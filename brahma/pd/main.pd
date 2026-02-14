@@ -4,8 +4,10 @@
 #X obj 50 250 faceplate_14;
 #X obj 260 250 faceplate_18;
 #X obj 570 250 faceplate_24;
+#X obj 50 450 macro_panel;
 #X text 50 20 Brahma Meta-Rack Interface;
 #X text 200 50 <- Bridge to SuperCollider;
 #X text 200 100 <- Global Clock;
 #X text 50 220 Organism Nodes:;
+#X text 50 420 Macro Performance:;
 #X connect 1 0 0 0;

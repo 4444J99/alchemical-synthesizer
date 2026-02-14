@@ -21,12 +21,17 @@ var root = thisProcess.nowExecutingPath.dirname;
 // 5. Sampler Creatures
 (root +/+ "05_sampler_creatures.scd").load;
 (root +/+ "05_sampler_creatures_stereo.scd").load;
+(root +/+ "05_agent_smith.scd").load;
+(root +/+ "05_ditto.scd").load;
 
 // 6. Typhon
 (root +/+ "06_typhon.scd").load;
 
 // 7. Safety
 (root +/+ "07_safety.scd").load;
+
+// 10. Validation
+(root +/+ "10_validation.scd").load;
 
 "--- BRAHMA SYSTEM ONLINE ---".postln;
 )
