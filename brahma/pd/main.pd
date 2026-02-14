@@ -1,0 +1,8 @@
+#N canvas 100 100 800 600 10;
+#X obj 50 50 osc_bridge;
+#X obj 50 100 master_clock;
+#X text 50 20 Brahma Meta-Rack Interface;
+#X text 200 50 <- Bridge to SuperCollider;
+#X text 200 100 <- Global Clock;
+#X text 50 200 TODO: Instantiate UI abstractions for Relinquished, Proteus, etc.;
+#X connect 1 0 0 0;

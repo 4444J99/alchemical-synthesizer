@@ -1,0 +1,18 @@
+#N canvas 100 100 450 300 10;
+#X obj 50 50 r BPM;
+#X obj 50 80 expr 60000 / $f1;
+#X obj 50 110 metro 500;
+#X obj 50 140 t b b;
+#X obj 50 170 s global_clock;
+#X obj 100 170 s cell_cycle_tick;
+#X obj 50 20 loadbang;
+#X msg 50 20 120;
+#X connect 0 0 1 0;
+#X connect 1 0 2 1;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 3 1 5 0;
+#X connect 6 0 7 0;
+#X connect 7 0 0 0;
+#X obj 200 50 r start_clock;
+#X connect 15 0 2 0;

@@ -1,0 +1,15 @@
+#N canvas 100 100 450 300 10;
+#X obj 50 50 netreceive -u -b 57121;
+#X obj 50 80 oscparse;
+#X obj 50 110 list trim;
+#X obj 50 140 route /sc;
+#X obj 50 170 print SC_MSG;
+#X obj 200 50 r to_sc;
+#X obj 200 80 netsend -u -b 127.0.0.1 57120;
+#X text 50 20 OSC Bridge for Brahma;
+#X text 50 200 Received messages routed to console for now.;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 5 0 6 0;
