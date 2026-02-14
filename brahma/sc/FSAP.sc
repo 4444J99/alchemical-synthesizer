@@ -17,12 +17,15 @@ FSAP {
         stack = List.new;
     }
     
-    // 1. Observation Phase
+    // 1. Observation Phase (guarded: must be IDLE)
     observe { |targetId, registry|
-        state = \OBSERVING;
-        // Mock observation logic
-        currentObservation = registry.getTraits(targetId);
-        "FSAP: Observed %".format(targetId).postln;
+        if (state == \IDLE) {
+            state = \OBSERVING;
+            currentObservation = registry.getTraits(targetId);
+            "FSAP: Observed %".format(targetId).postln;
+        } {
+            "FSAP Error: Must be IDLE to observe (current: %)".format(state).warn;
+        };
     }
     
     // 2. Absorption Phase

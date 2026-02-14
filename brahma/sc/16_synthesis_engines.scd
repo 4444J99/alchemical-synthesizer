@@ -69,10 +69,11 @@ SynthDef(\prima_materia, {
         LFTri.ar(portFreq + osc2Detune)
     ]) * osc2Level;
 
-    // Hard sync: osc1 resets osc2 phase
-    if(hardSync > 0, {
-        osc2 = SyncSaw.ar(portFreq + osc1Detune, portFreq + osc2Detune) * osc2Level;
-    });
+    // Hard sync: osc1 resets osc2 phase (use Select.ar for runtime switching)
+    osc2 = Select.ar(hardSync > 0, [
+        osc2,
+        SyncSaw.ar(portFreq + osc1Detune, portFreq + osc2Detune) * osc2Level
+    ]);
 
     // Oscillator 3
     osc3 = Select.ar(osc3Type.clip(0, 3), [
@@ -204,13 +205,15 @@ SynthDef(\quintessence, {
     harmonics = 32.collect({ |i|
         var harmFreq = freq * ((i + 1) ** stretch) + (i * spread) + shift;
         var amp = if(i < 16) { amps[i] } { 1.0 / (i + 1) };
+        var oddMask = if((i % 2) == 0) { 1.0 } { 0.0 };
+        var evenMask = if((i % 2) == 1) { 1.0 } { 0.0 };
 
         // Spectral morphing
         var morphAmp = Select.kr(morphTarget.clip(0, 3), [
             amp,
-            1.0 / 32,                          // All equal
-            if((i % 2) == 0, amp, 0),          // Odd only
-            if((i % 2) == 1, amp, 0)           // Even only
+            1.0 / 32,                // All equal
+            amp * oddMask,            // Odd only
+            amp * evenMask            // Even only
         ]);
 
         amp = amp.blend(morphAmp, morphAmount);
@@ -386,12 +389,16 @@ SynthDef(\homunculus, {
             feedback.clip(0.1, 10) * 2
         ) |> { |s| LPF.ar(s, freq * (4 - (damping * 3)).max(1.5)) },
 
-        // 1: Bowed string
-        DWGBowed.ar(freq, bowPressure, bowPosition, 0, gate) ? // Use if available
-        CombL.ar(
-            exciter + (LocalIn.ar(1) * feedback * 0.5),
-            0.05, freq.reciprocal, feedback * 3
-        ).tap({ |s| LocalOut.ar(LPF.ar(s * 0.5, freq * 2)) }),
+        // 1: Bowed string (continuous excitation with feedback network)
+        {
+            var bow = LPF.ar(WhiteNoise.ar * bowPressure * gate, freq * 3) * Lag.kr(gate, 0.1);
+            var body = CombL.ar(
+                bow + (LocalIn.ar(1) * feedback * 0.5),
+                0.05, freq.reciprocal, feedback * 3
+            );
+            LocalOut.ar(LPF.ar(body * 0.5, freq * 2));
+            body;
+        }.value,
 
         // 2: Blown tube
         CombL.ar(
@@ -552,18 +559,20 @@ SynthDef(\logos, {
 
     sig = Mix.new(formants) * 4; // Boost narrow BPF output
 
-    // Choir mode: stack detuned voices
-    if(choirVoices > 1, {
-        sig = Mix.fill(choirVoices.clip(1, 6), { |i|
-            var detune = (i - (choirVoices / 2)) * choirDetune * freq;
+    // Choir mode: stack 6 detuned voices, use amplitude gating for count
+    sig = Select.ar(choirVoices > 1, [
+        sig,
+        Mix.fill(6, { |i|
+            var active = (i < choirVoices).asInteger;
+            var detune = (i - 3) * choirDetune * freq;
             var choirExciter = Impulse.ar(freq + detune) + (PinkNoise.ar * 0.03);
             var choirFormants = formants.collect({ |f, fi|
-                BPF.ar(choirExciter, vowelFreqs[fi].clip(80, 10000) + rrand(-20, 20),
+                BPF.ar(choirExciter, vowelFreqs[fi].clip(80, 10000),
                     [f1Bw, f2Bw, f3Bw, f4Bw, f5Bw][fi].reciprocal.clip(0.001, 0.5))
             });
-            Mix.new(choirFormants);
-        }) * (4 / choirVoices);
-    });
+            Mix.new(choirFormants) * active;
+        }) * (4 / choirVoices.clip(1, 6))
+    ]);
 
     sig = sig * ampEnv * velocity;
 
@@ -744,27 +753,49 @@ SynthDef(\nebula, {
 // ENTITY REGISTRATION & CHRONOS TARGETS
 // ==========================================
 
-// Register all engines with AdamKadmon
+// Register all engines with AdamKadmon (differentiated trait maps)
 [
-    [\prima_materia, "Subtractive", 3001],
-    [\azoth, "FM", 3002],
-    [\quintessence, "Additive", 3003],
-    [\ouroboros, "Wavetable", 3004],
-    [\chrysopoeia, "Phase Distortion", 3005],
-    [\homunculus, "Physical Modeling", 3006],
-    [\buchlaeus, "West Coast", 3007],
-    [\logos, "Formant", 3008],
-    [\tetramorph, "Vector", 3009],
-    [\nebula, "Granular", 3010]
+    [\prima_materia, "Subtractive", 3001,
+        (centroid: 0.4, flatness: 0.2, bandwidth: 0.7, rolloff: 0.6),
+        (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.5)],
+    [\azoth, "FM", 3002,
+        (centroid: 0.7, flatness: 0.5, bandwidth: 0.9, rolloff: 0.3),
+        (attack: 0.01, decay: 0.5, sustain: 0.5, release: 0.3, slew: 0.2)],
+    [\quintessence, "Additive", 3003,
+        (centroid: 0.6, flatness: 0.8, bandwidth: 0.5, rolloff: 0.4),
+        (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.8)],
+    [\ouroboros, "Wavetable", 3004,
+        (centroid: 0.5, flatness: 0.4, bandwidth: 0.6, rolloff: 0.5),
+        (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.6)],
+    [\chrysopoeia, "Phase Distortion", 3005,
+        (centroid: 0.6, flatness: 0.3, bandwidth: 0.7, rolloff: 0.4),
+        (attack: 0.005, decay: 0.2, sustain: 0.5, release: 0.3, slew: 0.3)],
+    [\homunculus, "Physical Modeling", 3006,
+        (centroid: 0.3, flatness: 0.1, bandwidth: 0.4, rolloff: 0.8),
+        (attack: 0.005, decay: 0.5, sustain: 0.3, release: 0.5, slew: 0.9)],
+    [\buchlaeus, "West Coast", 3007,
+        (centroid: 0.8, flatness: 0.6, bandwidth: 0.9, rolloff: 0.2),
+        (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.4)],
+    [\logos, "Formant", 3008,
+        (centroid: 0.5, flatness: 0.2, bandwidth: 0.3, rolloff: 0.7),
+        (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.7)],
+    [\tetramorph, "Vector", 3009,
+        (centroid: 0.5, flatness: 0.4, bandwidth: 0.6, rolloff: 0.5),
+        (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.5)],
+    [\nebula, "Granular", 3010,
+        (centroid: 0.4, flatness: 0.7, bandwidth: 0.8, rolloff: 0.3),
+        (attack: 0.1, decay: 0.3, sustain: 0.8, release: 0.5, slew: 0.6)]
 ].do({ |spec|
     var synthDef = spec[0];
     var type = spec[1];
     var id = spec[2];
+    var spectral = spec[3];
+    var temporal = spec[4];
 
-    // Register with AdamKadmon
+    // Register with AdamKadmon (unique traits per engine)
     ~BRAHMA_REGISTRY.registerEntity(id, type, (
-        spectral_profile: (centroid: 0.5, flatness: 0.3, bandwidth: 0.6, rolloff: 0.5),
-        temporal_topology: (attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.3, slew: 0.5),
+        spectral_profile: spectral,
+        temporal_topology: temporal,
         modulation_graph: (type: synthDef, sources: 0, dests: 0, routes: 0),
         performance_response: (velocity: 0.8, aftertouch: 0.5, xy_sensitivity: 0.5, humanize: 0.0)
     ));

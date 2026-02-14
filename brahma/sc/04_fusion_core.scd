@@ -38,11 +38,14 @@ SynthDef(\fusion_core_voice, {
     psychology = LFNoise1.kr(1 + (mutation * 10));
     
     // Apply mutation to filter
-    sig = RLPF.ar(physiology, 
-        combined.linexp(-1, 1, 100, 5000) * (1 + (psychology * mutation)), 
+    sig = RLPF.ar(physiology,
+        combined.linexp(-1, 1, 100, 5000) * (1 + (psychology * mutation)),
         0.5
     );
-    
+
+    // Safety limiter: cross-modulation can produce unbounded signals
+    sig = Limiter.ar(sig, 0.95, 0.01);
+
     Out.ar(outBus, sig);
 }).add;
 
@@ -52,8 +55,7 @@ SynthDef(\fusion_core_voice, {
 // Nucleus is primarily a data structure (Dictionary) in the Language side.
 // This SynthDef is a "Freezer" that loops a granule of audio.
 
-SynthDef(
-ucleus_freeze, {
+SynthDef(\nucleus_freeze, {
     |inBus=0, outBus=0, freeze=0, buf|
     var in, rec, play;
     

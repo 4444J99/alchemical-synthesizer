@@ -16,8 +16,8 @@
     broadcastGolem: { |self|
         if(~GOLEM.notNil and: { ~GOLEM_SEQ.notNil }) {
             // Organism-level update
-            var coherence = MetricCollector.measureCoherence(nil);
-            var entropy = MetricCollector.measureEntropy(nil);
+            var coherence = ~METRIC_COLLECTOR.measureCoherence(nil);
+            var entropy = ~METRIC_COLLECTOR.measureEntropy(nil);
             self.target.sendMsg("/golem/organism/update",
                 ~GOLEM[\entityId], "Golem", coherence, entropy);
 

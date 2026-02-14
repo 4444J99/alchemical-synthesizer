@@ -38,6 +38,15 @@
     self[\enabled] = true;
     self[\targetGroup] = ~SC_GRP[\te];
 
+    // Initialize MIDI output (first available destination, or nil if none)
+    if(MIDIClient.destinations.size > 0) {
+        self[\midiOut] = MIDIOut(0);
+        "MIDI: Output initialized (%)".format(MIDIClient.destinations[0]).postln;
+    } {
+        self[\midiOut] = nil;
+        "MIDI: No output destinations available".postln;
+    };
+
     // ==========================================
     // NOTE ON
     // ==========================================
@@ -68,8 +77,10 @@
         ], target: self[\targetGroup]);
 
         // Broadcast to Visual Cortex
-        ~VISUAL_CORTEX.target.sendMsg("/brahma/midi/noteOn",
-            ch, note, vel, voiceIdx);
+        if(~VISUAL_CORTEX.notNil) {
+            ~VISUAL_CORTEX.target.sendMsg("/brahma/midi/noteOn",
+                ch, note, vel, voiceIdx);
+        };
     });
 
     // ==========================================
@@ -84,8 +95,10 @@
                 v[\synthNode].set(\gate, 0);
                 v[\synthNode] = nil;
             };
-            ~VISUAL_CORTEX.target.sendMsg("/brahma/midi/noteOff",
-                ch, note, vel, voiceIdx);
+            if(~VISUAL_CORTEX.notNil) {
+                ~VISUAL_CORTEX.target.sendMsg("/brahma/midi/noteOff",
+                    ch, note, vel, voiceIdx);
+            };
         };
     });
 
@@ -155,9 +168,10 @@
         self[\learnRoutes].keysValuesDo({ |key, route|
             if(route[\channel] == ch and: { route[\cc] == cc }) {
                 // Route to patch bay or direct parameter
-                ~VISUAL_CORTEX.target.sendMsg("/brahma/midi/cc",
-                    ch, cc, val, route[\target]);
-            };
+                if(~VISUAL_CORTEX.notNil) {
+                    ~VISUAL_CORTEX.target.sendMsg("/brahma/midi/cc",
+                        ch, cc, val, route[\target]);
+                };
         });
     });
 

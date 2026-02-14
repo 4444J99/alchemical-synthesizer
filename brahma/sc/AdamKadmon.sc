@@ -10,7 +10,7 @@ AdamKadmon {
     // Canonical Schema Definition
     *validateTraitMap { |map|
         var valid = true;
-        var requiredKeys = [\spectral_profile, 	emporal_topology, \modulation_graph, \performance_response];
+        var requiredKeys = [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response];
         
         requiredKeys.do { |key|
             if (map.includesKey(key).not) {

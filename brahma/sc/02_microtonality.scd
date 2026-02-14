@@ -72,10 +72,12 @@
 OSCdef(\brahma_tuning_scale, { |msg|
     var name = msg[1].asSymbol;
     ~BRAHMA_TUNING.setScale(name);
-    ~VISUAL_CORTEX.target.sendMsg("/brahma/tuning/state",
-        ~BRAHMA_TUNING[\currentScale].name,
-        ~BRAHMA_TUNING[\rootHz],
-        ~BRAHMA_TUNING[\transpose]);
+    if(~VISUAL_CORTEX.notNil) {
+        ~VISUAL_CORTEX.target.sendMsg("/brahma/tuning/state",
+            ~BRAHMA_TUNING[\currentScale].name,
+            ~BRAHMA_TUNING[\rootHz],
+            ~BRAHMA_TUNING[\transpose]);
+    };
 }, "/brahma/tuning/scale");
 
 // /brahma/tuning/root <hz:float>
@@ -83,10 +85,12 @@ OSCdef(\brahma_tuning_scale, { |msg|
 OSCdef(\brahma_tuning_root, { |msg|
     ~BRAHMA_TUNING[\rootHz] = msg[1].asFloat.clip(20, 20000);
     "TUNING: Root set to % Hz".format(~BRAHMA_TUNING[\rootHz]).postln;
-    ~VISUAL_CORTEX.target.sendMsg("/brahma/tuning/state",
-        ~BRAHMA_TUNING[\currentScale].name,
-        ~BRAHMA_TUNING[\rootHz],
-        ~BRAHMA_TUNING[\transpose]);
+    if(~VISUAL_CORTEX.notNil) {
+        ~VISUAL_CORTEX.target.sendMsg("/brahma/tuning/state",
+            ~BRAHMA_TUNING[\currentScale].name,
+            ~BRAHMA_TUNING[\rootHz],
+            ~BRAHMA_TUNING[\transpose]);
+    };
 }, "/brahma/tuning/root");
 
 // /brahma/tuning/transpose <semitones:int>
@@ -94,10 +98,12 @@ OSCdef(\brahma_tuning_root, { |msg|
 OSCdef(\brahma_tuning_transpose, { |msg|
     ~BRAHMA_TUNING[\transpose] = msg[1].asInteger.clip(-48, 48);
     "TUNING: Transpose set to % semitones".format(~BRAHMA_TUNING[\transpose]).postln;
-    ~VISUAL_CORTEX.target.sendMsg("/brahma/tuning/state",
-        ~BRAHMA_TUNING[\currentScale].name,
-        ~BRAHMA_TUNING[\rootHz],
-        ~BRAHMA_TUNING[\transpose]);
+    if(~VISUAL_CORTEX.notNil) {
+        ~VISUAL_CORTEX.target.sendMsg("/brahma/tuning/state",
+            ~BRAHMA_TUNING[\currentScale].name,
+            ~BRAHMA_TUNING[\rootHz],
+            ~BRAHMA_TUNING[\transpose]);
+    };
 }, "/brahma/tuning/transpose");
 
 // /brahma/tuning/loadScala <path:string> <name:string>

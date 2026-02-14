@@ -83,14 +83,15 @@
 
     undo: { |self|
         if(self[\undoStack].size > 0) {
+            var current, prev;
             // Save current state to redo
-            var current = self[\tracks].collect({ |t|
+            current = self[\tracks].collect({ |t|
                 if(t.notNil) { t.deepCopy } { nil };
             });
             self[\redoStack].add(current);
 
             // Restore previous state
-            var prev = self[\undoStack].pop;
+            prev = self[\undoStack].pop;
             prev.do({ |t, i|
                 if(t.notNil and: { i < self[\tracks].size }) {
                     self[\tracks][i] = t;
@@ -102,12 +103,13 @@
 
     redo: { |self|
         if(self[\redoStack].size > 0) {
-            var current = self[\tracks].collect({ |t|
+            var current, next;
+            current = self[\tracks].collect({ |t|
                 if(t.notNil) { t.deepCopy } { nil };
             });
             self[\undoStack].add(current);
 
-            var next = self[\redoStack].pop;
+            next = self[\redoStack].pop;
             next.do({ |t, i|
                 if(t.notNil and: { i < self[\tracks].size }) {
                     self[\tracks][i] = t;
@@ -185,8 +187,9 @@
 
     advanceSong: { |self|
         if(self[\songMode] and: { self[\songChain].size > 0 }) {
-            var entry = self[\songChain][self[\songPosition] % self[\songChain].size];
-            var shouldAdvance = true;
+            var entry, shouldAdvance, nextEntry;
+            entry = self[\songChain][self[\songPosition] % self[\songChain].size];
+            shouldAdvance = true;
 
             // Check condition
             case
@@ -196,7 +199,7 @@
             if(shouldAdvance) {
                 self[\songPosition] = self[\songPosition] + 1;
                 if(self[\songPosition] < self[\songChain].size) {
-                    var nextEntry = self[\songChain][self[\songPosition]];
+                    nextEntry = self[\songChain][self[\songPosition]];
                     self.loadScene(nextEntry[\sceneIdx]);
                 } {
                     // Song complete — loop or stop

@@ -20,10 +20,8 @@ SynthDef(\brahma_bus_clock, {
 }).add;
 
 SynthDef(\brahma_panic, {
-    |gate=0|
-    var env = EnvGen.kr(Env.asr(0, 1, 0.1), gate, doneAction: 2);
-    // This synth lives at the very end of the chain and can hard-mute everything
-    // Use ReplaceOut to clear buses if needed
+    // Hard-mute: replace hardware outputs with silence
+    ReplaceOut.ar(0, DC.ar(0) ! 2);
 }).add;
 
 "--- BRAHMA: Server-Side Arbitration Engine Loaded ---".postln;

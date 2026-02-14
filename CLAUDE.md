@@ -8,7 +8,7 @@ The **Alchemical Synthesizer** (Brahma Meta-Rack) is a modular synthesis organis
 
 ## Technology Stack
 
-- **SuperCollider** (`brahma/sc/`): DSP engine, trait registries, state machines (~1,400 LOC across 21 files)
+- **SuperCollider** (`brahma/sc/`): DSP engine, trait registries, state machines (~18,000 LOC across 60+ files)
 - **Pure Data** (`brahma/pd/`): Performance UI, faceplate abstractions, OSC control surface
 - **Node.js + p5.js** (`brahma/web/`): Visual Cortex — real-time browser visualization via OSC-to-WebSocket bridge
 - **Python** (`tools/`): Audio specimen validation utilities
@@ -34,14 +34,14 @@ Example: `/brahma/organism/update 1001 "Relinquished" 0.65 2.3`
 4. p5.js sketch renders organism state with:
    - **Radius**: coherence mapped to 50-200px
    - **Jitter**: entropy mapped to 0-10px with Perlin noise
-   - **Color**: Proteus=cyan(0,255,255), Relinquished=red(255,0,0), default=white
+   - **Color**: 16 organism types mapped (Proteus=cyan, Relinquished=red, Golem=orange, Typhon=violet, AgentSmith=green, etc.), default=white
    - **Decay**: 2000ms without update removes organism from display
 
 ### Pure Data OSC Bridge
 
-- **Receive**: `netreceive` on port 57121 (UDP, binary) → `oscparse` → `route /sc`
+- **Receive**: `netreceive` on port 57121 (UDP, binary) → `oscparse` → `route /sc /golem /brahma /chronos /daemon /patch`
 - **Send**: `netsend` to 127.0.0.1:57120
-- Enables bidirectional PD ↔ SC communication
+- Enables bidirectional PD ↔ SC communication across all OSC namespaces
 
 ## Running the System
 
@@ -52,7 +52,7 @@ Example: `/brahma/organism/update 1001 "Relinquished" 0.65 2.3`
 # Expected output: --- BRAHMA SYSTEM ONLINE ---
 ```
 
-Server configuration: 1024 audio buses, 4096 control buses, expanded memory (8192×16).
+Server configuration: 2048 audio buses, 8192 control buses, expanded memory (8192×32), 4096 buffers, 4096 max nodes.
 
 ### Pure Data (UI layer)
 ```bash
@@ -74,23 +74,47 @@ npm start
 python3 tools/validate_audio.py path/to/specimen.wav
 ```
 
+### SuperCollider Class Installation
+The `.sc` class files (`AdamKadmon.sc`, `BridgeRouter.sc`, `FSAP.sc`, `BrahmaScale.sc`, `BrahmaMPE.sc`, `BrahmaModBus.sc`) must be accessible to the SC class compiler. Either:
+- Symlink `brahma/sc/*.sc` into your SC Extensions directory (`Platform.userExtensionDir` in SC)
+- Or add the `brahma/sc/` directory to your SC include paths
+
+After installing, recompile the class library (Cmd+Shift+L in SC IDE).
+
+### Dependencies
+- **SuperCollider** v3.13+ (core)
+- **Pure Data** Vanilla v0.54+ (UI layer, optional)
+- **Node.js** v18+ (Visual Cortex, optional)
+- **sc3-plugins**: Not strictly required. The `\homunculus` physical modeling engine uses a CombL fallback instead of DWGBowed.
+
 ## Architecture
 
 ### Boot & Load Order
 
 `loader.scd` orchestrates strict dependency loading via numeric file prefixes:
 
-1. `01_*` — Infrastructure (server config, group hierarchy, global registry, bridge state)
-2. `03_*` — Proteus (emulation engine)
-3. `04_*` — Relinquished + Fusion Core (binding engines)
-4. `05_*` — Organisms (Agent Smith, Ditto, Sampler Creatures)
-5. `06_*` — Typhon (accumulative stacking)
-6. `07_*` — Safety (IMMUNE governor)
-7. `10-13_*` — Validation, metrics, test bench, NRT renderer
-8. `14_*` — Visual Cortex bridge
-9. `15_*` — Percussion Suite
+1. `01_*` — Infrastructure (server config, group hierarchy, global registry, arbitration)
+2. `02_*` — Microtonality (BrahmaScale), MIDI/MPE (BrahmaMPE)
+3. `03_*` — Proteus (emulation engine)
+4. `04_*` — Relinquished + Fusion Core (binding engines)
+5. `05_*` — Organisms (Agent Smith, Ditto, Sampler Creatures)
+6. `06_*` — Typhon (accumulative stacking)
+7. `07_*` — Safety (IMMUNE governor SynthDef)
+8. `08_*` — Patch Bay (BrahmaModBus universal CV routing)
+9. `09_*` — CHRONOS Master Sequencer (core, clock, tracks, MIDI, automation)
+10. `10-13_*` — Validation, metrics, test bench, NRT renderer
+11. `14_*` — Visual Cortex bridge
+12. `15_*` — Golem Percussion Organism (percussion suite, FX, patterns, sequencer)
+13. `16_*` — Synthesis Engines (10 engines: Prima Materia, Azoth, Quintessence, Ouroboros, Chrysopoeia, Homunculus, Buchlaeus, Logos, Tetramorph, Nebula)
+14. `17-20_*` — Make Noise module clones (functions, filters, time, oscillators, sequencers, utilities)
+15. `21-22_*` — Effects Rack (46 FX: dynamics, EQ, distortion, modulation, spatial, spectral, time)
+16. `23-24_*` — Standard Modular modules (oscillators, filters, amplifiers, envelopes, modulation, clock, sequencers, utilities)
+17. `25_*` — Elektron machine emulations (Analog machines, Octatrack)
+18. `26_*` — Interaction & controllers (MIDI controllers, sensors)
+19. `27_*` — Generative systems (Lorenz, Markov, Cellular Automata, chaos attractors + generative sequencers)
+20. `28_*` — Audio management (monitoring, recording, presets, sync)
 
-**Critical**: The IMMUNE governor (07_safety.scd) must always be the final node before any output.
+**Critical**: The IMMUNE governor is deployed as the final node in the `\rr` group at the end of `loader.scd`. All loads occur inside `s.doWhenBooted` to prevent boot race conditions.
 
 ### 7-Stage Organism Model
 
@@ -141,18 +165,24 @@ State machine for cumulative identity integration with four phases:
 - `~SC_GRP` — Group hierarchy for signal ordering (root, ia, bc, ae, te, pr, rr)
 - `~SC_BUS` — Dynamic bus allocation dictionary
 - `~VISUAL_CORTEX` — OSC broadcast interface and demo stream control
-- `~MEASURE` — Validation measurement harness with analysis methods
+- `~METRIC_COLLECTOR` — Language-side metrics Event (coherence, fidelity, stress, entropy)
+- `~BRAHMA_TUNING` — Global tuning state, scale library, BrahmaScale instance
+- `~BRAHMA_MIDI` — MIDI/MPE state, voice allocation, learn routes, clock
+- `~PATCH_BAY` — BrahmaModBus instance for universal CV routing (256-bus pool)
+- `~CHRONOS` — Master sequencer state (transport, tracks, scenes, undo/redo, song mode)
+- `~NRT_RENDERER` — Non-real-time rendering interface
+- `~GOLEM` / `~GOLEM_SEQ` — Golem percussion organism and sequencer state
 
 ### Validation & Metrics Infrastructure
 
-#### Measurement System (MetricCollector)
-Four-dimensional quantification:
-- **Coherence**: Spectral stability via variance calculation
-- **Fidelity**: Cross-correlation between input and output
-- **Stress**: System CPU load via `Server.local.avgCPU`
-- **Entropy**: Shannon entropy of spectral distribution
+#### Measurement System (~METRIC_COLLECTOR)
+Language-side Event (not a class — SC's class compiler only processes `.sc` files). Four-dimensional quantification:
+- **Coherence**: Spectral stability (placeholder — requires FluidBufSpectralShape for real implementation)
+- **Fidelity**: Cross-correlation between input and output (placeholder)
+- **Stress**: System CPU load via `Server.local.avgCPU` (real)
+- **Entropy**: Shannon entropy of spectral distribution (placeholder)
 
-Methods: `logMetric(name, value)`, `exportReport()` for data collection.
+Methods: `measureCoherence`, `measureFidelity`, `measureStress`, `measureEntropy`, `logMetric`, `exportReport`.
 
 #### A/B Test Bench
 - **runComparison(synth1, synth2)**: Sequentially runs two SynthDefs on same input with metrics
@@ -296,15 +326,15 @@ AdamKadmon.validateTraitMap(~trait_map);  // Returns true if valid
 
 ### Monitor Visualization
 Navigate to `http://localhost:3000` while SuperCollider and Node.js are running. Organisms appear as circles with:
-- Cyan circles: Proteus type
-- Red circles: Relinquished type
+- 16 color-coded organism types (cyan=Proteus, red=Relinquished, orange=Golem, violet=Typhon, green=AgentSmith, etc.)
 - Radius proportional to coherence
 - Jitter proportional to entropy
+- Auto-reconnecting WebSocket (3s retry)
 
 ### Run Offline Specimen Processing
 ```supercollider
-~MEASURE.renderSpecimen(
-    "/path/to/input.wav", 
+~NRT_RENDERER.renderSpecimen(
+    "/path/to/input.wav",
     "/path/to/output.wav"
 );
 ```

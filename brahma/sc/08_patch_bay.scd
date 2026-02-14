@@ -91,14 +91,18 @@ OSCdef(\brahma_patch_connect, { |msg|
     var offset = msg[4] !? _.asFloat ?? 0.0;
     var scale = msg[5] !? _.asFloat ?? 1.0;
     var routeId = ~PATCH_BAY_CONNECT.value(src, dst, amount, offset, scale);
-    ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/connected", routeId ? -1, src, dst);
+    if(~VISUAL_CORTEX.notNil) {
+        ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/connected", routeId ? -1, src, dst);
+    };
 }, "/brahma/patch/connect");
 
 // /brahma/patch/disconnect <routeId:int>
 OSCdef(\brahma_patch_disconnect, { |msg|
     var routeId = msg[1].asInteger;
     ~PATCH_BAY_DISCONNECT.value(routeId);
-    ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/disconnected", routeId);
+    if(~VISUAL_CORTEX.notNil) {
+        ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/disconnected", routeId);
+    };
 }, "/brahma/patch/disconnect");
 
 // /brahma/patch/attenuvert <routeId:int> <amount:float> <offset:float> <scale:float>
@@ -112,36 +116,44 @@ OSCdef(\brahma_patch_attenuvert, { |msg|
 
 // /brahma/patch/list — broadcast all active routes
 OSCdef(\brahma_patch_list, {
-    ~PATCH_BAY.activeRoutes.keysValuesDo({ |id, route|
-        ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/route",
-            id, route[\srcId], route[\dstId], route[\amount]);
-    });
+    if(~VISUAL_CORTEX.notNil) {
+        ~PATCH_BAY.activeRoutes.keysValuesDo({ |id, route|
+            ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/route",
+                id, route[\srcId], route[\dstId], route[\amount]);
+        });
+    };
 }, "/brahma/patch/list");
 
 // /brahma/patch/sources — broadcast registered sources
 OSCdef(\brahma_patch_sources, {
-    ~PATCH_BAY.sources.keysValuesDo({ |name, src|
-        ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/source", name, src[\type]);
-    });
+    if(~VISUAL_CORTEX.notNil) {
+        ~PATCH_BAY.sources.keysValuesDo({ |name, src|
+            ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/source", name, src[\type]);
+        });
+    };
 }, "/brahma/patch/sources");
 
 // /brahma/patch/destinations — broadcast registered destinations
 OSCdef(\brahma_patch_dests, {
-    ~PATCH_BAY.destinations.keysValuesDo({ |name, dst|
-        ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/destination", name, dst[\paramName]);
-    });
+    if(~VISUAL_CORTEX.notNil) {
+        ~PATCH_BAY.destinations.keysValuesDo({ |name, dst|
+            ~VISUAL_CORTEX.target.sendMsg("/brahma/patch/destination", name, dst[\paramName]);
+        });
+    };
 }, "/brahma/patch/destinations");
 
 // Broadcast patch bay state at 10Hz for Visual Cortex
 Tdef(\patch_bay_broadcast, {
     loop {
-        ~PATCH_BAY.activeRoutes.keysValuesDo({ |id, route|
-            if(route[\srcBus].notNil) {
-                var val = route[\srcBus].getSynchronous;
-                ~VISUAL_CORTEX.target.sendMsg("/brahma/mod/value",
-                    id, route[\srcId], route[\dstId], val * route[\amount]);
-            };
-        });
+        if(~VISUAL_CORTEX.notNil) {
+            ~PATCH_BAY.activeRoutes.keysValuesDo({ |id, route|
+                if(route[\srcBus].notNil) {
+                    var val = route[\srcBus].getSynchronous;
+                    ~VISUAL_CORTEX.target.sendMsg("/brahma/mod/value",
+                        id, route[\srcId], route[\dstId], val * route[\amount]);
+                };
+            });
+        };
         0.1.wait;
     };
 }).play;
