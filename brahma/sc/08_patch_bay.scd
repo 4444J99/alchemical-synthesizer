@@ -94,6 +94,9 @@ OSCdef(\brahma_patch_connect, { |msg|
     if(~visual_cortex.notNil) {
         ~visual_cortex.target.sendMsg("/brahma/patch/connected", routeId ? -1, src, dst);
     };
+    if(~pd_bridge.notNil) {
+        ~pd_bridge.sendMsg("/pd/patch/connected", routeId ? -1, src, dst);
+    };
 }, "/brahma/patch/connect");
 
 // /brahma/patch/disconnect <routeId:int>
@@ -141,6 +144,23 @@ OSCdef(\brahma_patch_dests, {
         });
     };
 }, "/brahma/patch/destinations");
+
+// /brahma/patch/disconnect/named <srcName:string> <dstName:string>
+OSCdef(\brahma_patch_disconnect_named, { |msg|
+    var src = msg[1].asString;
+    var dst = msg[2].asString;
+    ~patch_bay.activeRoutes.keysValuesDo({ |id, route|
+        if(route[\srcId].asString == src and: { route[\dstId].asString == dst }) {
+            ~patch_bay_disconnect.value(id);
+            if(~visual_cortex.notNil) {
+                ~visual_cortex.target.sendMsg("/brahma/patch/disconnected", id);
+            };
+            if(~pd_bridge.notNil) {
+                ~pd_bridge.sendMsg("/pd/patch/disconnected", id);
+            };
+        };
+    });
+}, "/brahma/patch/disconnect/named");
 
 // Broadcast patch bay state at 10Hz for Visual Cortex
 Tdef(\patch_bay_broadcast, {

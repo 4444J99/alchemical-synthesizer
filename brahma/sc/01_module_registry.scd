@@ -100,6 +100,11 @@
 );
 
 // ==========================================
+// PD BRIDGE: Send registry data to Pure Data on port 57121
+// ==========================================
+~pd_bridge = NetAddr("127.0.0.1", 57121);
+
+// ==========================================
 // OSC RESPONDERS: Module Discovery
 // ==========================================
 
@@ -194,5 +199,36 @@ OSCdef(\reg_free_instance, { |msg|
     ~module_registry.freeInstance(moduleName, instanceName);
 }, "/brahma/module/free");
 
-"--- BRAHMA: Module Registry Online ---".postln;
+// ==========================================
+// OSC RESPONDERS: PD-Specific Registry Queries
+// ==========================================
+
+// PD module list: sends each module then a done message
+OSCdef(\pd_list_modules, { |msg|
+    ~module_registry[\modules].keysValuesDo({ |name, spec|
+        ~pd_bridge.sendMsg("/pd/registry/module",
+            name.asString, spec[\category].asString,
+            spec[\params].size, spec[\description]);
+    });
+    ~pd_bridge.sendMsg("/pd/registry/done", ~module_registry.count);
+    "MODULE_REGISTRY: PD broadcast % modules".format(~module_registry.count).postln;
+}, "/pd/modules/list");
+
+// PD param list: sends slot index, name, default, min, max for each param
+OSCdef(\pd_list_params, { |msg|
+    var moduleName = msg[1].asSymbol;
+    var spec = ~module_registry.getSpec(moduleName);
+    if(spec.notNil) {
+        spec[\params].do({ |p, i|
+            ~pd_bridge.sendMsg("/pd/registry/param",
+                moduleName.asString, i,
+                p[\name].asString, p[\default].asFloat,
+                p[\min].asFloat, p[\max].asFloat);
+        });
+        ~pd_bridge.sendMsg("/pd/registry/params/done",
+            moduleName.asString, spec[\params].size);
+    };
+}, "/pd/modules/params");
+
+"--- BRAHMA: Module Registry Online (PD bridge: 57121) ---".postln;
 )

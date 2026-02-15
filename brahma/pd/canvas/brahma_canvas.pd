@@ -1,0 +1,18 @@
+#N canvas 50 50 1200 800 10;
+#X declare -path ..;
+#X obj 10 10 osc_bridge;
+#X obj 10 50 brahma_palette;
+#X text 280 10 BRAHMA CANVAS - Pd-Native Visual Patching;
+#X text 280 30 -------------------------------------------------;
+#X text 280 50 Usage:;
+#X text 280 70 1. Click LOAD in palette to fetch modules from SC;
+#X text 280 90 2. Put > Object > brahma_module <name> <instance>;
+#X text 280 110 Example: brahma_module prima_materia pm1;
+#X text 280 130 3. Sliders auto-populate from SC param specs;
+#X text 280 150 4. Connect modules with brahma_route:;
+#X text 280 170 brahma_route <src> <dst> <param> <amount>;
+#X text 280 190 Example: brahma_route pm1 od1 inBus 1.0;
+#X text 280 210 5. Delete route object to disconnect;
+#X text 280 230 6. Click FREE on module to free SC synth;
+#X text 280 260 Requires: SuperCollider running with loader.scd;
+#X text 280 290 All DSP lives in SC. Pd is control-only GUI.;
