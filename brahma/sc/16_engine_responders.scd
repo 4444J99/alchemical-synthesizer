@@ -38,9 +38,10 @@ OSCdef(\engine_noteOn, { |msg|
     var spec = ~MODULE_REGISTRY.getSpec(engineName);
 
     if(spec.notNil) {
+        var freq, args, i, synth;
+
         // Enforce max 16 voices
         if(inst[\voices].size >= 16) {
-            // Free the oldest voice
             var oldestKey = inst[\voices].keys.asArray.sort.first;
             if(oldestKey.notNil) {
                 inst[\voices][oldestKey].set(\gate, 0);
@@ -49,14 +50,14 @@ OSCdef(\engine_noteOn, { |msg|
         };
 
         // Convert MIDI note to frequency using microtonal system if available
-        var freq = if(~BRAHMA_TUNING.notNil and: { ~BRAHMA_TUNING[\degreeToFreq].notNil }) {
+        freq = if(~BRAHMA_TUNING.notNil and: { ~BRAHMA_TUNING[\degreeToFreq].notNil }) {
             ~BRAHMA_TUNING.degreeToFreq(note);
         } {
             note.midicps;
         };
 
         // Build synth args
-        var args = [\freq, freq, \gate, 1, \velocity, vel, \outBus, inst[\outBus]];
+        args = [\freq, freq, \gate, 1, \velocity, vel, \outBus, inst[\outBus]];
 
         // Apply stored instance params
         inst[\params].keysValuesDo({ |k, v|
@@ -64,13 +65,13 @@ OSCdef(\engine_noteOn, { |msg|
         });
 
         // Apply inline param overrides (pairs after velocity)
-        var i = 5;
+        i = 5;
         while({ i < (msg.size - 1) }) {
             args = args ++ [msg[i].asSymbol, msg[i+1].asFloat];
             i = i + 2;
         };
 
-        var synth = Synth(spec[\synthDef], args, spec[\group], \addToTail);
+        synth = Synth(spec[\synthDef], args, spec[\group], \addToTail);
         inst[\voices][note] = synth;
     } {
         "ENGINE_VOICES: Unknown engine '%'".format(engineName).postln;

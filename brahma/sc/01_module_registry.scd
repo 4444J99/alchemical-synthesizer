@@ -27,6 +27,7 @@
         var spec = self[\modules][moduleName.asSymbol];
         if(spec.notNil) {
             var synthArgs = [\outBus, outBus ? 0];
+            var synth;
             // Apply default param values, then override with args
             spec[\params].do({ |p|
                 synthArgs = synthArgs ++ [p[\name].asSymbol, p[\default]];
@@ -37,7 +38,7 @@
                     if(idx.notNil) { synthArgs[idx + 1] = v };
                 });
             };
-            var synth = Synth(spec[\synthDef], synthArgs,
+            synth = Synth(spec[\synthDef], synthArgs,
                 group ? spec[\group], \addToTail);
             spec[\instances].put(instanceName.asSymbol, (
                 synth: synth,

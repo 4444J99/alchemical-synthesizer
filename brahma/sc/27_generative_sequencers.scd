@@ -351,9 +351,9 @@ OSCdef(\deuc_advance, { |msg|
 	var entry = ~DAEMON_SEQ_INSTANCES[name];
 	if(entry.notNil and: { entry[0] == \euclidean }) {
 		var inst = entry[1];
-		inst.advance;
 		var gateBus = Bus(\control, gateBusIdx, 1, s);
 		var accentBus = Bus(\control, accentBusIdx, 1, s);
+		inst.advance;
 		gateBus.set(inst.gate);
 		accentBus.set(inst.velocity);
 	};
@@ -420,10 +420,11 @@ OSCdef(\probmatrix_advance, { |msg|
 	var entry = ~DAEMON_SEQ_INSTANCES[name];
 	if(entry.notNil and: { entry[0] == \probmatrix }) {
 		var inst = entry[1];
+		var activeRows, busIndices;
 		inst.advance;
-		var activeRows = inst.getActiveRows;
+		activeRows = inst.getActiveRows;
 		// Write gate values to specified buses
-		var busIndices = msg[2..];
+		busIndices = msg[2..];
 		activeRows.do({ |gate, i|
 			if(i < busIndices.size) {
 				var bus = Bus(\control, busIndices[i].asInteger, 1, s);

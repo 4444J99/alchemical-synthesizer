@@ -17,36 +17,39 @@
 
     start: { |self|
         if(self[\active].not) {
+            var melodyBus, reverbBus, markov, pentatonic, euclidean;
+            var lorenzBusX, lorenzBusY, lorenzBusZ, lorenz, reverb;
+
             self[\active] = true;
 
             // Allocate internal buses
-            var melodyBus = Bus.audio(s, 2);
-            var reverbBus = Bus.audio(s, 2);
+            melodyBus = Bus.audio(s, 2);
+            reverbBus = Bus.audio(s, 2);
             self[\buses][\melody] = melodyBus;
             self[\buses][\reverb] = reverbBus;
 
             // 1. Create MOIRAI Markov chain trained on pentatonic intervals
-            var markov = ~MOIRAI.(12);
+            markov = ~MOIRAI.(12);
             // Train on pentatonic scale degrees (C D E G A in MIDI offsets)
-            var pentatonic = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 12, 7];
+            pentatonic = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 12, 7];
             markov.train(pentatonic);
             markov.setTemperature(0.7);
             self[\instances].add([\moirai, markov]);
 
             // 2. Create Euclidean rhythm generator E(5, 8)
-            var euclidean = ~DAEMON_EUCLIDEAN_EXT.(8, 5, 2, 0);
+            euclidean = ~DAEMON_EUCLIDEAN_EXT.(8, 5, 2, 0);
             euclidean.generate;
             self[\instances].add([\euclidean, euclidean]);
 
             // 3. Create Lorenz attractor for filter modulation
-            var lorenzBusX = Bus.control(s, 1);
-            var lorenzBusY = Bus.control(s, 1);
-            var lorenzBusZ = Bus.control(s, 1);
+            lorenzBusX = Bus.control(s, 1);
+            lorenzBusY = Bus.control(s, 1);
+            lorenzBusZ = Bus.control(s, 1);
             self[\buses][\lorenzX] = lorenzBusX;
             self[\buses][\lorenzY] = lorenzBusY;
             self[\buses][\lorenzZ] = lorenzBusZ;
 
-            var lorenz = Synth(\daemon_lorenz, [
+            lorenz = Synth(\daemon_lorenz, [
                 \outBusX, lorenzBusX.index,
                 \outBusY, lorenzBusY.index,
                 \outBusZ, lorenzBusZ.index,
@@ -56,7 +59,7 @@
             self[\synths].add(lorenz);
 
             // 4. Create a reverb on the reverb bus → main out
-            var reverb = Synth(\aion_hall, [
+            reverb = Synth(\aion_hall, [
                 \inBus, melodyBus.index,
                 \outBus, 0,
                 \mix, 0.35,
@@ -69,30 +72,30 @@
             Tdef(\demo_patch_gen, {
                 var baseNote = 48; // C3
                 var tempo = ~CHRONOS[\tempo] ? 120;
+                var stepDur, gate, vel;
 
                 loop {
-                    var stepDur = 60 / tempo / 4; // 16th notes
+                    stepDur = 60 / tempo / 4; // 16th notes
 
                     // Advance Euclidean
                     euclidean.advance;
-                    var gate = euclidean.gate;
-                    var vel = euclidean.velocity;
+                    gate = euclidean.gate;
+                    vel = euclidean.velocity;
 
                     if(gate > 0) {
-                        // Get next Markov interval
                         var interval = (markov.next * 24).round.asInteger;
                         var note = baseNote + interval;
+                        var freq, cutoff, voice;
                         note = note.clip(36, 84);
 
-                        var freq = note.midicps;
+                        freq = note.midicps;
 
                         // Read Lorenz for cutoff modulation
-                        var cutoff;
                         lorenzBusX.get({ |v| cutoff = v.linexp(0, 1, 400, 8000) });
                         cutoff = cutoff ? 2000;
 
                         // Spawn a Prima Materia voice
-                        var voice = Synth(\prima_materia, [
+                        voice = Synth(\prima_materia, [
                             \freq, freq,
                             \velocity, vel * 0.5, // Gentle volume
                             \gate, 1,

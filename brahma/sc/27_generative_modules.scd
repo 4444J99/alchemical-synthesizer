@@ -359,13 +359,13 @@ SynthDef(\daemon_clock_divider_random, {
 
 	generativeLoop: { |outBus|
 		// Turing Machine → pentatonic quantization → Prima Materia
-		"SERPENS: Materializing generativeLoop...".postln;
 		var turing = ~DAEMON_MACHINA.(16, 0.7);
 		var cvBus = Bus.control(s, 1);
 		var gateBus = Bus.control(s, 1);
 		var audioBus = Bus.audio(s, 2);
 		var cleanup = List.new;
 		var outTarget = outBus ? 0;
+		"SERPENS: Materializing generativeLoop...".postln;
 
 		// Store instance for clock bridge access
 		~DAEMON_MACHINA_INSTANCES[\serpens_turing] = turing;
@@ -388,10 +388,11 @@ SynthDef(\daemon_clock_divider_random, {
 				gate = gate ? 0;
 
 				if(gate > 0.5) {
+					var voice;
 					// Quantize CV to pentatonic
 					note = baseNote + pentatonic.wrapAt((cv * 20).round.asInteger);
 					freq = note.midicps;
-					var voice = Synth(\prima_materia, [
+					voice = Synth(\prima_materia, [
 						\freq, freq, \velocity, 0.4, \gate, 1,
 						\outBus, outTarget, \cutoff, cv.linexp(0, 1, 500, 6000),
 						\atk, 0.01, \dec, 0.15, \sus, 0.3, \rel, 0.4,
@@ -418,7 +419,6 @@ SynthDef(\daemon_clock_divider_random, {
 
 	chaosModulation: { |targetParam, targetInstance|
 		// Lorenz attractor → parameter modulation
-		"SERPENS: Materializing chaosModulation...".postln;
 		var lorenzX = Bus.control(s, 1);
 		var lorenzY = Bus.control(s, 1);
 		var lorenzZ = Bus.control(s, 1);
@@ -438,13 +438,13 @@ SynthDef(\daemon_clock_divider_random, {
 
 	markovMelody: { |outBus|
 		// MOIRAI Markov → melodic voice
-		"SERPENS: Materializing markovMelody...".postln;
 		var markov = ~MOIRAI.(12);
 		var pentatonic = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 12, 7];
+		var outTarget = outBus ? 0;
+		"SERPENS: Materializing markovMelody...".postln;
 		markov.train(pentatonic);
 		markov.setTemperature(0.6);
 		~MOIRAI_INSTANCES[\serpens_markov] = markov;
-		var outTarget = outBus ? 0;
 
 		Tdef(\serpens_markov_melody, {
 			var baseNote = 52;
@@ -471,12 +471,12 @@ SynthDef(\daemon_clock_divider_random, {
 
 	euclideanDrums: { |outBus|
 		// 3 Euclidean generators → Golem drum voices
-		"SERPENS: Materializing euclideanDrums...".postln;
 		var kick = ~DAEMON_EUCLIDEAN_EXT.(16, 4, 2, 0);
 		var hat = ~DAEMON_EUCLIDEAN_EXT.(16, 7, 3, 0);
 		var snare = ~DAEMON_EUCLIDEAN_EXT.(16, 3, 1, 4);
-		kick.generate; hat.generate; snare.generate;
 		var outTarget = outBus ? 0;
+		"SERPENS: Materializing euclideanDrums...".postln;
+		kick.generate; hat.generate; snare.generate;
 
 		~DAEMON_SEQ_INSTANCES[\serpens_kick] = [\euclidean, kick];
 		~DAEMON_SEQ_INSTANCES[\serpens_hat] = [\euclidean, hat];
@@ -526,17 +526,18 @@ SynthDef(\daemon_clock_divider_random, {
 
 	cellularTexture: { |outBus|
 		// Cellular automata → oscillator bank
-		"SERPENS: Materializing cellularTexture...".postln;
 		var ca = ~GENESIS.(16, 30);
-		ca.seed(\random);
-		~GENESIS_INSTANCES[\serpens_ca] = ca;
 		var outTarget = outBus ? 0;
 		var baseFreq = 220;
+		"SERPENS: Materializing cellularTexture...".postln;
+		ca.seed(\random);
+		~GENESIS_INSTANCES[\serpens_ca] = ca;
 
 		Tdef(\serpens_cellular, {
 			loop {
+				var cells;
 				ca.step;
-				var cells = ca.getGates;
+				cells = ca.getGates;
 				// Map active cells to sine tones at harmonic intervals
 				cells.do({ |active, i|
 					if(active > 0) {
@@ -801,12 +802,13 @@ OSCdef(\serpens_apply, { |msg|
 	var outBus = if(msg.size > 2) { msg[2].asInteger } { 0 };
 	var fn = ~SERPENS_TEMPLATES[template];
 	if(fn.notNil) {
+		var result;
 		// Stop existing instance of same template if running
 		if(~SERPENS_ACTIVE[template].notNil) {
 			~SERPENS_ACTIVE[template].value; // call cleanup
 			~SERPENS_ACTIVE.removeAt(template);
 		};
-		var result = fn.value(outBus);
+		result = fn.value(outBus);
 		~SERPENS_ACTIVE[result[0].asSymbol] = result[1]; // store cleanup fn
 		// Broadcast state to web
 		if(~VISUAL_CORTEX.notNil) {
