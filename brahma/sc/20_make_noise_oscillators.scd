@@ -278,4 +278,92 @@ SynthDef(\harmonic_vessel, {
         );
     });
 });
+
+// ==========================================
+// MODULE REGISTRY REGISTRATION — Make Noise Oscillators
+// ==========================================
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // PRISMATIC_TWIN — DPO (Dual Prismatic Oscillator)
+    ~MODULE_REGISTRY.register(\prismatic_twin, \makenoise, \prismatic_twin, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \freqA, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Oscillator A frequency"),
+        (\name: \waveA, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Oscillator A waveform (0=sin 1=tri 2=saw 3=pulse)"),
+        (\name: \shapeA, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Oscillator A pulse width"),
+        (\name: \freqB, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Oscillator B frequency"),
+        (\name: \waveB, \default: 1, \min: 0, \max: 3, \units: "", \desc: "Oscillator B waveform (0=sin 1=tri 2=saw 3=pulse)"),
+        (\name: \shapeB, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Oscillator B pulse width"),
+        (\name: \fmAtoB, \default: 0, \min: 0, \max: 1, \units: "", \desc: "FM depth A→B"),
+        (\name: \fmBtoA, \default: 0, \min: 0, \max: 1, \units: "", \desc: "FM depth B→A"),
+        (\name: \amAtoB, \default: 0, \min: 0, \max: 1, \units: "", \desc: "AM depth A→B"),
+        (\name: \foldA, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Wavefold amount A"),
+        (\name: \foldB, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Wavefold amount B"),
+        (\name: \strike, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Strike excitation trigger"),
+        (\name: \follow, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Frequency follow mode (B tracks A)"),
+        (\name: \followRatio, \default: 1.0, \min: 0.1, \max: 16, \units: "", \desc: "Follow frequency ratio"),
+        (\name: \mixA, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Oscillator A mix level"),
+        (\name: \mixB, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Oscillator B mix level")
+    ], ~SC_GRP[\te], "DPO: Dual Prismatic Oscillator with FM/AM/wavefold and strike input");
+
+    // PRISMATIC_MONO — STO (Sub Timbral Oscillator)
+    ~MODULE_REGISTRY.register(\prismatic_mono, \makenoise, \prismatic_mono, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Main output bus"),
+        (\name: \subOutBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Sub oscillator output bus"),
+        (\name: \freq, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \shape, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Waveshape (0=sin 0.5=tri 1=saw)")
+    ], ~SC_GRP[\te], "STO: Sub Timbral Oscillator with continuous waveshaping and sub output");
+
+    // PRISMATIC_STEREO — XPO (Stereo Prismatic Oscillator)
+    ~MODULE_REGISTRY.register(\prismatic_stereo, \makenoise, \prismatic_stereo, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \freq, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Base frequency"),
+        (\name: \behavior, \default: 0, \min: 0, \max: 5, \units: "", \desc: "Behavior mode (0=indep 1=FM 2=AM 3=fold 4=sync 5=ring)"),
+        (\name: \fmAmt, \default: 0, \min: 0, \max: 1, \units: "", \desc: "FM modulation amount"),
+        (\name: \amAmt, \default: 0, \min: 0, \max: 1, \units: "", \desc: "AM modulation amount"),
+        (\name: \foldAmt, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Wavefold amount"),
+        (\name: \shapeL, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Left oscillator waveform"),
+        (\name: \shapeR, \default: 0.5, \min: 0, \max: 3, \units: "", \desc: "Right oscillator waveform"),
+        (\name: \spread, \default: 0.1, \min: 0, \max: 10, \units: "Hz", \desc: "Stereo frequency spread")
+    ], ~SC_GRP[\te], "XPO: Stereo Prismatic Oscillator with 6 behavior modes");
+
+    // PRISMATIC_MULTI — MultiWAVE
+    ~MODULE_REGISTRY.register(\prismatic_multi, \makenoise, \prismatic_multi, [
+        (\name: \outBusSin, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Sine output bus"),
+        (\name: \outBusTri, \default: 1, \min: 0, \max: 127, \units: "", \desc: "Triangle output bus"),
+        (\name: \outBusSaw, \default: 2, \min: 0, \max: 127, \units: "", \desc: "Sawtooth output bus"),
+        (\name: \outBusSq, \default: 3, \min: 0, \max: 127, \units: "", \desc: "Square output bus"),
+        (\name: \outBusSubSin, \default: 4, \min: 0, \max: 127, \units: "", \desc: "Sub sine output bus"),
+        (\name: \outBusSubSq, \default: 5, \min: 0, \max: 127, \units: "", \desc: "Sub square output bus"),
+        (\name: \freq, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Base frequency")
+    ], ~SC_GRP[\te], "MultiWAVE: Multi-output waveform generator with 6 simultaneous outputs");
+
+    // SPECTRAL_ORACLE — Spectraphon
+    ~MODULE_REGISTRY.register(\spectral_oracle, \makenoise, \spectral_oracle, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus for spectral analysis"),
+        (\name: \freqA, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Voice A frequency"),
+        (\name: \specPositionA, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Voice A spectral position"),
+        (\name: \specBrightnessA, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Voice A spectral brightness"),
+        (\name: \freqB, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Voice B frequency"),
+        (\name: \specPositionB, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Voice B spectral position"),
+        (\name: \specBrightnessB, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Voice B spectral brightness"),
+        (\name: \crossMod, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Cross-modulation amount"),
+        (\name: \mixA, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Voice A mix level"),
+        (\name: \mixB, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Voice B mix level"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Dry/wet mix")
+    ], ~SC_GRP[\te], "Spectraphon: Dual spectral oscillator with FFT analysis/resynthesis");
+
+    // HARMONIC_VESSEL — tELHARMONIC
+    ~MODULE_REGISTRY.register(\harmonic_vessel, \makenoise, \harmonic_vessel, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \freq, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Fundamental frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \algorithm, \default: 0, \min: 0, \max: 2, \units: "", \desc: "Synthesis algorithm (0=classic 1=noise-mod 2=subharmonic)"),
+        (\name: \harmony, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Harmonic content amount"),
+        (\name: \warp, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Spectral warping"),
+        (\name: \numPartials, \default: 12, \min: 1, \max: 24, \units: "", \desc: "Number of partials")
+    ], ~SC_GRP[\te], "tELHARMONIC: Additive synthesis with 3 algorithms and spectral warping");
+};
 )

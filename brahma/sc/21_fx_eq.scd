@@ -187,4 +187,70 @@ SynthDef(\prism_dynamic, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\prism_parametric, \fx, \prism_parametric, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \b1Freq, \default: 100, \min: 20, \max: 20000, \units: "Hz", \desc: "Band 1 frequency"),
+        (\name: \b1Gain, \default: 0, \min: -24, \max: 24, \units: "dB", \desc: "Band 1 gain"),
+        (\name: \b1Q, \default: 1, \min: 0.1, \max: 20, \units: "Q", \desc: "Band 1 Q factor"),
+        (\name: \b1Type, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Band 1 type (0=shelf, 1=peak)"),
+        (\name: \b2Freq, \default: 500, \min: 20, \max: 20000, \units: "Hz", \desc: "Band 2 frequency"),
+        (\name: \b2Gain, \default: 0, \min: -24, \max: 24, \units: "dB", \desc: "Band 2 gain"),
+        (\name: \b2Q, \default: 1, \min: 0.1, \max: 20, \units: "Q", \desc: "Band 2 Q factor"),
+        (\name: \b2Type, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Band 2 type (0=shelf, 1=peak)"),
+        (\name: \b3Freq, \default: 2000, \min: 20, \max: 20000, \units: "Hz", \desc: "Band 3 frequency"),
+        (\name: \b3Gain, \default: 0, \min: -24, \max: 24, \units: "dB", \desc: "Band 3 gain"),
+        (\name: \b3Q, \default: 1, \min: 0.1, \max: 20, \units: "Q", \desc: "Band 3 Q factor"),
+        (\name: \b3Type, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Band 3 type (0=shelf, 1=peak)"),
+        (\name: \b4Freq, \default: 8000, \min: 20, \max: 20000, \units: "Hz", \desc: "Band 4 frequency"),
+        (\name: \b4Gain, \default: 0, \min: -24, \max: 24, \units: "dB", \desc: "Band 4 gain"),
+        (\name: \b4Q, \default: 1, \min: 0.1, \max: 20, \units: "Q", \desc: "Band 4 Q factor"),
+        (\name: \b4Type, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Band 4 type (0=shelf, 1=peak)"),
+    ], ~SC_GRP[\rr], "4-band parametric EQ with shelf/peak modes");
+
+    ~MODULE_REGISTRY.register(\prism_graphic, \fx, \prism_graphic, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \g63, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "63 Hz band gain"),
+        (\name: \g125, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "125 Hz band gain"),
+        (\name: \g250, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "250 Hz band gain"),
+        (\name: \g500, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "500 Hz band gain"),
+        (\name: \g1k, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "1 kHz band gain"),
+        (\name: \g2k, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "2 kHz band gain"),
+        (\name: \g4k, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "4 kHz band gain"),
+        (\name: \g8k, \default: 0, \min: -12, \max: 12, \units: "dB", \desc: "8 kHz band gain"),
+    ], ~SC_GRP[\rr], "8-band graphic EQ");
+
+    ~MODULE_REGISTRY.register(\prism_shelf, \fx, \prism_shelf, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \lowFreq, \default: 200, \min: 20, \max: 2000, \units: "Hz", \desc: "Low shelf frequency"),
+        (\name: \lowGain, \default: 0, \min: -24, \max: 24, \units: "dB", \desc: "Low shelf gain"),
+        (\name: \highFreq, \default: 4000, \min: 500, \max: 20000, \units: "Hz", \desc: "High shelf frequency"),
+        (\name: \highGain, \default: 0, \min: -24, \max: 24, \units: "dB", \desc: "High shelf gain"),
+    ], ~SC_GRP[\rr], "High/low shelf EQ");
+
+    ~MODULE_REGISTRY.register(\prism_tilt, \fx, \prism_tilt, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \tilt, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Tilt amount (-1=dark, 0=flat, +1=bright)"),
+        (\name: \centerFreq, \default: 1000, \min: 100, \max: 5000, \units: "Hz", \desc: "Tilt center frequency"),
+    ], ~SC_GRP[\rr], "Single-knob tilt tone control");
+
+    ~MODULE_REGISTRY.register(\prism_dynamic, \fx, \prism_dynamic, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \freq, \default: 2000, \min: 20, \max: 20000, \units: "Hz", \desc: "Target frequency"),
+        (\name: \q, \default: 2, \min: 0.1, \max: 20, \units: "Q", \desc: "Band Q factor"),
+        (\name: \threshold, \default: -12, \min: -60, \max: 0, \units: "dB", \desc: "Compression threshold"),
+        (\name: \ratio, \default: 3, \min: 1, \max: 20, \units: ":1", \desc: "Compression ratio"),
+        (\name: \attack, \default: 0.005, \min: 0.0001, \max: 0.5, \units: "s", \desc: "Attack time"),
+        (\name: \release, \default: 0.05, \min: 0.001, \max: 1, \units: "s", \desc: "Release time"),
+    ], ~SC_GRP[\rr], "Frequency-dependent dynamic EQ");
+
+    "  -> 5 EQ FX registered with Module Registry".postln;
+};
 )

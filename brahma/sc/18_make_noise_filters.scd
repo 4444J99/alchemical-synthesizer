@@ -527,4 +527,101 @@ SynthDef(\vactrol_dxg, {
         );
     });
 });
+
+// ==========================================
+// MODULE REGISTRY REGISTRATION — Make Noise Filters
+// ==========================================
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\tetrapeak, \makenoise, \tetrapeak, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \radiateBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Radiate output bus"),
+        (\name: \freq, \default: 1000, \min: 20, \max: 20000, \units: "Hz", \desc: "Center frequency"),
+        (\name: \spread, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Peak spread"),
+        (\name: \resonance, \default: 0.7, \min: 0.01, \max: 0.999, \units: "", \desc: "Resonance"),
+    ], ~SC_GRP[\te], "QPAS: Quad Peak Animation System — stereo 4-peak resonant filter");
+
+    ~MODULE_REGISTRY.register(\vactrol_sanctum, \makenoise, \vactrol_sanctum, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \cv1, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 1 CV"),
+        (\name: \cv2, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 2 CV"),
+        (\name: \strike1, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 1 strike trigger"),
+        (\name: \strike2, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 2 strike trigger"),
+        (\name: \damp, \default: 0.5, \min: 0.01, \max: 1, \units: "", \desc: "Decay damping"),
+    ], ~SC_GRP[\te], "Optomix: Dual Low-Pass Gate with vactrol response and strike inputs");
+
+    ~MODULE_REGISTRY.register(\vactrol_shadow, \makenoise, \vactrol_shadow, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \cv1, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel A CV (6dB/oct)"),
+        (\name: \cv2, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel B CV (12dB/oct)"),
+    ], ~SC_GRP[\te], "LxD: Dual LPG — 6dB/oct and 12dB/oct slopes with vactrol response");
+
+    ~MODULE_REGISTRY.register(\vactrol_matrix, \makenoise, \vactrol_matrix, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus 1"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus 2"),
+        (\name: \inBus3, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus 3"),
+        (\name: \inBus4, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus 4"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \cv1, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 1 CV"),
+        (\name: \cv2, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 2 CV"),
+        (\name: \cv3, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 3 CV"),
+        (\name: \cv4, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 4 CV"),
+    ], ~SC_GRP[\te], "QXG: Quad Dynamics Gate — 4-channel vactrol VCA");
+
+    ~MODULE_REGISTRY.register(\vactrol_quad, \makenoise, \vactrol_quad, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \cv1, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 1 CV"),
+        (\name: \cv2, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 2 CV"),
+        (\name: \cv3, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 3 CV"),
+        (\name: \cv4, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Channel 4 CV"),
+        (\name: \mode1, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Ch1 filter mode (0=LP 1=HP 2=BP 3=Notch)"),
+        (\name: \mode2, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Ch2 filter mode (0=LP 1=HP 2=BP 3=Notch)"),
+        (\name: \mode3, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Ch3 filter mode (0=LP 1=HP 2=BP 3=Notch)"),
+        (\name: \mode4, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Ch4 filter mode (0=LP 1=HP 2=BP 3=Notch)"),
+    ], ~SC_GRP[\te], "QMMG: Quad Multimode Gate — 4-channel vactrol with selectable LP/HP/BP/Notch");
+
+    ~MODULE_REGISTRY.register(\resonance_prism, \makenoise, \resonance_prism, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBusLP, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Low-pass output bus"),
+        (\name: \outBusHP, \default: 0, \min: 0, \max: 127, \units: "", \desc: "High-pass output bus"),
+        (\name: \outBusBP, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Band-pass output bus"),
+        (\name: \outBusNotch, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Notch output bus"),
+        (\name: \freq, \default: 1000, \min: 20, \max: 20000, \units: "Hz", \desc: "Cutoff frequency"),
+        (\name: \res, \default: 0.5, \min: 0, \max: 0.99, \units: "", \desc: "Resonance"),
+    ], ~SC_GRP[\te], "Multimod: Simultaneous LP/HP/BP/Notch outputs — state-variable filter");
+
+    ~MODULE_REGISTRY.register(\vactrol_classic, \makenoise, \vactrol_classic, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \cv, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Vactrol CV"),
+        (\name: \mode, \default: 0, \min: 0, \max: 2, \units: "", \desc: "Filter mode (0=LP 1=HP 2=BP)"),
+    ], ~SC_GRP[\te], "MMG: Multimode Gate — single-channel vactrol LP/HP/BP");
+
+    ~MODULE_REGISTRY.register(\formant_drift, \makenoise, \formant_drift, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \gain1, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "110 Hz band gain"),
+        (\name: \gain2, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "220 Hz band gain"),
+        (\name: \gain3, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "440 Hz band gain"),
+        (\name: \gain4, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "880 Hz band gain"),
+        (\name: \gain5, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "1760 Hz band gain"),
+        (\name: \gain6, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "3520 Hz band gain"),
+        (\name: \gain7, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "5280 Hz band gain"),
+        (\name: \gain8, \default: 1.0, \min: 0, \max: 4, \units: "", \desc: "7920 Hz band gain"),
+    ], ~SC_GRP[\te], "FxDf: Fixed Filter Bank — 8 resonant bands spanning vocal formant range");
+
+    ~MODULE_REGISTRY.register(\vactrol_dxg, \makenoise, \vactrol_dxg, [
+        (\name: \inBusA, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus A"),
+        (\name: \inBusB, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Input bus B"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Output bus"),
+        (\name: \crossfade, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "A/B crossfade (0=A, 1=B)"),
+        (\name: \cv, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Vactrol CV"),
+    ], ~SC_GRP[\te], "DXG: Dual Crossfading Gate — stereo vactrol VCA with A/B crossfade");
+
+    "  -> 9 Make Noise Filters registered with Module Registry".postln;
+};
 )

@@ -504,4 +504,66 @@ OSCdef(\sibyl_reset, { |msg|
 }, "/sibyl/reset");
 
 "--- BRAHMA: SIBYL Sequencer Modules Online (8 modules) ---".postln;
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // 1. Step Sequencer — 1-64 steps, multiple directions
+    ~MODULE_REGISTRY.register(\SIBYL_STEP, \modular, \SIBYL_STEP, [
+        (\name: \numSteps, \default: 16, \min: 1, \max: 64, \units: "steps", \desc: "Number of steps"),
+        (\name: \direction, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Direction (0=fwd 1=rev 2=pend 3=rand)")
+    ], ~SC_GRP[\te], "Step sequencer with forward/backward/pendulum/random directions");
+
+    // 2. Euclidean Generator — Bjorklund algorithm pattern generator
+    ~MODULE_REGISTRY.register(\SIBYL_EUCLIDEAN, \modular, \SIBYL_EUCLIDEAN, [
+        (\name: \length, \default: 16, \min: 1, \max: 64, \units: "steps", \desc: "Pattern length"),
+        (\name: \fills, \default: 4, \min: 0, \max: 64, \units: "", \desc: "Number of active steps"),
+        (\name: \rotation, \default: 0, \min: 0, \max: 63, \units: "", \desc: "Pattern rotation offset")
+    ], ~SC_GRP[\te], "Euclidean rhythm generator with rotation");
+
+    // 3. Shift Register / Turing Machine — probabilistic bit-shift sequencer
+    ~MODULE_REGISTRY.register(\SIBYL_TURING, \modular, \SIBYL_TURING, [
+        (\name: \bits, \default: 8, \min: 1, \max: 32, \units: "bits", \desc: "Register length"),
+        (\name: \probability, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Probability of keeping bit (1=locked loop)")
+    ], ~SC_GRP[\te], "Turing Machine shift register with probability control");
+
+    // 4. Markov Chain — probabilistic state machine sequencer
+    ~MODULE_REGISTRY.register(\SIBYL_MARKOV, \modular, \SIBYL_MARKOV, [
+        (\name: \numStates, \default: 8, \min: 2, \max: 64, \units: "", \desc: "Number of states"),
+        (\name: \temperature, \default: 0.5, \min: 0.01, \max: 1, \units: "", \desc: "Temperature (lower=more deterministic)")
+    ], ~SC_GRP[\te], "Markov chain sequencer with trainable transition matrix");
+
+    // 5. Cellular Automata — 1D Wolfram rule sequencer
+    ~MODULE_REGISTRY.register(\SIBYL_AUTOMATA, \modular, \SIBYL_AUTOMATA, [
+        (\name: \numCells, \default: 16, \min: 4, \max: 64, \units: "cells", \desc: "Number of cells"),
+        (\name: \rule, \default: 30, \min: 0, \max: 255, \units: "", \desc: "Wolfram rule number (0-255)")
+    ], ~SC_GRP[\te], "1D cellular automata sequencer using Wolfram rules");
+
+    // 6. L-System — Lindenmayer grammar-based note sequencer
+    ~MODULE_REGISTRY.register(\SIBYL_LSYSTEM, \modular, \SIBYL_LSYSTEM, [
+        (\name: \depth, \default: 3, \min: 1, \max: 8, \units: "", \desc: "Grammar expansion depth"),
+        (\name: \noteOffset, \default: 60, \min: 24, \max: 108, \units: "MIDI", \desc: "Base MIDI note offset")
+    ], ~SC_GRP[\te], "L-System grammar sequencer with character-to-note mapping");
+
+    // 7. Bernoulli Gate — probability-based trigger routing
+    ~MODULE_REGISTRY.register(\sibyl_bernoulli, \modular, \sibyl_bernoulli, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Trigger input bus"),
+        (\name: \probability, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Probability of routing to output A")
+    ], ~SC_GRP[\te], "Bernoulli gate: probability-based trigger routing to A/B outputs");
+
+    // 8. Bernoulli Gate AR — audio-rate probability routing
+    ~MODULE_REGISTRY.register(\sibyl_bernoulli_ar, \modular, \sibyl_bernoulli_ar, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Audio input bus"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Trigger bus for coin flip"),
+        (\name: \probability, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Probability of routing to output A")
+    ], ~SC_GRP[\te], "Audio-rate Bernoulli gate with external trigger");
+
+    // 9. Comparator Sequencer — CV threshold to gate patterns
+    ~MODULE_REGISTRY.register(\sibyl_comparator_seq, \modular, \sibyl_comparator_seq, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "CV input bus"),
+        (\name: \threshold, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Comparison threshold"),
+        (\name: \hysteresis, \default: 0.01, \min: 0, \max: 0.2, \units: "", \desc: "Hysteresis amount")
+    ], ~SC_GRP[\te], "Comparator sequencer: CV threshold to gate with hysteresis");
+
+    "  MODULE_REGISTRY: 9 Sibyl sequencer modules registered".postln;
+};
 )

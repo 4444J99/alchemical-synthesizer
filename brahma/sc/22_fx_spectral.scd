@@ -157,4 +157,59 @@ SynthDef(\solve_spectral_filter, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\solve_vocoder, \fx, \solve_vocoder, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \numBands, \default: 16, \min: 4, \max: 32, \units: "", \desc: "Number of vocoder bands"),
+        (\name: \shift, \default: 0, \min: -24, \max: 24, \units: "st", \desc: "Formant shift in semitones"),
+    ], ~SC_GRP[\rr], "16-band vocoder with formant shift");
+
+    ~MODULE_REGISTRY.register(\solve_spectral_freeze, \fx, \solve_spectral_freeze, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \freeze, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Freeze toggle (>0.5 = frozen)"),
+    ], ~SC_GRP[\rr], "FFT spectral freeze");
+
+    ~MODULE_REGISTRY.register(\solve_spectral_blur, \fx, \solve_spectral_blur, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \blurAmount, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Spectral blur amount"),
+        (\name: \timeConst, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Time constant"),
+    ], ~SC_GRP[\rr], "FFT spectral blur/smear");
+
+    ~MODULE_REGISTRY.register(\solve_pitch_shift, \fx, \solve_pitch_shift, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \semitones, \default: 0, \min: -24, \max: 24, \units: "st", \desc: "Pitch shift in semitones"),
+        (\name: \formantPreserve, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Formant preservation (placeholder)"),
+        (\name: \windowSize, \default: 0.2, \min: 0.01, \max: 1, \units: "s", \desc: "FFT window size"),
+        (\name: \pitchDispersion, \default: 0, \min: 0, \max: 0.1, \units: "", \desc: "Pitch randomization"),
+        (\name: \timeDispersion, \default: 0.01, \min: 0, \max: 0.1, \units: "s", \desc: "Time randomization"),
+    ], ~SC_GRP[\rr], "Granular pitch shifter");
+
+    ~MODULE_REGISTRY.register(\solve_harmonizer, \fx, \solve_harmonizer, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \interval1, \default: 7, \min: -24, \max: 24, \units: "st", \desc: "Voice 1 interval in semitones"),
+        (\name: \interval2, \default: -5, \min: -24, \max: 24, \units: "st", \desc: "Voice 2 interval in semitones"),
+        (\name: \interval3, \default: 12, \min: -24, \max: 24, \units: "st", \desc: "Voice 3 interval in semitones"),
+        (\name: \interval4, \default: 0, \min: -24, \max: 24, \units: "st", \desc: "Voice 4 interval in semitones"),
+        (\name: \voice1Level, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Voice 1 level"),
+        (\name: \voice2Level, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Voice 2 level"),
+        (\name: \voice3Level, \default: 0.2, \min: 0, \max: 1, \units: "", \desc: "Voice 3 level"),
+        (\name: \voice4Level, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Voice 4 level"),
+    ], ~SC_GRP[\rr], "4-voice pitch harmonizer");
+
+    ~MODULE_REGISTRY.register(\solve_spectral_filter, \fx, \solve_spectral_filter, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \lowBin, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Low bin cutoff (normalized)"),
+        (\name: \highBin, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "High bin cutoff (normalized)"),
+    ], ~SC_GRP[\rr], "FFT brick-wall spectral filter");
+
+    "  -> 6 Spectral FX registered with Module Registry".postln;
+};
 )

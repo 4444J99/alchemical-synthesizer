@@ -661,4 +661,88 @@ SynthDef(\hermetic_contour, {
         );
     });
 });
+
+// ==========================================
+// MODULE REGISTRY REGISTRATION — Hermetic Function Generators
+// ==========================================
+if(~MODULE_REGISTRY.notNil) {
+    // 1. HERMETIC DUAL — MATHS Clone (dual function gen + attenuverters)
+    ~MODULE_REGISTRY.register(\hermetic_dual, \makenoise, \hermetic_dual, [
+        (\name: \ch1_rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "Ch1 rise time"),
+        (\name: \ch1_fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "Ch1 fall time"),
+        (\name: \ch1_curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "Ch1 curve shape"),
+        (\name: \ch1_cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Ch1 cycle mode"),
+        (\name: \ch1_rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Ch1 rise CV mod"),
+        (\name: \ch1_fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Ch1 fall CV mod"),
+        (\name: \ch1_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Ch1 output level"),
+        (\name: \ch4_rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "Ch4 rise time"),
+        (\name: \ch4_fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "Ch4 fall time"),
+        (\name: \ch4_curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "Ch4 curve shape"),
+        (\name: \ch4_cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Ch4 cycle mode"),
+        (\name: \ch4_rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Ch4 rise CV mod"),
+        (\name: \ch4_fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Ch4 fall CV mod"),
+        (\name: \ch4_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Ch4 output level"),
+        (\name: \ch2_atten, \default: 0.5, \min: -1, \max: 1, \units: "", \desc: "Ch2 attenuverter"),
+        (\name: \ch3_atten, \default: 0.5, \min: -1, \max: 1, \units: "", \desc: "Ch3 attenuverter"),
+    ], ~SC_GRP[\te], "MATHS clone: dual function gen + attenuverters, SUM/OR outputs");
+
+    // 2. HERMETIC QUAD — PoliMATHS Clone (4-channel cascading function gen)
+    ~MODULE_REGISTRY.register(\hermetic_quad, \makenoise, \hermetic_quad, [
+        (\name: \chA_rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "ChA rise time"),
+        (\name: \chA_fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "ChA fall time"),
+        (\name: \chA_curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "ChA curve shape"),
+        (\name: \chA_cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChA cycle mode"),
+        (\name: \chA_rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChA rise CV mod"),
+        (\name: \chA_fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChA fall CV mod"),
+        (\name: \chA_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "ChA output level"),
+        (\name: \chA_cascade, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChA cascade enable"),
+        (\name: \chB_rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "ChB rise time"),
+        (\name: \chB_fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "ChB fall time"),
+        (\name: \chB_curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "ChB curve shape"),
+        (\name: \chB_cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChB cycle mode"),
+        (\name: \chB_rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChB rise CV mod"),
+        (\name: \chB_fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChB fall CV mod"),
+        (\name: \chB_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "ChB output level"),
+        (\name: \chB_cascade, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChB cascade enable"),
+        (\name: \chC_rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "ChC rise time"),
+        (\name: \chC_fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "ChC fall time"),
+        (\name: \chC_curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "ChC curve shape"),
+        (\name: \chC_cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChC cycle mode"),
+        (\name: \chC_rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChC rise CV mod"),
+        (\name: \chC_fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChC fall CV mod"),
+        (\name: \chC_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "ChC output level"),
+        (\name: \chC_cascade, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChC cascade enable"),
+        (\name: \chD_rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "ChD rise time"),
+        (\name: \chD_fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "ChD fall time"),
+        (\name: \chD_curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "ChD curve shape"),
+        (\name: \chD_cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChD cycle mode"),
+        (\name: \chD_rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChD rise CV mod"),
+        (\name: \chD_fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "ChD fall CV mod"),
+        (\name: \chD_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "ChD output level"),
+        (\name: \chD_cascade, \default: 0, \min: 0, \max: 1, \units: "", \desc: "ChD cascade enable"),
+    ], ~SC_GRP[\te], "PoliMATHS clone: 4-channel cascading function gen with circular trigger chain");
+
+    // 3. HERMETIC MONO — Function Clone (single channel function gen)
+    ~MODULE_REGISTRY.register(\hermetic_mono, \makenoise, \hermetic_mono, [
+        (\name: \rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "Rise time"),
+        (\name: \fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "Fall time"),
+        (\name: \curve, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "Curve shape"),
+        (\name: \cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Cycle mode"),
+        (\name: \level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Output level"),
+        (\name: \rise_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Rise CV modulation"),
+        (\name: \fall_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Fall CV modulation"),
+    ], ~SC_GRP[\te], "Function clone: single-channel rise/fall function generator");
+
+    // 4. HERMETIC CONTOUR — Contour Clone (ASR contour generator)
+    ~MODULE_REGISTRY.register(\hermetic_contour, \makenoise, \hermetic_contour, [
+        (\name: \attack, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "Attack time"),
+        (\name: \sustain_level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Sustain level"),
+        (\name: \release, \default: 0.5, \min: 0.001, \max: 25, \units: "s", \desc: "Release time"),
+        (\name: \shape, \default: 0.0, \min: -8, \max: 8, \units: "", \desc: "Curve shape"),
+        (\name: \attack_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Attack CV modulation"),
+        (\name: \release_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Release CV modulation"),
+        (\name: \shape_cv, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Shape CV modulation"),
+        (\name: \level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Output level"),
+    ], ~SC_GRP[\te], "Contour clone: ASR contour generator with voltage-controlled shape");
+};
 )

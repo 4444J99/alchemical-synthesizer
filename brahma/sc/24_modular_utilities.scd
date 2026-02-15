@@ -319,4 +319,135 @@ SynthDef(\grimoire_quantizer, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // 1. Multiple — 1-to-4 signal splitter (control rate)
+    ~MODULE_REGISTRY.register(\grimoire_multiple, \modular, \grimoire_multiple, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Signal input bus")
+    ], ~SC_GRP[\te], "Control-rate 1-to-4 signal splitter");
+
+    // 2. Multiple AR — 1-to-4 signal splitter (audio rate)
+    ~MODULE_REGISTRY.register(\grimoire_multiple_ar, \modular, \grimoire_multiple_ar, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Audio input bus")
+    ], ~SC_GRP[\te], "Audio-rate 1-to-4 signal splitter");
+
+    // 3. Attenuverter — bipolar scaling with offset (control rate)
+    ~MODULE_REGISTRY.register(\grimoire_attenuverter, \modular, \grimoire_attenuverter, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Signal input bus"),
+        (\name: \amount, \default: 1.0, \min: -2, \max: 2, \units: "", \desc: "Bipolar scale amount"),
+        (\name: \offset, \default: 0.0, \min: -5, \max: 5, \units: "V", \desc: "DC offset")
+    ], ~SC_GRP[\te], "Control-rate attenuverter with bipolar scaling and DC offset");
+
+    // 4. Attenuverter AR — bipolar scaling with offset (audio rate)
+    ~MODULE_REGISTRY.register(\grimoire_attenuverter_ar, \modular, \grimoire_attenuverter_ar, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Audio input bus"),
+        (\name: \amount, \default: 1.0, \min: -2, \max: 2, \units: "", \desc: "Bipolar scale amount"),
+        (\name: \offset, \default: 0.0, \min: -5, \max: 5, \units: "V", \desc: "DC offset")
+    ], ~SC_GRP[\te], "Audio-rate attenuverter with bipolar scaling and DC offset");
+
+    // 5. Precision Adder — 4-input CV summer with individual gains
+    ~MODULE_REGISTRY.register(\grimoire_adder, \modular, \grimoire_adder, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 1 bus"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 2 bus"),
+        (\name: \inBus3, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 3 bus"),
+        (\name: \inBus4, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 4 bus"),
+        (\name: \gain1, \default: 1, \min: 0, \max: 2, \units: "", \desc: "Input 1 gain"),
+        (\name: \gain2, \default: 1, \min: 0, \max: 2, \units: "", \desc: "Input 2 gain"),
+        (\name: \gain3, \default: 1, \min: 0, \max: 2, \units: "", \desc: "Input 3 gain"),
+        (\name: \gain4, \default: 1, \min: 0, \max: 2, \units: "", \desc: "Input 4 gain")
+    ], ~SC_GRP[\te], "Precision CV adder: 4-input summer with individual gains");
+
+    // 6. Sequential Switch — rotate input between N outputs on trigger
+    ~MODULE_REGISTRY.register(\grimoire_seq_switch, \modular, \grimoire_seq_switch, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Signal input bus"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Trigger/clock input bus"),
+        (\name: \numOutputs, \default: 4, \min: 1, \max: 4, \units: "", \desc: "Number of active outputs"),
+        (\name: \mode, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Mode (0=forward 1=random)")
+    ], ~SC_GRP[\te], "Sequential switch: routes input to 1-of-4 outputs on trigger");
+
+    // 7. Analog Switch — CV-controlled A/B crossfade
+    ~MODULE_REGISTRY.register(\grimoire_switch, \modular, \grimoire_switch, [
+        (\name: \inBusA, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Audio input A bus"),
+        (\name: \inBusB, \default: 1, \min: 0, \max: 2048, \units: "bus", \desc: "Audio input B bus"),
+        (\name: \cvBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "CV control bus"),
+        (\name: \threshold, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "CV switch threshold")
+    ], ~SC_GRP[\te], "CV-controlled A/B analog switch with crossfade");
+
+    // 8. AND Gate
+    ~MODULE_REGISTRY.register(\grimoire_and, \modular, \grimoire_and, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 1"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 2")
+    ], ~SC_GRP[\te], "Logic AND gate for gate/trigger signals");
+
+    // 9. OR Gate
+    ~MODULE_REGISTRY.register(\grimoire_or, \modular, \grimoire_or, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 1"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 2")
+    ], ~SC_GRP[\te], "Logic OR gate for gate/trigger signals");
+
+    // 10. XOR Gate
+    ~MODULE_REGISTRY.register(\grimoire_xor, \modular, \grimoire_xor, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 1"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 2")
+    ], ~SC_GRP[\te], "Logic XOR gate for gate/trigger signals");
+
+    // 11. NOT Gate
+    ~MODULE_REGISTRY.register(\grimoire_not, \modular, \grimoire_not, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input")
+    ], ~SC_GRP[\te], "Logic NOT (inverter) gate for gate/trigger signals");
+
+    // 12. NAND Gate
+    ~MODULE_REGISTRY.register(\grimoire_nand, \modular, \grimoire_nand, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 1"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 2")
+    ], ~SC_GRP[\te], "Logic NAND gate for gate/trigger signals");
+
+    // 13. NOR Gate
+    ~MODULE_REGISTRY.register(\grimoire_nor, \modular, \grimoire_nor, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 1"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Gate input 2")
+    ], ~SC_GRP[\te], "Logic NOR gate for gate/trigger signals");
+
+    // 14. Comparator — A>B gate with hysteresis
+    ~MODULE_REGISTRY.register(\grimoire_comparator, \modular, \grimoire_comparator, [
+        (\name: \inBusA, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input A bus"),
+        (\name: \inBusB, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input B bus"),
+        (\name: \hysteresis, \default: 0.01, \min: 0, \max: 0.5, \units: "", \desc: "Hysteresis amount")
+    ], ~SC_GRP[\te], "CV comparator with hysteresis: outputs gate when A > B");
+
+    // 15. Rectifier — half/full wave CV rectification
+    ~MODULE_REGISTRY.register(\grimoire_rectifier, \modular, \grimoire_rectifier, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "CV input bus"),
+        (\name: \mode, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Mode (0=full wave 1=half wave)")
+    ], ~SC_GRP[\te], "CV rectifier: full-wave or half-wave rectification");
+
+    // 16. Min
+    ~MODULE_REGISTRY.register(\grimoire_min, \modular, \grimoire_min, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 1 bus"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 2 bus")
+    ], ~SC_GRP[\te], "Minimum of two CV signals");
+
+    // 17. Max
+    ~MODULE_REGISTRY.register(\grimoire_max, \modular, \grimoire_max, [
+        (\name: \inBus1, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 1 bus"),
+        (\name: \inBus2, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "Input 2 bus")
+    ], ~SC_GRP[\te], "Maximum of two CV signals");
+
+    // 18. Quantizer (language-side) — reads CV bus, snaps to scale degrees
+    ~MODULE_REGISTRY.register(\GRIMOIRE_QUANTIZER, \modular, \GRIMOIRE_QUANTIZER, [
+        (\name: \rate, \default: 100, \min: 10, \max: 1000, \units: "Hz", \desc: "Quantization polling rate")
+    ], ~SC_GRP[\te], "Language-side CV quantizer using BrahmaScale");
+
+    // 19. Quantizer SynthDef — server-side CV quantizer
+    ~MODULE_REGISTRY.register(\grimoire_quantizer, \modular, \grimoire_quantizer, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "CV input bus"),
+        (\name: \rootFreq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Root frequency"),
+        (\name: \numDegrees, \default: 12, \min: 1, \max: 128, \units: "", \desc: "Number of scale degrees"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 2048, \units: "bus", \desc: "External trigger bus"),
+        (\name: \trigMode, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Trigger mode (0=continuous 1=sample-and-hold)")
+    ], ~SC_GRP[\te], "Server-side CV quantizer with scale buffer and trigger modes");
+
+    "  MODULE_REGISTRY: 19 Grimoire utility modules registered".postln;
+};
 )

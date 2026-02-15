@@ -483,4 +483,37 @@ if(~PATCH_BAY.notNil) {
     });
     "  -> Generative sequencer modules registered with Patch Bay".postln;
 };
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // Language-side: ARBOR_VITAE (L-System / Fractal Sequencer)
+    ~MODULE_REGISTRY.register(\ARBOR_VITAE, \daemon, \ARBOR_VITAE, [
+        (\name: \axiom, \default: "F", \min: 0, \max: 0, \units: "", \desc: "L-system axiom string"),
+        (\name: \iterations, \default: 3, \min: 1, \max: 8, \units: "", \desc: "Number of rewrite iterations"),
+    ], ~SC_GRP[\te], "Lindenmayer system fractal sequencer — string rewriting to MIDI note sequences");
+
+    // Language-side: DAEMON_EUCLIDEAN_EXT (Extended Euclidean with accents)
+    ~MODULE_REGISTRY.register(\DAEMON_EUCLIDEAN_EXT, \daemon, \DAEMON_EUCLIDEAN_EXT, [
+        (\name: \length, \default: 16, \min: 1, \max: 64, \units: "steps", \desc: "Pattern length"),
+        (\name: \hits, \default: 4, \min: 0, \max: 64, \units: "", \desc: "Number of hits distributed"),
+        (\name: \accents, \default: 2, \min: 0, \max: 64, \units: "", \desc: "Number of accented hits"),
+        (\name: \rotation, \default: 0, \min: 0, \max: 63, \units: "steps", \desc: "Pattern rotation offset"),
+    ], ~SC_GRP[\te], "Euclidean rhythm generator with secondary Euclidean accent layer");
+
+    // Language-side: DAEMON_PROB_MATRIX (Probability Matrix Sequencer)
+    ~MODULE_REGISTRY.register(\DAEMON_PROB_MATRIX, \daemon, \DAEMON_PROB_MATRIX, [
+        (\name: \rows, \default: 8, \min: 1, \max: 32, \units: "", \desc: "Number of voice rows"),
+        (\name: \cols, \default: 16, \min: 1, \max: 64, \units: "steps", \desc: "Number of time step columns"),
+        (\name: \density, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Randomization fill density"),
+    ], ~SC_GRP[\te], "Probability matrix grid sequencer for generative multi-voice drum programming");
+
+    // SynthDef: Probability Gate (server-side coin flip gate)
+    ~MODULE_REGISTRY.register(\daemon_prob_gate, \daemon, \daemon_prob_gate, [
+        (\name: \trigBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Trigger input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Gate output bus"),
+        (\name: \probability, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Gate pass-through probability"),
+    ], ~SC_GRP[\te], "Server-side probability gate — passes or blocks triggers via coin flip");
+
+    "  -> DAEMON generative sequencers registered with Module Registry".postln;
+};
 )

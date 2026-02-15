@@ -188,4 +188,45 @@ SynthDef(\anima_ring_mod, {
         );
     });
 });
+
+// ==========================================
+// MODULE REGISTRY REGISTRATION — Modular Amplifiers
+// ==========================================
+if(~MODULE_REGISTRY.notNil) {
+    // 1. ANIMA_VCA — Voltage Controlled Amplifier
+    ~MODULE_REGISTRY.register(\anima_vca, \modular, \anima_vca, [
+        (\name: \gain, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Gain"),
+        (\name: \mode, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Linear/exponential response curve"),
+    ], ~SC_GRP[\te], "Voltage controlled amplifier with linear/exponential modes");
+
+    // 2. ANIMA_LPG — Low-Pass Gate
+    ~MODULE_REGISTRY.register(\anima_lpg, \modular, \anima_lpg, [
+        (\name: \strike, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Strike trigger input"),
+        (\name: \damp, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Vactrol damping amount"),
+    ], ~SC_GRP[\te], "Vactrol-modeled low-pass gate (VCA+VCF)");
+
+    // 3. ANIMA_MIXER — 4-Channel Mixer
+    ~MODULE_REGISTRY.register(\anima_mixer, \modular, \anima_mixer, [
+        (\name: \level1, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Channel 1 level"),
+        (\name: \level2, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Channel 2 level"),
+        (\name: \level3, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Channel 3 level"),
+        (\name: \level4, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Channel 4 level"),
+        (\name: \pan1, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Channel 1 pan"),
+        (\name: \pan2, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Channel 2 pan"),
+        (\name: \pan3, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Channel 3 pan"),
+        (\name: \pan4, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Channel 4 pan"),
+    ], ~SC_GRP[\te], "4-channel mixer with per-channel level and pan");
+
+    // 4. ANIMA_CROSSFADER — A/B Crossfader
+    ~MODULE_REGISTRY.register(\anima_crossfader, \modular, \anima_crossfader, [
+        (\name: \crossfade, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "A/B crossfade position"),
+    ], ~SC_GRP[\te], "Equal-power A/B crossfader with CV control");
+
+    // 5. ANIMA_RING_MOD — Ring Modulator
+    ~MODULE_REGISTRY.register(\anima_ring_mod, \modular, \anima_ring_mod, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Ring modulator with dry/wet blend");
+
+    "  MODULE_REGISTRY: 5 ANIMA amplifier modules registered".postln;
+};
 )

@@ -535,4 +535,69 @@ SynthDef(\morpheus_reel, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // 1. CHRONOS ECHO — Mimeophon Clone
+    ~MODULE_REGISTRY.register(\chronos_echo, \makenoise, \chronos_echo, [
+        (\name: \rate, \default: 0.25, \min: 0.01, \max: 2.0, \units: "s", \desc: "Repeat time / delay length"),
+        (\name: \color, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Tonal character (0=dark LP, 1=bright HP)"),
+        (\name: \zone, \default: 1, \min: 0, \max: 2, \units: "", \desc: "Behavior zone (0=karplus, 1=delay, 2=reverb)"),
+        (\name: \halo, \default: 0.5, \min: 0, \max: 0.98, \units: "", \desc: "Feedback with soft-clip saturation"),
+        (\name: \hold, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Freeze buffer content"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Mimeophon — micro-looping audio repeater with zone selection");
+
+    // 2. CHRONOS PITCH — Echophon Clone
+    ~MODULE_REGISTRY.register(\chronos_pitch, \makenoise, \chronos_pitch, [
+        (\name: \pitch, \default: 0, \min: -12, \max: 12, \units: "st", \desc: "Pitch shift per repeat in semitones"),
+        (\name: \time, \default: 0.3, \min: 0.01, \max: 2.0, \units: "s", \desc: "Echo delay time"),
+        (\name: \feedback, \default: 0.5, \min: 0, \max: 0.95, \units: "", \desc: "Feedback amount"),
+        (\name: \freeze, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Infinite hold (feedback=1, input muted)"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Echophon — pitch-shifting echo with shimmer feedback");
+
+    // 3. MORPHEUS TAPE — Morphagene-lite Clone
+    ~MODULE_REGISTRY.register(\morpheus_tape, \makenoise, \morpheus_tape, [
+        (\name: \gene, \default: 1.0, \min: -4, \max: 4, \units: "x", \desc: "Playback speed/direction"),
+        (\name: \slide, \default: 0.1, \min: 0.001, \max: 2.0, \units: "s", \desc: "Speed transition smoothing (lag time)"),
+        (\name: \organize, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Scan position through the reel"),
+        (\name: \morph, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Crossfade between splice points"),
+        (\name: \record, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Record toggle (write input to buffer)"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Morphagene-lite — microsound tape machine with splice morphing");
+
+    // 4. MORPHEUS PHONO — Phonogene Clone
+    ~MODULE_REGISTRY.register(\morpheus_phono, \makenoise, \morpheus_phono, [
+        (\name: \grainDensity, \default: 10, \min: 1, \max: 100, \units: "Hz", \desc: "Grain trigger rate"),
+        (\name: \grainSize, \default: 0.05, \min: 0.001, \max: 0.5, \units: "s", \desc: "Grain duration"),
+        (\name: \pitch, \default: 0, \min: -24, \max: 24, \units: "st", \desc: "Pitch shift in semitones"),
+        (\name: \splice, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Splice segment position (0=start, 1=end)"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Phonogene — granular sampler/looper with splice-based playback");
+
+    // 5. SPATIAL ERBE — Erbe-Verb Clone
+    ~MODULE_REGISTRY.register(\spatial_erbe, \makenoise, \spatial_erbe, [
+        (\name: \absorb, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "HF damping (0=bright, 1=very dark)"),
+        (\name: \decay, \default: 2.0, \min: 0.1, \max: 100, \units: "s", \desc: "Reverb decay time (100=near-infinite)"),
+        (\name: \speed, \default: 1.0, \min: 0.25, \max: 4.0, \units: "x", \desc: "Pitch-shift reverb tail (<1=drone, >1=shimmer)"),
+        (\name: \tilt, \default: 0.0, \min: -1, \max: 1, \units: "", \desc: "Spectral tilt (-1=dark, 0=neutral, 1=bright)"),
+        (\name: \size, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Room size (scales delay line lengths)"),
+        (\name: \preDelay, \default: 0.0, \min: 0, \max: 500, \units: "ms", \desc: "Pre-delay time"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Erbe-Verb — DSP reverb with absorb, tilt, and speed controls");
+
+    // 6. MORPHEUS REEL — True Morphagene Clone
+    ~MODULE_REGISTRY.register(\morpheus_reel, \makenoise, \morpheus_reel, [
+        (\name: \gene, \default: 1.0, \min: -4, \max: 4, \units: "x", \desc: "Playback speed/direction (0=freeze)"),
+        (\name: \slide, \default: 0.1, \min: 0.001, \max: 2.0, \units: "s", \desc: "Gene speed transition smoothing"),
+        (\name: \organize, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Select splice point position across reel"),
+        (\name: \morph, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Crossfade window between adjacent splice regions"),
+        (\name: \sos, \default: 0.0, \min: 0, \max: 0.95, \units: "", \desc: "Sound-on-Sound overdub amount (0=replace, 1=full)"),
+        (\name: \shift, \default: 0, \min: -24, \max: 24, \units: "st", \desc: "Pitch shift independent of speed"),
+        (\name: \geneSize, \default: 1.0, \min: 0.01, \max: 1.0, \units: "", \desc: "Playback window length as proportion of splice"),
+        (\name: \record, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Record toggle"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Morphagene — tape-splice granular processor with reel/splice/gene paradigm");
+};
 )

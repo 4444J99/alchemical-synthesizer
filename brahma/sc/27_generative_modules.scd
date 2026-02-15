@@ -351,52 +351,221 @@ SynthDef(\daemon_clock_divider_random, {
 // Each template returns a list of module names and a description of
 // how to connect them via the patch bay.
 ~SERPENS_TEMPLATES = (
-	generativeLoop: { |clockBus, outBus|
-		// Clock -> divider -> turing machine -> quantizer -> output
-		"SERPENS: generativeLoop — clock -> divider -> turing -> quantizer -> osc".postln;
-		// Returns suggested module chain and wiring description
-		[
-			[\horologium_divider, \daemon_turing, \grimoire_quantizer],
-			"Connect clock outBus4 -> turing trigBus, turing outBusCV -> quantizer inBus"
-		];
+	// ==========================================
+	// MATERIALIZED SERPENS TEMPLATES
+	// Each template creates real instances, allocates buses,
+	// and starts generative processes. Returns cleanup function.
+	// ==========================================
+
+	generativeLoop: { |outBus|
+		// Turing Machine → pentatonic quantization → Prima Materia
+		"SERPENS: Materializing generativeLoop...".postln;
+		var turing = ~DAEMON_MACHINA.(16, 0.7);
+		var cvBus = Bus.control(s, 1);
+		var gateBus = Bus.control(s, 1);
+		var audioBus = Bus.audio(s, 2);
+		var cleanup = List.new;
+		var outTarget = outBus ? 0;
+
+		// Store instance for clock bridge access
+		~DAEMON_MACHINA_INSTANCES[\serpens_turing] = turing;
+
+		// Register with clock bridge at 16th notes
+		if(~DAEMON_CLOCK_BRIDGE.notNil) {
+			~DAEMON_CLOCK_BRIDGE.register(\serpens_turing, \machina, turing, 1,
+				cvBus.index, gateBus.index);
+		};
+
+		// Tdef: read CV bus, quantize to pentatonic, trigger Prima Materia
+		Tdef(\serpens_gen_loop, {
+			var pentatonic = [0, 2, 4, 7, 9]; // C D E G A
+			var baseNote = 48;
+			loop {
+				var cv, gate, note, freq;
+				cvBus.get({ |v| cv = v });
+				gateBus.get({ |v| gate = v });
+				cv = cv ? 0;
+				gate = gate ? 0;
+
+				if(gate > 0.5) {
+					// Quantize CV to pentatonic
+					note = baseNote + pentatonic.wrapAt((cv * 20).round.asInteger);
+					freq = note.midicps;
+					var voice = Synth(\prima_materia, [
+						\freq, freq, \velocity, 0.4, \gate, 1,
+						\outBus, outTarget, \cutoff, cv.linexp(0, 1, 500, 6000),
+						\atk, 0.01, \dec, 0.15, \sus, 0.3, \rel, 0.4,
+						\osc1Type, 1, \osc2Level, 0.2
+					], ~SC_GRP[\te], \addToTail);
+					{ 0.12.wait; voice.set(\gate, 0); }.fork;
+				};
+				(60 / (~CHRONOS[\tempo] ? 120) / 4).wait;
+			};
+		}).play;
+
+		cleanup.add({ Tdef(\serpens_gen_loop).stop });
+		cleanup.add({ cvBus.free; gateBus.free; audioBus.free });
+		cleanup.add({ ~DAEMON_MACHINA_INSTANCES.removeAt(\serpens_turing) });
+		cleanup.add({
+			if(~DAEMON_CLOCK_BRIDGE.notNil) {
+				~DAEMON_CLOCK_BRIDGE.unregister(\serpens_turing);
+			};
+		});
+
+		"SERPENS: generativeLoop ACTIVE (Turing → pentatonic → Prima Materia)".postln;
+		[\generativeLoop, { cleanup.do({ |fn| fn.value }) }];
 	},
 
-	chaosModulation: {
-		// Chaos oscillator -> slew limiter -> attenuverter -> target parameter
-		"SERPENS: chaosModulation — chaos osc -> slew -> attenuverter -> target".postln;
-		[
-			[\athanor_chaos, \aqua_vitae_slew, \grimoire_attenuverter],
-			"Connect chaos out -> slew in -> attenuverter in -> destination param bus"
-		];
+	chaosModulation: { |targetParam, targetInstance|
+		// Lorenz attractor → parameter modulation
+		"SERPENS: Materializing chaosModulation...".postln;
+		var lorenzX = Bus.control(s, 1);
+		var lorenzY = Bus.control(s, 1);
+		var lorenzZ = Bus.control(s, 1);
+		var synth = Synth(\daemon_lorenz, [
+			\outBusX, lorenzX.index, \outBusY, lorenzY.index, \outBusZ, lorenzZ.index,
+			\sigma, 10, \rho, 28, \beta, 2.667, \rate, 1.5, \scale, 0.03
+		]);
+		~DAEMON_SYNTH_INSTANCES[\serpens_lorenz] = synth;
+		"SERPENS: chaosModulation ACTIVE (Lorenz → 3 CV buses: %, %, %)".format(
+			lorenzX.index, lorenzY.index, lorenzZ.index).postln;
+		[\chaosModulation, {
+			synth.free;
+			lorenzX.free; lorenzY.free; lorenzZ.free;
+			~DAEMON_SYNTH_INSTANCES.removeAt(\serpens_lorenz);
+		}];
 	},
 
-	markovMelody: { |scaleName|
-		// Markov chain -> quantizer -> voice -> output
-		"SERPENS: markovMelody — markov -> quantizer -> voice".postln;
-		[
-			[\moirai, \grimoire_quantizer, \oscillator],
-			"Use MOIRAI.next for CV, quantize to scale, send to oscillator freq bus"
-		];
+	markovMelody: { |outBus|
+		// MOIRAI Markov → melodic voice
+		"SERPENS: Materializing markovMelody...".postln;
+		var markov = ~MOIRAI.(12);
+		var pentatonic = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 12, 7];
+		markov.train(pentatonic);
+		markov.setTemperature(0.6);
+		~MOIRAI_INSTANCES[\serpens_markov] = markov;
+		var outTarget = outBus ? 0;
+
+		Tdef(\serpens_markov_melody, {
+			var baseNote = 52;
+			loop {
+				var interval = (markov.next * 24).round.asInteger;
+				var note = (baseNote + interval).clip(36, 84);
+				var voice = Synth(\prima_materia, [
+					\freq, note.midicps, \velocity, 0.35, \gate, 1,
+					\outBus, outTarget, \cutoff, 3000,
+					\atk, 0.02, \dec, 0.2, \sus, 0.5, \rel, 0.6,
+					\osc1Type, 0, \osc2Type, 1, \osc2Level, 0.3, \osc2Detune, 3
+				], ~SC_GRP[\te], \addToTail);
+				{ 0.2.wait; voice.set(\gate, 0); }.fork;
+				(60 / (~CHRONOS[\tempo] ? 120) / 4).wait;
+			};
+		}).play;
+
+		"SERPENS: markovMelody ACTIVE (MOIRAI → pentatonic → Prima Materia)".postln;
+		[\markovMelody, {
+			Tdef(\serpens_markov_melody).stop;
+			~MOIRAI_INSTANCES.removeAt(\serpens_markov);
+		}];
 	},
 
-	euclideanDrums: {
-		// Multiple euclidean generators with different densities -> drum voices
-		"SERPENS: euclideanDrums — parallel euclidean -> drum voices".postln;
-		[
-			[\daemon_euclidean_ext, \daemon_euclidean_ext, \daemon_euclidean_ext],
-			"Create 3 instances with length=16, hits=4/7/11, route gates to drum synths"
-		];
+	euclideanDrums: { |outBus|
+		// 3 Euclidean generators → Golem drum voices
+		"SERPENS: Materializing euclideanDrums...".postln;
+		var kick = ~DAEMON_EUCLIDEAN_EXT.(16, 4, 2, 0);
+		var hat = ~DAEMON_EUCLIDEAN_EXT.(16, 7, 3, 0);
+		var snare = ~DAEMON_EUCLIDEAN_EXT.(16, 3, 1, 4);
+		kick.generate; hat.generate; snare.generate;
+		var outTarget = outBus ? 0;
+
+		~DAEMON_SEQ_INSTANCES[\serpens_kick] = [\euclidean, kick];
+		~DAEMON_SEQ_INSTANCES[\serpens_hat] = [\euclidean, hat];
+		~DAEMON_SEQ_INSTANCES[\serpens_snare] = [\euclidean, snare];
+
+		// Register with clock bridge
+		if(~DAEMON_CLOCK_BRIDGE.notNil) {
+			~DAEMON_CLOCK_BRIDGE.register(\serpens_kick, \euclidean, kick, 1, nil, nil);
+			~DAEMON_CLOCK_BRIDGE.register(\serpens_hat, \euclidean, hat, 1, nil, nil);
+			~DAEMON_CLOCK_BRIDGE.register(\serpens_snare, \euclidean, snare, 1, nil, nil);
+		};
+
+		Tdef(\serpens_euclid_drums, {
+			loop {
+				kick.advance; hat.advance; snare.advance;
+				if(kick.gate > 0) {
+					Synth(\drum_subtractive, [
+						\outBus, outTarget, \freq, 55, \velocity, kick.velocity * 0.6,
+						\gate, 1, \cutoff, 800, \envAmt, 0.8
+					], ~SC_GRP[\te], \addToTail);
+				};
+				if(hat.gate > 0) {
+					Synth(\drum_noise, [
+						\outBus, outTarget, \freq, 8000, \velocity, hat.velocity * 0.3,
+						\gate, 1, \decay, 0.05
+					], ~SC_GRP[\te], \addToTail);
+				};
+				if(snare.gate > 0) {
+					Synth(\drum_fm, [
+						\outBus, outTarget, \freq, 200, \velocity, snare.velocity * 0.4,
+						\gate, 1, \modRatio, 2.3, \modIndex, 3
+					], ~SC_GRP[\te], \addToTail);
+				};
+				(60 / (~CHRONOS[\tempo] ? 120) / 4).wait;
+			};
+		}).play;
+
+		"SERPENS: euclideanDrums ACTIVE (E(4,16) kick + E(7,16) hat + E(3,16) snare)".postln;
+		[\euclideanDrums, {
+			Tdef(\serpens_euclid_drums).stop;
+			[\serpens_kick, \serpens_hat, \serpens_snare].do({ |k|
+				~DAEMON_SEQ_INSTANCES.removeAt(k);
+				if(~DAEMON_CLOCK_BRIDGE.notNil) { ~DAEMON_CLOCK_BRIDGE.unregister(k) };
+			});
+		}];
 	},
 
-	cellularTexture: {
-		// Cellular automata rows -> individual oscillator frequencies
-		"SERPENS: cellularTexture — CA rows -> oscillator bank".postln;
-		[
-			[\genesis, \grimoire_multiple, \oscillator_bank],
-			"Step GENESIS each clock tick, map cell states to oscillator on/off gates"
-		];
+	cellularTexture: { |outBus|
+		// Cellular automata → oscillator bank
+		"SERPENS: Materializing cellularTexture...".postln;
+		var ca = ~GENESIS.(16, 30);
+		ca.seed(\random);
+		~GENESIS_INSTANCES[\serpens_ca] = ca;
+		var outTarget = outBus ? 0;
+		var baseFreq = 220;
+
+		Tdef(\serpens_cellular, {
+			loop {
+				ca.step;
+				var cells = ca.getGates;
+				// Map active cells to sine tones at harmonic intervals
+				cells.do({ |active, i|
+					if(active > 0) {
+						var freq = baseFreq * (i + 1) * 0.5;
+						if(freq < 4000) {
+							var grain = Synth(\prima_materia, [
+								\freq, freq, \velocity, 0.08, \gate, 1,
+								\outBus, outTarget, \osc1Type, 0,
+								\atk, 0.02, \dec, 0.1, \sus, 0.0, \rel, 0.15,
+								\cutoff, 5000
+							], ~SC_GRP[\te], \addToTail);
+							{ 0.08.wait; grain.set(\gate, 0); }.fork;
+						};
+					};
+				});
+				(60 / (~CHRONOS[\tempo] ? 120) / 2).wait; // 8th notes
+			};
+		}).play;
+
+		"SERPENS: cellularTexture ACTIVE (Rule 30 → harmonic oscillator bank)".postln;
+		[\cellularTexture, {
+			Tdef(\serpens_cellular).stop;
+			~GENESIS_INSTANCES.removeAt(\serpens_ca);
+		}];
 	}
 );
+
+// Active SERPENS instances (for cleanup)
+~SERPENS_ACTIVE = IdentityDictionary.new;
 
 
 // ==========================================
@@ -629,12 +798,20 @@ OSCdef(\genesis_set, { |msg|
 // ==========================================
 OSCdef(\serpens_apply, { |msg|
 	var template = msg[1].asSymbol;
+	var outBus = if(msg.size > 2) { msg[2].asInteger } { 0 };
 	var fn = ~SERPENS_TEMPLATES[template];
 	if(fn.notNil) {
-		var result = fn.value;
-		"SERPENS: Applied template '%'".format(template).postln;
-		result[0].do({ |mod| "  Module: %".format(mod).postln });
-		"  Wiring: %".format(result[1]).postln;
+		// Stop existing instance of same template if running
+		if(~SERPENS_ACTIVE[template].notNil) {
+			~SERPENS_ACTIVE[template].value; // call cleanup
+			~SERPENS_ACTIVE.removeAt(template);
+		};
+		var result = fn.value(outBus);
+		~SERPENS_ACTIVE[result[0].asSymbol] = result[1]; // store cleanup fn
+		// Broadcast state to web
+		if(~VISUAL_CORTEX.notNil) {
+			~VISUAL_CORTEX.target.sendMsg("/serpens/state", template.asString, 1);
+		};
 	} {
 		"SERPENS: Unknown template '%'".format(template).postln;
 	};
@@ -643,9 +820,43 @@ OSCdef(\serpens_apply, { |msg|
 OSCdef(\serpens_list, { |msg|
 	"SERPENS: Available templates:".postln;
 	~SERPENS_TEMPLATES.keysValuesDo({ |key, val|
-		"  - %".format(key).postln;
+		var active = ~SERPENS_ACTIVE[key].notNil;
+		"  - % %".format(key, if(active, "[ACTIVE]", "")).postln;
 	});
+	// Broadcast template list to web
+	if(~VISUAL_CORTEX.notNil) {
+		~SERPENS_TEMPLATES.keysValuesDo({ |key, val|
+			var active = ~SERPENS_ACTIVE[key].notNil;
+			~VISUAL_CORTEX.target.sendMsg("/serpens/template",
+				key.asString, active.asInteger);
+		});
+		~VISUAL_CORTEX.target.sendMsg("/serpens/list/done",
+			~SERPENS_TEMPLATES.size);
+	};
 }, "/serpens/list");
+
+OSCdef(\serpens_stop, { |msg|
+	var template = msg[1].asSymbol;
+	if(~SERPENS_ACTIVE[template].notNil) {
+		~SERPENS_ACTIVE[template].value; // call cleanup
+		~SERPENS_ACTIVE.removeAt(template);
+		"SERPENS: Stopped template '%'".format(template).postln;
+		if(~VISUAL_CORTEX.notNil) {
+			~VISUAL_CORTEX.target.sendMsg("/serpens/state", template.asString, 0);
+		};
+	} {
+		"SERPENS: Template '%' not active".format(template).postln;
+	};
+}, "/serpens/stop");
+
+OSCdef(\serpens_stop_all, {
+	~SERPENS_ACTIVE.keysValuesDo({ |key, cleanup|
+		cleanup.value;
+		"SERPENS: Stopped '%'".format(key).postln;
+	});
+	~SERPENS_ACTIVE = IdentityDictionary.new;
+	"SERPENS: All templates stopped".postln;
+}, "/serpens/stopAll");
 
 // ==========================================
 // SYNTHDEF: LORENZ ATTRACTOR (3-axis chaotic CV)
@@ -857,5 +1068,128 @@ if(~PATCH_BAY.notNil) {
         });
     });
     "  -> Generative modules registered with Patch Bay".postln;
+};
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // SynthDef: Turing Machine (audio-rate shift register CV/gate)
+    ~MODULE_REGISTRY.register(\daemon_turing, \daemon, \daemon_turing, [
+        (\name: \outBusCV, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "CV output bus index"),
+        (\name: \outBusGate, \default: 1, \min: 0, \max: 4095, \units: "", \desc: "Gate output bus index"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Trigger input bus index"),
+        (\name: \bits, \default: 8, \min: 1, \max: 16, \units: "", \desc: "Register bit depth"),
+        (\name: \probability, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Flip probability"),
+    ], ~SC_GRP[\te], "Audio-rate shift register CV/gate generator");
+
+    // SynthDef: Bernoulli Cascade (3-level probability routing tree)
+    ~MODULE_REGISTRY.register(\daemon_bernoulli_cascade, \daemon, \daemon_bernoulli_cascade, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Trigger input bus"),
+        (\name: \outBus1, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Output bus 1"),
+        (\name: \outBus2, \default: 1, \min: 0, \max: 4095, \units: "", \desc: "Output bus 2"),
+        (\name: \outBus3, \default: 2, \min: 0, \max: 4095, \units: "", \desc: "Output bus 3"),
+        (\name: \outBus4, \default: 3, \min: 0, \max: 4095, \units: "", \desc: "Output bus 4"),
+        (\name: \prob1, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Level 1 branch probability"),
+        (\name: \prob2, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Level 2 branch A probability"),
+        (\name: \prob3, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Level 3 branch B probability"),
+    ], ~SC_GRP[\te], "3-level probability routing tree for trigger distribution");
+
+    // SynthDef: Flip-Flop (toggle on trigger)
+    ~MODULE_REGISTRY.register(\daemon_flipflop, \daemon, \daemon_flipflop, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Trigger input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Toggle output bus"),
+        (\name: \resetBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Reset input bus"),
+    ], ~SC_GRP[\te], "Toggle between 0 and 1 on each trigger with reset");
+
+    // SynthDef: Counter (trigger counter with modulo/one-shot modes)
+    ~MODULE_REGISTRY.register(\daemon_counter, \daemon, \daemon_counter, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Trigger input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Gate output bus"),
+        (\name: \resetBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Reset input bus"),
+        (\name: \count, \default: 8, \min: 1, \max: 256, \units: "", \desc: "Trigger count threshold"),
+        (\name: \mode, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Mode: 0=modulo divider, 1=one-shot"),
+    ], ~SC_GRP[\te], "Trigger counter with modulo clock divider and one-shot modes");
+
+    // SynthDef: Clock Divider Random (stochastic trigger thinning)
+    ~MODULE_REGISTRY.register(\daemon_clock_divider_random, \daemon, \daemon_clock_divider_random, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Clock input bus"),
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Thinned clock output bus"),
+        (\name: \density, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Pass-through probability"),
+    ], ~SC_GRP[\te], "Stochastic clock divider — each trigger passes with probability density");
+
+    // SynthDef: Lorenz Attractor (3-axis chaotic CV)
+    ~MODULE_REGISTRY.register(\daemon_lorenz, \daemon, \daemon_lorenz, [
+        (\name: \outBusX, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "X-axis CV output bus"),
+        (\name: \outBusY, \default: 1, \min: 0, \max: 4095, \units: "", \desc: "Y-axis CV output bus"),
+        (\name: \outBusZ, \default: 2, \min: 0, \max: 4095, \units: "", \desc: "Z-axis CV output bus"),
+        (\name: \sigma, \default: 10, \min: 0.1, \max: 50, \units: "", \desc: "Lorenz sigma parameter"),
+        (\name: \rho, \default: 28, \min: 0.1, \max: 100, \units: "", \desc: "Lorenz rho parameter"),
+        (\name: \beta, \default: 2.667, \min: 0.1, \max: 20, \units: "", \desc: "Lorenz beta parameter"),
+        (\name: \rate, \default: 1.0, \min: 0.01, \max: 10, \units: "", \desc: "Evolution rate"),
+        (\name: \scale, \default: 0.02, \min: 0.001, \max: 1, \units: "", \desc: "Output scale factor"),
+    ], ~SC_GRP[\te], "Continuous Lorenz attractor producing 3 correlated chaotic CV outputs");
+
+    // SynthDef: Henon Map (2-axis chaotic CV)
+    ~MODULE_REGISTRY.register(\daemon_henon, \daemon, \daemon_henon, [
+        (\name: \outBusX, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "X-axis CV output bus"),
+        (\name: \outBusY, \default: 1, \min: 0, \max: 4095, \units: "", \desc: "Y-axis CV output bus"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Trigger input bus"),
+        (\name: \a, \default: 1.4, \min: 0.1, \max: 2.0, \units: "", \desc: "Henon a parameter"),
+        (\name: \b, \default: 0.3, \min: 0.01, \max: 1.0, \units: "", \desc: "Henon b parameter"),
+    ], ~SC_GRP[\te], "Discrete Henon map producing 2 correlated chaotic CV outputs");
+
+    // SynthDef: Rossler Attractor (3-axis chaotic CV)
+    ~MODULE_REGISTRY.register(\daemon_rossler, \daemon, \daemon_rossler, [
+        (\name: \outBusX, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "X-axis CV output bus"),
+        (\name: \outBusY, \default: 1, \min: 0, \max: 4095, \units: "", \desc: "Y-axis CV output bus"),
+        (\name: \outBusZ, \default: 2, \min: 0, \max: 4095, \units: "", \desc: "Z-axis CV output bus"),
+        (\name: \a, \default: 0.2, \min: 0.01, \max: 1, \units: "", \desc: "Rossler a parameter"),
+        (\name: \b, \default: 0.2, \min: 0.01, \max: 2, \units: "", \desc: "Rossler b parameter"),
+        (\name: \c, \default: 5.7, \min: 0.1, \max: 20, \units: "", \desc: "Rossler c parameter"),
+        (\name: \rate, \default: 1.0, \min: 0.01, \max: 10, \units: "", \desc: "Evolution rate"),
+        (\name: \scale, \default: 0.05, \min: 0.001, \max: 1, \units: "", \desc: "Output scale factor"),
+    ], ~SC_GRP[\te], "Continuous Rossler attractor producing quasi-periodic to chaotic CV");
+
+    // Language-side: DAEMON_MACHINA (full Turing Machine)
+    ~MODULE_REGISTRY.register(\DAEMON_MACHINA, \daemon, \DAEMON_MACHINA, [
+        (\name: \bits, \default: 16, \min: 1, \max: 32, \units: "", \desc: "Shift register bit depth"),
+        (\name: \probability, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Bit preservation probability"),
+        (\name: \length, \default: 16, \min: 2, \max: 32, \units: "", \desc: "Effective loop window length"),
+        (\name: \locked, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Lock register (1=frozen)"),
+    ], ~SC_GRP[\te], "Language-side 16-bit shift register with probability-controlled feedback");
+
+    // Language-side: MOIRAI (Markov chain with training)
+    ~MODULE_REGISTRY.register(\MOIRAI, \daemon, \MOIRAI, [
+        (\name: \numStates, \default: 8, \min: 2, \max: 64, \units: "", \desc: "Number of Markov states"),
+        (\name: \temperature, \default: 0.5, \min: 0.01, \max: 10.0, \units: "", \desc: "Stochasticity temperature"),
+    ], ~SC_GRP[\te], "N-state Markov chain with trainable transition probabilities");
+
+    // Language-side: GENESIS (cellular automata)
+    ~MODULE_REGISTRY.register(\GENESIS, \daemon, \GENESIS, [
+        (\name: \width, \default: 32, \min: 4, \max: 256, \units: "cells", \desc: "Automaton width"),
+        (\name: \rule, \default: 30, \min: 0, \max: 255, \units: "", \desc: "Wolfram rule number (0-255)"),
+    ], ~SC_GRP[\te], "1D Wolfram cellular automaton with density and CV outputs");
+
+    // SERPENS Templates (self-patching recipes)
+    ~MODULE_REGISTRY.register(\SERPENS_generativeLoop, \daemon, \SERPENS_generativeLoop, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Audio output bus"),
+    ], ~SC_GRP[\te], "SERPENS: Turing Machine -> pentatonic quantization -> Prima Materia");
+
+    ~MODULE_REGISTRY.register(\SERPENS_chaosModulation, \daemon, \SERPENS_chaosModulation, [
+        (\name: \targetParam, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Target parameter to modulate"),
+    ], ~SC_GRP[\te], "SERPENS: Lorenz attractor -> 3-axis parameter modulation");
+
+    ~MODULE_REGISTRY.register(\SERPENS_markovMelody, \daemon, \SERPENS_markovMelody, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Audio output bus"),
+    ], ~SC_GRP[\te], "SERPENS: MOIRAI Markov chain -> melodic voice");
+
+    ~MODULE_REGISTRY.register(\SERPENS_euclideanDrums, \daemon, \SERPENS_euclideanDrums, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Audio output bus"),
+    ], ~SC_GRP[\te], "SERPENS: 3 Euclidean generators -> Golem drum voices");
+
+    ~MODULE_REGISTRY.register(\SERPENS_cellularTexture, \daemon, \SERPENS_cellularTexture, [
+        (\name: \outBus, \default: 0, \min: 0, \max: 4095, \units: "", \desc: "Audio output bus"),
+    ], ~SC_GRP[\te], "SERPENS: Cellular automata -> harmonic oscillator bank texture");
+
+    "  -> DAEMON generative modules registered with Module Registry".postln;
 };
 )

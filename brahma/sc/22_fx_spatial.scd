@@ -149,4 +149,44 @@ SynthDef(\aether_binaural, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\aether_width, \fx, \aether_width, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \width, \default: 1.0, \min: 0, \max: 3, \units: "", \desc: "Stereo width (0=mono, 1=normal, 2+=wide)"),
+    ], ~SC_GRP[\rr], "Stereo width processor via mid/side");
+
+    ~MODULE_REGISTRY.register(\aether_auto_pan, \fx, \aether_auto_pan, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \rate, \default: 1, \min: 0.01, \max: 20, \units: "Hz", \desc: "Pan rate"),
+        (\name: \depth, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Pan depth"),
+        (\name: \shape, \default: 0, \min: 0, \max: 2, \units: "", \desc: "LFO shape (0=sine, 1=tri, 2=saw)"),
+    ], ~SC_GRP[\rr], "Auto-panner with selectable shape");
+
+    ~MODULE_REGISTRY.register(\aether_haas, \fx, \aether_haas, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \delayMs, \default: 15, \min: 1, \max: 40, \units: "ms", \desc: "Haas delay time"),
+        (\name: \side, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Delayed side (0=right, 1=left)"),
+    ], ~SC_GRP[\rr], "Haas effect stereo widening");
+
+    ~MODULE_REGISTRY.register(\aether_ms_encode, \fx, \aether_ms_encode, [
+    ], ~SC_GRP[\rr], "Mid/side encoder");
+
+    ~MODULE_REGISTRY.register(\aether_ms_decode, \fx, \aether_ms_decode, [
+    ], ~SC_GRP[\rr], "Mid/side decoder");
+
+    ~MODULE_REGISTRY.register(\aether_binaural, \fx, \aether_binaural, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \azimuth, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Azimuth position (-1=left, 1=right)"),
+        (\name: \elevation, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Elevation (-1=below, 1=above)"),
+        (\name: \distance, \default: 1, \min: 0.1, \max: 10, \units: "m", \desc: "Source distance"),
+    ], ~SC_GRP[\rr], "Simplified binaural panner (HRTF approximation)");
+
+    "  -> 6 Spatial FX registered with Module Registry".postln;
+};
 )

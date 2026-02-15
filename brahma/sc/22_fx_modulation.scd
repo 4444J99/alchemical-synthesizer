@@ -215,4 +215,74 @@ SynthDef(\maelstrom_rotary, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\maelstrom_chorus, \fx, \maelstrom_chorus, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \rate, \default: 0.5, \min: 0.01, \max: 10, \units: "Hz", \desc: "LFO rate"),
+        (\name: \depth, \default: 0.005, \min: 0, \max: 0.03, \units: "s", \desc: "Modulation depth"),
+        (\name: \voices, \default: 3, \min: 1, \max: 6, \units: "", \desc: "Number of chorus voices"),
+        (\name: \spread, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Stereo spread"),
+    ], ~SC_GRP[\rr], "Multi-voice chorus with stereo spread");
+
+    ~MODULE_REGISTRY.register(\maelstrom_flanger, \fx, \maelstrom_flanger, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \rate, \default: 0.3, \min: 0.01, \max: 10, \units: "Hz", \desc: "LFO rate"),
+        (\name: \depth, \default: 0.003, \min: 0, \max: 0.02, \units: "s", \desc: "Modulation depth"),
+        (\name: \feedback, \default: 0.5, \min: -0.95, \max: 0.95, \units: "", \desc: "Feedback amount"),
+        (\name: \manual, \default: 0.003, \min: 0.0001, \max: 0.02, \units: "s", \desc: "Manual delay offset"),
+    ], ~SC_GRP[\rr], "Flanger with feedback");
+
+    ~MODULE_REGISTRY.register(\maelstrom_phaser, \fx, \maelstrom_phaser, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \rate, \default: 0.3, \min: 0.01, \max: 10, \units: "Hz", \desc: "LFO rate"),
+        (\name: \depth, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Modulation depth"),
+        (\name: \stages, \default: 4, \min: 2, \max: 12, \units: "", \desc: "Number of allpass stages"),
+        (\name: \feedback, \default: 0.3, \min: -0.9, \max: 0.9, \units: "", \desc: "Feedback amount"),
+        (\name: \stereoPhase, \default: 0.25, \min: 0, \max: 1, \units: "", \desc: "Stereo LFO phase offset"),
+    ], ~SC_GRP[\rr], "Multi-stage phaser");
+
+    ~MODULE_REGISTRY.register(\maelstrom_vibrato, \fx, \maelstrom_vibrato, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \rate, \default: 5, \min: 0.1, \max: 20, \units: "Hz", \desc: "Vibrato rate"),
+        (\name: \depth, \default: 0.005, \min: 0, \max: 0.05, \units: "s", \desc: "Vibrato depth"),
+        (\name: \delay, \default: 0.01, \min: 0.0001, \max: 0.05, \units: "s", \desc: "Base delay time"),
+    ], ~SC_GRP[\rr], "Pitch vibrato via delay modulation");
+
+    ~MODULE_REGISTRY.register(\maelstrom_tremolo, \fx, \maelstrom_tremolo, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \rate, \default: 4, \min: 0.1, \max: 30, \units: "Hz", \desc: "Tremolo rate"),
+        (\name: \depth, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Tremolo depth"),
+        (\name: \shape, \default: 0, \min: 0, \max: 2, \units: "", \desc: "LFO shape (0=sine, 1=tri, 2=square)"),
+        (\name: \stereoPhase, \default: 0.25, \min: 0, \max: 1, \units: "", \desc: "Stereo LFO phase offset"),
+    ], ~SC_GRP[\rr], "Stereo tremolo with selectable shape");
+
+    ~MODULE_REGISTRY.register(\maelstrom_ring_mod, \fx, \maelstrom_ring_mod, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \carrierFreq, \default: 440, \min: 1, \max: 10000, \units: "Hz", \desc: "Carrier frequency"),
+    ], ~SC_GRP[\rr], "Ring modulator");
+
+    ~MODULE_REGISTRY.register(\maelstrom_freq_shift, \fx, \maelstrom_freq_shift, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \shift, \default: 0, \min: -5000, \max: 5000, \units: "Hz", \desc: "Frequency shift amount"),
+        (\name: \feedback, \default: 0, \min: 0, \max: 0.9, \units: "", \desc: "Feedback amount"),
+    ], ~SC_GRP[\rr], "Frequency shifter with feedback");
+
+    ~MODULE_REGISTRY.register(\maelstrom_rotary, \fx, \maelstrom_rotary, [
+        (\name: \mix, \default: 1.0, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \speed, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Rotor speed (0=slow, 1=fast)"),
+        (\name: \acceleration, \default: 0.5, \min: 0.1, \max: 5, \units: "s", \desc: "Speed transition time"),
+    ], ~SC_GRP[\rr], "Rotary speaker simulation with doppler");
+
+    "  -> 8 Modulation FX registered with Module Registry".postln;
+};
 )

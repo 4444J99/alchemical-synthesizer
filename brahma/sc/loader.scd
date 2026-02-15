@@ -20,6 +20,9 @@ s.doWhenBooted({
     // === 01B: Arbitration Engine ===
     (root +/+ "01_arbitration_engine.scd").load;
 
+    // === 01C: Module Registry ===
+    (root +/+ "01_module_registry.scd").load;
+
     // === 02: Tuning & Input Systems ===
     (root +/+ "02_microtonality.scd").load;
     (root +/+ "02_midi_mpe.scd").load;
@@ -72,6 +75,9 @@ s.doWhenBooted({
     // === 16: Synthesis Engines ===
     (root +/+ "16_synthesis_engines.scd").load;
 
+    // === 16B: Engine Voice Responders ===
+    (root +/+ "16_engine_responders.scd").load;
+
     // === 17-20: Make Noise Modules ===
     (root +/+ "17_make_noise_functions.scd").load;
     (root +/+ "18_make_noise_filters.scd").load;
@@ -111,6 +117,9 @@ s.doWhenBooted({
     (root +/+ "27_generative_modules.scd").load;
     (root +/+ "27_generative_sequencers.scd").load;
 
+    // === 27B: DAEMON-CHRONOS Clock Bridge ===
+    (root +/+ "27_daemon_clock_bridge.scd").load;
+
     // === 28: Audio Management ===
     (root +/+ "28_audio_monitoring.scd").load;
     (root +/+ "28_audio_recording.scd").load;
@@ -122,6 +131,9 @@ s.doWhenBooted({
     Synth(\immune_governor, [\inBus, 0, \outBus, 0, \threshold, 0.9], ~SC_GRP[\rr], \addToTail);
     Synth(\immune_governor, [\inBus, 1, \outBus, 1, \threshold, 0.9], ~SC_GRP[\rr], \addToTail);
     "--- BRAHMA: IMMUNE Governor Deployed (stereo, threshold 0.9) ---".postln;
+
+    // === 30: Demo Patch (generative hello-world) ===
+    (root +/+ "30_demo_patch.scd").load;
 
     "--- BRAHMA SYSTEM ONLINE ---".postln;
 });

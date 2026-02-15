@@ -98,6 +98,9 @@
                         self[\tempo], self[\playing].asInteger);
                 };
 
+                // Drive DAEMON generative modules via clock bridge
+                if(~DAEMON_CLOCK_BRIDGE.notNil) { ~DAEMON_CLOCK_BRIDGE.tick(tickCount) };
+
                 tickCount = tickCount + 1;
                 tickDur.wait;
             };

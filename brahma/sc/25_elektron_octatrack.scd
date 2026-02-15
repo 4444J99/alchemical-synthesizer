@@ -471,4 +471,54 @@ OSCdef(\octahedron_arr_advance, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // OCTAHEDRON CROSSFADER — Scene A/B blending
+    ~MODULE_REGISTRY.register(\octahedron_crossfader, \elektron, \octahedron_crossfader, [
+        (\name: \inBusA, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Scene A input bus"),
+        (\name: \inBusB, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Scene B input bus"),
+        (\name: \xfade, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Crossfade position (0=A, 1=B)"),
+        (\name: \curve, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Crossfade curve (0=equal power, 1=linear)"),
+    ], ~SC_GRP[\te], "Scene A/B crossfader with equal-power and linear curves");
+
+    // OCTAHEDRON PICKUP — Live loop recorder/overdub
+    ~MODULE_REGISTRY.register(\octahedron_pickup, \elektron, \octahedron_pickup, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Audio input bus"),
+        (\name: \bufnum, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Recording buffer number"),
+        (\name: \record, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Record toggle (>0.5 = armed)"),
+        (\name: \overdub, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Overdub toggle (>0.5 = active)"),
+        (\name: \multiply, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Multiply mode"),
+        (\name: \level, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Playback level"),
+        (\name: \feedback, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Overdub feedback (content preservation)"),
+    ], ~SC_GRP[\te], "Live loop recorder with overdub and feedback control");
+
+    // OCTAHEDRON TIMESTRETCH — Granular phase vocoder
+    ~MODULE_REGISTRY.register(\octahedron_timestretch, \elektron, \octahedron_timestretch, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Audio input bus"),
+        (\name: \bufnum, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Source buffer number"),
+        (\name: \rate, \default: 1.0, \min: 0.01, \max: 4.0, \units: "x", \desc: "Time stretch rate"),
+        (\name: \pitch, \default: 1.0, \min: 0.25, \max: 4.0, \units: "x", \desc: "Pitch shift ratio"),
+        (\name: \grainSize, \default: 0.1, \min: 0.01, \max: 1.0, \units: "s", \desc: "Grain duration"),
+        (\name: \overlap, \default: 4, \min: 1, \max: 16, \units: "", \desc: "Grain overlap factor"),
+    ], ~SC_GRP[\te], "Granular time stretch with independent rate and pitch control");
+
+    // OCTAHEDRON SLICER — Sample slice playback
+    ~MODULE_REGISTRY.register(\octahedron_slicer, \elektron, \octahedron_slicer, [
+        (\name: \bufnum, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Source buffer number"),
+        (\name: \sliceIndex, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Slice index"),
+        (\name: \numSlices, \default: 16, \min: 1, \max: 128, \units: "", \desc: "Total number of slices"),
+        (\name: \rate, \default: 1.0, \min: -4, \max: 4, \units: "x", \desc: "Playback rate"),
+        (\name: \startPos, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Start position (normalized, if sliceIndex=0)"),
+    ], ~SC_GRP[\te], "Sample slicer with indexed slice playback");
+
+    // OCTAHEDRON CUE — Dual-destination router
+    ~MODULE_REGISTRY.register(\octahedron_cue, \elektron, \octahedron_cue, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Stereo input bus"),
+        (\name: \cueBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Cue/headphone output bus"),
+        (\name: \mainBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Main output bus"),
+        (\name: \cueLevel, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Cue output level"),
+        (\name: \mainLevel, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Main output level"),
+    ], ~SC_GRP[\te], "DJ-style dual-destination cue/main router");
+};
 )

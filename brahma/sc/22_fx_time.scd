@@ -396,4 +396,133 @@ SynthDef(\aion_convolution, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\aion_stereo_delay, \fx, \aion_stereo_delay, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \timeL, \default: 0.25, \min: 0.001, \max: 4.0, \units: "s", \desc: "Left delay time"),
+        (\name: \timeR, \default: 0.375, \min: 0.001, \max: 4.0, \units: "s", \desc: "Right delay time"),
+        (\name: \feedbackL, \default: 0.3, \min: 0, \max: 0.95, \units: "", \desc: "Left feedback"),
+        (\name: \feedbackR, \default: 0.3, \min: 0, \max: 0.95, \units: "", \desc: "Right feedback"),
+        (\name: \crossFeedback, \default: 0, \min: 0, \max: 0.5, \units: "", \desc: "Cross-channel feedback"),
+        (\name: \pingPong, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Ping-pong mode (0=independent, 1=ping-pong)"),
+        (\name: \filterFreq, \default: 8000, \min: 200, \max: 18000, \units: "Hz", \desc: "Feedback LP filter frequency"),
+    ], ~SC_GRP[\rr], "Stereo delay with ping-pong and cross-feedback");
+
+    ~MODULE_REGISTRY.register(\aion_tape_delay, \fx, \aion_tape_delay, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \time, \default: 0.3, \min: 0.001, \max: 4.0, \units: "s", \desc: "Delay time"),
+        (\name: \feedback, \default: 0.4, \min: 0, \max: 0.95, \units: "", \desc: "Feedback amount"),
+        (\name: \wow, \default: 0.1, \min: 0, \max: 1, \units: "", \desc: "Wow modulation (slow pitch drift)"),
+        (\name: \flutter, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Flutter modulation (fast pitch jitter)"),
+        (\name: \saturation, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Tape saturation"),
+        (\name: \degradation, \default: 0, \min: 0, \max: 0.9, \units: "", \desc: "HF loss per repeat"),
+        (\name: \speed, \default: 1.0, \min: 0.25, \max: 4, \units: "x", \desc: "Variable tape speed"),
+    ], ~SC_GRP[\rr], "Tape delay with wow, flutter, and saturation");
+
+    ~MODULE_REGISTRY.register(\aion_multitap, \fx, \aion_multitap, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \t1, \default: 0.1, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 1 time"),
+        (\name: \t2, \default: 0.2, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 2 time"),
+        (\name: \t3, \default: 0.3, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 3 time"),
+        (\name: \t4, \default: 0.4, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 4 time"),
+        (\name: \t5, \default: 0.5, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 5 time"),
+        (\name: \t6, \default: 0.6, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 6 time"),
+        (\name: \t7, \default: 0.7, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 7 time"),
+        (\name: \t8, \default: 0.8, \min: 0.001, \max: 4, \units: "s", \desc: "Tap 8 time"),
+        (\name: \l1, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Tap 1 level"),
+        (\name: \l2, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Tap 2 level"),
+        (\name: \l3, \default: 0.6, \min: 0, \max: 1, \units: "", \desc: "Tap 3 level"),
+        (\name: \l4, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Tap 4 level"),
+        (\name: \l5, \default: 0.4, \min: 0, \max: 1, \units: "", \desc: "Tap 5 level"),
+        (\name: \l6, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Tap 6 level"),
+        (\name: \l7, \default: 0.2, \min: 0, \max: 1, \units: "", \desc: "Tap 7 level"),
+        (\name: \l8, \default: 0.15, \min: 0, \max: 1, \units: "", \desc: "Tap 8 level"),
+        (\name: \p1, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Tap 1 pan"),
+        (\name: \p2, \default: -0.5, \min: -1, \max: 1, \units: "", \desc: "Tap 2 pan"),
+        (\name: \p3, \default: 0.5, \min: -1, \max: 1, \units: "", \desc: "Tap 3 pan"),
+        (\name: \p4, \default: -0.3, \min: -1, \max: 1, \units: "", \desc: "Tap 4 pan"),
+        (\name: \p5, \default: 0.3, \min: -1, \max: 1, \units: "", \desc: "Tap 5 pan"),
+        (\name: \p6, \default: -0.7, \min: -1, \max: 1, \units: "", \desc: "Tap 6 pan"),
+        (\name: \p7, \default: 0.7, \min: -1, \max: 1, \units: "", \desc: "Tap 7 pan"),
+        (\name: \p8, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Tap 8 pan"),
+        (\name: \feedback, \default: 0.2, \min: 0, \max: 0.5, \units: "", \desc: "Tap feedback"),
+        (\name: \filterFreq, \default: 6000, \min: 200, \max: 18000, \units: "Hz", \desc: "Feedback LP filter"),
+    ], ~SC_GRP[\rr], "8-tap stereo delay with per-tap time, level, and pan");
+
+    ~MODULE_REGISTRY.register(\aion_granular_delay, \fx, \aion_granular_delay, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \grainSize, \default: 0.1, \min: 0.01, \max: 1, \units: "s", \desc: "Grain duration"),
+        (\name: \density, \default: 10, \min: 1, \max: 100, \units: "Hz", \desc: "Grain trigger density"),
+        (\name: \pitch, \default: 1.0, \min: 0.25, \max: 4, \units: "x", \desc: "Grain playback pitch"),
+        (\name: \posRand, \default: 0.1, \min: 0, \max: 0.5, \units: "", \desc: "Position randomization"),
+        (\name: \feedback, \default: 0.3, \min: 0, \max: 0.9, \units: "", \desc: "Feedback amount"),
+        (\name: \time, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Playback position in buffer"),
+    ], ~SC_GRP[\rr], "Granular delay with pitch and density control");
+
+    ~MODULE_REGISTRY.register(\aion_room, \fx, \aion_room, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \decay, \default: 0.5, \min: 0.1, \max: 10, \units: "s", \desc: "Reverb decay time"),
+        (\name: \damping, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "HF damping"),
+        (\name: \size, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Room size"),
+    ], ~SC_GRP[\rr], "Room reverb (FreeVerb)");
+
+    ~MODULE_REGISTRY.register(\aion_hall, \fx, \aion_hall, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \decay, \default: 2.0, \min: 0.1, \max: 20, \units: "s", \desc: "Hall decay time"),
+        (\name: \damping, \default: 0.3, \min: 0, \max: 0.9, \units: "", \desc: "HF damping"),
+        (\name: \size, \default: 0.8, \min: 0.1, \max: 2, \units: "", \desc: "Hall size"),
+        (\name: \preDelay, \default: 0.03, \min: 0, \max: 0.5, \units: "s", \desc: "Pre-delay time"),
+    ], ~SC_GRP[\rr], "Hall reverb with allpass diffusion");
+
+    ~MODULE_REGISTRY.register(\aion_plate, \fx, \aion_plate, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \decay, \default: 1.5, \min: 0.1, \max: 10, \units: "s", \desc: "Plate decay time"),
+        (\name: \damping, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "HF damping"),
+        (\name: \brightness, \default: 0.7, \min: 0, \max: 1, \units: "", \desc: "Brightness (HF content)"),
+    ], ~SC_GRP[\rr], "Plate reverb (dense, bright)");
+
+    ~MODULE_REGISTRY.register(\aion_spring, \fx, \aion_spring, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \decay, \default: 1.0, \min: 0.1, \max: 5, \units: "s", \desc: "Spring decay time"),
+        (\name: \tension, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Spring tension"),
+        (\name: \drip, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Metallic drip amount"),
+    ], ~SC_GRP[\rr], "Spring reverb with tension and drip");
+
+    ~MODULE_REGISTRY.register(\aion_shimmer, \fx, \aion_shimmer, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \decay, \default: 3.0, \min: 0.1, \max: 20, \units: "s", \desc: "Shimmer decay time"),
+        (\name: \damping, \default: 0.2, \min: 0, \max: 0.9, \units: "", \desc: "HF damping"),
+        (\name: \shimmerAmt, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Shimmer (octave-up) amount"),
+    ], ~SC_GRP[\rr], "Shimmer reverb with octave-up feedback");
+
+    ~MODULE_REGISTRY.register(\aion_freeze, \fx, \aion_freeze, [
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \freeze, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Freeze toggle (infinite sustain)"),
+        (\name: \decay, \default: 5.0, \min: 0, \max: 0.98, \units: "", \desc: "Decay feedback (when not frozen)"),
+    ], ~SC_GRP[\rr], "Freeze reverb with infinite sustain mode");
+
+    ~MODULE_REGISTRY.register(\aion_convolution, \fx, \aion_convolution, [
+        (\name: \mix, \default: 0.3, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+        (\name: \bypass, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Bypass toggle"),
+        (\name: \irBufnum, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "IR buffer number"),
+        (\name: \irSize, \default: 2048, \min: 256, \max: 8192, \units: "", \desc: "FFT partition size"),
+        (\name: \preDelay, \default: 0, \min: 0, \max: 200, \units: "ms", \desc: "Pre-delay time"),
+        (\name: \damping, \default: 0.3, \min: 0, \max: 0.9, \units: "", \desc: "HF damping on wet signal"),
+        (\name: \level, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Wet signal level"),
+    ], ~SC_GRP[\rr], "Partitioned convolution reverb");
+
+    "  -> 12 Time-Based FX registered with Module Registry".postln;
+};
 )

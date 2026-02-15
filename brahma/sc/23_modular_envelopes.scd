@@ -309,4 +309,81 @@ SynthDef(\nigredo_looping, {
         );
     });
 });
+
+// ==========================================
+// MODULE REGISTRY REGISTRATION — Modular Envelopes
+// ==========================================
+
+// --- MODULE REGISTRY REGISTRATION: NIGREDO_ADSR ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\nigredo_adsr, \modular, \nigredo_adsr, [
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 30, \units: "s", \desc: "Attack time"),
+        (\name: \dec, \default: 0.3, \min: 0.001, \max: 30, \units: "s", \desc: "Decay time"),
+        (\name: \sus, \default: 0.7, \min: 0, \max: 1, \units: "", \desc: "Sustain level"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 30, \units: "s", \desc: "Release time"),
+        (\name: \curve, \default: -4, \min: -8, \max: 8, \units: "", \desc: "Curve shape"),
+    ], ~SC_GRP[\te], "Standard ADSR envelope with configurable curve shape");
+};
+
+// --- MODULE REGISTRY REGISTRATION: NIGREDO_AD ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\nigredo_ad, \modular, \nigredo_ad, [
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 30, \units: "s", \desc: "Attack time"),
+        (\name: \dec, \default: 0.3, \min: 0.001, \max: 30, \units: "s", \desc: "Decay time"),
+        (\name: \curve, \default: -4, \min: -8, \max: 8, \units: "", \desc: "Curve shape"),
+    ], ~SC_GRP[\te], "Trigger-mode attack-decay envelope for percussive transients");
+};
+
+// --- MODULE REGISTRY REGISTRATION: NIGREDO_AR ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\nigredo_ar, \modular, \nigredo_ar, [
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 30, \units: "s", \desc: "Attack time"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 30, \units: "s", \desc: "Release time"),
+        (\name: \curve, \default: -4, \min: -8, \max: 8, \units: "", \desc: "Curve shape"),
+    ], ~SC_GRP[\te], "Gate-mode attack-release envelope for organ-style articulation");
+};
+
+// --- MODULE REGISTRY REGISTRATION: NIGREDO_MULTI ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\nigredo_multi, \modular, \nigredo_multi, [
+        (\name: \level0, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Segment 0 level (start)"),
+        (\name: \level1, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Segment 1 level"),
+        (\name: \level2, \default: 0.7, \min: 0, \max: 1, \units: "", \desc: "Segment 2 level"),
+        (\name: \level3, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Segment 3 level"),
+        (\name: \level4, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Segment 4 level"),
+        (\name: \level5, \default: 0.2, \min: 0, \max: 1, \units: "", \desc: "Segment 5 level"),
+        (\name: \level6, \default: 0.1, \min: 0, \max: 1, \units: "", \desc: "Segment 6 level"),
+        (\name: \level7, \default: 0.05, \min: 0, \max: 1, \units: "", \desc: "Segment 7 level"),
+        (\name: \level8, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Segment 8 level (end)"),
+        (\name: \time0, \default: 0.01, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 0-1 time"),
+        (\name: \time1, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 1-2 time"),
+        (\name: \time2, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 2-3 time"),
+        (\name: \time3, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 3-4 time"),
+        (\name: \time4, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 4-5 time"),
+        (\name: \time5, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 5-6 time"),
+        (\name: \time6, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 6-7 time"),
+        (\name: \time7, \default: 0.1, \min: 0.001, \max: 30, \units: "s", \desc: "Segment 7-8 time"),
+        (\name: \loopStart, \default: 0, \min: 0, \max: 7, \units: "", \desc: "Loop start segment"),
+        (\name: \loopEnd, \default: 0, \min: 0, \max: 7, \units: "", \desc: "Loop end segment"),
+    ], ~SC_GRP[\te], "Multi-stage envelope with up to 8 segments and optional loop region");
+};
+
+// --- MODULE REGISTRY REGISTRATION: NIGREDO_FUNCTION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\nigredo_function, \modular, \nigredo_function, [
+        (\name: \rise, \default: 0.1, \min: 0.001, \max: 25, \units: "s", \desc: "Rise time"),
+        (\name: \fall, \default: 0.3, \min: 0.001, \max: 25, \units: "s", \desc: "Fall time"),
+        (\name: \shape, \default: 0, \min: -8, \max: 8, \units: "", \desc: "Curve shape"),
+        (\name: \cycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Cycle mode (0=one-shot, 1=loop)"),
+    ], ~SC_GRP[\te], "MATHS-style function generator with rise/fall/cycle and EOR/EOC triggers");
+};
+
+// --- MODULE REGISTRY REGISTRATION: NIGREDO_LOOPING ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\nigredo_looping, \modular, \nigredo_looping, [
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 30, \units: "s", \desc: "Attack time"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 30, \units: "s", \desc: "Release time"),
+        (\name: \loop, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Loop enable (0=off, 1=on)"),
+    ], ~SC_GRP[\te], "Looping AR envelope with auto-retrigger for envelope-shaped LFO");
+};
 )

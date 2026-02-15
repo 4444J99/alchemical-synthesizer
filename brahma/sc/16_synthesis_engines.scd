@@ -804,6 +804,186 @@ SynthDef(\nebula, {
     ~CHRONOS.registerTarget(synthDef.asString, synthDef, 0, ~SC_GRP[\te]);
 });
 
+// ==========================================
+// MODULE REGISTRY REGISTRATION — 10 Synthesis Engines
+// ==========================================
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\prima_materia, \engine, \prima_materia, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \osc1Type, \default: 1, \min: 0, \max: 5, \units: "", \desc: "Osc1 wave"),
+        (\name: \osc1Detune, \default: 0, \min: -100, \max: 100, \units: "Hz", \desc: "Osc1 detune"),
+        (\name: \osc1Level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Osc1 level"),
+        (\name: \osc2Type, \default: 1, \min: 0, \max: 3, \units: "", \desc: "Osc2 wave"),
+        (\name: \osc2Detune, \default: 7, \min: -100, \max: 100, \units: "Hz", \desc: "Osc2 detune"),
+        (\name: \osc2Level, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Osc2 level"),
+        (\name: \osc3Type, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Osc3 wave"),
+        (\name: \osc3Detune, \default: 0, \min: -100, \max: 100, \units: "Hz", \desc: "Osc3 detune"),
+        (\name: \osc3Level, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Osc3 level"),
+        (\name: \subLevel, \default: 0.2, \min: 0, \max: 1, \units: "", \desc: "Sub level"),
+        (\name: \pwm, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Pulse width"),
+        (\name: \hardSync, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Hard sync"),
+        (\name: \ringMod, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Ring mod"),
+        (\name: \filterType, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Filter type"),
+        (\name: \cutoff, \default: 2000, \min: 20, \max: 20000, \units: "Hz", \desc: "Filter cutoff"),
+        (\name: \resonance, \default: 2, \min: 0, \max: 4, \units: "", \desc: "Filter resonance"),
+        (\name: \filterEnvAmt, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Filter env amount"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \dec, \default: 0.3, \min: 0.001, \max: 5, \units: "s", \desc: "Decay"),
+        (\name: \sus, \default: 0.7, \min: 0, \max: 1, \units: "", \desc: "Sustain"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release"),
+        (\name: \portamento, \default: 0, \min: 0, \max: 2, \units: "s", \desc: "Portamento")
+    ], ~SC_GRP[\te], "Subtractive: 3 osc, dual filter, hard sync, ring mod, unison");
+
+    ~MODULE_REGISTRY.register(\azoth, \engine, \azoth, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \algorithm, \default: 0, \min: 0, \max: 7, \units: "", \desc: "FM algorithm"),
+        (\name: \op1Ratio, \default: 1, \min: 0.1, \max: 32, \units: "", \desc: "Op1 ratio"),
+        (\name: \op1Level, \default: 1.0, \min: 0, \max: 1, \units: "", \desc: "Op1 level"),
+        (\name: \op1Feedback, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Op1 feedback"),
+        (\name: \op1Atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Op1 attack"),
+        (\name: \op1Dec, \default: 0.5, \min: 0.001, \max: 5, \units: "s", \desc: "Op1 decay"),
+        (\name: \op1Sus, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Op1 sustain"),
+        (\name: \op1Rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Op1 release"),
+        (\name: \op2Ratio, \default: 2, \min: 0.1, \max: 32, \units: "", \desc: "Op2 ratio"),
+        (\name: \op2Level, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Op2 level"),
+        (\name: \op3Ratio, \default: 3, \min: 0.1, \max: 32, \units: "", \desc: "Op3 ratio"),
+        (\name: \op3Level, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Op3 level"),
+        (\name: \op4Ratio, \default: 4, \min: 0.1, \max: 32, \units: "", \desc: "Op4 ratio"),
+        (\name: \op4Level, \default: 0.2, \min: 0, \max: 1, \units: "", \desc: "Op4 level")
+    ], ~SC_GRP[\te], "FM Synthesis: DX7-class 4-operator");
+
+    ~MODULE_REGISTRY.register(\quintessence, \engine, \quintessence, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \stretch, \default: 1.0, \min: 0.5, \max: 3, \units: "", \desc: "Harmonic stretch"),
+        (\name: \spread, \default: 0.0, \min: 0, \max: 100, \units: "Hz", \desc: "Freq spread"),
+        (\name: \shift, \default: 0.0, \min: -500, \max: 500, \units: "Hz", \desc: "Harmonic shift"),
+        (\name: \morphTarget, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Morph target"),
+        (\name: \morphAmount, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Morph amount"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \dec, \default: 0.3, \min: 0.001, \max: 5, \units: "s", \desc: "Decay"),
+        (\name: \sus, \default: 0.7, \min: 0, \max: 1, \units: "", \desc: "Sustain"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Additive: 32 harmonics with spectral morphing");
+
+    ~MODULE_REGISTRY.register(\ouroboros, \engine, \ouroboros, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \position, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Wavetable position"),
+        (\name: \morph, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Table morph"),
+        (\name: \posModFreq, \default: 0, \min: 0, \max: 20, \units: "Hz", \desc: "Position LFO rate"),
+        (\name: \posModAmt, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Position LFO amount"),
+        (\name: \fmIndex, \default: 0, \min: 0, \max: 10, \units: "", \desc: "FM index"),
+        (\name: \cutoff, \default: 8000, \min: 20, \max: 20000, \units: "Hz", \desc: "Filter cutoff"),
+        (\name: \resonance, \default: 1, \min: 0, \max: 4, \units: "", \desc: "Filter resonance"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Wavetable: dual-table morphing with position modulation");
+
+    ~MODULE_REGISTRY.register(\chrysopoeia, \engine, \chrysopoeia, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \pdType, \default: 0, \min: 0, \max: 7, \units: "", \desc: "PD waveform type"),
+        (\name: \dcw, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "DCW amount"),
+        (\name: \osc2Ratio, \default: 1.0, \min: 0.1, \max: 16, \units: "", \desc: "Osc2 ratio"),
+        (\name: \osc2Level, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Osc2 level"),
+        (\name: \osc2Ring, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Ring mod amount"),
+        (\name: \dcwEnvAmt, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "DCW env amount"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \dec, \default: 0.3, \min: 0.001, \max: 5, \units: "s", \desc: "Decay"),
+        (\name: \sus, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Sustain"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Phase Distortion: CZ-style with 8 PD waveforms");
+
+    ~MODULE_REGISTRY.register(\homunculus, \engine, \homunculus, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \modelType, \default: 0, \min: 0, \max: 4, \units: "", \desc: "Model type"),
+        (\name: \exciterType, \default: 0, \min: 0, \max: 2, \units: "", \desc: "Exciter type"),
+        (\name: \exciterBright, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Exciter brightness"),
+        (\name: \feedback, \default: 0.99, \min: 0.1, \max: 10, \units: "", \desc: "Resonance decay"),
+        (\name: \damping, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "HF damping"),
+        (\name: \bowPressure, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Bow pressure"),
+        (\name: \bowPosition, \default: 0.12, \min: 0, \max: 1, \units: "", \desc: "Bow position"),
+        (\name: \tension, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Membrane tension"),
+        (\name: \atk, \default: 0.005, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \rel, \default: 0.5, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Physical Modeling: pluck, bow, blow, modal, membrane");
+
+    ~MODULE_REGISTRY.register(\buchlaeus, \engine, \buchlaeus, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \primaryWave, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Primary wave"),
+        (\name: \modWave, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Mod wave"),
+        (\name: \modRatio, \default: 2.0, \min: 0.1, \max: 16, \units: "", \desc: "Mod ratio"),
+        (\name: \fmIndex, \default: 0.0, \min: 0, \max: 10, \units: "", \desc: "FM index"),
+        (\name: \timbre, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Timbre (AM)"),
+        (\name: \foldAmount, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Fold amount"),
+        (\name: \foldSymmetry, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Fold symmetry"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "West Coast: complex oscillator, through-zero FM, wavefolder");
+
+    ~MODULE_REGISTRY.register(\logos, \engine, \logos, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \vowel, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Vowel morph"),
+        (\name: \f1Freq, \default: 800, \min: 80, \max: 10000, \units: "Hz", \desc: "Formant 1 freq"),
+        (\name: \f2Freq, \default: 1200, \min: 80, \max: 10000, \units: "Hz", \desc: "Formant 2 freq"),
+        (\name: \f3Freq, \default: 2500, \min: 80, \max: 10000, \units: "Hz", \desc: "Formant 3 freq"),
+        (\name: \exciterType, \default: 0, \min: 0, \max: 2, \units: "", \desc: "Exciter type"),
+        (\name: \choirVoices, \default: 1, \min: 1, \max: 6, \units: "", \desc: "Choir voices"),
+        (\name: \choirDetune, \default: 0.02, \min: 0, \max: 0.1, \units: "", \desc: "Choir detune"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Formant: 5 parallel resonators, vowel morph, choir mode");
+
+    ~MODULE_REGISTRY.register(\tetramorph, \engine, \tetramorph, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \vectorX, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Vector X"),
+        (\name: \vectorY, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Vector Y"),
+        (\name: \srcN, \default: 0, \min: 0, \max: 5, \units: "", \desc: "North source"),
+        (\name: \srcS, \default: 1, \min: 0, \max: 5, \units: "", \desc: "South source"),
+        (\name: \srcE, \default: 2, \min: 0, \max: 5, \units: "", \desc: "East source"),
+        (\name: \srcW, \default: 3, \min: 0, \max: 5, \units: "", \desc: "West source"),
+        (\name: \cutoff, \default: 5000, \min: 20, \max: 20000, \units: "Hz", \desc: "Filter cutoff"),
+        (\name: \resonance, \default: 1, \min: 0.5, \max: 20, \units: "", \desc: "Filter resonance"),
+        (\name: \atk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \rel, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Vector: 4-corner XY crossfade with 6 source types");
+
+    ~MODULE_REGISTRY.register(\nebula, \engine, \nebula, [
+        (\name: \freq, \default: 440, \min: 20, \max: 20000, \units: "Hz", \desc: "Frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \grainDensity, \default: 20, \min: 1, \max: 200, \units: "Hz", \desc: "Grain density"),
+        (\name: \grainSize, \default: 0.05, \min: 0.001, \max: 0.5, \units: "s", \desc: "Grain size"),
+        (\name: \position, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Buffer position"),
+        (\name: \positionSpread, \default: 0.02, \min: 0, \max: 0.5, \units: "", \desc: "Position spray"),
+        (\name: \pitchSpread, \default: 0.0, \min: 0, \max: 24, \units: "st", \desc: "Pitch spread"),
+        (\name: \stereoSpread, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Stereo spread"),
+        (\name: \freeze, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Freeze"),
+        (\name: \jitter, \default: 0.0, \min: 0, \max: 1, \units: "", \desc: "Timing jitter"),
+        (\name: \cutoff, \default: 12000, \min: 20, \max: 20000, \units: "Hz", \desc: "Filter cutoff"),
+        (\name: \atk, \default: 0.1, \min: 0.001, \max: 5, \units: "s", \desc: "Attack"),
+        (\name: \rel, \default: 0.5, \min: 0.001, \max: 10, \units: "s", \desc: "Release")
+    ], ~SC_GRP[\te], "Granular: density/size/position/freeze cloud synthesis");
+
+    "  -> 10 Synthesis Engines registered with Module Registry".postln;
+};
+
 "--- BRAHMA: 10 Synthesis Engines Online ---".postln;
 "  PRIMA MATERIA (Subtractive) | AZOTH (FM) | QUINTESSENCE (Additive)".postln;
 "  OUROBOROS (Wavetable) | CHRYSOPOEIA (PD) | HOMUNCULUS (Physical)".postln;

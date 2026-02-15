@@ -522,4 +522,68 @@ OSCdef(\chimera_layer_trig, { |msg|
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    // AUTOMATON TRX — 909-style analog drum machine
+    ~MODULE_REGISTRY.register(\automaton_trx, \elektron, \automaton_trx, [
+        (\name: \type, \default: 0, \min: 0, \max: 5, \units: "", \desc: "Drum type (0=kick,1=snare,2=hat,3=clap,4=tom,5=rim)"),
+        (\name: \freq, \default: 60, \min: 20, \max: 20000, \units: "Hz", \desc: "Pitch"),
+        (\name: \decay, \default: 0.5, \min: 0.01, \max: 2, \units: "s", \desc: "Decay time"),
+        (\name: \tone, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Tone"),
+        (\name: \snap, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Snap/transient"),
+        (\name: \vel, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+    ], ~SC_GRP[\te], "909-style analog drum machine");
+
+    // AUTOMATON EFM — FM metal percussion
+    ~MODULE_REGISTRY.register(\automaton_efm, \elektron, \automaton_efm, [
+        (\name: \freq, \default: 800, \min: 20, \max: 20000, \units: "Hz", \desc: "Carrier frequency"),
+        (\name: \ratio, \default: 3.5, \min: 0.25, \max: 16, \units: "", \desc: "Modulator ratio"),
+        (\name: \index, \default: 5, \min: 0, \max: 20, \units: "", \desc: "FM index"),
+        (\name: \decay, \default: 0.3, \min: 0.01, \max: 4, \units: "s", \desc: "Decay time"),
+        (\name: \feedback, \default: 0, \min: 0, \max: 3, \units: "", \desc: "FM feedback"),
+        (\name: \vel, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+    ], ~SC_GRP[\te], "FM metal percussion (bells, gongs, cymbals)");
+
+    // AUTOMATON E12 — 12-bit sample emulation
+    ~MODULE_REGISTRY.register(\automaton_e12, \elektron, \automaton_e12, [
+        (\name: \bufnum, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Buffer number"),
+        (\name: \rate, \default: 1.0, \min: -4, \max: 4, \units: "x", \desc: "Playback rate"),
+        (\name: \start, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Start position (normalized)"),
+        (\name: \decay, \default: 1.0, \min: 0.01, \max: 8, \units: "s", \desc: "Decay time"),
+        (\name: \lofi, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Lo-fi degradation (bit crush + SR reduce)"),
+        (\name: \vel, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+    ], ~SC_GRP[\te], "12-bit sample emulation with bit-crush and SR reduction");
+
+    // AUTOMATON GND — Noise machine percussion
+    ~MODULE_REGISTRY.register(\automaton_gnd, \elektron, \automaton_gnd, [
+        (\name: \freq, \default: 1000, \min: 20, \max: 20000, \units: "Hz", \desc: "Center frequency"),
+        (\name: \bw, \default: 0.5, \min: 0.01, \max: 2, \units: "", \desc: "Bandwidth (reciprocal Q)"),
+        (\name: \decay, \default: 0.2, \min: 0.005, \max: 4, \units: "s", \desc: "Decay time"),
+        (\name: \type, \default: 0, \min: 0, \max: 2, \units: "", \desc: "Noise type (0=white,1=pink,2=crackle)"),
+        (\name: \vel, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+    ], ~SC_GRP[\te], "Filtered noise percussion with selectable noise source");
+
+    // AZOTH_MINOR ARP — Arpeggiator
+    ~MODULE_REGISTRY.register(\azoth_minor_arp, \elektron, \azoth_minor_arp, [
+        (\name: \trigBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "External trigger bus (0=self-clock)"),
+        (\name: \rate, \default: 8, \min: 0.5, \max: 64, \units: "Hz", \desc: "Arp rate (pulses per beat)"),
+        (\name: \mode, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Direction (0=up,1=down,2=upDown,3=random)"),
+        (\name: \octaves, \default: 2, \min: 1, \max: 4, \units: "oct", \desc: "Octave range"),
+    ], ~SC_GRP[\te], "Digitone-style arpeggiator with direction modes");
+
+    // CHIMERA SAMPLE LAYER — Analog + sample hybrid
+    ~MODULE_REGISTRY.register(\chimera_sample_layer, \elektron, \chimera_sample_layer, [
+        (\name: \synthBus, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Analog synthesis input bus"),
+        (\name: \bufnum, \default: 0, \min: 0, \max: 4096, \units: "", \desc: "Sample buffer number"),
+        (\name: \synthLevel, \default: 0.7, \min: 0, \max: 2, \units: "", \desc: "Analog synth level"),
+        (\name: \sampleLevel, \default: 0.5, \min: 0, \max: 2, \units: "", \desc: "Sample level"),
+        (\name: \sampleRate, \default: 1.0, \min: 0.25, \max: 4, \units: "x", \desc: "Sample playback rate"),
+        (\name: \sampleStart, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Sample start position (normalized)"),
+        (\name: \sampleDecay, \default: 1.0, \min: 0.01, \max: 8, \units: "s", \desc: "Sample decay time"),
+        (\name: \filterFreq, \default: 8000, \min: 20, \max: 20000, \units: "Hz", \desc: "Filter cutoff frequency"),
+        (\name: \filterRes, \default: 1, \min: 0.5, \max: 20, \units: "", \desc: "Filter resonance"),
+        (\name: \vel, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+    ], ~SC_GRP[\te], "RYTM-style analog + sample hybrid drum layer");
+};
 )

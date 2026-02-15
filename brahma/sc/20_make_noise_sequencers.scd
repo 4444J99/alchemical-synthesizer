@@ -256,4 +256,34 @@ OSCdef(\tempi_tap, { ~TEMPORAL_ORACLE.tap }, "/tempi/tap");
 
 "--- BRAHMA: Make Noise Sequencer Clones Online ---".postln;
 "  CARTESIAN_MAZE (Rene) | CAPACITIVE_GRID (Pressure Points) | TEMPORAL_ORACLE (TEMPI)".postln;
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\cartesian_maze, \makenoise, \cartesian_maze, [
+        (\name: \posX, \default: 0, \min: 0, \max: 3, \units: "", \desc: "X position on 4x4 grid"),
+        (\name: \posY, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Y position on 4x4 grid"),
+        (\name: \modeX, \default: 0, \min: 0, \max: 4, \units: "", \desc: "X mode (0=fwd 1=rev 2=pend 3=rand 4=snake)"),
+        (\name: \modeY, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Y mode (0=fwd 1=rev 2=pend 3=rand)"),
+        (\name: \cvValue, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "CV value at current grid cell"),
+        (\name: \gateState, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate state at current grid cell")
+    ], ~SC_GRP[\te], "Cartesian sequencer (Rene) — 4x4 XY grid with snake/pendulum modes");
+
+    ~MODULE_REGISTRY.register(\capacitive_grid, \makenoise, \capacitive_grid, [
+        (\name: \padIdx, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Active pad index"),
+        (\name: \pressure, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Pad pressure amount"),
+        (\name: \posX, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Touch X position"),
+        (\name: \posY, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Touch Y position"),
+        (\name: \gate, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Pad gate output")
+    ], ~SC_GRP[\te], "Touch controller (Pressure Points) — 4 capacitive pads with pressure/position CV");
+
+    ~MODULE_REGISTRY.register(\temporal_oracle, \makenoise, \temporal_oracle, [
+        (\name: \bpm, \default: 120, \min: 20, \max: 300, \units: "BPM", \desc: "Master tempo"),
+        (\name: \ratio0, \default: 1, \min: 0.125, \max: 32, \units: "", \desc: "Clock 0 ratio"),
+        (\name: \ratio1, \default: 2, \min: 0.125, \max: 32, \units: "", \desc: "Clock 1 ratio"),
+        (\name: \ratio2, \default: 3, \min: 0.125, \max: 32, \units: "", \desc: "Clock 2 ratio"),
+        (\name: \ratio3, \default: 4, \min: 0.125, \max: 32, \units: "", \desc: "Clock 3 ratio"),
+        (\name: \ratio4, \default: 6, \min: 0.125, \max: 32, \units: "", \desc: "Clock 4 ratio"),
+        (\name: \ratio5, \default: 8, \min: 0.125, \max: 32, \units: "", \desc: "Clock 5 ratio")
+    ], ~SC_GRP[\te], "Clock module (TEMPI) — 6 independent outputs with tap tempo");
+};
 )

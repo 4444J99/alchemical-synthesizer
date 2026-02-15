@@ -324,4 +324,82 @@ SynthDef(\bruxa_sigil, {
         );
     });
 });
+
+// --- MODULE REGISTRY REGISTRATION ---
+if(~MODULE_REGISTRY.notNil) {
+    ~MODULE_REGISTRY.register(\elixir_blend, \makenoise, \elixir_blend, [
+        (\name: \crossfade, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "A/B crossfade position"),
+        (\name: \cvAmt, \default: 0, \min: 0, \max: 1, \units: "", \desc: "CV modulation amount"),
+    ], ~SC_GRP[\te], "modDemix: voltage-controlled crossfader/VCA");
+
+    ~MODULE_REGISTRY.register(\elixir_compass, \makenoise, \elixir_compass, [
+        (\name: \crossfade, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "A/B crossfade position"),
+        (\name: \pan, \default: 0, \min: -1, \max: 1, \units: "", \desc: "Stereo pan position"),
+        (\name: \cvAmt, \default: 0, \min: 0, \max: 1, \units: "", \desc: "CV modulation amount"),
+    ], ~SC_GRP[\te], "X-PAN: stereo crossfader/panner");
+
+    ~MODULE_REGISTRY.register(\elixir_crown, \makenoise, \elixir_crown, [
+        (\name: \crossfade, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "A/B crossfade position"),
+        (\name: \mainLevel, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Main output level"),
+        (\name: \hpLevel, \default: 0.8, \min: 0, \max: 2, \units: "", \desc: "Headphone output level"),
+    ], ~SC_GRP[\te], "XOH: output module with headphone amp");
+
+    ~MODULE_REGISTRY.register(\elixir_flux, \makenoise, \elixir_flux, [
+        (\name: \level1, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Input 1 level"),
+        (\name: \level2, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Input 2 level"),
+        (\name: \duckAmt, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Sidechain duck amount"),
+        (\name: \duckAtk, \default: 0.005, \min: 0.001, \max: 0.1, \units: "s", \desc: "Duck attack time"),
+        (\name: \duckRel, \default: 0.1, \min: 0.01, \max: 1, \units: "s", \desc: "Duck release time"),
+    ], ~SC_GRP[\te], "Dynamix: dynamics-controlled mixer with sidechain");
+
+    ~MODULE_REGISTRY.register(\elixir_gate, \makenoise, \elixir_gate, [
+        (\name: \mainLevel, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Main output level"),
+        (\name: \sendLevel, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Effects send level"),
+        (\name: \returnLevel, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Effects return level"),
+    ], ~SC_GRP[\te], "Rosie: output module with send/return loop");
+
+    ~MODULE_REGISTRY.register(\chaos_oracle, \makenoise, \chaos_oracle, [
+        (\name: \clockRate, \default: 4, \min: 0.1, \max: 100, \units: "Hz", \desc: "Master clock rate"),
+        (\name: \woggleRate, \default: 2, \min: 0.01, \max: 50, \units: "Hz", \desc: "Woggle slew rate"),
+        (\name: \burstDensity, \default: 0.3, \min: 0, \max: 100, \units: "Hz", \desc: "Random burst trigger density"),
+    ], ~SC_GRP[\te], "Wogglebug: chaotic random voltage generator");
+
+    ~MODULE_REGISTRY.register(\strega_vessel, \makenoise, \strega_vessel, [
+        (\name: \freq, \default: 200, \min: 20, \max: 20000, \units: "Hz", \desc: "Oscillator frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \oscLevel, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Internal oscillator level"),
+        (\name: \oscType, \default: 0, \min: 0, \max: 2, \units: "", \desc: "Oscillator type (0=sin, 1=tri, 2=saw)"),
+        (\name: \delayTime, \default: 0.3, \min: 0.01, \max: 2.0, \units: "s", \desc: "Delay time"),
+        (\name: \feedback, \default: 0.6, \min: 0, \max: 0.95, \units: "", \desc: "Delay feedback amount"),
+        (\name: \filterFreq, \default: 1000, \min: 50, \max: 15000, \units: "Hz", \desc: "Feedback filter cutoff"),
+        (\name: \springMix, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Spring reverb mix"),
+        (\name: \springDecay, \default: 2.0, \min: 0.1, \max: 5, \units: "s", \desc: "Spring reverb decay time"),
+        (\name: \touchCV, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Touch CV input (filter modulation)"),
+    ], ~SC_GRP[\te], "Strega: delay/filter instrument with spring tank");
+
+    ~MODULE_REGISTRY.register(\coast_zero, \makenoise, \coast_zero, [
+        (\name: \freq, \default: 220, \min: 20, \max: 20000, \units: "Hz", \desc: "Oscillator frequency"),
+        (\name: \gate, \default: 1, \min: 0, \max: 1, \units: "", \desc: "Gate"),
+        (\name: \velocity, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Velocity"),
+        (\name: \overtone, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Overtone harmonic enrichment"),
+        (\name: \multiply, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Ring mod multiply amount"),
+        (\name: \slopeRise, \default: 0.01, \min: 0.001, \max: 10, \units: "s", \desc: "Slope generator rise time"),
+        (\name: \slopeFall, \default: 0.3, \min: 0.001, \max: 10, \units: "s", \desc: "Slope generator fall time"),
+        (\name: \slopeCycle, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Slope cycle mode"),
+        (\name: \dynAmount, \default: 0.8, \min: 0, \max: 1, \units: "", \desc: "Dynamics/LPG amount"),
+        (\name: \contourAtk, \default: 0.01, \min: 0.001, \max: 5, \units: "s", \desc: "Contour attack time"),
+        (\name: \contourDec, \default: 0.5, \min: 0.001, \max: 5, \units: "s", \desc: "Contour decay time"),
+        (\name: \balance, \default: 0.5, \min: 0, \max: 1, \units: "", \desc: "Fundamental/overtone balance"),
+    ], ~SC_GRP[\te], "0-Coast: semi-modular monosynth with vactrol LPG");
+
+    ~MODULE_REGISTRY.register(\bruxa_sigil, \makenoise, \bruxa_sigil, [
+        (\name: \delayTimeL, \default: 0.3, \min: 0.01, \max: 2.0, \units: "s", \desc: "Left channel delay time"),
+        (\name: \delayTimeR, \default: 0.4, \min: 0.01, \max: 2.0, \units: "s", \desc: "Right channel delay time"),
+        (\name: \feedback, \default: 0.5, \min: 0, \max: 0.95, \units: "", \desc: "Cross-feedback amount"),
+        (\name: \filterFreq, \default: 3000, \min: 100, \max: 15000, \units: "Hz", \desc: "Feedback filter cutoff"),
+        (\name: \touchCV, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Touch CV input (filter modulation)"),
+        (\name: \saturation, \default: 0.3, \min: 0, \max: 1, \units: "", \desc: "Feedback saturation amount"),
+        (\name: \mix, \default: 0.5, \min: 0, \max: 1, \units: "wet", \desc: "Dry/wet mix"),
+    ], ~SC_GRP[\te], "Bruxa: analog stereo delay with touch and saturation");
+};
 )

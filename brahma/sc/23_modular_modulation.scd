@@ -261,4 +261,52 @@ SynthDef(\aqua_env_follower, {
         );
     });
 });
+
+// ==========================================
+// MODULE REGISTRY REGISTRATION — Modular Modulation Sources
+// ==========================================
+if(~MODULE_REGISTRY.notNil) {
+    // 1. AQUA_LFO — Multi-waveform LFO with sync and reset
+    ~MODULE_REGISTRY.register(\aqua_lfo, \modular, \aqua_lfo, [
+        (\name: \rate, \default: 1, \min: 0.001, \max: 100, \units: "Hz", \desc: "LFO rate"),
+        (\name: \shape, \default: 0, \min: 0, \max: 5, \units: "", \desc: "Waveform shape (0=sine, 1=tri, 2=saw, 3=square, 4=S&H, 5=random walk)"),
+        (\name: \syncBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Sync input bus"),
+        (\name: \resetBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Reset input bus"),
+    ], ~SC_GRP[\te], "Multi-waveform LFO with sync and reset (6 shapes)");
+
+    // 2. AQUA_SAMPLE_HOLD — Sample & Hold with slew
+    ~MODULE_REGISTRY.register(\aqua_sample_hold, \modular, \aqua_sample_hold, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Input signal bus"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Trigger input bus"),
+        (\name: \slew, \default: 0, \min: 0, \max: 5, \units: "s", \desc: "Slew (portamento) time between sampled values"),
+    ], ~SC_GRP[\te], "Sample & Hold with adjustable slew");
+
+    // 3. AQUA_TRACK_HOLD — Track & Hold (toggle)
+    ~MODULE_REGISTRY.register(\aqua_track_hold, \modular, \aqua_track_hold, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Input signal bus"),
+        (\name: \trigBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Trigger input bus (toggles track/hold)"),
+    ], ~SC_GRP[\te], "Track & Hold — passes signal until trigger freezes value");
+
+    // 4. AQUA_SLEW — Slew Limiter with independent rise/fall
+    ~MODULE_REGISTRY.register(\aqua_slew, \modular, \aqua_slew, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Input signal bus"),
+        (\name: \rise, \default: 0.1, \min: 0, \max: 10, \units: "s", \desc: "Rise (ascending) slew rate"),
+        (\name: \fall, \default: 0.1, \min: 0, \max: 10, \units: "s", \desc: "Fall (descending) slew rate"),
+    ], ~SC_GRP[\te], "Slew limiter with independent rise and fall rates");
+
+    // 5. AQUA_RANDOM — Multi-mode random generator
+    ~MODULE_REGISTRY.register(\aqua_random, \modular, \aqua_random, [
+        (\name: \type, \default: 0, \min: 0, \max: 3, \units: "", \desc: "Random mode (0=smooth, 1=stepped, 2=Lorenz, 3=Gaussian)"),
+        (\name: \rate, \default: 1, \min: 0.01, \max: 100, \units: "Hz", \desc: "Rate of random change"),
+    ], ~SC_GRP[\te], "Random generator (smooth, stepped, Lorenz, Gaussian)");
+
+    // 6. AQUA_ENV_FOLLOWER — Audio-to-CV envelope follower
+    ~MODULE_REGISTRY.register(\aqua_env_follower, \modular, \aqua_env_follower, [
+        (\name: \inBus, \default: 0, \min: 0, \max: 8191, \units: "bus", \desc: "Audio input bus"),
+        (\name: \attack, \default: 0.01, \min: 0.0001, \max: 2, \units: "s", \desc: "Attack time (transient response)"),
+        (\name: \release, \default: 0.1, \min: 0.001, \max: 5, \units: "s", \desc: "Release time (decay smoothing)"),
+    ], ~SC_GRP[\te], "Audio-to-CV envelope follower with attack/release ballistics");
+
+    "  MODULE_REGISTRY: 6 Aqua Vitae modulation modules registered".postln;
+};
 )
