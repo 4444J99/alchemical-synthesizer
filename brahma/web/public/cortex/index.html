@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX — Brahma Universal Control Surface</title>
+    <link rel="stylesheet" href="../golem/style.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="midnight">
+    <div id="app">
+        <header id="header">
+            <h1 class="logo">CORTEX</h1>
+            <nav id="nav">
+                <button class="nav-btn active" data-view="modules">Modules</button>
+                <button class="nav-btn" data-view="engines">Engines</button>
+                <button class="nav-btn" data-view="patchbay">Patch Bay</button>
+                <button class="nav-btn" data-view="chronos">Chronos</button>
+                <button class="nav-btn" data-view="daemons">Daemons</button>
+                <button class="nav-btn" data-view="serpens">Serpens</button>
+            </nav>
+            <div id="theme-selector">
+                <select id="theme-select">
+                    <option value="midnight">Midnight</option>
+                    <option value="vapor">Vaporwave</option>
+                    <option value="terminal">Terminal</option>
+                    <option value="arctic">Arctic</option>
+                    <option value="neon">Neon</option>
+                </select>
+            </div>
+            <div id="transport">
+                <button id="btn-play" class="transport-btn">PLAY</button>
+                <button id="btn-stop" class="transport-btn">STOP</button>
+                <label>BPM <input type="number" id="bpm-input" value="120" min="30" max="300"></label>
+                <span id="status-indicator" class="status-dot disconnected"></span>
+                <span id="module-count" class="text-xs">0 modules</span>
+            </div>
+        </header>
+
+        <main id="main">
+            <div id="view-modules" class="view active"></div>
+            <div id="view-engines" class="view"></div>
+            <div id="view-patchbay" class="view"></div>
+            <div id="view-chronos" class="view"></div>
+            <div id="view-daemons" class="view"></div>
+            <div id="view-serpens" class="view"></div>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

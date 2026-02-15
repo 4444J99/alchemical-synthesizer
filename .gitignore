@@ -3,3 +3,6 @@ node_modules/
 *.swp
 *.wav
 *.aiff
+
+# Override global gitignore's `public/` rule (Gatsby)
+!brahma/web/public/

@@ -1,0 +1,313 @@
+/* Cortex — Brahma Universal Control Surface */
+/* Extends Golem base styles (../golem/style.css imported via HTML) */
+
+.logo {
+    color: #06b6d4;
+    text-shadow: 0 0 10px #06b6d480;
+}
+
+/* Status indicator */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.status-dot.connected { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.status-dot.disconnected { background: #ef4444; }
+
+/* Module count badge */
+#module-count {
+    color: var(--text-muted);
+    margin-left: 4px;
+}
+
+/* Category filter bar */
+.category-bar {
+    display: flex;
+    gap: 4px;
+    padding: 8px 0;
+    flex-wrap: wrap;
+}
+
+.cat-btn {
+    background: var(--bg-control);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 3px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    transition: all 0.15s;
+}
+.cat-btn:hover { border-color: var(--text-muted); color: var(--text); }
+.cat-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+
+.cat-count {
+    font-size: 9px;
+    opacity: 0.6;
+    margin-left: 2px;
+}
+
+/* Search bar */
+.search-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.search-input {
+    flex: 1;
+    background: var(--bg-control);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text-muted); }
+
+/* Module list */
+.module-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 8px;
+}
+
+.module-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.module-card:hover { border-color: var(--accent); }
+.module-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+
+.module-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.module-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.module-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+/* Param panel */
+.param-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.param-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.instance-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.instance-input {
+    background: var(--bg-control);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-size: 12px;
+    width: 140px;
+}
+
+.action-btn {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    transition: all 0.15s;
+}
+.action-btn:hover { background: var(--accent); color: #000; }
+.action-btn.danger { background: transparent; border-color: #ef4444; color: #ef4444; }
+.action-btn.danger:hover { background: #ef4444; color: #fff; }
+
+/* Piano keyboard */
+.piano {
+    display: flex;
+    height: 80px;
+    position: relative;
+    margin: 12px 0;
+    user-select: none;
+}
+
+.piano-key {
+    flex: 1;
+    background: #e5e7eb;
+    border: 1px solid #9ca3af;
+    border-radius: 0 0 4px 4px;
+    cursor: pointer;
+    transition: background 0.05s;
+    min-width: 20px;
+}
+.piano-key:active, .piano-key.active { background: var(--accent); }
+.piano-key.black {
+    background: #1f2937;
+    width: 60%;
+    height: 55%;
+    position: absolute;
+    z-index: 1;
+    border-color: #111;
+    border-radius: 0 0 3px 3px;
+}
+.piano-key.black:active, .piano-key.black.active { background: var(--accent-dim); }
+
+/* Split layout */
+.split-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 12px;
+    height: calc(100vh - 60px);
+}
+
+.split-layout .sidebar {
+    overflow-y: auto;
+    max-height: calc(100vh - 72px);
+}
+
+.split-layout .main-panel {
+    overflow-y: auto;
+    max-height: calc(100vh - 72px);
+}
+
+/* SERPENS template cards */
+.template-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+.template-card.active { border-color: #22c55e; }
+
+.template-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.template-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 4px 0 8px;
+}
+
+.template-status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}
+.template-status.active { background: #22c55e30; color: #22c55e; }
+.template-status.inactive { background: var(--bg-control); color: var(--text-muted); }
+
+/* Chronos transport panel */
+.transport-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.tempo-display {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Daemon instance list */
+.daemon-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.daemon-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.daemon-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.daemon-name { font-weight: 600; font-size: 12px; }
+.daemon-type { font-size: 10px; color: var(--text-muted); }
+
+.daemon-controls {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Demo patch controls */
+.demo-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.demo-label {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.demo-status {
+    font-size: 11px;
+    font-weight: 600;
+}
+.demo-status.active { color: #22c55e; }
+.demo-status.inactive { color: var(--text-muted); }
