@@ -45,7 +45,7 @@ graph LR
 
 ### Prerequisites
 - **SuperCollider** (v3.13+)
-- **Pure Data** (Vanilla v0.54+) — optional, for performance UI
+- **Pure Data** (Vanilla v0.54+) — optional, for performance UI and visual patching
 - **Node.js** (v18+) — optional, for Visual Cortex web visualization
 
 ### Installation
@@ -57,27 +57,33 @@ cd alchemical-synthesizer
 ### SuperCollider Class Files
 The `.sc` class files must be installed for the SC class compiler:
 ```bash
-# Find your SC Extensions directory:
+# Find your SC Extensions directory (platform-dependent):
 # In SuperCollider: Platform.userExtensionDir
-# Then symlink the class files:
-ln -s $(pwd)/brahma/sc/AdamKadmon.sc ~/Library/Application\ Support/SuperCollider/Extensions/
-ln -s $(pwd)/brahma/sc/BridgeRouter.sc ~/Library/Application\ Support/SuperCollider/Extensions/
-ln -s $(pwd)/brahma/sc/FSAP.sc ~/Library/Application\ Support/SuperCollider/Extensions/
-ln -s $(pwd)/brahma/sc/BrahmaScale.sc ~/Library/Application\ Support/SuperCollider/Extensions/
-ln -s $(pwd)/brahma/sc/BrahmaMPE.sc ~/Library/Application\ Support/SuperCollider/Extensions/
-ln -s $(pwd)/brahma/sc/BrahmaModBus.sc ~/Library/Application\ Support/SuperCollider/Extensions/
+# macOS default: ~/Library/Application Support/SuperCollider/Extensions/
+# Linux default: ~/.local/share/SuperCollider/Extensions/
+
+SC_EXT=$(sclang -e 'Platform.userExtensionDir.postln; 0.exit' 2>/dev/null | tail -1)
+
+for f in AdamKadmon BridgeRouter FSAP BrahmaScale BrahmaMPE BrahmaModBus; do
+    ln -s "$(pwd)/brahma/sc/${f}.sc" "${SC_EXT}/"
+done
 ```
 Then recompile the class library in SC IDE (Cmd+Shift+L).
 
 ### Running the Ritual
 1.  Launch **SuperCollider** and evaluate `brahma/sc/loader.scd` (Cmd+Return).
     - Expected: `--- BRAHMA SYSTEM ONLINE ---`
+    - A demo patch auto-plays: Prima Materia + MOIRAI melody + Euclidean rhythm + Lorenz modulation + reverb
 2.  Launch **Visual Cortex** (optional):
     ```bash
     cd brahma/web && npm install && npm start
     ```
-    - Open `http://localhost:3000` to see real-time organism visualization
-3.  Launch **Pure Data** and open `brahma/pd/main.pd` (optional, for performance UI).
+    - `http://localhost:3000` — real-time organism visualization
+    - `http://localhost:3000/cortex` — Canvas web patching UI (module browser, drag-drop, cable routing)
+    - `http://localhost:3000/golem` — Golem percussion web UI (sequencer, mixer, patchbay)
+3.  Launch **Pure Data** (optional):
+    - `brahma/pd/main.pd` — master control surface with OSC bridge
+    - `brahma/pd/canvas/brahma_canvas.pd` — Pd-native visual patching via GOP abstractions
 
 ---
 
@@ -114,32 +120,65 @@ Then recompile the class library in SC IDE (Cmd+Shift+L).
 | Category | Count |
 | :--- | :--- |
 | Synthesis Engines | 10 |
-| Make Noise Clones | ~30 modules |
-| Effects (FX) | 46 |
-| Standard Modular Modules | ~53 |
-| Elektron Machine Emulations | ~15 |
+| Organisms (Proteus, Relinquished, Typhon, etc.) | 24 |
+| Golem Percussion (drums, FX, LFO) | 11 |
+| Make Noise Clones | 34 |
+| Effects (FX) | 49 |
+| Standard Modular | 58 |
+| Elektron Machine Emulations | 11 |
 | Generative Algorithms | 9 |
-| Interaction Controllers | ~10 |
-| **Total SynthDefs** | **~234** |
+| Interaction Controllers | 9 |
+| Infrastructure (patch bay, safety, arbitration) | 8 |
+| **Total SynthDefs** | **223** |
 
 ### Infrastructure
 
 - **Patch Bay**: Universal CV routing via BrahmaModBus (256-bus pool, audio/control rate)
 - **CHRONOS**: Full-featured master sequencer (128 tracks, 8 scenes, morph, undo/redo, song mode)
+- **Module Registry**: Dynamic SynthDef registration with OSC-addressable create/set/free lifecycle
 - **Microtonality**: 16 built-in scales, Scala file import, arbitrary N-TET, custom ratios
 - **MIDI/MPE**: 16-voice MPE with per-note expression, MIDI learn, clock sync
 - **IMMUNE Governor**: Safety limiter deployed on hardware outputs
+- **Presets**: Save/load/morph with project management and undo history
+- **Recording**: Multi-track capture, punch-in/out, bounce, WAV export
 - **Visual Cortex**: Real-time browser visualization via OSC-to-WebSocket bridge
+- **PD Bridge**: Bidirectional SC↔PD communication via OSC (ports 57120/57121)
+
+---
+
+## Control Surfaces
+
+The system offers three ways to interact, all connected via OSC:
+
+| Surface | Technology | Entry Point |
+| :--- | :--- | :--- |
+| **SC IDE** | SuperCollider | `brahma/sc/loader.scd` |
+| **Web Canvas** | Browser (p5.js) | `http://localhost:3000/cortex` |
+| **PD Canvas** | Pure Data (GOP) | `brahma/pd/canvas/brahma_canvas.pd` |
+
+The **Web Canvas** provides a Max/MSP-style module browser with drag-drop patching and cable routing. The **PD Canvas** uses Graph-On-Parent abstractions for Pd-native visual patching with a module palette, routing, and parameter control.
 
 ---
 
 ## Technology Stack
 
-- **SuperCollider** (`brahma/sc/`): DSP engine, ~18,000 LOC across 60+ files
-- **Pure Data** (`brahma/pd/`): Performance UI, 8 patches
-- **Node.js + p5.js** (`brahma/web/`): Visual Cortex browser visualization
+- **SuperCollider** (`brahma/sc/`): DSP engine, ~20,000 LOC across 60+ `.scd` files and 6 `.sc` classes
+- **Pure Data** (`brahma/pd/`): Performance UI and visual patching, 12 patches (8 core + 4 canvas abstractions)
+- **Node.js + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI, Golem percussion UI (~3,000 LOC)
 - **Python** (`tools/`): Audio specimen validation
 - **OSC**: Bidirectional glue (ports 57120, 57121, 57122)
+
+---
+
+## Development Phases
+
+| Phase | Name | Scope |
+| :--- | :--- | :--- |
+| **0** | Foundation | Infrastructure, organisms, classes, 7-stage signal path, safety governor |
+| **1** | Expansion | 10 synthesis engines, 49 FX, modular suite, Make Noise clones, Elektron emulations, generative systems |
+| **2** | Vivification | Module registry, voice manager, Cortex UI, DAEMON-CHRONOS bridge, presets, recording |
+| **3** | Canvas (Web) | Browser-based visual patching — module browser, drag-drop canvas, cable routing, parameter editors |
+| **3B** | Canvas (Pd) | Pd-native visual patching via GOP abstractions — brahma_module, brahma_route, brahma_palette, brahma_canvas |
 
 ---
 
