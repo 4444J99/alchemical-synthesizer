@@ -129,7 +129,7 @@ Then recompile the class library in SC IDE (Cmd+Shift+L).
 | Generative Algorithms | 9 |
 | Interaction Controllers | 9 |
 | Infrastructure (patch bay, safety, arbitration) | 8 |
-| **Total SynthDefs** | **223** |
+| **Total SynthDefs** | **317** |
 
 ### Infrastructure
 
@@ -164,7 +164,7 @@ The **Web Canvas** provides a Max/MSP-style module browser with drag-drop patchi
 
 - **SuperCollider** (`brahma/sc/`): DSP engine, ~20,000 LOC across 60+ `.scd` files and 6 `.sc` classes
 - **Pure Data** (`brahma/pd/`): Performance UI and visual patching, 12 patches (8 core + 4 canvas abstractions)
-- **Node.js + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI, Golem percussion UI (~3,000 LOC)
+- **Node.js + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI, Golem percussion UI (~5,500 LOC)
 - **Python** (`tools/`): Audio specimen validation
 - **OSC**: Bidirectional glue (ports 57120, 57121, 57122)
 
@@ -190,7 +190,7 @@ This project follows the **Minimal Root Philosophy** and **Fidelity Stacking Abs
 - **UI Surface**: Pure Data (`brahma/pd/`)
 - **Ontology**: Adam Kadmon (`brahma/sc/AdamKadmon.sc`)
 
-See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation, coding conventions, and development tasks.
+See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation, coding conventions, and development tasks. See also [ROADMAP.md](ROADMAP.md) for project milestones and [GEMINI.md](GEMINI.md) for additional architecture context.
 
 ---
 

@@ -4,5 +4,27 @@ node_modules/
 *.wav
 *.aiff
 
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Build artifacts
+*.o
+*.so
+build/
+
+# SuperCollider temp
+*.scx
+synthdefs/
+
 # Override global gitignore's `public/` rule (Gatsby)
 !brahma/web/public/

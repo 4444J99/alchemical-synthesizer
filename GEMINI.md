@@ -58,7 +58,7 @@ Every primary module (e.g., **Relinquished**) adheres to a strict stage specific
 - **NRT Rendering:** Use `brahma/sc/13_nrt_renderer.scd` for high-volume offline specimen generation.
 
 ### 3. Automation & Validation
-- **Validate Audio:** Run `python3 scripts/validate_audio.py path/to/specimen.wav` to ensure the viability of a recorded specimen.
+- **Validate Audio:** Run `python3 tools/validate_audio.py path/to/specimen.wav` to ensure the viability of a recorded specimen.
 
 ---
 
