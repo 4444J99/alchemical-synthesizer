@@ -1,0 +1,51 @@
+{
+  "schema": "organvm.source_verification_receipt.v1",
+  "observed_at": "2026-09-26T01:39:47Z",
+  "owner": "4444J99/alchemical-synthesizer#47",
+  "source_head": "6ebca82635ca37d2e6fd9d4d7d125a6e16dfea0a",
+  "scope": "Exact-source release packaging after security and cache-exclusion repairs",
+  "checks": [
+    {
+      "command": "bash tools/build_release.sh",
+      "exit_code": 0
+    },
+    {
+      "command": "shasum -a 256 -c SHA256SUMS.txt",
+      "exit_code": 0,
+      "result": "tar.gz and zip checksums passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "alchemical-synthesizer-v1.0.0-74-g6ebca82.tar.gz",
+      "bytes": 759994,
+      "sha256": "adb720b9dee7c44a1f88fd30972b4152bde6eb2a1217e0fcd514316c55206b3c",
+      "entries": 726,
+      "python_cache_entries": 0,
+      "generated_json_data_entries": 0
+    },
+    {
+      "name": "alchemical-synthesizer-v1.0.0-74-g6ebca82.zip",
+      "bytes": 897753,
+      "sha256": "69e6047eee4af31645c7774f437ca5eeaea9215e1ec9e7ce7bef2ae9252ca508",
+      "entries": 363,
+      "python_cache_entries": 0,
+      "generated_json_data_entries": 0
+    }
+  ],
+  "hosted_readback": {
+    "run": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/35067126325",
+    "observed_result": "job did not start",
+    "annotation": "The job was not started because your account is locked due to a billing issue.",
+    "interpretation": "Historical runner-admission evidence only; current account, budget, and remedy are unverified until a changed head receives a fresh hosted readback."
+  },
+  "limits": [
+    "The archives are local verification products and were not published.",
+    "The security regression and full smoke evidence remain in the earlier source receipts; changes after source head 25d776684519fcbfa88e1915933d88ef78f6455b are limited to release-receipt and cache-exclusion paths."
+  ],
+  "claims_not_made": [
+    "hosted execution passed",
+    "pull request merged",
+    "release deployed"
+  ]
+}
