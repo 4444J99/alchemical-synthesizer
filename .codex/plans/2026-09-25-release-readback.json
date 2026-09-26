@@ -1,10 +1,20 @@
 {
   "schema": "organvm.source_verification_receipt.v1",
-  "observed_at": "2026-09-26T01:39:47Z",
+  "observed_at": "2026-09-26T02:03:49Z",
   "owner": "4444J99/alchemical-synthesizer#47",
-  "source_head": "6ebca82635ca37d2e6fd9d4d7d125a6e16dfea0a",
-  "scope": "Exact-source release packaging after security and cache-exclusion repairs",
+  "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
+  "scope": "Exact-source security regressions, smoke coverage, and release packaging after review repairs",
   "checks": [
+    {
+      "command": "node --test public/dashboard/session.test.js src/api/account-security.test.js src/api/acp.test.js src/auth/rate-limit.test.js",
+      "exit_code": 0,
+      "result": "11 passed, 0 failed"
+    },
+    {
+      "command": "node bin/smoke.js",
+      "exit_code": 0,
+      "result": "21 passed, 0 failed"
+    },
     {
       "command": "bash tools/build_release.sh",
       "exit_code": 0
@@ -17,18 +27,18 @@
   ],
   "artifacts": [
     {
-      "name": "alchemical-synthesizer-v1.0.0-74-g6ebca82.tar.gz",
-      "bytes": 759994,
-      "sha256": "adb720b9dee7c44a1f88fd30972b4152bde6eb2a1217e0fcd514316c55206b3c",
-      "entries": 726,
+      "name": "alchemical-synthesizer-v1.0.0-76-g36ef558.tar.gz",
+      "bytes": 761503,
+      "sha256": "db479714acfe592b4b12841dd8e9da2aff12964bc6ef8693d448860db2d9d7db",
+      "entries": 728,
       "python_cache_entries": 0,
       "generated_json_data_entries": 0
     },
     {
-      "name": "alchemical-synthesizer-v1.0.0-74-g6ebca82.zip",
-      "bytes": 897753,
-      "sha256": "69e6047eee4af31645c7774f437ca5eeaea9215e1ec9e7ce7bef2ae9252ca508",
-      "entries": 363,
+      "name": "alchemical-synthesizer-v1.0.0-76-g36ef558.zip",
+      "bytes": 899542,
+      "sha256": "8fba831ddf977dd043a7da6e5bb02ee6c0faa218ea8670197e41871d200c1535",
+      "entries": 364,
       "python_cache_entries": 0,
       "generated_json_data_entries": 0
     }
@@ -41,7 +51,7 @@
   },
   "limits": [
     "The archives are local verification products and were not published.",
-    "The security regression and full smoke evidence remain in the earlier source receipts; changes after source head 25d776684519fcbfa88e1915933d88ef78f6455b are limited to release-receipt and cache-exclusion paths."
+    "The review repairs at source head 36ef558a52ba0172811b739b9da46705ba3edfa7 invalidate pending account responses on session changes, avoid consuming a new render command as a module name, and sweep expired rate-limit peers before rejecting at capacity."
   ],
   "claims_not_made": [
     "hosted execution passed",
