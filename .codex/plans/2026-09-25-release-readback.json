@@ -1,25 +1,35 @@
 {
   "schema": "organvm.source_verification_receipt.v1",
-  "observed_at": "2026-09-26T02:03:49Z",
+  "observed_at": "2026-09-26T02:12:28Z",
   "owner": "4444J99/alchemical-synthesizer#47",
-  "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
-  "scope": "Exact-source security regressions, smoke coverage, and release packaging after review repairs",
+  "source_head": "e634fbf03b0728dc26be4daeb8f10b3968b3b96d",
+  "scope": "Security review repairs, one-time credential migration, and source-bound verification receipts",
   "checks": [
     {
+      "source_head": "e634fbf03b0728dc26be4daeb8f10b3968b3b96d",
+      "command": "node --test product/public/dashboard/session.test.js",
+      "exit_code": 0,
+      "result": "3 passed, 0 failed; legacy stored key/email move into page memory once and persistent copies are removed"
+    },
+    {
+      "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
       "command": "node --test public/dashboard/session.test.js src/api/account-security.test.js src/api/acp.test.js src/auth/rate-limit.test.js",
       "exit_code": 0,
       "result": "11 passed, 0 failed"
     },
     {
+      "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
       "command": "node bin/smoke.js",
       "exit_code": 0,
       "result": "21 passed, 0 failed"
     },
     {
+      "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
       "command": "bash tools/build_release.sh",
       "exit_code": 0
     },
     {
+      "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
       "command": "shasum -a 256 -c SHA256SUMS.txt",
       "exit_code": 0,
       "result": "tar.gz and zip checksums passed"
@@ -28,6 +38,7 @@
   "artifacts": [
     {
       "name": "alchemical-synthesizer-v1.0.0-76-g36ef558.tar.gz",
+      "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
       "bytes": 761503,
       "sha256": "db479714acfe592b4b12841dd8e9da2aff12964bc6ef8693d448860db2d9d7db",
       "entries": 728,
@@ -36,6 +47,7 @@
     },
     {
       "name": "alchemical-synthesizer-v1.0.0-76-g36ef558.zip",
+      "source_head": "36ef558a52ba0172811b739b9da46705ba3edfa7",
       "bytes": 899542,
       "sha256": "8fba831ddf977dd043a7da6e5bb02ee6c0faa218ea8670197e41871d200c1535",
       "entries": 364,
@@ -44,14 +56,20 @@
     }
   ],
   "hosted_readback": {
-    "run": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/35067126325",
-    "observed_result": "job did not start",
-    "annotation": "The job was not started because your account is locked due to a billing issue.",
-    "interpretation": "Historical runner-admission evidence only; current account, budget, and remedy are unverified until a changed head receives a fresh hosted readback."
+    "pull_request": "https://github.com/4444J99/alchemical-synthesizer/pull/47",
+    "observed_head": "6b8c3bb1c00d217ceae365048a98e82788d46289",
+    "observed_result": "4 successful checks, 1 skipped; no base conflict",
+    "interpretation": "This readback predates the one-time credential migration commit e634fbf03b0728dc26be4daeb8f10b3968b3b96d; the newer head still needs one status readback. Historical zero-step billing failures are superseded by this executed successful generation, but do not establish hosted security scan clearance."
+  },
+  "admission": {
+    "operation": "sanctioned heavy verification",
+    "result": "denied before tests or release build started",
+    "reason": "swap-fraction"
   },
   "limits": [
     "The archives are local verification products and were not published.",
-    "The review repairs at source head 36ef558a52ba0172811b739b9da46705ba3edfa7 invalidate pending account responses on session changes, avoid consuming a new render command as a module name, and sweep expired rate-limit peers before rejecting at capacity."
+    "The three review repairs at source head 36ef558a52ba0172811b739b9da46705ba3edfa7 invalidate pending account responses on session changes, avoid consuming a new render command as a module name, and sweep expired rate-limit peers before rejecting at capacity.",
+    "The one-time old-key migration at source head e634fbf03b0728dc26be4daeb8f10b3968b3b96d passed its focused 3-test session suite, but the broader suite and release build were not rerun on this newer head because host admission denied swap-fraction."
   ],
   "claims_not_made": [
     "hosted execution passed",
