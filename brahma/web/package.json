@@ -6,12 +6,22 @@
   "scripts": {
     "start": "node server.js"
   },
-  "keywords": ["supercollider", "osc", "visualization", "p5js"],
+  "keywords": [
+    "supercollider",
+    "osc",
+    "visualization",
+    "p5js"
+  ],
   "author": "4444J99",
   "license": "MIT",
   "dependencies": {
     "express": "^5.2.1",
     "osc": "^2.4.4",
     "ws": "^8.21.3"
+  },
+  "overrides": {
+    "osc": {
+      "ws": "^8.21.3"
+    }
   }
 }

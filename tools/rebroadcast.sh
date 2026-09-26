@@ -55,14 +55,18 @@ v, a, vis = c["video"], c["audio"], c["visualizer"]
 tgt = os.environ.get("TARGET", "")
 url = c.get("targets", {}).get(tgt, {}).get("url", "")
 mode = os.environ.get("MODE_OVERRIDE") or vis.get("mode", "showspectrum")
-print(f"C_TURL={url}")
-print(f"C_MODE={mode}")
-print(f"C_ACCENT={vis.get('accent','0x7ba7ff')}")
-print(f"C_COLOR={vis.get('color','intensity')}")
-print(f"C_VBIT={v['bitrate']}"); print(f"C_VMAX={v['maxrate']}"); print(f"C_VBUF={v['bufsize']}")
-print(f"C_FPS={v['fps']}"); print(f"C_W={v['width']}"); print(f"C_H={v['height']}"); print(f"C_GOP={v['gop']}")
-print(f"C_PIX={v['pix_fmt']}"); print(f"C_VCODEC={v['codec']}"); print(f"C_PRESET={v['preset']}")
-print(f"C_ABIT={a['bitrate']}"); print(f"C_ASR={a['samplerate']}"); print(f"C_ACH={a['channels']}")
+import shlex
+values = {
+    "C_TURL": url, "C_MODE": mode,
+    "C_ACCENT": vis.get("accent", "0x7ba7ff"),
+    "C_COLOR": vis.get("color", "intensity"),
+    "C_VBIT": v["bitrate"], "C_VMAX": v["maxrate"], "C_VBUF": v["bufsize"],
+    "C_FPS": v["fps"], "C_W": v["width"], "C_H": v["height"], "C_GOP": v["gop"],
+    "C_PIX": v["pix_fmt"], "C_VCODEC": v["codec"], "C_PRESET": v["preset"],
+    "C_ABIT": a["bitrate"], "C_ASR": a["samplerate"], "C_ACH": a["channels"],
+}
+for key, value in values.items():
+    print(key + "=" + shlex.quote(str(value)))
 PY
 )"
 

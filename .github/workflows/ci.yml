@@ -7,10 +7,14 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     name: Smoke test (shipped-test)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -23,6 +27,13 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: "3.11"
+
+      - name: Install product dependencies
+        working-directory: product
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Run security regression tests
+        run: node --test product/src/api/account-security.test.js product/src/api/acp.test.js product/src/auth/rate-limit.test.js product/public/dashboard/session.test.js deploy/aether/serve.test.js docs/absorb-alchemize/engine-path.test.cjs
 
       - name: Run smoke test
         run: bash tools/smoke.sh --strict

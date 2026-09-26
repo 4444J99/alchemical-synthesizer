@@ -7,6 +7,7 @@
  */
 
 const express = require("express");
+const { rateLimit } = require("../auth/rate-limit");
 const fs = require("fs");
 const path = require("path");
 const actions = require("../core/actions");
@@ -27,6 +28,10 @@ const AUDIO_TYPES = {
 };
 
 const router = express.Router();
+// Share signup/login admission before JSON parsing or password hashing.
+const accountLimit = rateLimit({ limit: 10 });
+router.use(["/account/signup", "/account/login"], accountLimit);
+const audioLimit = rateLimit({ limit: 120 });
 router.use(express.json({ limit: "256kb" }));
 
 const ok = (res, data) => res.json({ ok: true, data });
@@ -73,7 +78,7 @@ router.get("/specimens/:id", (req, res) => {
   return s ? ok(res, s) : fail(res, 404, "specimen_not_found");
 });
 
-router.get("/specimens/:id/audio", (req, res) => {
+router.get("/specimens/:id/audio", audioLimit, (req, res) => {
   const s = marketplace.getSpecimen(req.params.id);
   if (!s) return fail(res, 404, "specimen_not_found");
   if (s.simulated || !s.audioUrl) {
@@ -119,12 +124,14 @@ router.post("/account/keys", meter({ cost: 0 }), (req, res) =>
   ok(res, { ...licensing.issueApiKey(req.auth.ownerEmail, req.auth.plan, req.body.label || "key") }));
 
 router.post("/account/keys/revoke", meter({ cost: 0 }), (req, res) => {
+  const target = licensing.resolveApiKey(req.body.key);
+  if (!target || target.ownerEmail !== req.auth.ownerEmail) return fail(res, 403, "key_not_owned");
   licensing.revokeApiKey(req.body.key);
   ok(res, { revoked: true });
 });
 
 router.get("/account/usage", meter({ cost: 0 }), (req, res) =>
-  ok(res, { plan: req.auth.plan, usage: req.auth.usage, quota: req.auth.quota }));
+  ok(res, { ownerEmail: req.auth.ownerEmail, plan: req.auth.plan, usage: req.auth.usage, quota: req.auth.quota }));
 
 // ---- plans & billing ----
 router.get("/plans", (req, res) => ok(res, listPlans()));

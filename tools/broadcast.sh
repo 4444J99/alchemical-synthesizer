@@ -173,8 +173,9 @@ PY
     eval "$(SUB_JSON="$SUB" python3 - <<'PY'
 import os, json
 s = json.loads(os.environ["SUB_JSON"])
-print(f"SUB_URL={json.dumps(s.get('url',''))}")
-print(f"SUB_LIC={s.get('license','unknown')}")
+import shlex
+print("SUB_URL=" + shlex.quote(str(s.get("url", ""))))
+print("SUB_LIC=" + shlex.quote(str(s.get("license", "unknown"))))
 PY
 )"
     TUNED="$WORK/sub_$G_SEG.wav"

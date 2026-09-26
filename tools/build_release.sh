@@ -34,6 +34,9 @@ tar \
   --exclude='./.git' \
   --exclude='./dist' \
   --exclude='*/node_modules' \
+  --exclude='*/__pycache__' \
+  --exclude='*.pyc' \
+  --exclude='*/.pytest_cache' \
   --exclude='*/vendor' \
   --exclude='*.tgz' \
   --exclude='*.abletonextension' \

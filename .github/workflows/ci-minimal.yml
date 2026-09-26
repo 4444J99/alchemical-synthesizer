@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -26,7 +29,12 @@ jobs:
       - name: Validate seed.yaml
         run: |
           if [ -f seed.yaml ]; then
-            python3 -c "import yaml; yaml.safe_load(open('seed.yaml'))" && echo "seed.yaml is valid YAML" || { echo "::error::seed.yaml is invalid YAML"; exit 1; }
+            if python3 -c "import yaml; yaml.safe_load(open('seed.yaml'))"; then
+              echo "seed.yaml is valid YAML"
+            else
+              echo "::error::seed.yaml is invalid YAML"
+              exit 1
+            fi
           else
             echo "No seed.yaml (optional for this repo type)"
           fi
