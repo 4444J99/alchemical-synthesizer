@@ -69,6 +69,12 @@ function interpret(text) {
     if (!seenRender) continue;
     moduleSuffix.lastIndex = previousEnd;
     render = moduleSuffix.exec(lower);
+    // A connector may continue onto the next line, but a fresh command may not
+    // be consumed as its module name. Let the scanner parse that command.
+    if (render && render[1] === "render" && /[\n\r\u2028\u2029]/.test(render[0])) {
+      render = null;
+      continue;
+    }
     if (render) break;
   }
   if (!render) render = lower.match(/\brender\b\s+(?:a\s+specimen\s+)?(?:the\s+)?([a-z0-9]+)/);

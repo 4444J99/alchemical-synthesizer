@@ -16,13 +16,25 @@ test("credentials are memory-only, old storage is removed and reload signs out",
   assert.equal(stored.size, 1);
   assert.equal(stored.get("unrelated"), "keep");
   assert.equal(session.key, "");
+  assert.equal(session.generation, 0);
   session.set("test-key", "person@example.test");
   assert.equal(session.key, "test-key");
   assert.equal(session.email, "person@example.test");
+  assert.equal(session.generation, 1);
   assert.equal(page(storage).key, "");
   session.clear();
   assert.equal(session.key, "");
   assert.equal(session.email, "");
+  assert.equal(session.generation, 2);
+});
+test("session generations invalidate pending same-account responses", () => {
+  const session = page({ removeItem() {} });
+  session.set("old-key", "person@example.test");
+  const pendingGeneration = session.generation;
+  session.clear();
+  session.set("new-key", "person@example.test");
+  assert.equal(session.email, "person@example.test");
+  assert.notEqual(session.generation, pendingGeneration);
 });
 test("disabled browser storage does not prevent an in-memory session", () => {
   const session = page({ removeItem() { throw new Error("storage denied"); } });

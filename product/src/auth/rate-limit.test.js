@@ -30,6 +30,17 @@ test("bounded peer table refuses new identities without evicting live budgets", 
   time = 1000;
   assert.equal(request(limit, "second").admitted, true);
 });
+test("bounded peer table removes entries that expire before the scheduled sweep", () => {
+  let time = 0;
+  const limit = rateLimit({ limit: 10, maxPeers: 2, windowMs: 1000, now: () => time });
+  assert.equal(request(limit, "first").admitted, true);
+  time = 600;
+  assert.equal(request(limit, "second").admitted, true);
+  time = 1000;
+  assert.equal(request(limit, "third").admitted, true);
+  time = 1600;
+  assert.equal(request(limit, "fourth").admitted, true);
+});
 test("invalid limits fail at initialization", () => {
   for (const limit of [0, -1, Infinity, NaN, 1.5]) assert.throws(() => rateLimit({ limit }), TypeError);
 });

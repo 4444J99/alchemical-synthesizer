@@ -10,4 +10,4 @@ Upstream security references:
 - https://github.com/websockets/ws/security/advisories/GHSA-96hv-2xvq-fx4p
 - https://github.com/advisories/GHSA-73jw-fp74-p77x
 
-Next source obligations: reproduce and repair current ACP parsing complexity, static serving containment, dashboard persistent key storage, and REST resource rate limits. Preserve all other alert obligations in the health denominator. Obtain exact-head hosted scan results through the declared integration rail; do not dismiss alerts based only on local installation success.
+The ACP parsing-complexity, static-serving containment, dashboard persistent-key storage, and REST resource-rate-limit source repairs are implemented with local regression coverage. Pending dashboard account responses are additionally bound to the page-session generation so sign-out and same-email reauthentication invalidate older reads. Remaining obligations are exact-head hosted scans, browser acceptance on the deployed build, and deployment through the declared integration rail. Preserve all other alert obligations in the health denominator; do not dismiss alerts based only on local installation success.

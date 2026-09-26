@@ -69,9 +69,13 @@ function drawTelemetry(){
 }
 
 async function refreshOverview(){
+  const generation = session.generation;
+  const key = session.key;
   const plans = (await api("/api/v1/plans")).data || [];
-  if(session.key){
-    const u = await api("/api/v1/account/usage", { headers: authHeaders() });
+  if(session.generation !== generation) return;
+  if(key){
+    const u = await api("/api/v1/account/usage", { headers: { Authorization: "Bearer " + key } });
+    if(session.generation !== generation) return;
     if(u.ok){
       $("#ov-plan").textContent = (plans.find(p=>p.id===u.data.plan)||{}).name || u.data.plan;
       $("#ov-usage").textContent = `${u.data.usage.count} / ${u.data.quota}`;
@@ -135,8 +139,10 @@ window.buySpecimen = async (id) => {
 $("#ac-signup").onclick = () => doAuth("/api/v1/account/signup");
 $("#ac-login").onclick = () => doAuth("/api/v1/account/login");
 async function doAuth(path){
+  const generation = session.generation;
   const email=$("#ac-email").value.trim(), password=$("#ac-pass").value;
   const res = await api(path, { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({email,password}) });
+  if(session.generation !== generation) return;
   const msg = $("#ac-msg");
   if(!res.ok){ msg.style.color="#e94560"; msg.textContent=res.error; return; }
   if(path.endsWith("signup")){
@@ -156,14 +162,19 @@ async function doAuth(path){
   renderAccount(); refreshOverview(); updateWho();
 }
 async function renderAccount(){
+  const generation = session.generation;
+  const key = session.key;
   const authed = !!session.email;
   $("#acct-auth").style.display = authed ? "none" : "block";
   $("#acct-body").style.display = authed ? "block" : "none";
   if(!authed) return;
-  if(session.key){
-    const u = await api("/api/v1/account/usage", { headers: authHeaders() });
+  if(key){
+    const headers = { Authorization: "Bearer " + key };
+    const u = await api("/api/v1/account/usage", { headers });
+    if(session.generation !== generation) return;
     if(u.ok){ $("#ac-plan").textContent=u.data.plan; $("#ac-usage").textContent=`${u.data.usage.count} / ${u.data.quota}`; }
-    const keys = await api("/api/v1/account/keys", { headers: authHeaders() });
+    const keys = await api("/api/v1/account/keys", { headers });
+    if(session.generation !== generation) return;
     if(keys.ok){
       $("#ac-keys").innerHTML = keys.data.map(k=>`<tr><td>${k.label}</td><td>${k.key}</td><td>${k.plan}</td><td>${k.status}</td></tr>`).join("");
     }
@@ -173,10 +184,11 @@ $("#ac-use-key").onclick = async () => {
   const input = $("#ac-existing-key");
   const key = input.value.trim();
   const email = session.email;
+  const generation = session.generation;
   input.value = "";
   if(!key) return;
   const result = await api("/api/v1/account/usage", { headers: { Authorization: "Bearer " + key } });
-  if(session.email !== email) return;
+  if(session.generation !== generation || session.email !== email) return;
   if(!result.ok || result.data.ownerEmail !== email.toLowerCase()){
     $("#ac-key-msg").textContent="Enter an active API key for this account."; return;
   }
@@ -186,7 +198,10 @@ $("#ac-use-key").onclick = async () => {
 };
 $("#ac-newkey").onclick = async () => {
   if(!session.key){ alert("Sign up first to obtain your first key."); return; }
-  const res = await api("/api/v1/account/keys", { method:"POST", headers: authHeaders({"content-type":"application/json"}), body: JSON.stringify({label:"key"}) });
+  const generation = session.generation;
+  const key = session.key;
+  const res = await api("/api/v1/account/keys", { method:"POST", headers:{"content-type":"application/json", Authorization:"Bearer "+key}, body: JSON.stringify({label:"key"}) });
+  if(session.generation !== generation) return;
   if(res.ok){
     const out=$("#ac-newkey-out"); out.style.display="block";
     out.textContent = "New API key (shown once):\n"+res.data.key;
