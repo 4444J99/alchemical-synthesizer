@@ -1,5 +1,5 @@
 const osc = require("osc");
-const WebSocket = require("ws");
+const WebSocket = require("ws"); // ws ^8.21.3 (Dependabot update #1632814654, CI green)
 const express = require("express");
 const path = require("path");
 
