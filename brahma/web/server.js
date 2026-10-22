@@ -2,27 +2,41 @@ const osc = require("osc");
 const WebSocket = require("ws"); // ws ^8.21.3 (Dependabot update #1632814654, CI green)
 const express = require("express");
 const path = require("path");
+const { createAuth, safeEqual } = require("./lib/auth");
+const sandbox = require("./lib/sandbox");
+const runtimes = require("./lib/runtimes");
+const { createDirtBridge } = require("./lib/dirt");
 
-const HTTP_PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || "127.0.0.1";
+const HTTP_PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 3000;
 const OSC_UDP_PORT = 57122; // Listening for SC
 const OSC_SEND_PORT = 57120; // Sending to SC
+const DIRT_PORT = Number(process.env.BRAHMA_DIRT_PORT || process.env.DIRT_PORT) || 57130;
 
 // Namespace whitelist: all OSC address prefixes allowed from browser → SC
 const ALLOWED_NAMESPACES = [
     "/golem/", "/brahma/", "/chronos/", "/daemon/",
     "/moirai/", "/genesis/", "/arbor/", "/serpens/",
-    "/scriptorium/", "/ableton/"
+    "/scriptorium/", "/ableton/", "/dirt/"
 ];
 
 // Module registry cache (populated from SC broadcasts)
 const moduleCache = {};
 const paramCache = {};
 
-// 1. HTTP Server
+// 1. HTTP Server & Middleware
 const app = express();
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));
+
+let server;
+const auth = createAuth({
+    getPort: () => (server && server.address() ? server.address().port : HTTP_PORT),
+    humanToken: process.env.BRAHMA_HUMAN_TOKEN,
+    agentToken: process.env.BRAHMA_AGENT_TOKEN
+});
 
 // AETHER live broadcast: tools/broadcast.sh writes a rolling HLS stream +
 // telemetry.json into out/live (gitignored). Serve it at /live so the theatron
@@ -49,14 +63,124 @@ app.get("/api/modules/:name/params", (req, res) => {
     res.json(params);
 });
 
-const server = app.listen(HTTP_PORT, () => {
-    console.log(`--- VISUAL CORTEX ONLINE: http://localhost:${HTTP_PORT} ---`);
-    console.log(`--- GOLEM UI: http://localhost:${HTTP_PORT}/golem ---`);
-    console.log(`--- CORTEX UI: http://localhost:${HTTP_PORT}/cortex ---`);
+// REST API: Auth exchange (Human token -> HttpOnly cookie)
+app.post("/api/auth/exchange", (req, res) => {
+    if (!auth.isLoopback(req) || !auth.originOk(req)) {
+        return res.status(403).json({ ok: false, error: "forbidden", message: "Loopback and trusted Origin required" });
+    }
+    const { token } = req.body || {};
+    if (!auth.exchangeHuman(token)) {
+        return res.status(401).json({ ok: false, error: "invalid_token", message: "Invalid or missing human token" });
+    }
+    res.setHeader("Set-Cookie", auth.cookieHeader());
+    return res.json({ ok: true, role: "human" });
 });
 
-// 2. WebSocket Server (for Browser)
-const wss = new WebSocket.Server({ server });
+// REST API: Auth status
+app.get("/api/auth/status", (req, res) => {
+    const role = auth.roleOf(req);
+    return res.json({ ok: true, role, authenticated: role !== null });
+});
+
+// Sandbox state & startup self-test
+let sandboxStatus = {
+    ok: false,
+    backend: sandbox.backend(),
+    checks: {},
+    reason: "uninitialized",
+    checkedAt: null
+};
+
+async function initSandbox() {
+    try {
+        const res = await sandbox.selfTest({ udpPort: OSC_SEND_PORT });
+        sandboxStatus = {
+            ...res,
+            checkedAt: new Date().toISOString()
+        };
+        if (res.ok) {
+            console.log(`[sandbox] Seatbelt isolation verified (backend: ${res.backend}, checks: 7/7 passed)`);
+        } else {
+            console.warn(`[sandbox] WARNING: Sandbox self-test failed (${res.reason}). Server-side runtimes DISABLED (fail-closed).`);
+            if (process.env.BRAHMA_STRICT_SANDBOX === "1") {
+                console.error(`[sandbox] FATAL: BRAHMA_STRICT_SANDBOX=1 specified. Aborting server startup.`);
+                process.exit(1);
+            }
+        }
+    } catch (err) {
+        sandboxStatus = {
+            ok: false,
+            backend: sandbox.backend(),
+            checks: {},
+            reason: "exception:" + err.message,
+            checkedAt: new Date().toISOString()
+        };
+        console.error(`[sandbox] Exception during sandbox self-test:`, err);
+        if (process.env.BRAHMA_STRICT_SANDBOX === "1") {
+            process.exit(1);
+        }
+    }
+}
+
+// REST API: Runtime status discovery
+app.get("/api/runtimes", (req, res) => {
+    const role = auth.roleOf(req);
+    const runtimesList = runtimes.getRuntimeStatus({ role, sandboxStatus });
+    return res.json({
+        sandbox: {
+            ok: sandboxStatus.ok,
+            backend: sandboxStatus.backend,
+            checks: sandboxStatus.checks,
+            reason: sandboxStatus.reason
+        },
+        runtimes: runtimesList
+    });
+});
+
+// REST API: Sandboxed SuperCollider sclang evaluation (opt-in behind BRAHMA_ALLOW_SCLANG=1 and human role)
+app.post("/api/runtimes/sclang/eval", async (req, res) => {
+    if (!auth.originOk(req)) {
+        return res.status(403).json({ ok: false, error: "forbidden_origin", message: "Untrusted Origin" });
+    }
+    if (auth.roleOf(req) !== "human") {
+        return res.status(403).json({ ok: false, error: "human_role_required", message: "Human role required for sclang execution" });
+    }
+    if (process.env.BRAHMA_ALLOW_SCLANG !== "1") {
+        return res.status(403).json({ ok: false, error: "sclang_disabled_by_env", message: "sclang execution disabled: BRAHMA_ALLOW_SCLANG != 1" });
+    }
+    if (!sandboxStatus.ok) {
+        return res.status(503).json({ ok: false, error: "sandbox_unavailable", message: "Sandbox self-test failed or unavailable" });
+    }
+    const { code, timeoutMs } = req.body || {};
+    if (typeof code !== "string" || !code.trim()) {
+        return res.status(400).json({ ok: false, error: "bad_request", message: "Missing code in request body" });
+    }
+    try {
+        const result = await runtimes.executeSclang({ code, timeoutMs });
+        return res.json(result);
+    } catch (err) {
+        return res.status(500).json({ ok: false, error: err.code || "exec_error", message: err.message });
+    }
+});
+
+// Bind HTTP server to loopback by default
+server = app.listen(HTTP_PORT, HOST, () => {
+    console.log(`--- VISUAL CORTEX ONLINE: http://${HOST}:${HTTP_PORT} ---`);
+    console.log(`--- GOLEM UI: http://${HOST}:${HTTP_PORT}/golem ---`);
+    console.log(`--- CORTEX UI: http://${HOST}:${HTTP_PORT}/cortex ---`);
+});
+
+// 2. WebSocket Server (for Browser & Workbench) with Origin Verification
+const wss = new WebSocket.Server({
+    server,
+    verifyClient: (info, cb) => {
+        if (!auth.originOk(info.req)) {
+            // Reject untrusted Origin headers with HTTP 403 Forbidden
+            return cb(false, 403, "Forbidden");
+        }
+        return cb(true);
+    }
+});
 
 // 3. OSC UDP Port (From SuperCollider)
 const udpPort = new osc.UDPPort({
@@ -74,15 +198,63 @@ const sendPort = new osc.UDPPort({
     metadata: true
 });
 
-wss.on("connection", (ws) => {
-    console.log("Client Connected to Visual Cortex");
+// 5. Dirt Protocol Bridge (UDP 127.0.0.1:57130 -> SC 57120)
+const dirtBridge = createDirtBridge({
+    port: DIRT_PORT,
+    scPort: OSC_SEND_PORT,
+    scHost: "127.0.0.1",
+    bindAddress: "127.0.0.1",
+    metadata: true
+});
+
+dirtBridge.on("ready", ({ port, scPort }) => {
+    console.log(`--- DIRT BRIDGE ONLINE: UDP ${port} -> SC ${scPort} ---`);
+});
+
+dirtBridge.on("error", (err) => {
+    console.warn(`Dirt bridge notice (${err.code || err.message}) — continuing server execution`);
+});
+
+dirtBridge.start();
+
+wss.on("connection", (ws, req) => {
+    ws.role = auth.roleOf(req);
+    console.log(`Client Connected to Visual Cortex [role: ${ws.role || "unauthenticated"}]`);
 
     ws.on("message", (message) => {
         try {
             const msg = JSON.parse(message);
 
+            // In-band WebSocket auth support
+            if (msg.type === "auth" || msg.address === "/brahma/auth") {
+                const token = msg.token || (Array.isArray(msg.args) && msg.args[0]); // allow-secret
+                if (typeof token === "string") { // allow-secret
+                    if (auth.exchangeHuman(token)) {
+                        ws.role = "human";
+                        ws.send(JSON.stringify({ address: "/brahma/auth/ack", role: "human" }));
+                        return;
+                    } else if (safeEqual(token, auth.agentToken)) {
+                        ws.role = "agent";
+                        ws.send(JSON.stringify({ address: "/brahma/auth/ack", role: "agent" }));
+                        return;
+                    }
+                }
+                ws.send(JSON.stringify({ address: "/brahma/auth/error", error: "invalid_token" }));
+                return;
+            }
+
             // Forward allowed namespace messages from browser to SC via OSC
             if (msg.address && ALLOWED_NAMESPACES.some(ns => msg.address.startsWith(ns))) {
+                // Human authorization required for live sound execution and panic commands
+                if (ws.role !== "human") {
+                    ws.send(JSON.stringify({
+                        address: "/brahma/error",
+                        error: "forbidden",
+                        message: "Human authorization required for live engine control"
+                    }));
+                    return;
+                }
+
                 const oscArgs = (msg.args || []).map(arg => {
                     if (typeof arg === "number") {
                         return Number.isInteger(arg)
@@ -126,7 +298,6 @@ udpPort.on("message", (oscMsg) => {
         const paramName = oscMsg.args[1]?.value;
         if (moduleName && paramName) {
             if (!paramCache[moduleName]) paramCache[moduleName] = [];
-            // Avoid duplicates
             const existing = paramCache[moduleName].findIndex(p => p.name === paramName);
             const param = {
                 name: paramName,
@@ -165,11 +336,7 @@ sendPort.on("ready", () => {
     console.log(`OSC Sender Ready -> port ${OSC_SEND_PORT}`);
 });
 
-// The OSC bridge to SuperCollider is OPTIONAL: the HTTP surface (dashboard,
-// /aether player, /live HLS stream) must survive when SC isn't running or the
-// OSC port is already taken. An unhandled 'error' on a dgram socket would
-// otherwise crash the whole process (EventEmitter semantics), taking the live
-// broadcast down with it. So we log and continue — degrade, don't die.
+// Graceful UDP degradation: degrade, don't die
 udpPort.on("error", (err) => {
     console.warn(`OSC listener unavailable on ${OSC_UDP_PORT} — serving HTTP without live SC telemetry (${err.code || err.message})`);
 });
@@ -179,3 +346,37 @@ sendPort.on("error", (err) => {
 
 udpPort.open();
 sendPort.open();
+
+// Fail-closed sandbox self-test on boot
+initSandbox();
+
+function closeServer(cb) {
+    try { dirtBridge.close(); } catch (_) {}
+    try { udpPort.close(); } catch (_) {}
+    try { sendPort.close(); } catch (_) {}
+    try { wss.close(); } catch (_) {}
+    if (server) {
+        server.close(cb);
+    } else if (cb) {
+        cb();
+    }
+}
+
+process.on("SIGTERM", () => closeServer());
+process.on("SIGINT", () => closeServer());
+
+module.exports = {
+    app,
+    server,
+    wss,
+    auth,
+    dirtBridge,
+    sandboxStatus,
+    initSandbox,
+    closeServer,
+    udpPort,
+    sendPort,
+    ALLOWED_NAMESPACES,
+    HOST,
+    HTTP_PORT
+};

@@ -129,6 +129,9 @@ s.doWhenBooted({
     // === 29: Ableton Bridge (Live Set absorption via Extensions SDK) ===
     (root +/+ "29_ableton_bridge.scd").load;
 
+    // === 31: Live Gateway responders (browser/agent workbench: play, panic, ping) ===
+    (root +/+ "31_live_gateway.scd").load;
+
     // === 30: Deploy IMMUNE Governor (must be last in signal chain) ===
     // Stereo IMMUNE on hardware outputs - final safety net
     Synth(\immune_governor, [\inBus, 0, \outBus, 0, \threshold, 0.9], ~sc_grp[\rr], \addToTail);

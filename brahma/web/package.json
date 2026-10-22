@@ -4,7 +4,8 @@
   "description": "Visual interface for the Alchemical Synthesizer",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/**/*.test.js"
   },
   "keywords": ["supercollider", "osc", "visualization", "p5js"],
   "author": "4444J99",
