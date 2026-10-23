@@ -294,7 +294,7 @@ server = app.listen(HTTP_PORT, HOST, () => {
     if (process.env.BRAHMA_HUMAN_TOKEN) {
         console.log(`--- HUMAN ROLE: supplied by environment, not printed ---`);
     } else {
-        console.log(`--- WORKBENCH (human): http://${HOST}:${port}/#t=${auth.humanToken} ---`); // allow-secret
+        console.log(`--- WORKBENCH (human): http://${HOST}:${port}/workbench/#t=${auth.humanToken} ---`); // allow-secret
         console.log(`--- Open that URL on this machine to claim the human role. ---`);
     }
 });

@@ -130,11 +130,32 @@ if command -v node >/dev/null 2>&1; then
     done
     code="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
     api="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
+    wb="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/workbench/" 2>/dev/null || echo 000)"
+    wbsrc="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/workbench/source.json" 2>/dev/null || echo 000)"
+    # The agent loop must refuse an unauthenticated caller. A 200 here would mean the
+    # approval boundary is open to anything that can reach loopback.
+    agent_anon="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/agent/providers" 2>/dev/null || echo 000)"
     kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
     if [ "$code" = "200" ] && [ "$api" = "200" ]; then
       ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
     else
       bad "Visual Cortex boot (/ = $code, /api/modules = $api; see /tmp/brahma_web.log)"
+    fi
+    if [ "$wb" = "200" ] && [ "$wbsrc" = "200" ]; then
+      ok "workbench page + source offer served (200/200)"
+    else
+      bad "workbench served (/workbench/ = $wb, source.json = $wbsrc)"
+    fi
+    if [ "$agent_anon" = "401" ]; then
+      ok "agent API refuses unauthenticated callers (401)"
+    else
+      bad "agent API auth gate (expected 401, got $agent_anon)"
+    fi
+    # The launch URL must point at the page that can actually claim the token.
+    if grep -q "/workbench/#t=" /tmp/brahma_web.log 2>/dev/null; then
+      ok "human launch URL targets /workbench/#t="
+    else
+      bad "human launch URL does not target the workbench (see /tmp/brahma_web.log)"
     fi
   else
     if [ "$STRICT" = "1" ]; then bad "could not install web deps (offline?)"; else skip "web deps unavailable (offline) — endpoint boot"; fi

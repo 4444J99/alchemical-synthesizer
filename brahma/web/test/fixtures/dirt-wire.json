@@ -1,0 +1,22 @@
+{
+  "_provenance": [
+    "Dirt/SuperDirt wire-format fixtures for the bridge conformance test.",
+    "",
+    "These are the exact bytes SuperDirt would receive: OSC address, typetag string,",
+    "then big-endian arguments with 4-byte alignment. They were encoded with the",
+    "reference OSC encoder from the argument lists Tidal's Dirt client sends.",
+    "",
+    "They are NOT a capture from a live Tidal session: this host has no GHC and no",
+    "Tidal, so a live capture cannot be made here. What the test proves is therefore",
+    "wire-format conformance — the bridge decodes these bytes and produces typed",
+    "Brahma messages — not interoperability observed against a running Tidal.",
+    "",
+    "When Tidal is available, replacing `play` with a real capture is the upgrade.",
+    "The test reads bytes, not JS objects, so that swap changes nothing else."
+  ],
+  "packets": {
+    "play": "2f646972742f706c617900002c73737364736473647364736400000073000000626400006e00000000000000000000006761696e000000003feccccccccccccd6f726269740000003ff0000000000000637073003fe000000000000064656c74610000003fd0000000000000",
+    "panic": "2f646972742f70616e6963002c000000",
+    "play2": "2f706c61793200002c7373736473647364000000736f756e64000000736177746f6f7468000000006d6964696e6f746500000000405000000000000076656c6f63697479000000003fe8000000000000637073004000000000000000"
+  }
+}

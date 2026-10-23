@@ -134,12 +134,14 @@ async function executeSclang({
   const scratch = sandbox.makeScratch();
   const scriptFile = path.join(scratch, "headless_eval.scd");
 
-  // Wrap script to execute cleanly in headless sclang and exit with 0 or report error and exit 1
+  // Wrap script to execute cleanly in headless sclang and exit with 0 or report error and exit 1.
+  // The result is printed: an eval whose value cannot be observed is not verifiable,
+  // and the API returns stdout as the answer.
   const wrappedCode = `
 try {
   (
     ${code}
-  );
+  ).postln;
   0.exit;
 } { |err|
   err.reportError;

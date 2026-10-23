@@ -79,6 +79,9 @@ function buildProfile({ readRoots = [], readFiles = [], execs = [], scratch, udp
   lines.push('(allow file-write* (literal "/dev/null"))');
   lines.push("(deny network*)");
   lines.push('(allow network-bind (local udp "*:*"))');
+  // sclang opens its own inbound UDP port at startup and dies noisily without this:
+  // binding is not receiving, and Seatbelt treats them as separate operations.
+  lines.push(`(allow network-inbound (local udp "*:${Number(udpPort)}"))`);
   lines.push(`(allow network-outbound (remote udp "localhost:${Number(udpPort)}"))`);
   return lines.join("\n") + "\n";
 }
