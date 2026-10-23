@@ -8,6 +8,7 @@ const runtimes = require("./lib/runtimes");
 const { createDirtBridge } = require("./lib/dirt");
 const { createTokenBucket } = require("./lib/ratelimit");
 const { createLiveSessions, createSession, oscArgs } = require("./lib/session");
+const { createAgentLayer } = require("./lib/agent");
 
 const HOST = process.env.HOST || "127.0.0.1";
 const HTTP_PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 3000;
@@ -157,6 +158,89 @@ app.get("/workbench/source.json", (req, res) => {
             version: (pkg.dependencies && pkg.dependencies[d.name]) || "unlisted"
         }))
     });
+});
+
+// REST API: Agent composition loop (propose → accept → run).
+//
+// Three separate acts, three separate endpoints, and only a human may perform the
+// last two. Accepting a proposal does not execute it; running does.
+const agent = createAgentLayer({
+    repoRoot: path.resolve(__dirname, "../.."),
+    engineHealth: () => liveSessions.engineHealth()
+});
+
+function agentGuard(req, res, { requireHuman = false } = {}) {
+    if (!auth.originOk(req)) {
+        res.status(403).json({ ok: false, code: "forbidden_origin", message: "Untrusted Origin" });
+        return null;
+    }
+    const role = auth.roleOf(req);
+    if (requireHuman && role !== "human") {
+        res.status(403).json({ ok: false, code: "human_role_required", message: "Human role required" });
+        return null;
+    }
+    if (!requireHuman && role !== "human" && role !== "agent") {
+        res.status(401).json({ ok: false, code: "auth_required", message: "Human or agent role required" });
+        return null;
+    }
+    return role;
+}
+
+function agentReply(res, result, okStatus = 200) {
+    if (result && result.ok === false) {
+        const status = result.code === "forbidden" ? 403
+            : result.code === "unknown_approval" ? 404
+            : result.code === "invalid_transition" || result.code === "not_accepted" ? 409
+            : 400;
+        return res.status(status).json(result);
+    }
+    return res.status(okStatus).json(result);
+}
+
+app.get("/api/agent/providers", (req, res) => {
+    if (!agentGuard(req, res)) return;
+    return res.json({ providers: agent.available(), tools: agent.toolset() });
+});
+
+app.post("/api/agent/propose", async (req, res) => {
+    const role = agentGuard(req, res);
+    if (!role) return;
+
+    const { provider, prompt, duration } = req.body || {};
+    const result = await agent.propose({
+        provider: provider || "mock",
+        prompt: prompt || "",
+        duration,
+        proposedBy: role
+    });
+    return agentReply(res, result);
+});
+
+app.get("/api/agent/approvals", (req, res) => {
+    if (!agentGuard(req, res)) return;
+    return res.json({ approvals: agent.approvals.list() });
+});
+
+app.post("/api/agent/approvals/:id/accept", (req, res) => {
+    if (!agentGuard(req, res, { requireHuman: true })) return;
+    return agentReply(res, agent.accept(req.params.id, { actor: "human" }));
+});
+
+app.post("/api/agent/approvals/:id/reject", (req, res) => {
+    if (!agentGuard(req, res, { requireHuman: true })) return;
+    return agentReply(res, agent.reject(req.params.id, { actor: "human", reason: (req.body || {}).reason }));
+});
+
+app.post("/api/agent/approvals/:id/run", (req, res) => {
+    if (!agentGuard(req, res, { requireHuman: true })) return;
+    return agentReply(res, agent.run(req.params.id, { actor: "human" }), 202);
+});
+
+app.get("/api/agent/jobs/:id", (req, res) => {
+    if (!agentGuard(req, res)) return;
+    const job = agent.runner.get(req.params.id);
+    if (!job) return res.status(404).json({ ok: false, code: "unknown_job", message: `No job ${req.params.id}` });
+    return res.json({ job });
 });
 
 // REST API: Runtime status discovery

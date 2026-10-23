@@ -87,6 +87,109 @@
             }
         );
         outputPath
+    },
+
+    // ------------------------------------------------------------------------
+    // renderPattern — a *pattern* (note events) -> a WAV. Different verb from
+    // renderSpecimen, which re-expresses an existing audio file.
+    //
+    // The score file is plain text, one event per line:
+    //
+    //     # comment
+    //     <time_seconds> <midi_note> <velocity 0..1> <duration_seconds>
+    //
+    // Plain text rather than JSON on purpose: this SC build ships no JSON
+    // parser, and inventing a dependency for four numbers would be worse.
+    //
+    // The voice is deliberately a fixed, documented timbre (filtered saw +
+    // pulse). It exists so an agent-proposed pattern can be rendered and
+    // measured. It is NOT the live engine rack: per-engine timbre is a later
+    // concern, and pretending otherwise would make the render lie.
+    // ------------------------------------------------------------------------
+    patternDef: {
+        SynthDef(\brahma_pattern_voice, { |out = 0, freq = 440, amp = 0.3,
+                                          dur = 0.5, pan = 0|
+            var env, sig, filt;
+            env  = EnvGen.kr(Env.perc(0.005, dur, 1, -4), doneAction: 2);
+            sig  = Saw.ar(freq, 0.4) + Pulse.ar(freq * 1.004, 0.5, 0.15);
+            filt = RLPF.ar(sig, (freq * 6).clip(200, 12000), 0.3);
+            sig  = filt * env * amp;
+            Out.ar(out, Balance2.ar(sig, sig, pan));
+        });
+    },
+
+    parsePatternScore: { |self, scorePath|
+        var lines, events;
+        lines = File.readAllString(scorePath).split($\n);
+        events = List.new;
+        lines.do { |raw|
+            var line, parts, t, note, vel, dur;
+            line = raw.stripWhiteSpace;
+            if (line.notEmpty and: { line.beginsWith("#").not }) {
+                parts = line.split($ ).reject { |p| p.isEmpty };
+                if (parts.size >= 4) {
+                    t    = parts[0].asFloat;
+                    note = parts[1].asFloat;
+                    vel  = parts[2].asFloat;
+                    dur  = parts[3].asFloat;
+                    if (t.notNil and: { note.notNil }) {
+                        events.add((time: t, note: note, vel: vel, dur: dur));
+                    };
+                };
+            };
+        };
+        events
+    },
+
+    // scorePath   : plain-text pattern score (see above)
+    // outputPath  : destination WAV
+    // duration    : render length in seconds (must cover the last event)
+    // exitWhenDone: call 0.exit when finished (for headless sclang)
+    renderPattern: { |self, scorePath, outputPath, duration = 8.0, exitWhenDone = false|
+        var def, events, score, opts, osc, tail;
+
+        def = self.patternDef.();
+        events = self.parsePatternScore(scorePath);
+        osc = outputPath ++ ".osc";
+        tail = 1.2;
+
+        ("NRT pattern render: " ++ events.size ++ " events -> " ++ outputPath
+            ++ " (" ++ duration ++ "s)").postln;
+
+        score = Score(
+            [[0.0, [\d_recv, def.asBytes]]]
+            ++ events.collect { |e, i|
+                [
+                    e[\time],
+                    [\s_new, \brahma_pattern_voice, 2000 + i, 0, 0,
+                        \freq, e[\note].midicps,
+                        \amp, (e[\vel] * 0.6).clip(0.0, 0.9),
+                        \dur, e[\dur].clip(0.02, 30.0),
+                        \pan, ((i % 5) - 2) * 0.15]
+                ]
+            }
+            ++ [[duration + 0.5, [\c_set, 0, 0]]]
+        );
+
+        opts = ServerOptions.new
+            .numOutputBusChannels_(2)
+            .numInputBusChannels_(0)
+            .sampleRate_(44100);
+
+        score.recordNRT(
+            oscFilePath: osc,
+            outputFilePath: outputPath,
+            sampleRate: 44100,
+            headerFormat: "WAV",
+            sampleFormat: "int16",
+            options: opts,
+            duration: duration + tail,
+            action: {
+                ("NRT pattern render complete -> " ++ outputPath).postln;
+                if(exitWhenDone) { 0.exit(0) };
+            }
+        );
+        outputPath
     }
 );
 

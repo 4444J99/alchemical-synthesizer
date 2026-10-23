@@ -81,6 +81,18 @@ if command -v python3 >/dev/null 2>&1; then
   else
     bad "validate_audio.py (see /tmp/brahma_validator.log)"; tail -8 /tmp/brahma_validator.log
   fi
+  # M3: the measurement mode the agent loop depends on. Proves the flag is wired and
+  # that a real tone measures as sound rather than coming back empty.
+  if [ -f forge/analyze_audio.py ] && command -v ffmpeg >/dev/null 2>&1; then
+    if python3 forge/analyze_audio.py "$TONE" --summary-json /tmp/brahma_summary.json >/tmp/brahma_summary.log 2>&1 \
+       && python3 -c 'import json,sys; d=json.load(open("/tmp/brahma_summary.json")); sys.exit(0 if d.get("verdict")=="non_silent" and d.get("peak_dbfs") is not None else 1)'; then
+      ok "analyze_audio.py --summary-json measures a real tone"
+    else
+      bad "analyze_audio.py --summary-json (see /tmp/brahma_summary.log)"; tail -5 /tmp/brahma_summary.log
+    fi
+  else
+    skip "ffmpeg not installed — audio summary"
+  fi
   rm -f "$TONE"
 else
   skip "python3 not installed — validator"
@@ -174,7 +186,7 @@ if command -v python3 >/dev/null 2>&1; then
 else
   skip "python3 not installed — Forge py syntax"
 fi
-for sh in forge/forge.sh forge/bounce.sh forge/ingest.sh forge/setup-demucs.sh \
+for sh in forge/forge.sh forge/bounce.sh forge/render-pattern.sh forge/ingest.sh forge/setup-demucs.sh \
           forge/videotrack.sh forge/setup-video.sh forge/package.sh tools/broadcast.sh \
           tools/r2_sync.sh tools/rebroadcast.sh deploy/aether/entrypoint.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue

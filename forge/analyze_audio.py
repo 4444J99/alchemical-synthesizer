@@ -204,10 +204,61 @@ def analyze(samples: list[float], fps: int, n_bands: int) -> dict:
     }
 
 
+def summarize(samples: list[float], window_s: float = 0.05, silence_db: float = -50.0) -> dict:
+    """Summary metrics for a render — the numbers an agent needs to know whether
+    the thing it asked for actually produced sound.
+
+    Deliberately reports *measurements*, not judgements: peak/rms in dBFS, the
+    fraction of windows below the silence floor, clipping, and a plain verdict
+    string. A non-silent verdict means samples were measured above the floor; it
+    does not mean anyone heard anything.
+    """
+    total = len(samples)
+    duration = total / ANALYSIS_SR if total else 0.0
+
+    peak = max((abs(s) for s in samples), default=0.0)
+    sq = sum(s * s for s in samples)
+    rms = math.sqrt(sq / total) if total else 0.0
+    clipped = sum(1 for s in samples if abs(s) >= 0.999)
+    zc = sum(1 for i in range(1, total) if (samples[i] >= 0.0) != (samples[i - 1] >= 0.0))
+
+    win = max(1, int(ANALYSIS_SR * window_s))
+    windows = [samples[i:i + win] for i in range(0, total, win)]
+    floor = 10.0 ** (silence_db / 20.0)
+    active = 0
+    for w in windows:
+        if w and math.sqrt(sum(x * x for x in w) / len(w)) > floor:
+            active += 1
+
+    def db(x: float) -> float | None:
+        return round(20.0 * math.log10(x), 2) if x > 0 else None
+
+    return {
+        "version": 1,
+        "analysis_sr": ANALYSIS_SR,
+        "duration_s": round(duration, 3),
+        "peak_linear": round(peak, 6),
+        "peak_dbfs": db(peak),
+        "rms_linear": round(rms, 6),
+        "rms_dbfs": db(rms),
+        "clipped_samples": clipped,
+        "clipped_ratio": round(clipped / total, 6) if total else 0.0,
+        "zero_crossing_rate": round(zc / max(1, total - 1), 6),
+        "window_s": window_s,
+        "silence_floor_dbfs": silence_db,
+        "windows": len(windows),
+        "active_windows": active,
+        "silence_ratio": round(1.0 - (active / len(windows)), 4) if windows else 1.0,
+        "non_silent_seconds": round(active * window_s, 3),
+        "verdict": "non_silent" if active > 0 else "silent",
+    }
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Audio -> per-frame visual envelope JSON")
     ap.add_argument("track", help="input audio file (wav/mp3/aiff/...)")
-    ap.add_argument("--out", required=True, help="output envelope JSON path")
+    ap.add_argument("--out", help="output envelope JSON path (envelope mode)")
+    ap.add_argument("--summary-json", help="output summary metrics JSON path (measurement mode)")
     ap.add_argument("--fps", type=int, default=30, help="video frame rate (default 30)")
     ap.add_argument("--bands", type=int, default=12, help="spectral bands (default 12)")
     args = ap.parse_args(argv)
@@ -221,6 +272,9 @@ def main(argv: list[str]) -> int:
     if not os.path.exists(args.track):
         sys.stderr.write(f"analyze_audio: no such file: {args.track}\n")
         return 2
+    if not args.out and not args.summary_json:
+        sys.stderr.write("analyze_audio: nothing to do — pass --out and/or --summary-json\n")
+        return 2
 
     ffmpeg = find_ffmpeg()
     if not ffmpeg:
@@ -229,20 +283,33 @@ def main(argv: list[str]) -> int:
 
     try:
         samples = decode_mono_f32(ffmpeg, args.track)
-        result = analyze(samples, args.fps, args.bands)
+        result = analyze(samples, args.fps, args.bands) if args.out else None
+        summary = summarize(samples) if args.summary_json else None
     except RuntimeError as e:
         sys.stderr.write(f"analyze_audio: {e}\n")
         return 3
 
-    os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-    with open(args.out, "w", encoding="utf-8") as fh:
-        json.dump(result, fh, separators=(",", ":"))
+    if result is not None:
+        os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
+        with open(args.out, "w", encoding="utf-8") as fh:
+            json.dump(result, fh, separators=(",", ":"))
 
-    sys.stderr.write(
-        f"analyze_audio: {args.track} -> {args.out} "
-        f"({result['frames']} frames @ {args.fps}fps, {result['duration']}s, "
-        f"{args.bands} bands)\n"
-    )
+        sys.stderr.write(
+            f"analyze_audio: {args.track} -> {args.out} "
+            f"({result['frames']} frames @ {args.fps}fps, {result['duration']}s, "
+            f"{args.bands} bands)\n"
+        )
+
+    if summary is not None:
+        os.makedirs(os.path.dirname(os.path.abspath(args.summary_json)), exist_ok=True)
+        with open(args.summary_json, "w", encoding="utf-8") as fh:
+            json.dump(summary, fh, separators=(",", ":"))
+
+        sys.stderr.write(
+            f"analyze_audio: {args.track} -> {args.summary_json} "
+            f"({summary['verdict']}, peak {summary['peak_dbfs']} dBFS, "
+            f"rms {summary['rms_dbfs']} dBFS, silence {summary['silence_ratio']})\n"
+        )
     return 0
 
 
