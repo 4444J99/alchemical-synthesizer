@@ -6,6 +6,8 @@ const { createAuth, safeEqual } = require("./lib/auth");
 const sandbox = require("./lib/sandbox");
 const runtimes = require("./lib/runtimes");
 const { createDirtBridge } = require("./lib/dirt");
+const { createTokenBucket } = require("./lib/ratelimit");
+const { createLiveSessions, createSession, oscArgs } = require("./lib/session");
 
 const HOST = process.env.HOST || "127.0.0.1";
 const HTTP_PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 3000;
@@ -13,11 +15,14 @@ const OSC_UDP_PORT = 57122; // Listening for SC
 const OSC_SEND_PORT = 57120; // Sending to SC
 const DIRT_PORT = Number(process.env.BRAHMA_DIRT_PORT || process.env.DIRT_PORT) || 57130;
 
-// Namespace whitelist: all OSC address prefixes allowed from browser → SC
+// Namespace whitelist: all OSC address prefixes allowed from browser → SC.
+// /dirt/ is deliberately absent: Dirt traffic arrives on the UDP bridge (57130),
+// which owns its translation and auto-release. A browser writing raw /dirt/play
+// would bypass both.
 const ALLOWED_NAMESPACES = [
     "/golem/", "/brahma/", "/chronos/", "/daemon/",
     "/moirai/", "/genesis/", "/arbor/", "/serpens/",
-    "/scriptorium/", "/ableton/", "/dirt/"
+    "/scriptorium/", "/ableton/"
 ];
 
 // Module registry cache (populated from SC broadcasts)
@@ -30,6 +35,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));
+
+// Shared live-pattern registry. One gateway, one engine, one state.
+const liveSessions = createLiveSessions();
 
 let server;
 const auth = createAuth({
@@ -165,9 +173,18 @@ app.post("/api/runtimes/sclang/eval", async (req, res) => {
 
 // Bind HTTP server to loopback by default
 server = app.listen(HTTP_PORT, HOST, () => {
-    console.log(`--- VISUAL CORTEX ONLINE: http://${HOST}:${HTTP_PORT} ---`);
-    console.log(`--- GOLEM UI: http://${HOST}:${HTTP_PORT}/golem ---`);
-    console.log(`--- CORTEX UI: http://${HOST}:${HTTP_PORT}/cortex ---`);
+    const port = server.address() ? server.address().port : HTTP_PORT;
+    console.log(`--- VISUAL CORTEX ONLINE: http://${HOST}:${port} ---`);
+    console.log(`--- GOLEM UI: http://${HOST}:${port}/golem ---`);
+    console.log(`--- CORTEX UI: http://${HOST}:${port}/cortex ---`);
+    // Human token handoff. Without this, no browser can obtain the human role and
+    // the workbench is unusable: the token is per-launch and random.
+    if (process.env.BRAHMA_HUMAN_TOKEN) {
+        console.log(`--- HUMAN ROLE: supplied by environment, not printed ---`);
+    } else {
+        console.log(`--- WORKBENCH (human): http://${HOST}:${port}/#t=${auth.humanToken} ---`); // allow-secret
+        console.log(`--- Open that URL on this machine to claim the human role. ---`);
+    }
 });
 
 // 2. WebSocket Server (for Browser & Workbench) with Origin Verification
@@ -182,16 +199,16 @@ const wss = new WebSocket.Server({
     }
 });
 
-// 3. OSC UDP Port (From SuperCollider)
+// 3. OSC UDP Port (From SuperCollider). Loopback only: the engine runs on this host.
 const udpPort = new osc.UDPPort({
-    localAddress: "0.0.0.0",
+    localAddress: HOST,
     localPort: OSC_UDP_PORT,
     metadata: true
 });
 
 // 4. OSC Send Port (To SuperCollider)
 const sendPort = new osc.UDPPort({
-    localAddress: "0.0.0.0",
+    localAddress: HOST,
     localPort: 0, // ephemeral
     remoteAddress: "127.0.0.1",
     remotePort: OSC_SEND_PORT,
@@ -218,65 +235,45 @@ dirtBridge.on("error", (err) => {
 dirtBridge.start();
 
 wss.on("connection", (ws, req) => {
-    ws.role = auth.roleOf(req);
+    // Role is held in a mutable cell so typed frames can upgrade the connection
+    // (auth) without the protocol layer reaching into ws internals.
+    const role = { current: auth.roleOf(req) };
+
+    const limiter = createTokenBucket({
+        ratePerSec: Number(process.env.BRAHMA_EVENT_RATE || 200),
+        burst: Number(process.env.BRAHMA_EVENT_BURST || 400)
+    });
+
+    const session = createSession({
+        getRole: () => role.current,
+        setRole: (r) => { role.current = r; },
+        exchangeHuman: (t) => auth.exchangeHuman(t),
+        isAgentToken: (t) => safeEqual(t, auth.agentToken),
+        sendOsc: (address, args) => sendPort.send({ address, args: oscArgs(args) }),
+        allowedPrefixes: ALLOWED_NAMESPACES,
+        limiter,
+        sessions: liveSessions,
+        send: (payload) => {
+            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload));
+        }
+    });
+
+    ws.role = role.current;
     console.log(`Client Connected to Visual Cortex [role: ${ws.role || "unauthenticated"}]`);
 
     ws.on("message", (message) => {
-        try {
-            const msg = JSON.parse(message);
-
-            // In-band WebSocket auth support
-            if (msg.type === "auth" || msg.address === "/brahma/auth") {
-                const token = msg.token || (Array.isArray(msg.args) && msg.args[0]); // allow-secret
-                if (typeof token === "string") { // allow-secret
-                    if (auth.exchangeHuman(token)) {
-                        ws.role = "human";
-                        ws.send(JSON.stringify({ address: "/brahma/auth/ack", role: "human" }));
-                        return;
-                    } else if (safeEqual(token, auth.agentToken)) {
-                        ws.role = "agent";
-                        ws.send(JSON.stringify({ address: "/brahma/auth/ack", role: "agent" }));
-                        return;
-                    }
-                }
-                ws.send(JSON.stringify({ address: "/brahma/auth/error", error: "invalid_token" }));
-                return;
-            }
-
-            // Forward allowed namespace messages from browser to SC via OSC
-            if (msg.address && ALLOWED_NAMESPACES.some(ns => msg.address.startsWith(ns))) {
-                // Human authorization required for live sound execution and panic commands
-                if (ws.role !== "human") {
-                    ws.send(JSON.stringify({
-                        address: "/brahma/error",
-                        error: "forbidden",
-                        message: "Human authorization required for live engine control"
-                    }));
-                    return;
-                }
-
-                const oscArgs = (msg.args || []).map(arg => {
-                    if (typeof arg === "number") {
-                        return Number.isInteger(arg)
-                            ? { type: "i", value: arg }
-                            : { type: "f", value: arg };
-                    }
-                    return { type: "s", value: String(arg) };
-                });
-
-                sendPort.send({
-                    address: msg.address,
-                    args: oscArgs
-                });
-            }
-        } catch (e) {
-            // Ignore malformed messages
-        }
+        session.handle(message.toString());
+        ws.role = role.current;
     });
 });
 
 // Broadcast incoming OSC to all WebSocket clients + cache registry data
 udpPort.on("message", (oscMsg) => {
+    // Engine health signal: /brahma/live/pong <module_count> <live_voice_count>
+    if (oscMsg.address === "/brahma/live/pong") {
+        liveSessions.recordPong(oscMsg.args[0]?.value, oscMsg.args[1]?.value);
+    }
+
     // Cache registry module broadcasts
     if (oscMsg.address === "/brahma/registry/module") {
         const name = oscMsg.args[0]?.value;
@@ -376,6 +373,7 @@ module.exports = {
     closeServer,
     udpPort,
     sendPort,
+    liveSessions,
     ALLOWED_NAMESPACES,
     HOST,
     HTTP_PORT

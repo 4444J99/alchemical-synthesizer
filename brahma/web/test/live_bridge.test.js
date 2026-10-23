@@ -59,5 +59,20 @@ test("Live Bridge — SuperCollider File & Schema Integrity", async (t) => {
 test("Live Bridge — Gateway Server Namespace Whitelist", () => {
   const serverContent = fs.readFileSync(SERVER_JS, "utf8");
   assert.ok(serverContent.includes('"/brahma/"'), "server.js ALLOWED_NAMESPACES must include /brahma/");
-  assert.ok(serverContent.includes('"/dirt/"'), "server.js ALLOWED_NAMESPACES must include /dirt/");
+  // /dirt/ must stay out of the browser allowlist: the UDP bridge owns that
+  // translation (auto-release + mapping). A browser could otherwise write raw
+  // /dirt/play straight to SuperCollider and bypass both.
+  assert.ok(
+    !/ALLOWED_NAMESPACES\s*=\s*\[[^\]]*"\/dirt\/"/.test(serverContent),
+    "server.js ALLOWED_NAMESPACES must NOT include /dirt/ (bridge-only ingress)"
+  );
+});
+
+test("Live Bridge — OSC sockets bind loopback only", () => {
+  const serverContent = fs.readFileSync(SERVER_JS, "utf8");
+  assert.ok(
+    !serverContent.includes('localAddress: "0.0.0.0"'),
+    "OSC UDP sockets must not bind 0.0.0.0"
+  );
+  assert.ok(serverContent.includes("localAddress: HOST"), "OSC sockets must bind the loopback HOST");
 });

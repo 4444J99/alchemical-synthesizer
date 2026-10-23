@@ -229,7 +229,7 @@ test("Gateway Integration: WebSocket verifyClient enforces 403 on untrusted Orig
   wsOk.close();
 });
 
-test("Gateway Integration: WebSocket forwards messages for human and rejects agent/unauthenticated", async () => {
+test("Gateway Integration: WebSocket enforces roles and the browser allowlist", async () => {
   const port = server.address().port;
 
   let oscSent = [];
@@ -238,71 +238,65 @@ test("Gateway Integration: WebSocket forwards messages for human and rejects age
     oscSent.push(msg);
   };
 
+  const open = (headers) => new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}`, { headers });
+    ws.on("open", () => resolve(ws));
+    ws.on("error", reject);
+  });
+
+  const ask = (ws, frame) => new Promise((resolve) => {
+    ws.once("message", (d) => resolve(JSON.parse(d)));
+    ws.send(JSON.stringify(frame));
+  });
+
+  const sockets = [];
   try {
-    // 1. Unauthenticated client attempting live command
-    const wsAnon = new WebSocket(`ws://127.0.0.1:${port}`, {
-      headers: { Origin: `http://127.0.0.1:${port}` }
-    });
-    await new Promise(r => wsAnon.on("open", r));
-    const anonReply = await new Promise(resolve => {
-      wsAnon.on("message", d => resolve(JSON.parse(d)));
-      wsAnon.send(JSON.stringify({ address: "/dirt/play", args: ["bd", 60] }));
-    });
-    assert.strictEqual(anonReply.error, "forbidden");
-    assert.strictEqual(oscSent.length, 0);
-    wsAnon.close();
+    const origin = `http://127.0.0.1:${port}`;
 
-    // 2. Agent token client attempting live command
-    const wsAgent = new WebSocket(`ws://127.0.0.1:${port}`, {
-      headers: {
-        Origin: `http://127.0.0.1:${port}`,
-        Authorization: `Bearer ${auth.agentToken}`
-      }
-    });
-    await new Promise(r => wsAgent.on("open", r));
-    const agentReply = await new Promise(resolve => {
-      wsAgent.on("message", d => resolve(JSON.parse(d)));
-      wsAgent.send(JSON.stringify({ address: "/brahma/live/play", args: ["synth", 1, 60, 0.8, 1.0] }));
-    });
-    assert.strictEqual(agentReply.error, "forbidden");
+    // 1. Unauthenticated client attempting a legacy live command
+    const wsAnon = await open({ Origin: origin });
+    sockets.push(wsAnon);
+    const anonReply = await ask(wsAnon, { address: "/brahma/live/play", args: ["synth", 1, 60, 0.8, 1.0] });
+    assert.strictEqual(anonReply.type, "error");
+    assert.strictEqual(anonReply.code, "forbidden");
     assert.strictEqual(oscSent.length, 0);
-    wsAgent.close();
 
-    // 3. In-band auth on unauthenticated client upgrading to human
-    const wsInBand = new WebSocket(`ws://127.0.0.1:${port}`, {
-      headers: { Origin: `http://127.0.0.1:${port}` }
-    });
-    await new Promise(r => wsInBand.on("open", r));
-    const ackReply = await new Promise(resolve => {
-      wsInBand.on("message", d => resolve(JSON.parse(d)));
-      wsInBand.send(JSON.stringify({ type: "auth", token: auth.humanToken })); // allow-secret
-    });
-    assert.strictEqual(ackReply.address, "/brahma/auth/ack");
+    // 2. Agent token cannot drive the engine
+    const wsAgent = await open({ Origin: origin, Authorization: `Bearer ${auth.agentToken}` });
+    sockets.push(wsAgent);
+    const agentReply = await ask(wsAgent, { type: "run", id: "p1" });
+    assert.strictEqual(agentReply.code, "forbidden");
+    assert.strictEqual(oscSent.length, 0);
+
+    // 3. In-band auth upgrades the socket to human
+    const wsInBand = await open({ Origin: origin });
+    sockets.push(wsInBand);
+    const ackReply = await ask(wsInBand, { type: "auth", token: auth.humanToken }); // allow-secret
+    assert.strictEqual(ackReply.type, "auth");
     assert.strictEqual(ackReply.role, "human");
 
-    // Now send live command from newly authenticated socket
+    // 4. The upgraded socket may forward an allowlisted address
     wsInBand.send(JSON.stringify({ address: "/brahma/live/play", args: ["synth", 1, 60, 0.8, 1.0] }));
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50));
     assert.strictEqual(oscSent.length, 1);
     assert.strictEqual(oscSent[0].address, "/brahma/live/play");
-    wsInBand.close();
 
-    // 4. Human authenticated client sending /dirt/play
-    const wsHuman = new WebSocket(`ws://127.0.0.1:${port}`, {
-      headers: {
-        Origin: `http://127.0.0.1:${port}`,
-        Cookie: `brahma_human=${auth.humanToken}`
-      }
-    });
-    await new Promise(r => wsHuman.on("open", r));
-    wsHuman.send(JSON.stringify({ address: "/dirt/play", args: ["cp", 64] }));
+    // 5. A human client still cannot reach /dirt/: the bridge owns that ingress
+    const wsHuman = await open({ Origin: origin, Cookie: `brahma_human=${auth.humanToken}` });
+    sockets.push(wsHuman);
+    const dirtReply = await ask(wsHuman, { address: "/dirt/play", args: ["cp", 64] });
+    assert.strictEqual(dirtReply.type, "error");
+    assert.strictEqual(dirtReply.code, "forbidden_address");
+    assert.strictEqual(oscSent.length, 1, "no /dirt/ frame reached the engine");
 
-    await new Promise(r => setTimeout(r, 50));
-    assert.strictEqual(oscSent.length, 2);
-    assert.strictEqual(oscSent[1].address, "/dirt/play");
-    assert.strictEqual(oscSent[1].args[0].value, "cp");
-    wsHuman.close();
+    // 6. Typed run is accepted only for humans
+    const runReply = await ask(wsHuman, { type: "run", id: "p1", engine: "chimera" });
+    assert.strictEqual(runReply.type, "ack");
+    assert.strictEqual(runReply.id, "p1");
   } finally {
+    for (const ws of sockets) {
+      try { ws.close(); } catch (_) {}
+    }
     sendPort.send = originalSend;
   }
 });

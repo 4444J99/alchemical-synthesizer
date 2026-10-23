@@ -96,15 +96,20 @@ if command -v node >/dev/null 2>&1; then
   fi
   if [ -d brahma/web/node_modules ]; then
     PORT=3939
-    ( cd brahma/web && PORT=$PORT node server.js >/tmp/brahma_web.log 2>&1 ) &
+    # exec, so $! is node's own PID rather than a subshell: the teardown below has
+    # to actually release the port, or the next run fails with EADDRINUSE.
+    ( cd brahma/web && exec env PORT=$PORT node server.js >/tmp/brahma_web.log 2>&1 ) &
     WEB_PID=$!
+    # curl -q ignores ~/.curlrc. A user config carrying --http2 makes curl send an
+    # h2c Upgrade header, which this server answers 400 — a harness must not depend
+    # on the operator's aliases.
     # Wait up to ~5s for the server to answer.
     for _ in $(seq 1 25); do
-      if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then break; fi
+      if curl -q -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then break; fi
       sleep 0.2
     done
-    code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
-    api="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
+    code="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
+    api="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
     kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
     if [ "$code" = "200" ] && [ "$api" = "200" ]; then
       ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
