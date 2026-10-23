@@ -11,8 +11,8 @@ const { createLiveSessions, createSession, oscArgs } = require("./lib/session");
 
 const HOST = process.env.HOST || "127.0.0.1";
 const HTTP_PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 3000;
-const OSC_UDP_PORT = 57122; // Listening for SC
-const OSC_SEND_PORT = 57120; // Sending to SC
+const OSC_UDP_PORT = Number(process.env.BRAHMA_OSC_LISTEN_PORT || 57122); // Listening for SC
+const OSC_SEND_PORT = Number(process.env.BRAHMA_OSC_SEND_PORT || 57120); // Sending to SC
 const DIRT_PORT = Number(process.env.BRAHMA_DIRT_PORT || process.env.DIRT_PORT) || 57130;
 
 // Namespace whitelist: all OSC address prefixes allowed from browser → SC.
@@ -130,9 +130,37 @@ async function initSandbox() {
     }
 }
 
+// AGPL source-disclosure surface. The workbench page is AGPL-3.0-or-later, and
+// publishing it over HTTP requires offering its source. This endpoint names the exact
+// running commit and every bundled dependency, with version, licence and upstream.
+const pkg = require("./package.json");
+
+const WORKBENCH_DEPENDENCIES = [
+    { name: "@strudel/core", license: "AGPL-3.0-or-later", source: "https://codeberg.org/uzu/strudel" },
+    { name: "@strudel/mini", license: "AGPL-3.0-or-later", source: "https://codeberg.org/uzu/strudel" },
+    { name: "@strudel/transpiler", license: "AGPL-3.0-or-later", source: "https://codeberg.org/uzu/strudel" },
+    { name: "codemirror", license: "MIT", source: "https://codemirror.net" },
+    { name: "@codemirror/state", license: "MIT", source: "https://codemirror.net" },
+    { name: "@codemirror/lang-javascript", license: "MIT", source: "https://codemirror.net" }
+];
+
+app.get("/workbench/source.json", (req, res) => {
+    res.json({
+        workbenchLicense: "AGPL-3.0-or-later",
+        licenseFile: "/LICENSES/AGPL-3.0-or-later.txt",
+        repository: "https://github.com/4444J99/alchemical-synthesizer",
+        commit: process.env.BRAHMA_COMMIT_SHA || null,
+        commitNote: "set BRAHMA_COMMIT_SHA at launch to pin the exact deployed revision",
+        bundle: "/workbench/vendor/workbench.js",
+        dependencies: WORKBENCH_DEPENDENCIES.map((d) => ({
+            ...d,
+            version: (pkg.dependencies && pkg.dependencies[d.name]) || "unlisted"
+        }))
+    });
+});
+
 // REST API: Runtime status discovery
-app.get("/api/runtimes", (req, res) => {
-    const role = auth.roleOf(req);
+app.get("/api/runtimes", (req, res) => {    const role = auth.roleOf(req);
     const runtimesList = runtimes.getRuntimeStatus({ role, sandboxStatus });
     return res.json({
         sandbox: {

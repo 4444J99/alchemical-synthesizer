@@ -1,0 +1,15 @@
+# CHANGES — workbench subtree
+
+Record of modifications to workbench sources and to bundled dependency source.
+
+AGPL-3.0-or-later requires that changes be recorded with dates when covered work is
+conveyed. Bundled dependency source is currently **unmodified**.
+
+## 2026-10-23
+
+- Initial workbench subtree created (AGPL-3.0-or-later).
+- Bundled dependencies added unmodified: `@strudel/core` 1.2.6, `@strudel/mini` 1.2.6,
+  `@strudel/transpiler` 1.2.6, `codemirror` 6.0.2, `@codemirror/state`,
+  `@codemirror/lang-javascript`.
+- No patch is applied to any dependency at build time; `tools/build-workbench.mjs` only
+  bundles and minifies, preserving legal comments at end of file.

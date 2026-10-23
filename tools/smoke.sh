@@ -95,6 +95,14 @@ if command -v node >/dev/null 2>&1; then
         || npm install --no-audit --no-fund >/tmp/brahma_npm.log 2>&1; } )
   fi
   if [ -d brahma/web/node_modules ]; then
+    # The workbench bundle is a build artefact (gitignored). Boot without it and the
+    # page is broken, so the gate that claims the workbench works must build it first.
+    if ( cd brahma/web && npm run --silent build:workbench >/tmp/brahma_wb_build.log 2>&1 ); then
+      ok "workbench bundle built (public/workbench/vendor/workbench.js)"
+    else
+      bad "workbench bundle build failed (see /tmp/brahma_wb_build.log)"
+    fi
+
     PORT=3939
     # exec, so $! is node's own PID rather than a subshell: the teardown below has
     # to actually release the port, or the next run fails with EADDRINUSE.
@@ -121,6 +129,13 @@ if command -v node >/dev/null 2>&1; then
   fi
 else
   skip "node not installed — web endpoint"
+fi
+
+# The licence boundary is enforced, not just described.
+if bash tools/check-workbench-licence.sh >/tmp/brahma_licence.log 2>&1; then
+  ok "workbench licence boundary clean (AGPL subtree isolated)"
+else
+  bad "workbench licence boundary violated (see /tmp/brahma_licence.log)"
 fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="

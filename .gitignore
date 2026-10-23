@@ -52,3 +52,7 @@ __pycache__/
 
 # Override global gitignore's `public/` rule (Gatsby)
 !brahma/web/public/
+
+# Workbench bundle — a build artefact, rebuilt by `npm run build:workbench`.
+# Generated from brahma/web/public/workbench/src/, never edited by hand.
+brahma/web/public/workbench/vendor/

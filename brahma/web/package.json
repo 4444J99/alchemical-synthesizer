@@ -5,14 +5,31 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test test/**/*.test.js",
+    "build:workbench": "node ../../tools/build-workbench.mjs",
+    "test:e2e": "node --test test/e2e/*.e2e.js"
   },
-  "keywords": ["supercollider", "osc", "visualization", "p5js"],
+  "keywords": [
+    "supercollider",
+    "osc",
+    "visualization",
+    "p5js"
+  ],
   "author": "4444J99",
   "license": "MIT",
   "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/state": "6.7.6",
+    "@strudel/core": "1.2.6",
+    "@strudel/mini": "1.2.6",
+    "@strudel/transpiler": "1.2.6",
+    "codemirror": "6.0.2",
     "express": "^5.2.1",
     "osc": "^2.4.4",
     "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "puppeteer-core": "25.16.0"
   }
 }

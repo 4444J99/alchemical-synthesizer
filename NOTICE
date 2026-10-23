@@ -1,0 +1,33 @@
+Brahma — Alchemical Synthesizer
+Copyright (C) 2026 4444J99
+
+This repository is MIT licensed (see LICENSE), with one deliberate exception:
+
+  brahma/web/public/workbench/   AGPL-3.0-or-later
+
+The workbench page is a combined work with Strudel, which is AGPL-3.0-or-later. The
+full licence text is at LICENSES/AGPL-3.0-or-later.txt. Everything served by that page
+is AGPL-3.0-or-later compatible; no proprietary or licence-incompatible asset is loaded
+into it. `product/` is never bundled into, or served alongside, the workbench page.
+
+Bundled into the workbench bundle (brahma/web/public/workbench/vendor/workbench.js):
+
+  @strudel/core        1.2.6   AGPL-3.0-or-later   https://codeberg.org/uzu/strudel
+  @strudel/mini        1.2.6   AGPL-3.0-or-later   https://codeberg.org/uzu/strudel
+  @strudel/transpiler  1.2.6   AGPL-3.0-or-later   https://codeberg.org/uzu/strudel
+  codemirror           6.0.2   MIT                https://codemirror.net
+  @codemirror/state    6.x     MIT                https://codemirror.net
+  @codemirror/lang-javascript   6.x   MIT         https://codemirror.net
+
+Build-time and test-time only (not distributed to browsers):
+
+  esbuild              MIT
+  puppeteer-core       Apache-2.0
+
+None of the bundled dependency sources are modified. The workbench loads Strudel's
+published npm artefacts unmodified; if that ever changes, the change must be recorded
+in brahma/web/public/workbench/CHANGES with file, change and date.
+
+The exact revision served is reported at GET /workbench/source.json.
+
+This notice is engineering diligence, not legal advice.
