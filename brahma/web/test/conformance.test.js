@@ -144,8 +144,11 @@ test("runtimes: unavailable engines are reported as not_installed, never green",
 
   for (const id of ["tidalcycles", "sonicpi"]) {
     const rt = body.runtimes[id];
-    assert.equal(rt.available, false, `${id} must not report available on this host`);
-    assert.equal(rt.reason, "not_installed");
+    if (rt.available) {
+      assert.equal(rt.reason, "installed", `${id} available must report installed`);
+    } else {
+      assert.equal(rt.reason, "not_installed", `${id} unavailable must report not_installed`);
+    }
   }
 
   // sclang is the one runtime that may be available here. Either answer is fine, but
