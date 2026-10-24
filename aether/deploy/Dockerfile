@@ -10,7 +10,7 @@
 #  image variant for later.
 #
 #  BUILD CONTEXT = the repository root (COPY paths are repo-relative):
-#     docker build -f deploy/aether/Dockerfile -t aether-radio .
+#     docker build -f aether/deploy/Dockerfile -t aether-radio .
 # ============================================================================
 FROM node:20-bookworm-slim
 
@@ -22,12 +22,13 @@ RUN apt-get update \
 WORKDIR /app
 
 # The generator toolchain, the theatron player (static), and the runtime.
-COPY tools/ /app/tools/
+COPY aether/tools/ /app/tools/
 # broadcast.sh reuses two Forge-lane tools (Aether -> Forge dependency, see
-# ORGANS.md): forge/tune.py captures a queued submission, forge/bounce.sh is the
-# NRT render tier (SC-gated, no-op in this SC-less image but kept for parity).
-COPY forge/tune.py forge/bounce.sh /app/forge/
-COPY brahma/web/public/aether/ /app/player/
+# ORGANS.md): aether/tools/tune.py captures a queued submission,
+# forge/bounce.sh is the NRT render tier (SC-gated, no-op in this SC-less image
+# but kept for parity).
+COPY aether/tools/tune.py forge/bounce.sh /app/forge/
+COPY aether/web/listener/ /app/player/
 COPY deploy/aether/serve.js deploy/aether/entrypoint.sh /app/
 
 RUN mkdir -p /live \

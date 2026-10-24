@@ -16,7 +16,7 @@ compatibility_date = "2026-01-01"
 # The container: the live generator + stream server (deploy/aether/Dockerfile).
 [[containers]]
 class_name = "AetherContainer"
-image = "../../Dockerfile"      # see README: build context = repo root
+image = "Dockerfile"            # see README: build context = repo root
 max_instances = 1
 instance_type = "basic"
 

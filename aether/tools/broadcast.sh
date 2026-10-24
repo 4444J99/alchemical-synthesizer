@@ -179,7 +179,7 @@ print("SUB_LIC=" + shlex.quote(str(s.get("license", "unknown"))))
 PY
 )"
     TUNED="$WORK/sub_$G_SEG.wav"
-    if python3 "$HERE/forge/tune.py" --url "$SUB_URL" --license "$SUB_LIC" \
+    if python3 "$HERE/tools/tune.py" --url "$SUB_URL" --license "$SUB_LIC" \
          --secs "$SECS" --out "$TUNED" >/dev/null 2>&1 && [ -s "$TUNED" ]; then
       SEG_SOURCE="$TUNED"; ABSORB_SOURCE="$SUB_URL"; ABSORB_LICENSE="$SUB_LIC"
       echo "  ⟳ absorbing submission: $SUB_URL [$SUB_LIC]" >&2
@@ -197,7 +197,7 @@ PY
   # 2. RENDER: produce this segment (graceful tiers) from SEG_SOURCE.
   RENDER_TIER="tone"
   if [ -n "$SEG_SOURCE" ] && [ "$HAVE_SC" = 1 ] && [ "$NO_NRT" = 0 ]; then
-    if bash "$HERE/forge/bounce.sh" "$SEG_SOURCE" "$SEG_WAV" "$SECS" >/dev/null 2>&1; then
+    if bash "$HERE/../forge/bounce.sh" "$SEG_SOURCE" "$SEG_WAV" "$SECS" >/dev/null 2>&1; then
       RENDER_TIER="nrt"
     fi
   fi
