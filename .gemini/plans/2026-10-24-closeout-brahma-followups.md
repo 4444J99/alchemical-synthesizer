@@ -211,3 +211,25 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
   Tidal/Sonic Pi, atom pipeline run, product/ PRs #47/#53).
 - Session DONE: now supported — repository freshness green, native OpenCode
   handshake verified.
+
+---
+
+## Post-closeout correction #4 (2026-10-24, decision set)
+
+### Approved decisions (D1–D6 revised)
+
+- **D1 — Audible judgment**: approved as written. Short audition of browser-to-engine path; measurements remain labeled measured; approving the protocol ≠ listening.
+- **D2 — Composition (revised)**: use existing authenticated agents (agy/OpenCode/Claude Code/Codex) and their allotments. Implemented agent-composed submission path (PR #64). Direct API adapter remains optional.
+- **D3 — Spending (revised)**: **$0 additional API spend.** No new keys or credit purchases. Agent-composed path uses existing allotments. Direct API adapter optional.
+- **D4 — Licensing/deployment**: retain Strudel, accept AGPL obligations; local studio continues; distributed/hosted edition must provide covered source, notices, build material. Verify actual distributed combination + source offer before hosting.
+- **D5 — Tidal/Sonic Pi**: both remain intended capabilities; Tidal first, then Sonic Pi; native install + executable adapters + real availability checks + stop-all integration; availability currently hardcoded false.
+- **D6 — Atom regeneration**: authorize bounded local regeneration using Brahma-related inputs, one heavy process, finite-work limits; human-only closure; sanitized evidence; raw private derivatives stay in private custody. Exclude automatic completion inference and unrelated research-document changes.
+
+### Implementation (D2/D3)
+- `brahma_propose_pattern` now accepts optional `events` (agent-composed note events) and `summary`. If events supplied, no provider called; proposal filed with provider="agent". Bad events rejected (`bad_events`). Accept/execute separation preserved (state "proposed").
+- HTTP route `/api/agent/propose` passes through `events` and `summary`.
+- `agent.propose()` branches: agent-composed path (validate + file) vs provider path (unchanged).
+- PR #64 merged (2026-10-24T15:11:07Z). 143/143 tests pass.
+
+### Net state
+- Repo main @ ce3dad5, clean, 0/0. Gate exit 0. 143/143 tests. organvm verify PASS.
