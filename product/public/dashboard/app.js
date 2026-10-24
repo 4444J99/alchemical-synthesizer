@@ -5,13 +5,6 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const ORIGIN = location.origin;
 
-// --- session (API key in localStorage) ---
-const session = {
-  get key(){ return localStorage.getItem("foundry_key"); },
-  get email(){ return localStorage.getItem("foundry_email"); },
-  set(key, email){ localStorage.setItem("foundry_key", key); if(email) localStorage.setItem("foundry_email", email); },
-  clear(){ localStorage.removeItem("foundry_key"); localStorage.removeItem("foundry_email"); }
-};
 function authHeaders(extra={}){ const h={...extra}; if(session.key) h["Authorization"]="Bearer "+session.key; return h; }
 const api = (p, opts={}) => fetch(ORIGIN+p, opts).then(r=>r.json());
 
@@ -76,9 +69,13 @@ function drawTelemetry(){
 }
 
 async function refreshOverview(){
+  const generation = session.generation;
+  const key = session.key;
   const plans = (await api("/api/v1/plans")).data || [];
-  if(session.key){
-    const u = await api("/api/v1/account/usage", { headers: authHeaders() });
+  if(session.generation !== generation) return;
+  if(key){
+    const u = await api("/api/v1/account/usage", { headers: { Authorization: "Bearer " + key } });
+    if(session.generation !== generation) return;
     if(u.ok){
       $("#ov-plan").textContent = (plans.find(p=>p.id===u.data.plan)||{}).name || u.data.plan;
       $("#ov-usage").textContent = `${u.data.usage.count} / ${u.data.quota}`;
@@ -142,38 +139,69 @@ window.buySpecimen = async (id) => {
 $("#ac-signup").onclick = () => doAuth("/api/v1/account/signup");
 $("#ac-login").onclick = () => doAuth("/api/v1/account/login");
 async function doAuth(path){
+  const generation = session.generation;
   const email=$("#ac-email").value.trim(), password=$("#ac-pass").value;
   const res = await api(path, { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({email,password}) });
+  if(session.generation !== generation) return;
   const msg = $("#ac-msg");
   if(!res.ok){ msg.style.color="#e94560"; msg.textContent=res.error; return; }
   if(path.endsWith("signup")){
     session.set(res.data.apiKey, email);
-    msg.style.color="#d4a853"; msg.textContent="Account created. API key saved to this browser.";
+    msg.style.color="#d4a853"; msg.textContent="Account created. Your key is available for this page session only.";
   } else {
-    const keys = res.data.keys||[];
-    // Login returns masked keys; keep any existing full key, else prompt.
-    if(!session.key){ msg.style.color="#d4a853"; msg.textContent="Signed in. Use an existing key or create a new one below."; }
+    // Never carry another account's key into this login.
+    if(session.email !== email) session.clear();
+    if(!session.key){ msg.style.color="#d4a853"; msg.textContent="Signed in. Enter your existing API key below to enable authenticated requests."; }
     session.set(session.key || "", email);
+  }
+  $("#ac-pass").value = "";
+  if(path.endsWith("signup")){
+    $("#ac-newkey-out").style.display="block";
+    $("#ac-newkey-out").textContent="API key (shown once):\n"+res.data.apiKey;
   }
   renderAccount(); refreshOverview(); updateWho();
 }
 async function renderAccount(){
+  const generation = session.generation;
+  const key = session.key;
   const authed = !!session.email;
   $("#acct-auth").style.display = authed ? "none" : "block";
   $("#acct-body").style.display = authed ? "block" : "none";
   if(!authed) return;
-  if(session.key){
-    const u = await api("/api/v1/account/usage", { headers: authHeaders() });
+  if(key){
+    const headers = { Authorization: "Bearer " + key };
+    const u = await api("/api/v1/account/usage", { headers });
+    if(session.generation !== generation) return;
     if(u.ok){ $("#ac-plan").textContent=u.data.plan; $("#ac-usage").textContent=`${u.data.usage.count} / ${u.data.quota}`; }
-    const keys = await api("/api/v1/account/keys", { headers: authHeaders() });
+    const keys = await api("/api/v1/account/keys", { headers });
+    if(session.generation !== generation) return;
     if(keys.ok){
       $("#ac-keys").innerHTML = keys.data.map(k=>`<tr><td>${k.label}</td><td>${k.key}</td><td>${k.plan}</td><td>${k.status}</td></tr>`).join("");
     }
   }
 }
+$("#ac-use-key").onclick = async () => {
+  const input = $("#ac-existing-key");
+  const key = input.value.trim();
+  const email = session.email;
+  const generation = session.generation;
+  input.value = "";
+  if(!key) return;
+  const result = await api("/api/v1/account/usage", { headers: { Authorization: "Bearer " + key } });
+  if(session.generation !== generation || session.email !== email) return;
+  if(!result.ok || result.data.ownerEmail !== email.toLowerCase()){
+    $("#ac-key-msg").textContent="Enter an active API key for this account."; return;
+  }
+  session.set(key, email);
+  $("#ac-key-msg").textContent="Key active for this page session.";
+  renderAccount(); refreshOverview();
+};
 $("#ac-newkey").onclick = async () => {
   if(!session.key){ alert("Sign up first to obtain your first key."); return; }
-  const res = await api("/api/v1/account/keys", { method:"POST", headers: authHeaders({"content-type":"application/json"}), body: JSON.stringify({label:"key"}) });
+  const generation = session.generation;
+  const key = session.key;
+  const res = await api("/api/v1/account/keys", { method:"POST", headers:{"content-type":"application/json", Authorization:"Bearer "+key}, body: JSON.stringify({label:"key"}) });
+  if(session.generation !== generation) return;
   if(res.ok){
     const out=$("#ac-newkey-out"); out.style.display="block";
     out.textContent = "New API key (shown once):\n"+res.data.key;
@@ -183,7 +211,7 @@ $("#ac-newkey").onclick = async () => {
 
 function updateWho(){
   const link=$("#auth-link");
-  if(session.email){ link.textContent = session.email+" · sign out"; link.onclick=(e)=>{e.preventDefault();session.clear();updateWho();renderAccount();refreshOverview();}; }
+  if(session.email){ link.textContent = session.email+" · sign out"; link.onclick=(e)=>{e.preventDefault();session.clear();$("#ac-msg").textContent="";$("#ac-key-msg").textContent="";$("#ac-plan").textContent="—";$("#ac-usage").textContent="—";$("#ac-newkey-out").textContent="";$("#ac-existing-key").value="";$("#ac-keys").textContent="";updateWho();renderAccount();refreshOverview();}; }
   else { link.textContent="Sign in"; link.onclick=(e)=>{e.preventDefault();showTab("account");}; }
 }
 
