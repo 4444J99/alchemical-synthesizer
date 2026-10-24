@@ -11,7 +11,9 @@
 #   2. Extension    — Ableton "Brahma Bridge" zero-dependency smoke test (node)
 #   3. JS syntax    — Visual Cortex server + sketch parse cleanly (node --check)
 #   4. Validator    — Python audio validator accepts a generated test tone
-#   5. Web endpoint — Visual Cortex boots and serves HTTP 200 (needs npm deps)
+#   5. Web endpoint — Visual Cortex boots, serves HTTP 200, and answers MCP on both
+#                     wires (HTTP /mcp + stdio bridge) with the role-scoped tool list
+#                     (needs npm deps)
 #
 # Exit code is non-zero if any *required* check fails. The web endpoint check
 # is skipped (not failed) when dependencies can't be installed offline, unless
@@ -34,6 +36,10 @@ echo "=== [1/6] Structure ==="
 req_files=(
   "brahma/sc/loader.scd"
   "brahma/web/server.js"
+  "brahma/web/bin/brahma-mcp.js"
+  "brahma/web/lib/mcp/server.js"
+  "brahma/web/lib/mcp/client.js"
+  "docs/agent-clients.md"
   "brahma/ableton/src/index.js"
   "forge/validate_audio.py"
   "README.md"
@@ -57,7 +63,9 @@ fi
 
 echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
-  for js in brahma/web/server.js brahma/web/public/sketch.js \
+  for js in brahma/web/server.js brahma/web/bin/brahma-mcp.js \
+            brahma/web/lib/mcp/server.js brahma/web/lib/mcp/client.js \
+            brahma/web/public/sketch.js \
             brahma/web/public/tree/video.js brahma/web/public/aether/aether.js \
             brahma/web/public/instrument/pattern.js brahma/web/public/instrument/instrument.js \
             deploy/aether/serve.js deploy/aether/worker.mjs forge/render_video.mjs; do
@@ -116,9 +124,13 @@ if command -v node >/dev/null 2>&1; then
     fi
 
     PORT=3939
+    # A fixed agent token makes the MCP surface testable end to end. The gateway writes
+    # it to brahma/web/.runtime/agent-token-<port> (0600); the stdio bridge below reads
+    # that file, so this proves the handoff the four clients rely on.
+    SMOKE_AGENT_TOKEN="smoke-agent-token-0001"
     # exec, so $! is node's own PID rather than a subshell: the teardown below has
     # to actually release the port, or the next run fails with EADDRINUSE.
-    ( cd brahma/web && exec env PORT=$PORT node server.js >/tmp/brahma_web.log 2>&1 ) &
+    ( cd brahma/web && exec env PORT=$PORT BRAHMA_AGENT_TOKEN="$SMOKE_AGENT_TOKEN" node server.js >/tmp/brahma_web.log 2>&1 ) &
     WEB_PID=$!
     # curl -q ignores ~/.curlrc. A user config carrying --http2 makes curl send an
     # h2c Upgrade header, which this server answers 400 — a harness must not depend
@@ -135,6 +147,18 @@ if command -v node >/dev/null 2>&1; then
     # The agent loop must refuse an unauthenticated caller. A 200 here would mean the
     # approval boundary is open to anything that can reach loopback.
     agent_anon="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/agent/providers" 2>/dev/null || echo 000)"
+    # MCP: same boundary, both wires. The agent tool list must offer propose and must
+    # NOT offer accept/run — that is the structural gate, not a policy note.
+    mcp_anon="$(curl -q -s -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' \
+      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+      "http://127.0.0.1:${PORT}/mcp" 2>/dev/null || echo 000)"
+    curl -q -s -X POST -H 'content-type: application/json' \
+      -H "authorization: Bearer ${SMOKE_AGENT_TOKEN}" \
+      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+      "http://127.0.0.1:${PORT}/mcp" >/tmp/brahma_mcp_tools.json 2>/dev/null
+    printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
+      | ( cd "$ROOT" && BRAHMA_GATEWAY_URL="http://127.0.0.1:${PORT}" node brahma/web/bin/brahma-mcp.js ) \
+      >/tmp/brahma_mcp_stdio.json 2>/tmp/brahma_mcp_stdio.err
     kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
     if [ "$code" = "200" ] && [ "$api" = "200" ]; then
       ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
@@ -150,6 +174,21 @@ if command -v node >/dev/null 2>&1; then
       ok "agent API refuses unauthenticated callers (401)"
     else
       bad "agent API auth gate (expected 401, got $agent_anon)"
+    fi
+    if [ "$mcp_anon" = "401" ]; then
+      ok "MCP endpoint refuses unauthenticated callers (401)"
+    else
+      bad "MCP auth gate (expected 401, got $mcp_anon)"
+    fi
+    if python3 -c 'import json,sys; d=json.load(open("/tmp/brahma_mcp_tools.json")); n=[t["name"] for t in d["result"]["tools"]]; sys.exit(0 if "brahma_propose_pattern" in n and "brahma_accept" not in n and "brahma_run" not in n else 1)' >/dev/null 2>&1; then
+      ok "MCP agent tools: propose yes, accept/run no"
+    else
+      bad "MCP agent tool list is wrong (see /tmp/brahma_mcp_tools.json)"
+    fi
+    if grep -q '"brahma-workbench"' /tmp/brahma_mcp_stdio.json 2>/dev/null; then
+      ok "stdio MCP bridge handshake (initialize → brahma-workbench)"
+    else
+      bad "stdio MCP bridge failed (see /tmp/brahma_mcp_stdio.err)"
     fi
     # The launch URL must point at the page that can actually claim the token.
     if grep -q "/workbench/#t=" /tmp/brahma_web.log 2>/dev/null; then
