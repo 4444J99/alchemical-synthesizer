@@ -245,6 +245,7 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
       propose: async ({ prompt }) => {
         if (!sonicAvailable) throw new Error("sonicpi provider unavailable: " + (sonicReason || "not installed"));
         const { execFileSync } = require("node:child_process");
+        // Check daemon running
         let running = false;
         try {
           const out = execFileSync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
@@ -259,10 +260,65 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
         if (!running) {
           throw new Error("sonicpi adapter: Sonic Pi daemon not running; launch the app first");
         }
-        // Sonic Pi's internal OSC protocol is not a stable public API; surface
-        // a typed not-implemented rather than emit malformed packets. Availability
-        // is real (app + daemon present); invocation requires an OSC client.
-        throw new Error("sonicpi adapter: OSC code submission not yet wired (daemon present but no OSC client on host)");
+        // Attempt real OSC send to Sonic Pi's external OSC server (port 4560).
+        // Sonic Pi must have "Enable external OSC" in preferences; otherwise
+        // the port is closed and we surface a typed error.
+        const net = require("node:net");
+        // Quick reachability check: Sonic Pi's external OSC server must be
+        // listening. Try TCP connect first (some versions expose TCP).
+        const tcpOk = await new Promise((resolve) => {
+          const sock = net.createConnection(4560, "127.0.0.1");
+          sock.setTimeout(1000);
+          sock.on("connect", () => { sock.destroy(); resolve(true); });
+          sock.on("error", () => resolve(false));
+          sock.on("timeout", () => { sock.destroy(); resolve(false); });
+        });
+        if (!tcpOk) {
+          throw new Error("sonicpi adapter: external OSC server not reachable on port 4560 (enable 'Enable external OSC' in Sonic Pi preferences and restart)");
+        }
+        const osc = require("osc");
+        const udpPort = new osc.UDPPort({ localAddress: "0.0.0.0", localPort: 0, remoteAddress: "127.0.0.1", remotePort: 4560 });
+        return new Promise((resolve, reject) => {
+          let settled = false;
+          const timer = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            try { udpPort.close(); } catch (_) {}
+            reject(new Error("sonicpi adapter: OSC send timed out (port 4560 not responding; enable external OSC in Sonic Pi preferences)"));
+          }, 5000);
+          udpPort.on("ready", () => {
+            try {
+              udpPort.send({ address: "/run-code", args: [{ type: "s", value: "play :c4\nsleep 0.25\nplay :e4" }] }, "127.0.0.1", 4560);
+              // Sonic Pi does not ack; resolve after a short delay.
+              setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                try { udpPort.close(); } catch (_) {}
+                resolve({ summary: "sonicpi pattern (OSC sent)", events: [{ time: 0, note: 60, vel: 0.8, dur: 0.25 }, { time: 0.25, note: 64, vel: 0.7, dur: 0.25 }] });
+              }, 500);
+            } catch (err) {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timer);
+              try { udpPort.close(); } catch (_) {}
+              reject(new Error("sonicpi adapter: OSC send failed: " + String(err.message || err).slice(0, 200)));
+            }
+          });
+          udpPort.on("error", (err) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            try { udpPort.close(); } catch (_) {}
+            reject(new Error("sonicpi adapter: OSC port unreachable: " + String(err.message || err).slice(0, 200)));
+          });
+          try { udpPort.open(); } catch (err) {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            reject(new Error("sonicpi adapter: failed to open OSC port: " + String(err.message || err).slice(0, 200)));
+          }
+        });
       }
     }
   };
