@@ -233,3 +233,15 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
 
 ### Net state
 - Repo main @ ce3dad5, clean, 0/0. Gate exit 0. 143/143 tests. organvm verify PASS.
+
+---
+
+## Post-closeout correction #5 (2026-10-24, D6 atom regeneration)
+
+### D6 — BLOCKED (genuine blocker, durable owner assigned)
+
+- **Generator identified**: `data/prompt-registry/atomize_prompts.py` (corpus repo), which reads `data/prompt-registry/prompt-registry.json` and emits `data/prompt-registry/prompt-atoms.json`.
+- **Missing input**: `prompt-registry.json` is also gitignored (regenerable). Neither the input nor the output artifact is present on this host. The atomization pipeline is a multi-stage extraction (prompts → registry → atoms → triage → measure → route) documented in `data/prompt-registry/README.md`.
+- **Why not run**: scoping inputs to Brahma requires modifying the extraction pipeline (which extracts from all prompts system-wide). Running the full pipeline is unbounded, risks modifying research documents (explicitly excluded by D6), and exceeds "one heavy process / finite-work limits" without a pre-filtered Brahma-only input set. The user authorized bounded regeneration; the infrastructure for bounding is absent.
+- **Durable owner**: corpus lane (`organvm-corpvs-testamentvm`), human-gated. Next step: produce a Brahma-scoped prompt subset (filter extraction to Brahma-related prompts), then run `atomize_prompts.py` in private staging (`$LIMEN_CUSTODY_STAGING_ROOT`), validate, review derivatives, push sanitized receipts. Human-only atom closure preserved.
+- **No regeneration performed.** No private prompts exposed. No research documents modified.
