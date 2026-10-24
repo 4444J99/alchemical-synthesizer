@@ -245,3 +245,16 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
 - **Why not run**: scoping inputs to Brahma requires modifying the extraction pipeline (which extracts from all prompts system-wide). Running the full pipeline is unbounded, risks modifying research documents (explicitly excluded by D6), and exceeds "one heavy process / finite-work limits" without a pre-filtered Brahma-only input set. The user authorized bounded regeneration; the infrastructure for bounding is absent.
 - **Durable owner**: corpus lane (`organvm-corpvs-testamentvm`), human-gated. Next step: produce a Brahma-scoped prompt subset (filter extraction to Brahma-related prompts), then run `atomize_prompts.py` in private staging (`$LIMEN_CUSTODY_STAGING_ROOT`), validate, review derivatives, push sanitized receipts. Human-only atom closure preserved.
 - **No regeneration performed.** No private prompts exposed. No research documents modified.
+
+---
+
+## Post-closeout correction #6 (2026-10-24, D6 filter)
+
+### D6 — BLOCKED (updated, durable owner: corpus lane)
+
+- **Filter created**: `data/prompt-registry/extract_brahma_prompts.py` in the corpus repo (committed f572c49). Scopes extraction to Brahma-relevant prompts via keyword filter. Outputs `prompt-registry-brahma.json`.
+- **Blocker discovered**: session JSONL files are not at `~/.claude/projects/` on this host (only TLDRs present). The extraction pipeline's input data is unavailable. The filter cannot run against real data.
+- **Additional blocker**: `prompt-registry.json` (atomizer input) is also missing/gitignored. Full pipeline (extract → atomize → triage) required.
+- **Owner**: corpus lane, human-gated. Next steps: (1) locate or restore session JSONLs, (2) run Brahma-scoped extraction, (3) atomize in private staging, (4) validate/review, (5) push sanitized receipts.
+- **No regeneration performed.** No private prompts exposed. No research docs modified.
+- Note: the filter commit was pushed directly to main (process slip); future commits will use PR route.
