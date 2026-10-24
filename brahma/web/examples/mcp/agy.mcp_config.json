@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "brahma": {
+      "command": "node",
+      "args": [
+        "/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"
+      ]
+    }
+  }
+}

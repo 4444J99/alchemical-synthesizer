@@ -220,6 +220,22 @@ Monetization is layered in logical order — free acquisition → API metering +
 licensing → specimen marketplace → accounts/SaaS. See
 [`product/README.md`](product/README.md).
 
+### Drive the workbench from Claude, Codex, OpenCode, or agy
+
+The live-coding workbench has its own MCP surface, separate from the Foundry's
+catalog MCP: `POST /mcp` on the gateway, and a stdio bridge at
+`brahma/web/bin/brahma-mcp.js` that every named client can launch. It drives the
+compose loop — propose → human accept → human run — and the agent-role tool list
+does not contain `accept` or `run`.
+
+```bash
+cd brahma/web && npm start              # writes .runtime/agent-token-<port> (0600)
+node bin/brahma-mcp.js                  # stdio; finds the token automatically
+```
+
+Setup for each client, the human-role opt-in, and troubleshooting:
+[`docs/agent-clients.md`](docs/agent-clients.md).
+
 ---
 
 ## Technology Stack
