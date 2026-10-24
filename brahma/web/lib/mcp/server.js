@@ -56,27 +56,49 @@ const SHARED_TOOLS = [
     name: "brahma_propose_pattern",
     title: "Propose a pattern",
     description:
-      "Turn a prompt into note events and file an approval in state 'proposed'. " +
+      "File an approval in state 'proposed'. Two paths: (a) supply `events` (agent-composed note events) " +
+      "to submit a pattern composed by the connected agent using its own allotment — no server-side provider is called; " +
+      "(b) supply `prompt` (+ optional `provider`) to ask a server-side provider. " +
       "Nothing is rendered, queued, or played. A human must accept the approval, then separately run it. " +
       "This tool cannot accept or run, by design.",
     inputSchema: {
       type: "object",
-      required: ["prompt"],
       properties: {
-        prompt: { type: "string", minLength: 1, description: "What to compose." },
+        prompt: { type: "string", minLength: 1, description: "What to compose. Used when no events are supplied (provider path)." },
         provider: { type: "string", enum: ["mock", "claude", "tidal", "sonicpi"], default: "mock" },
+        events: {
+          type: "array",
+          description: "Agent-composed note events. If supplied, no provider is called; the connected agent composed using its own allotment. Each event: {time, note, vel?, dur?}.",
+          items: {
+            type: "object",
+            required: ["time", "note"],
+            properties: {
+              time: { type: "number", minimum: 0, maximum: 3600 },
+              note: { type: "integer", minimum: 0, maximum: 127 },
+              vel: { type: "number", minimum: 0, maximum: 1 },
+              dur: { type: "number", minimum: 0, maximum: 30 }
+            },
+            additionalProperties: false
+          },
+          minItems: 1,
+          maxItems: 512
+        },
+        summary: { type: "string", maxLength: 500, description: "One-line summary of the agent-composed pattern." },
         duration: { type: "number", minimum: 0.5, maximum: 120, description: "Render length in seconds; omit to derive from the events." }
       },
       additionalProperties: false
     },
     annotations: WRITES,
     handler: async (args, { api }) => {
-      if (!args.prompt || !String(args.prompt).trim()) {
-        throw Object.assign(new Error("prompt is required"), { code: "bad_request" });
+      const hasEvents = Array.isArray(args.events) && args.events.length > 0;
+      if (!hasEvents && (!args.prompt || !String(args.prompt).trim())) {
+        throw Object.assign(new Error("prompt or events is required"), { code: "bad_request" });
       }
       return api.propose({
-        provider: args.provider || "mock",
-        prompt: String(args.prompt),
+        provider: hasEvents ? "agent" : (args.provider || "mock"),
+        prompt: hasEvents ? "" : String(args.prompt),
+        events: hasEvents ? args.events : undefined,
+        summary: args.summary,
         duration: args.duration
       });
     }
