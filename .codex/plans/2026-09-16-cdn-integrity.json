@@ -1,0 +1,25 @@
+{
+  "scope": "Pinned existing CDN script bytes; no version changes",
+  "artifacts": [
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js",
+      "bytes": 413181,
+      "integrity": "sha384-w6Gb3fXHb5e1LUYa/hYA5Q41bEDglN5ZPCG7Jvnoo8/X90oGnlPqBlBJCe38mEMm",
+      "cors": "*",
+      "files": [
+        "product/public/home/index.html",
+        "brahma/web/public/aether/index.html"
+      ]
+    },
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js",
+      "bytes": 1029097,
+      "integrity": "sha384-bOv+b6RV+dlZvdQAx6+cJ+FK9ab8JCSVWyJ1JPhMVQjPW+4C8V2cOKK+qZDfnRnx",
+      "cors": "*",
+      "files": [
+        "brahma/web/public/index.html"
+      ]
+    }
+  ],
+  "acceptance": "Browser loading and hosted scan clearance remain separate"
+}

@@ -591,7 +591,19 @@ export default function DrumMachine() {
 
   // State Helpers
   const updateTrack = (k, v) => setTracks(p => p.map((t, i) => i === selectedTrack ? { ...t, [k]: v } : t));
-  const updateEngine = (path, v) => setTracks(p => p.map((t, i) => { if (i !== selectedTrack) return t; const e = JSON.parse(JSON.stringify(t.engine)); const keys = path.split('.'); let o = e; for (let j = 0; j < keys.length - 1; j++) o = o[keys[j]]; o[keys[keys.length - 1]] = v; return { ...t, engine: e }; }));
+  const updateEngine = (path, v) => setTracks(p => p.map((t, i) => {
+    if (i !== selectedTrack || typeof path !== 'string') return t;
+    const keys = path.split('.');
+    if (keys.some(k => !k || ['__proto__', 'constructor', 'prototype'].includes(k))) return t;
+    const e = JSON.parse(JSON.stringify(t.engine));
+    let o = e;
+    for (let j = 0; j < keys.length; j++) {
+      if (!o || typeof o !== 'object' || !Object.prototype.hasOwnProperty.call(o, keys[j])) return t;
+      if (j === keys.length - 1) o[keys[j]] = v;
+      else o = o[keys[j]];
+    }
+    return { ...t, engine: e };
+  }));
   const updateLFO = (i, k, v) => setTracks(p => p.map((t, j) => { if (j !== selectedTrack) return t; const lfos = [...t.lfos]; lfos[i] = { ...lfos[i], [k]: v }; return { ...t, lfos }; }));
   const addMod = (src, dest, amt) => setTracks(p => p.map((t, i) => i !== selectedTrack || t.modMatrix.find(m => m.source === src && m.dest === dest) ? t : { ...t, modMatrix: [...t.modMatrix, { source: src, dest, amount: amt }] }));
   const removeMod = (idx) => setTracks(p => p.map((t, i) => i !== selectedTrack ? t : { ...t, modMatrix: t.modMatrix.filter((_, j) => j !== idx) }));
