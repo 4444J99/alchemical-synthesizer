@@ -152,13 +152,24 @@ const WORKBENCH_DEPENDENCIES = [
     { name: "@codemirror/lang-javascript", license: "MIT", source: "https://codemirror.net" }
 ];
 
+function resolveCommitSha() {
+    if (process.env.BRAHMA_COMMIT_SHA) return process.env.BRAHMA_COMMIT_SHA;
+    try {
+        const { execFileSync } = require("node:child_process");
+        const root = path.resolve(__dirname, "../..");
+        return execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim() || null;
+    } catch (_) {
+        return null;
+    }
+}
+
 app.get("/workbench/source.json", (req, res) => {
     res.json({
         workbenchLicense: "AGPL-3.0-or-later",
         licenseFile: "/LICENSES/AGPL-3.0-or-later.txt",
         repository: "https://github.com/4444J99/alchemical-synthesizer",
-        commit: process.env.BRAHMA_COMMIT_SHA || null,
-        commitNote: "set BRAHMA_COMMIT_SHA at launch to pin the exact deployed revision",
+        commit: resolveCommitSha(),
+        commitNote: "auto-detected from git HEAD; set BRAHMA_COMMIT_SHA to override",
         bundle: "/workbench/vendor/workbench.js",
         dependencies: WORKBENCH_DEPENDENCIES.map((d) => ({
             ...d,
