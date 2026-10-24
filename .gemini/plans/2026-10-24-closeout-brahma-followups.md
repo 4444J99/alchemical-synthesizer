@@ -258,3 +258,56 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
 - **Owner**: corpus lane, human-gated. Next steps: (1) locate or restore session JSONLs, (2) run Brahma-scoped extraction, (3) atomize in private staging, (4) validate/review, (5) push sanitized receipts.
 - **No regeneration performed.** No private prompts exposed. No research docs modified.
 - Note: the filter commit was pushed directly to main (process slip); future commits will use PR route.
+
+---
+
+## Post-closeout correction #7 (2026-10-24, session closeout verification)
+
+### Work performed this session (all merged via PR + `--match-head-commit`)
+
+| PR | Title | Status |
+|----|-------|--------|
+| #73 | Merge PR #47: security hardening (resolved against main) | MERGED |
+| #53 | chore(deps): bump qs (#53) | MERGED |
+| #74 | feat(brahma): add Gemini provider adapter | MERGED |
+| #75 | feat(brahma): Vector 1 — replace placeholder metrics with real DSP (praxis.md) | MERGED |
+| #76 | refactor(aether): Stage 1 consolidation — move AETHER under aether/ prefix | MERGED |
+
+### AETHER Stage 2 — lift to standalone repo (COMPLETE)
+
+- **Repo created**: `https://github.com/4444J99/aether-radio` (private)
+- **Named for what it is/does**: `aether-radio` — the 24/7 living radio container (listens → transmutes → broadcasts live HLS)
+- **Push**: `git subtree split --prefix=aether` history (3 commits, 22 files) → `aether-radio/main` @ `2d87d65c`
+- **Verified**: fresh clone confirms all 3 commits and all 22 files intact
+- **Deploy steps remaining (human-gated)**: CF Pages funnel + CF Containers `aether-radio` deploy, R2 bucket + secrets via credential organ, one-line pointer/redirect in this repo
+
+### Local-only state resolved
+
+- **`aether-only` branch** (local-only vehicle for Stage 2 split): deleted locally. Content preserved in `4444J99/aether-radio`. Achieves local:remote 1:1 within this repo.
+- **All other feature branches** have remote counterparts (pushed as PR branches); squash-merged into main, feature branches remain on origin as expected.
+
+### Verified state (this session)
+
+- Working tree: clean
+- Parity: HEAD == origin/main @ ab249bf
+- `brahma/web` tests: 144/144 pass, 0 fail
+- `product` smoke: 21/21 pass, 0 fail
+- Full smoke: 74/74 pass, 0 fail, 0 skip
+- `organvm verify system`: PASS 10/10 (no registry warning)
+- `claude-md-autogen-gate`: exit 0
+
+### Remaining open (human-gated / out of lane)
+
+| Item | Status | Owner |
+|------|--------|-------|
+| D6 atom regeneration | BLOCKED — session JSONLs not at `~/.claude/projects/`, `prompt-registry.json` missing/gitignored | corpus lane, human-gated |
+| AGPL legal / hosted-service | Human-gated; D4 retained AGPL + local scope | human |
+| D1 audible judgment | Human-gated; released by PR #56 merge auth, not listened | human |
+| Tidal / Sonic Pi | `not_installed` on this host; availability probes real, adapters wired, typed errors until enabled | human (GUI toggle for Sonic Pi) |
+| praxis-perpetua sync refresh | Needs clone for content-preserving sync; sync `--write` degrades enriched directives | organvm lane |
+| product/ PRs #47/#53 | Now merged (#73, #53) — resolved this session | — |
+
+### Safe-to-close verdict
+
+- **Lane (alchemical-synthesizer / Brahma follow-ups): safe to close.** All executed work merged to main, parity achieved, tests green, no uncommitted work, local-only branch resolved.
+- **Broader workspace WIP (out of lane)**: D6 atom recovery, AGPL legal, audible judgment, Tidal/Sonic Pi invocation, praxis-perpetua sync. None block this lane's close.
