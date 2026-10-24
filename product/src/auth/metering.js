@@ -17,7 +17,8 @@ function extractKey(req) {
   const auth = req.headers["authorization"] || "";
   if (auth.startsWith("Bearer ")) return auth.slice(7).trim();
   if (req.headers["x-api-key"]) return String(req.headers["x-api-key"]).trim();
-  if (req.query && req.query.api_key) return String(req.query.api_key).trim();
+  // URLs may enter logs, browser history and referrers. Accept credentials
+  // only in headers; query parameters never authenticate a request.
   return null;
 }
 

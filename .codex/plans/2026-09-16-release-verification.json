@@ -1,0 +1,41 @@
+{
+  "tested_head": "25d776684519fcbfa88e1915933d88ef78f6455b",
+  "commands": [
+    {
+      "command": "bash tools/build_release.sh",
+      "exit": 0
+    },
+    {
+      "command": "shasum -a 256 -c SHA256SUMS.txt (in dist)",
+      "exit": 0
+    }
+  ],
+  "admission": {
+    "kind": "heavy",
+    "owner": "alchemical-release-check-20260916",
+    "ttl_seconds": 300,
+    "subprocess_deadline_seconds": 180
+  },
+  "artifacts": [
+    {
+      "name": "alchemical-synthesizer-v1.0.0-72-g25d7766.tar.gz",
+      "bytes": 776678,
+      "sha256": "1818ca22c6282c4d8ca4e3b2bb1f4177518fa0b99057eaeb2751a6b2aeb9fef1"
+    },
+    {
+      "name": "alchemical-synthesizer-v1.0.0-72-g25d7766.zip",
+      "bytes": 952509,
+      "sha256": "8c15e81b6fa6d0885c3837b4781f9f79900cc4553f396b704272688c6911ebfb"
+    }
+  ],
+  "archive_inspection": {
+    "tar_entries": 375,
+    "python_cache_entries": 8,
+    "generated_json_data_entries": 0
+  },
+  "limits": [
+    "Local package verification only; artifacts not published",
+    "Python caches are included by the existing packaging script; package hygiene remains an owning-repository follow-up",
+    "Hosted scan clearance, merge, deployment, and protected relay acceptance are not established"
+  ]
+}
