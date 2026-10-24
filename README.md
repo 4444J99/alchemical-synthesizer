@@ -115,6 +115,7 @@ Then recompile the class library in SC IDE (Cmd+Shift+L).
     - `http://localhost:3000` — **Etz Chaim**: the recursive Tree of Life, and a *universal* synthesizer. Organisms emanate down the Lightning Flash into the ten Sephirot; an Ouroboros coils the cosmos and every illumined vessel contains the Tree again (fractal). **Retune it across four substrates** — `1` Sound · `2` Idea · `3` Product · `4` Cosmos (`T` to cycle) — the one engine re-expressing timbre, thought, value, and worlds through the same vessels (see [`docs/the-universal-synthesizer.md`](docs/the-universal-synthesizer.md)). Self-emanates a demo stream when SuperCollider is silent. Keys: `SPACE` flash · `+/-` recursion depth · `O` ouroboros · `M` multiverse · `D` demo · `H` help.
     - `http://localhost:3000/cortex` — Canvas web patching UI (module browser, drag-drop, cable routing)
     - `http://localhost:3000/golem` — Golem percussion web UI (sequencer, mixer, patchbay)
+    - `http://localhost:3000/workbench` — Browser live-coding workbench (multi-buffer CodeMirror + Strudel patterns against Brahma; human/agent approval for AI composition)
 3.  Launch **Pure Data** (optional):
     - `brahma/pd/main.pd` — master control surface with OSC bridge
     - `brahma/pd/canvas/brahma_canvas.pd` — Pd-native visual patching via GOP abstractions
@@ -152,7 +153,7 @@ Then recompile the class library in SC IDE (Cmd+Shift+L).
 ### Module Counts
 
 | Category | Count |
-| :--- | :--- |
+| :--- | :--- | :--- |
 | Synthesis Engines | 10 |
 | Organisms (Proteus, Relinquished, Typhon, etc.) | 24 |
 | Golem Percussion (drums, FX, LFO) | 11 |
@@ -190,8 +191,9 @@ The system offers three ways to interact, all connected via OSC:
 | **SC IDE** | SuperCollider | `brahma/sc/loader.scd` |
 | **Web Canvas** | Browser (p5.js) | `http://localhost:3000/cortex` |
 | **PD Canvas** | Pure Data (GOP) | `brahma/pd/canvas/brahma_canvas.pd` |
+| **Live Workbench** | Browser (CodeMirror + Strudel) | `http://localhost:3000/workbench` |
 
-The **Web Canvas** provides a Max/MSP-style module browser with drag-drop patching and cable routing. The **PD Canvas** uses Graph-On-Parent abstractions for Pd-native visual patching with a module palette, routing, and parameter control.
+The **Web Canvas** provides a Max/MSP-style module browser with drag-drop patching and cable routing. The **PD Canvas** uses Graph-On-Parent abstractions for Pd-native visual patching with a module palette, routing, and parameter control. The **Live Workbench** enables browser-based live coding with AI-assisted composition under human approval.
 
 ---
 
@@ -258,6 +260,7 @@ Setup for each client, the human-role opt-in, and troubleshooting:
 | **2** | Vivification | Module registry, voice manager, Cortex UI, DAEMON-CHRONOS bridge, presets, recording |
 | **3** | Canvas (Web) | Browser-based visual patching — module browser, drag-drop canvas, cable routing, parameter editors |
 | **3B** | Canvas (Pd) | Pd-native visual patching via GOP abstractions — brahma_module, brahma_route, brahma_palette, brahma_canvas |
+| **4** | Live Workbench | Browser live-coding + AI composition with human/agent approval |
 
 ---
 
