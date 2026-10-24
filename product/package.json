@@ -1,7 +1,7 @@
 {
   "name": "brahma-foundry",
   "version": "0.1.0",
-  "description": "The Foundry — productization layer for the Alchemical Synthesizer: Dashboard, REST API, MCP server, ACP adapters, licensing, metering, and marketplace.",
+  "description": "The Foundry \u2014 productization layer for the Alchemical Synthesizer: Dashboard, REST API, MCP server, ACP adapters, licensing, metering, and marketplace.",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
@@ -11,7 +11,15 @@
     "acp-stdio": "node bin/acp-stdio.js",
     "smoke": "node bin/smoke.js"
   },
-  "keywords": ["supercollider", "synthesizer", "api", "mcp", "acp", "saas", "marketplace"],
+  "keywords": [
+    "supercollider",
+    "synthesizer",
+    "api",
+    "mcp",
+    "acp",
+    "saas",
+    "marketplace"
+  ],
   "author": "4444J99",
   "license": "MIT",
   "dependencies": {
@@ -24,5 +32,11 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "overrides": {
+    "osc": {
+      "ws": "^8.21.3"
+    },
+    "qs": "^6.16.0"
   }
 }

@@ -104,6 +104,10 @@ curl -s -X POST $ORIGIN/api/v1/render \
         <div class="card"><div class="k">Upgrade</div><div class="v"><a href="/pricing">View plans →</a></div></div>
       </div>
       <h4>API keys</h4>
+      <p>Keys stay in this page only. After a reload, sign in and enter your saved key again.</p>
+      <label>Existing API key <input id="ac-existing-key" type="password" autocomplete="off"></label>
+      <button id="ac-use-key">Use key</button>
+      <p id="ac-key-msg" role="status"></p>
       <button id="ac-newkey">+ New key</button>
       <table class="keys"><thead><tr><th>Label</th><th>Key</th><th>Plan</th><th>Status</th></tr></thead><tbody id="ac-keys"></tbody></table>
       <p class="hint">Your full key is shown once at creation — store it safely.</p>
@@ -112,6 +116,7 @@ curl -s -X POST $ORIGIN/api/v1/render \
   </section>
 </main>
 
+<script src="session.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

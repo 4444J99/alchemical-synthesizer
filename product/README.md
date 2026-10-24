@@ -107,3 +107,7 @@ product/
 docker build -t brahma-foundry product/
 docker run -p 4000:4000 -e PORT=4000 brahma-foundry
 ```
+
+### API-key transport
+
+Send API keys in the `Authorization: Bearer <key>` or `x-api-key` header. URL query parameters do not authenticate requests. This applies to REST, MCP, and ACP HTTP endpoints; the ACP stdio adapter retains its environment-to-header transport.

@@ -47,13 +47,20 @@ const MIME = {
 /** Resolve a URL path to a file under `root`, safe against traversal. Returns
  *  the absolute path or null if it escapes root / does not exist. */
 function safeResolve(root, urlPath) {
-  const rel = decodeURIComponent(urlPath.split("?")[0]).replace(/^\/+/, "");
-  const base = path.resolve(root);
-  let abs = path.resolve(base, rel);
-  if (abs !== base && !abs.startsWith(base + path.sep)) return null;
   try {
+    const rel = decodeURIComponent(urlPath.split("?")[0]).replace(/^\/+/, "");
+    const base = fs.realpathSync(root);
+    const inside = (file) => {
+      const relative = path.relative(base, file);
+      return relative !== ".." && !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative);
+    };
+    let abs = path.resolve(base, rel);
+    if (!inside(abs)) return null;
+    abs = fs.realpathSync(abs);
+    if (!inside(abs)) return null;
     if (fs.statSync(abs).isDirectory()) abs = path.join(abs, "index.html");
-    return fs.existsSync(abs) ? abs : null;
+    abs = fs.realpathSync(abs);
+    return inside(abs) && fs.statSync(abs).isFile() ? abs : null;
   } catch { return null; }
 }
 
@@ -64,7 +71,9 @@ function sendFile(res, file, extraHeaders) {
   try { stat = fs.statSync(file); } catch { res.writeHead(404).end("not found"); return; }
   headers["Content-Length"] = stat.size;
   res.writeHead(200, headers);
-  fs.createReadStream(file).pipe(res);
+  const stream = fs.createReadStream(file);
+  stream.on("error", () => res.destroy());
+  stream.pipe(res);
 }
 
 const server = http.createServer((req, res) => {
@@ -120,11 +129,13 @@ const server = http.createServer((req, res) => {
   return sendFile(res, file);
 });
 
-server.listen(PORT, () => {
-  console.log(`[aether] serve.js on :${PORT}  live=${LIVE_DIR}  static=${STATIC_DIR}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`[aether] serve.js on :${PORT}  live=${LIVE_DIR}  static=${STATIC_DIR}`);
+  });
 
-// Graceful shutdown so the container platform can recycle us cleanly.
-for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => { server.close(() => process.exit(0)); });
+  // Graceful shutdown so the container platform can recycle us cleanly.
+  for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => { server.close(() => process.exit(0)); });
+}
 
-module.exports = { server };
+module.exports = { server, safeResolve };
