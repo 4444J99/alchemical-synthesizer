@@ -25,7 +25,7 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
-CONTRACT="$HERE/deploy/aether/rebroadcast.json"
+CONTRACT="$HERE/deploy/rebroadcast.json"
 
 TARGET=""
 CUSTOM_URL=""
@@ -38,7 +38,7 @@ while [ $# -gt 0 ]; do
     --url)     CUSTOM_URL="$2"; shift 2;;
     --input)   INPUT="$2"; shift 2;;
     --mode)    MODE="$2"; shift 2;;
-    --dry-run) DRYRUN="${2:-$HERE/out/rebroadcast-preview.flv}"; shift 2;;
+    --dry-run) DRYRUN="${2:-$HERE/../out/rebroadcast-preview.flv}"; shift 2;;
     -h|--help) grep -E '^#( |$)' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
     *) echo "rebroadcast: unknown arg $1" >&2; exit 2;;
   esac
@@ -100,7 +100,7 @@ if [ -n "$INPUT" ]; then
 elif [ -n "$DRYRUN" ]; then
   IN_ARGS=(-f lavfi -i "sine=frequency=220:duration=1:sample_rate=${C_ASR}")
 else
-  DEFAULT_IN="$HERE/out/live/stream.m3u8"
+  DEFAULT_IN="$HERE/../out/live/stream.m3u8"
   [ -f "$DEFAULT_IN" ] || { echo "rebroadcast: no --input and no live stream at $DEFAULT_IN" >&2; exit 2; }
   IN_ARGS=(-re -i "$DEFAULT_IN")
 fi

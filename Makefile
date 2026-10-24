@@ -50,13 +50,13 @@ clean:
 # free/streaming web source into a Forge-ready WAV (+ a provenance sidecar).
 # Rights posture is human-gated — captures are license-tagged, not cleared.
 stations:
-	python3 forge/tune.py --list
+	python3 aether/tools/tune.py --list
 
 tune:
 	@test -n "$(STATION)" || test -n "$(URL)" || \
 		{ echo "usage: make tune STATION=somafm-dronezone [SECS=30] [OUT=out/tuned/x.wav]"; \
 		  echo "   or: make tune URL=https://host/stream [LICENSE=cc0] [SECS=30] [OUT=...]"; exit 1; }
-	python3 forge/tune.py $(if $(STATION),--station $(STATION),) $(if $(URL),--url "$(URL)",) \
+	python3 aether/tools/tune.py $(if $(STATION),--station $(STATION),) $(if $(URL),--url "$(URL)",) \
 		$(if $(SECS),--secs $(SECS),) $(if $(LICENSE),--license $(LICENSE),) $(if $(OUT),--out "$(OUT)",)
 
 rip:
@@ -120,7 +120,7 @@ package:
 # rolling HLS stream in out/live (served at /live; watch it at /aether). Fold a
 # tune capture in with SOURCE=. SEGMENTS=0 (default) streams forever.
 broadcast:
-	bash tools/broadcast.sh \
+	bash aether/tools/broadcast.sh \
 		$(if $(SOURCE),--source "$(SOURCE)",) $(if $(SEGMENTS),--segments $(SEGMENTS),) \
 		$(if $(SECONDS),--seconds $(SECONDS),) $(if $(SEED),--seed $(SEED),) \
 		$(if $(PERIOD),--period $(PERIOD),) $(if $(OUT),--out "$(OUT)",) \
@@ -130,7 +130,7 @@ broadcast:
 # (Also exposed over HTTP as POST /submit on the live host.) URL required.
 submit:
 	@test -n "$(URL)" || { echo "usage: make submit URL=https://host/stream [LICENSE=cc0] [OUT=out/live]"; exit 1; }
-	python3 tools/ingest_queue.py add --url "$(URL)" $(if $(LICENSE),--license $(LICENSE),) \
+	python3 aether/tools/ingest_queue.py add --url "$(URL)" $(if $(LICENSE),--license $(LICENSE),) \
 		--dir "$(if $(OUT),$(OUT),out/live)/queue"
 
 # rebroadcast: the "Reach" lure — push the sovereign stream to YouTube/Twitch over
@@ -138,5 +138,5 @@ submit:
 # an organ-owned credential (env RTMP_KEY, never recited). DRYRUN= renders a local
 # preview .flv with no push and no key.
 rebroadcast:
-	bash tools/rebroadcast.sh $(if $(TARGET),--target $(TARGET),) $(if $(URL),--url "$(URL)",) \
+	bash aether/tools/rebroadcast.sh $(if $(TARGET),--target $(TARGET),) $(if $(URL),--url "$(URL)",) \
 		$(if $(INPUT),--input "$(INPUT)",) $(if $(MODE),--mode $(MODE),) $(if $(DRYRUN),--dry-run "$(DRYRUN)",)
