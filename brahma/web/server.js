@@ -256,6 +256,12 @@ app.post("/api/agent/approvals/:id/run", (req, res) => {
     return agentReply(res, agent.run(req.params.id, { actor: "human" }), 202);
 });
 
+app.post("/api/agent/stop", (req, res) => {
+    if (!agentGuard(req, res, { requireHuman: true })) return;
+    const result = agent.stop();
+    return agentReply(res, result);
+});
+
 app.get("/api/agent/jobs/:id", (req, res) => {
     if (!agentGuard(req, res)) return;
     const job = agent.runner.get(req.params.id);

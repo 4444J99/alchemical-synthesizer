@@ -6,7 +6,7 @@
         "type": "local",
         "command": [
           "node",
-          "/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"
+          "brahma/web/bin/brahma-mcp.js"
         ]
       }
     }

@@ -51,18 +51,5 @@ produces:
   - type: creative-artifact
     description: "Generative art, interactive system, or experiential work"
 
-consumes:
-  - type: theory-artifact
-    source: ORGAN-I
-    description: Theoretical frameworks inform art creation
-
-subscriptions:
-  - event: governance.updated
-    source: ORGAN-IV
-    action: Check compliance with updated governance rules
-  - event: health-audit.completed
-    source: ORGAN-IV
-    action: Review audit findings for this repo
-  - event: theory.published
-    source: ORGAN-I
-    action: Check for art derivative opportunities
+consumes: []
+subscriptions: []

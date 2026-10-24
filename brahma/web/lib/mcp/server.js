@@ -210,6 +210,18 @@ const HUMAN_TOOLS = [
       if (!args.approvalId) throw Object.assign(new Error("approvalId is required"), { code: "bad_request" });
       return api.run(String(args.approvalId));
     }
+  },
+  {
+    name: "brahma_stop",
+    title: "Stop all rendering (human only)",
+    description:
+      "HUMAN ONLY. Kill the running render process (sclang via render-pattern.sh) and mark the active job failed. " +
+      "Use this to abort an in-progress render. Polling brahma_job after stopping shows the stopped state.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    annotations: Object.freeze({ readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: false }),
+    handler: async (_args, { api }) => {
+      return api.stop();
+    }
   }
 ];
 

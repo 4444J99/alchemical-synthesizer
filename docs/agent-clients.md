@@ -67,7 +67,7 @@ The equivalent one-liner, if you prefer user scope across projects:
 
 ```bash
 claude mcp add --scope user brahma -- \
-  node /Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js
+  node brahma/web/bin/brahma-mcp.js
 ```
 
 ## Codex
@@ -78,7 +78,7 @@ to `~/.codex/config.toml`, then restart Codex:
 ```toml
 [mcp_servers.brahma]
 command = "node"
-args = ["/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"]
+args = ["brahma/web/bin/brahma-mcp.js"]
 startup_timeout_sec = 20
 ```
 
@@ -92,7 +92,7 @@ The current config shape is `mcp.servers.<name>` (verified with `opencode mcp ad
     "servers": {
       "brahma": {
         "type": "local",
-        "command": ["node", "/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"]
+        "command": ["node", "brahma/web/bin/brahma-mcp.js"]
       }
     }
   }
@@ -102,7 +102,7 @@ The current config shape is `mcp.servers.<name>` (verified with `opencode mcp ad
 Add it without hand-editing:
 
 ```bash
-opencode mcp add brahma -- node /Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js
+opencode mcp add brahma -- node brahma/web/bin/brahma-mcp.js
 # add --global to write the user config instead of the project config
 ```
 
@@ -123,7 +123,7 @@ into `~/.gemini/config/mcp_config.json`, then reload the MCP panel:
   "mcpServers": {
     "brahma": {
       "command": "node",
-      "args": ["/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"]
+      "args": ["brahma/web/bin/brahma-mcp.js"]
     }
   }
 }
@@ -135,7 +135,7 @@ proxy (the host already uses `uvx mcp-proxy` for `ianva`).
 The CLI writes that same file, which is the safest way to edit it:
 
 ```bash
-agy mcp add brahma node /Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js
+agy mcp add brahma node brahma/web/bin/brahma-mcp.js
 agy mcp list   # brahma  stdio  enabled  node …/brahma-mcp.js
 ```
 

@@ -17,7 +17,7 @@ const { validateEvents } = require("./providers");
 function defaultExecFile(file, args, opts = {}) {
   const { execFile } = require("node:child_process");
   return new Promise((resolve, reject) => {
-    execFile(
+    const child = execFile(
       file,
       args,
       { timeout: opts.timeout || 300000, maxBuffer: 8 * 1024 * 1024, ...opts },
@@ -30,6 +30,10 @@ function defaultExecFile(file, args, opts = {}) {
         resolve({ stdout, stderr });
       }
     );
+    child.stop = () => {
+      try { child.kill("SIGKILL"); } catch (_) { /* already gone */ }
+    };
+    resolve.child = child;
   });
 }
 
@@ -37,6 +41,7 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
   if (!repoRoot) throw new Error("createTools requires repoRoot");
 
   const scratch = scratchRoot || path.join(os.tmpdir(), "brahma-agent");
+  let activeChild = null;
 
   function toolError(code, message) {
     const err = new Error(message);
@@ -133,7 +138,31 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
   async function run(name, args) {
     const tool = get(name);
     if (!tool) throw toolError("unknown_tool", `Unknown tool ${name}`);
-    return tool.run(args || {});
+
+    // Track the execFile child process so stop_all can abort a long-running render.
+    const wrapped = execFile.bind(null);
+    const orig = execFile;
+    execFile = (...a) => {
+      const p = orig(...a);
+      activeChild = p && p.child ? p.child : null;
+      return p;
+    };
+
+    try {
+      return await tool.run(args || {});
+    } finally {
+      execFile = orig;
+      activeChild = null;
+    }
+  }
+
+  /** Abort the currently running render process, if any. Human-owned. */
+  function stop() {
+    const child = activeChild;
+    if (!child) return { ok: false, code: "nothing_running", message: "No render process is running" };
+    try { child.stop(); } catch (_) { /* already gone */ }
+    activeChild = null;
+    return { ok: true, message: "render process killed" };
   }
 
   function catalogue() {
@@ -144,7 +173,7 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
     }));
   }
 
-  return { get, run, catalogue, scratch };
+  return { get, run, catalogue, scratch, stop };
 }
 
 module.exports = { createTools, defaultExecFile };
