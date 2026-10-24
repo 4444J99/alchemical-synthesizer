@@ -1,0 +1,9 @@
+# Codex — append to ~/.codex/config.toml
+#
+# Default role is agent: propose and observe. Accept/run are not exposed.
+# Replace the path if the checkout moves.
+
+[mcp_servers.brahma]
+command = "node"
+args = ["/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"]
+startup_timeout_sec = 20

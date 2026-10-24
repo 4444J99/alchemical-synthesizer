@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Copyright (C) 2026 4444J99
+
+  This page is part of the AGPL-3.0-or-later workbench subtree. It is a separate
+  document from the MIT/LGPL Visual Cortex page at /: no p5.js, no product/ assets.
+  Source for the exact deployed commit: /workbench/source.json
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brahma · live workbench</title>
+  <link rel="stylesheet" href="/workbench/workbench.css">
+</head>
+<body>
+  <header class="bar">
+    <span class="brand">Brahma <span class="muted">live workbench</span></span>
+    <label class="engine">
+      engine
+      <select id="engine" aria-label="default Brahma engine"></select>
+    </label>
+    <span id="running" class="badge">stopped</span>
+    <span class="spacer"></span>
+    <button id="run" type="button" class="primary">run ⌘↵</button>
+    <button id="stop" type="button">stop</button>
+    <button id="panic" type="button" class="danger">panic esc</button>
+    <button id="status-btn" type="button">status</button>
+  </header>
+
+  <nav id="tabs" class="tabs" aria-label="pattern buffers"></nav>
+
+  <main class="split">
+    <section id="editor" class="editor" aria-label="pattern editor"></section>
+    <section class="panel" aria-label="gateway log">
+      <div class="panel-head">gateway</div>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span id="status">socket: offline</span>
+    <span class="spacer"></span>
+    <span class="muted">Strudel pattern language · AGPL-3.0-or-later workbench</span>
+    <a href="/workbench/source.json">source</a>
+  </footer>
+
+  <script type="module" src="/workbench/vendor/workbench.js"></script>
+</body>
+</html>

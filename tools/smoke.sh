@@ -11,7 +11,9 @@
 #   2. Extension    — Ableton "Brahma Bridge" zero-dependency smoke test (node)
 #   3. JS syntax    — Visual Cortex server + sketch parse cleanly (node --check)
 #   4. Validator    — Python audio validator accepts a generated test tone
-#   5. Web endpoint — Visual Cortex boots and serves HTTP 200 (needs npm deps)
+#   5. Web endpoint — Visual Cortex boots, serves HTTP 200, and answers MCP on both
+#                     wires (HTTP /mcp + stdio bridge) with the role-scoped tool list
+#                     (needs npm deps)
 #
 # Exit code is non-zero if any *required* check fails. The web endpoint check
 # is skipped (not failed) when dependencies can't be installed offline, unless
@@ -34,6 +36,10 @@ echo "=== [1/6] Structure ==="
 req_files=(
   "brahma/sc/loader.scd"
   "brahma/web/server.js"
+  "brahma/web/bin/brahma-mcp.js"
+  "brahma/web/lib/mcp/server.js"
+  "brahma/web/lib/mcp/client.js"
+  "docs/agent-clients.md"
   "brahma/ableton/src/index.js"
   "forge/validate_audio.py"
   "README.md"
@@ -57,7 +63,9 @@ fi
 
 echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
-  for js in brahma/web/server.js brahma/web/public/sketch.js \
+  for js in brahma/web/server.js brahma/web/bin/brahma-mcp.js \
+            brahma/web/lib/mcp/server.js brahma/web/lib/mcp/client.js \
+            brahma/web/public/sketch.js \
             brahma/web/public/tree/video.js brahma/web/public/aether/aether.js \
             brahma/web/public/instrument/pattern.js brahma/web/public/instrument/instrument.js \
             deploy/aether/serve.js deploy/aether/worker.mjs forge/render_video.mjs; do
@@ -81,6 +89,18 @@ if command -v python3 >/dev/null 2>&1; then
   else
     bad "validate_audio.py (see /tmp/brahma_validator.log)"; tail -8 /tmp/brahma_validator.log
   fi
+  # M3: the measurement mode the agent loop depends on. Proves the flag is wired and
+  # that a real tone measures as sound rather than coming back empty.
+  if [ -f forge/analyze_audio.py ] && command -v ffmpeg >/dev/null 2>&1; then
+    if python3 forge/analyze_audio.py "$TONE" --summary-json /tmp/brahma_summary.json >/tmp/brahma_summary.log 2>&1 \
+       && python3 -c 'import json,sys; d=json.load(open("/tmp/brahma_summary.json")); sys.exit(0 if d.get("verdict")=="non_silent" and d.get("peak_dbfs") is not None else 1)'; then
+      ok "analyze_audio.py --summary-json measures a real tone"
+    else
+      bad "analyze_audio.py --summary-json (see /tmp/brahma_summary.log)"; tail -5 /tmp/brahma_summary.log
+    fi
+  else
+    skip "ffmpeg not installed — audio summary"
+  fi
   rm -f "$TONE"
 else
   skip "python3 not installed — validator"
@@ -95,27 +115,99 @@ if command -v node >/dev/null 2>&1; then
         || npm install --no-audit --no-fund >/tmp/brahma_npm.log 2>&1; } )
   fi
   if [ -d brahma/web/node_modules ]; then
+    # The workbench bundle is a build artefact (gitignored). Boot without it and the
+    # page is broken, so the gate that claims the workbench works must build it first.
+    if ( cd brahma/web && npm run --silent build:workbench >/tmp/brahma_wb_build.log 2>&1 ); then
+      ok "workbench bundle built (public/workbench/vendor/workbench.js)"
+    else
+      bad "workbench bundle build failed (see /tmp/brahma_wb_build.log)"
+    fi
+
     PORT=3939
-    ( cd brahma/web && PORT=$PORT node server.js >/tmp/brahma_web.log 2>&1 ) &
+    # A fixed agent token makes the MCP surface testable end to end. The gateway writes
+    # it to brahma/web/.runtime/agent-token-<port> (0600); the stdio bridge below reads
+    # that file, so this proves the handoff the four clients rely on.
+    SMOKE_AGENT_TOKEN="smoke-agent-token-0001"
+    # exec, so $! is node's own PID rather than a subshell: the teardown below has
+    # to actually release the port, or the next run fails with EADDRINUSE.
+    ( cd brahma/web && exec env PORT=$PORT BRAHMA_AGENT_TOKEN="$SMOKE_AGENT_TOKEN" node server.js >/tmp/brahma_web.log 2>&1 ) &
     WEB_PID=$!
+    # curl -q ignores ~/.curlrc. A user config carrying --http2 makes curl send an
+    # h2c Upgrade header, which this server answers 400 — a harness must not depend
+    # on the operator's aliases.
     # Wait up to ~5s for the server to answer.
     for _ in $(seq 1 25); do
-      if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then break; fi
+      if curl -q -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then break; fi
       sleep 0.2
     done
-    code="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
-    api="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
+    code="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
+    api="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
+    wb="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/workbench/" 2>/dev/null || echo 000)"
+    wbsrc="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/workbench/source.json" 2>/dev/null || echo 000)"
+    # The agent loop must refuse an unauthenticated caller. A 200 here would mean the
+    # approval boundary is open to anything that can reach loopback.
+    agent_anon="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/agent/providers" 2>/dev/null || echo 000)"
+    # MCP: same boundary, both wires. The agent tool list must offer propose and must
+    # NOT offer accept/run — that is the structural gate, not a policy note.
+    mcp_anon="$(curl -q -s -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' \
+      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+      "http://127.0.0.1:${PORT}/mcp" 2>/dev/null || echo 000)"
+    curl -q -s -X POST -H 'content-type: application/json' \
+      -H "authorization: Bearer ${SMOKE_AGENT_TOKEN}" \
+      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+      "http://127.0.0.1:${PORT}/mcp" >/tmp/brahma_mcp_tools.json 2>/dev/null
+    printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
+      | ( cd "$ROOT" && BRAHMA_GATEWAY_URL="http://127.0.0.1:${PORT}" node brahma/web/bin/brahma-mcp.js ) \
+      >/tmp/brahma_mcp_stdio.json 2>/tmp/brahma_mcp_stdio.err
     kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
     if [ "$code" = "200" ] && [ "$api" = "200" ]; then
       ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
     else
       bad "Visual Cortex boot (/ = $code, /api/modules = $api; see /tmp/brahma_web.log)"
     fi
+    if [ "$wb" = "200" ] && [ "$wbsrc" = "200" ]; then
+      ok "workbench page + source offer served (200/200)"
+    else
+      bad "workbench served (/workbench/ = $wb, source.json = $wbsrc)"
+    fi
+    if [ "$agent_anon" = "401" ]; then
+      ok "agent API refuses unauthenticated callers (401)"
+    else
+      bad "agent API auth gate (expected 401, got $agent_anon)"
+    fi
+    if [ "$mcp_anon" = "401" ]; then
+      ok "MCP endpoint refuses unauthenticated callers (401)"
+    else
+      bad "MCP auth gate (expected 401, got $mcp_anon)"
+    fi
+    if python3 -c 'import json,sys; d=json.load(open("/tmp/brahma_mcp_tools.json")); n=[t["name"] for t in d["result"]["tools"]]; sys.exit(0 if "brahma_propose_pattern" in n and "brahma_accept" not in n and "brahma_run" not in n else 1)' >/dev/null 2>&1; then
+      ok "MCP agent tools: propose yes, accept/run no"
+    else
+      bad "MCP agent tool list is wrong (see /tmp/brahma_mcp_tools.json)"
+    fi
+    if grep -q '"brahma-workbench"' /tmp/brahma_mcp_stdio.json 2>/dev/null; then
+      ok "stdio MCP bridge handshake (initialize → brahma-workbench)"
+    else
+      bad "stdio MCP bridge failed (see /tmp/brahma_mcp_stdio.err)"
+    fi
+    # The launch URL must point at the page that can actually claim the token.
+    if grep -q "/workbench/#t=" /tmp/brahma_web.log 2>/dev/null; then
+      ok "human launch URL targets /workbench/#t="
+    else
+      bad "human launch URL does not target the workbench (see /tmp/brahma_web.log)"
+    fi
   else
     if [ "$STRICT" = "1" ]; then bad "could not install web deps (offline?)"; else skip "web deps unavailable (offline) — endpoint boot"; fi
   fi
 else
   skip "node not installed — web endpoint"
+fi
+
+# The licence boundary is enforced, not just described.
+if bash tools/check-workbench-licence.sh >/tmp/brahma_licence.log 2>&1; then
+  ok "workbench licence boundary clean (AGPL subtree isolated)"
+else
+  bad "workbench licence boundary violated (see /tmp/brahma_licence.log)"
 fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
@@ -154,7 +246,7 @@ if command -v python3 >/dev/null 2>&1; then
 else
   skip "python3 not installed — Forge py syntax"
 fi
-for sh in forge/forge.sh forge/bounce.sh forge/ingest.sh forge/setup-demucs.sh \
+for sh in forge/forge.sh forge/bounce.sh forge/render-pattern.sh forge/ingest.sh forge/setup-demucs.sh \
           forge/videotrack.sh forge/setup-video.sh forge/package.sh tools/broadcast.sh \
           tools/r2_sync.sh tools/rebroadcast.sh deploy/aether/entrypoint.sh tools/smoke.sh; do
   [ -f "$sh" ] || continue
