@@ -85,3 +85,7 @@ a secret into config.
 - Audible confirmation of a rendered pattern.
 - `ANTHROPIC_API_KEY` + `BRAHMA_CLAUDE_MODEL` for the Claude provider.
 - AGPL / hosted-service legal question.
+
+---
+
+Merged: #56 / 99382c0 (squash merge commit `99382c0434611474634af8a8801c0bb43bd3b1f0`; merged tree `d5b3a948db6e17a1e0bad6f72cf52095428fc1d2`; verified head `e65d44d`; issue #55 CLOSED; PRs #52/#54 superseded by #56).

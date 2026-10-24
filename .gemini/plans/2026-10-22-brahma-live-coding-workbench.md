@@ -192,3 +192,7 @@ Three separate claims for every item: **Implemented** (code on the branch), **Te
 - **Merge conflicts** with #47, #52, #53 and #54 are expected in `package.json` and lockfiles, resolved by rebase at merge time.
 - All changes are additive, except `mcp.js` becoming async-aware. Each stage reverts as a commit.
 - Known deferrals, filed and not dropped: ACP reuse, remote audio streaming, Linux `bwrap` backend verification, Strudel legal review for commercial hosting.
+
+---
+
+Merged: #56 / 99382c0 (squash merge commit `99382c0434611474634af8a8801c0bb43bd3b1f0`; merged tree `d5b3a948db6e17a1e0bad6f72cf52095428fc1d2`; verified head `e65d44d`; issue #55 CLOSED; PRs #52/#54 superseded by #56).
