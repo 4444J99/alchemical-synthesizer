@@ -213,10 +213,12 @@ app.post("/api/agent/propose", async (req, res) => {
     const role = agentGuard(req, res);
     if (!role) return;
 
-    const { provider, prompt, duration } = req.body || {};
+    const { provider, prompt, events, summary, duration } = req.body || {};
     const result = await agent.propose({
         provider: provider || "mock",
         prompt: prompt || "",
+        events: Array.isArray(events) ? events : undefined,
+        summary,
         duration,
         proposedBy: role
     });

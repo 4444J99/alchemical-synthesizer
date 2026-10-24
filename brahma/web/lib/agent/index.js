@@ -13,7 +13,7 @@
 
 const { createApprovalStore } = require("./approval");
 const { createJobRunner } = require("./jobs");
-const { createProviderRegistry } = require("./providers");
+const { createProviderRegistry, validateEvents } = require("./providers");
 const { createTools } = require("./tools");
 
 function createAgentLayer({
@@ -43,27 +43,51 @@ function createAgentLayer({
     }
   });
 
-  /** Ask a provider for a pattern, then file it as a proposal. Nothing runs. */
-  async function propose({ provider = "mock", prompt = "", duration, proposedBy = "agent" } = {}) {
-    const proposal = await providers.propose(provider, { prompt });
-    if (!proposal.ok) return proposal;
+  /** File a proposal. Two paths:
+   *   1. Agent-composed: caller supplies `events` (already validated shape).
+   *      No provider is called; the connected agent composed using its own
+   *      allotment. This is the preferred path for MCP clients.
+   *   2. Provider-composed: caller supplies `prompt` (+ optional `provider`);
+   *      the server asks the provider for events.
+   *  Nothing runs either way. */
+  async function propose({ provider = "mock", prompt = "", events, summary, duration, proposedBy = "agent" } = {}) {
+    let resolvedProvider = provider || "mock";
+    let resolvedEvents = null;
+    let resolvedSummary = "";
+
+    if (Array.isArray(events) && events.length > 0) {
+      // Agent-composed path: validate the supplied events, no provider call.
+      const validated = validateEvents(events);
+      if (!validated) {
+        return { ok: false, code: "bad_events", message: "events must be a non-empty array of valid note events (time 0-3600, note 0-127, vel 0-1, dur 0-30, at most 512)" };
+      }
+      resolvedEvents = validated;
+      resolvedProvider = "agent";
+      resolvedSummary = String(summary || "agent-composed pattern").slice(0, 500);
+    } else {
+      const proposal = await providers.propose(resolvedProvider, { prompt });
+      if (!proposal.ok) return proposal;
+      resolvedEvents = proposal.events;
+      resolvedSummary = proposal.summary;
+      resolvedProvider = proposal.provider;
+    }
 
     // The accepted payload is exactly the payload that will run: the events are
     // frozen into the approval, not re-requested from the provider at run time.
     const filed = approvals.propose({
       tool: "render_pattern",
-      args: { events: proposal.events, duration: duration === undefined ? null : Number(duration), label: provider },
-      summary: proposal.summary,
+      args: { events: resolvedEvents, duration: duration === undefined ? null : Number(duration), label: resolvedProvider },
+      summary: resolvedSummary,
       proposedBy
     });
     if (!filed.ok) return filed;
 
     return {
       ok: true,
-      provider: proposal.provider,
+      provider: resolvedProvider,
       approval: filed.approval,
-      summary: proposal.summary,
-      events: proposal.events
+      summary: resolvedSummary,
+      events: resolvedEvents
     };
   }
 
