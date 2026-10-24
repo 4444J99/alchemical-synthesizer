@@ -34,7 +34,7 @@ async function waitForJob(api, id, waitMs) {
   for (;;) {
     const out = await api.job(id);
     if (TERMINAL_JOB_STATES.has(out.job.state) || Date.now() >= deadline) {
-      return { ...out, waitedMs: bounded };
+      return { ...out, waitLimitMs: bounded };
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
