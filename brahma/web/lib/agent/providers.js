@@ -16,7 +16,7 @@
 
 const crypto = require("node:crypto");
 
-const PROVIDER_NAMES = ["mock", "claude", "tidal", "sonicpi"];
+const PROVIDER_NAMES = ["mock", "claude", "gemini", "tidal", "sonicpi"];
 
 let tidalAvailable = false;
 let tidalReason = "not_probed";
@@ -98,8 +98,32 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     return (body.content || []).map((c) => c.text || "").join("");
   });
 
+  const geminiTransport = transport || (async ({ prompt, apiKey, model }) => {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1200, temperature: 0.7 }
+      })
+    });
+    if (!res.ok) {
+      throw new Error(`gemini api ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    }
+    const body = await res.json();
+    const candidate = (body.candidates || [])[0];
+    const parts = (candidate && candidate.content && candidate.content.parts) || [];
+    return parts.map((p) => p.text || "").join("");
+  });
+
   const claudeModel = env.BRAHMA_CLAUDE_MODEL || null;
   const hasKey = Boolean(env.ANTHROPIC_API_KEY);
+  const geminiApiKey = env.GEMINI_API_KEY || env.GOOGLE_API_KEY || null;
+  const hasGeminiKey = Boolean(geminiApiKey);
+  const geminiModel = env.BRAHMA_GEMINI_MODEL || "gemini-1.5-flash";
 
   const providers = {
     mock: {
@@ -139,6 +163,38 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
         }
         const events = validateEvents(parsed.events);
         if (!events) throw new Error("claude provider returned no valid events");
+        return { summary: String(parsed.summary || "model proposal").slice(0, 500), events };
+      }
+    },
+
+    gemini: {
+      name: "gemini",
+      kind: "model",
+      available: () => hasGeminiKey,
+      reason: () => (hasGeminiKey ? "api_key_present" : "not_configured: no GEMINI_API_KEY or GOOGLE_API_KEY"),
+      note: hasGeminiKey && !geminiModel ? "set BRAHMA_GEMINI_MODEL to pin the model" : "",
+      propose: async ({ prompt }) => {
+        if (!hasGeminiKey) throw new Error("gemini provider unavailable: no GEMINI_API_KEY or GOOGLE_API_KEY");
+        if (!geminiModel) throw new Error("gemini provider misconfigured: set BRAHMA_GEMINI_MODEL");
+
+        const instruction = [
+          "Compose a short monophonic pattern for a synthesizer.",
+          "Respond with JSON only, no prose and no code fences:",
+          '{"summary": "one line", "events": [{"time": 0.0, "note": 60, "vel": 0.8, "dur": 0.5}]}',
+          "note is MIDI 0-127, vel 0-1, times and durations in seconds, at most 64 events.",
+          "",
+          `Prompt: ${prompt}`
+        ].join("\n");
+
+        const raw = await geminiTransport({ prompt: instruction, apiKey: geminiApiKey, model: geminiModel }); // allow-secret
+        let parsed;
+        try {
+          parsed = JSON.parse(stripFences(raw));
+        } catch (_) {
+          throw new Error("gemini provider returned unparseable JSON");
+        }
+        const events = validateEvents(parsed.events);
+        if (!events) throw new Error("gemini provider returned no valid events");
         return { summary: String(parsed.summary || "model proposal").slice(0, 500), events };
       }
     },
