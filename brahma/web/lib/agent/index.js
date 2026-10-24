@@ -31,6 +31,7 @@ function createAgentLayer({
 
   const runner = createJobRunner({
     now,
+    maxQueued: 16,
     execute: async (job) => {
       try {
         const result = await tools.run(job.tool, job.args);
@@ -123,6 +124,24 @@ function createAgentLayer({
     return { ok: true, approval: started.approval, job: queued.job };
   }
 
+  /** Stop all: kill the running render process and mark the active job stopped. Human only. */
+  function stop({ actor } = {}) {
+    if (actor !== "human") {
+      return { ok: false, code: "forbidden", message: "Only a human may stop renders" };
+    }
+    const killed = tools.stop();
+    // Mark the active job as failed so pollers see terminal state immediately;
+    // the execute() rejection handler will reconcile when the child actually dies.
+    const activeId = runner.active;
+    const job = activeId ? runner.get(activeId) : null;
+    if (job && job.state === "running") {
+      job.state = "failed";
+      job.error = "stopped by human";
+      job.finishedAt = new Date(now()).toISOString();
+    }
+    return { ok: true, killed: killed.ok, message: killed.message };
+  }
+
   return {
     approvals,
     providers,
@@ -132,6 +151,7 @@ function createAgentLayer({
     accept,
     reject,
     run,
+    stop,
     available: () => providers.list(),
     toolset: () => tools.catalogue()
   };

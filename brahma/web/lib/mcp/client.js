@@ -96,6 +96,7 @@ function createHttpGateway({ baseUrl, token, role = "agent", timeoutMs = 15000, 
     accept: async (id) => unwrap(await request("POST", idPath(id, "/accept"), {})),
     reject: async (id, reason) => unwrap(await request("POST", idPath(id, "/reject"), { reason: reason || "" })),
     run: async (id) => unwrap(await request("POST", idPath(id, "/run"), {})),
+    stop: async () => unwrap(await request("POST", "/api/agent/stop", {})),
     engine: () => request("GET", "/api/runtimes")
   };
 }
@@ -136,6 +137,7 @@ function createAgentGateway({ agent, role = "agent", engine } = {}) {
     accept: (id) => humanOnly("accept", async () => unwrap(await agent.accept(id, { actor: "human" }))),
     reject: (id, reason) => humanOnly("reject", async () => unwrap(await agent.reject(id, { actor: "human", reason }))),
     run: (id) => humanOnly("run", async () => unwrap(await agent.run(id, { actor: "human" }))),
+    stop: () => humanOnly("stop", async () => unwrap(await agent.stop())),
     engine: () => (typeof engine === "function" ? engine() : { sandbox: null, runtimes: [] })
   };
 }

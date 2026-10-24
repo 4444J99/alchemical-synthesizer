@@ -5,5 +5,5 @@
 
 [mcp_servers.brahma]
 command = "node"
-args = ["/Users/4jp/Workspace/library/shelves/organvm-ii-poiesis/alchemical-synthesizer/brahma/web/bin/brahma-mcp.js"]
+args = ["brahma/web/bin/brahma-mcp.js"]
 startup_timeout_sec = 20

@@ -27,6 +27,7 @@ function createJobRunner({ execute, now = () => Date.now(), maxQueued = 16, idFa
   const queue = [];
   const waiters = [];
   let running = null;
+  const stopFns = new Map(); // job id -> stop() for the currently running process
 
   const newId = idFactory || (() => "job_" + crypto.randomBytes(6).toString("hex"));
 
@@ -63,10 +64,30 @@ function createJobRunner({ execute, now = () => Date.now(), maxQueued = 16, idFa
       })
       .then(() => {
         job.finishedAt = new Date(now()).toISOString();
+        stopFns.delete(id);
         running = null;
         // Yield so the completion is observable before the next job starts.
         setImmediate(tick);
       });
+  }
+
+  /** Kill the currently running render process and mark its job failed. Human-only. */
+  function stop(id) {
+    const job = jobs.get(id);
+    if (!job) return { ok: false, code: "unknown_job", message: `No job ${id}` };
+    if (job.state !== STATES.RUNNING) {
+      return { ok: false, code: "not_running", message: `Job ${id} is ${job.state}, not running` };
+    }
+    const stop = stopFns.get(id);
+    if (!stop) return { ok: false, code: "unstoppable", message: `Job ${id} has no stoppable process` };
+    try { stop(); } catch (_) { /* already gone */ }
+    job.state = STATES.FAILED;
+    job.error = "stopped by human";
+    job.finishedAt = new Date(now()).toISOString();
+    stopFns.delete(id);
+    running = null;
+    setImmediate(tick);
+    return { ok: true, job: view(job) };
   }
 
   /** Queue work. Returns immediately; the job's state is polled via get(). */
