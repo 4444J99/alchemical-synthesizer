@@ -126,12 +126,20 @@ test("Suite 5: Runtime Status Gating Matrix", async (t) => {
     assert.equal(status.strudel.execution, "browser");
   });
 
-  await t.test("Tidal and Sonic Pi are reported not_installed", () => {
-    const status = runtimes.getRuntimeStatus({ role: "human", sandboxStatus: { ok: true } });
+  await t.test("Tidal and Sonic Pi report not_installed when their binaries are absent", () => {
+    const status = runtimes.getRuntimeStatus({ role: "human", sandboxStatus: { ok: true }, tidalBinary: null, sonicPiApp: null });
     assert.equal(status.tidalcycles.available, false);
     assert.equal(status.tidalcycles.reason, "not_installed");
     assert.equal(status.sonicpi.available, false);
     assert.equal(status.sonicpi.reason, "not_installed");
+  });
+
+  await t.test("Tidal and Sonic Pi report installed when their binaries are present", () => {
+    const status = runtimes.getRuntimeStatus({ role: "human", sandboxStatus: { ok: true }, tidalBinary: "/opt/homebrew/bin/ghci", sonicPiApp: "/Applications/Sonic Pi.app" });
+    assert.equal(status.tidalcycles.available, true);
+    assert.equal(status.tidalcycles.reason, "installed");
+    assert.equal(status.sonicpi.available, true);
+    assert.equal(status.sonicpi.reason, "installed");
   });
 
   await t.test("sclang is disabled if BRAHMA_ALLOW_SCLANG is not 1", () => {

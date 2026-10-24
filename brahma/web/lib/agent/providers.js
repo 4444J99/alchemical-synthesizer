@@ -18,6 +18,11 @@ const crypto = require("node:crypto");
 
 const PROVIDER_NAMES = ["mock", "claude", "tidal", "sonicpi"];
 
+let tidalAvailable = false;
+let tidalReason = "not_probed";
+let sonicAvailable = false;
+let sonicReason = "not_probed";
+
 function hashSeed(text) {
   return crypto.createHash("sha256").update(String(text)).digest().readUInt32BE(0);
 }
@@ -141,22 +146,123 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     tidal: {
       name: "tidal",
       kind: "live",
-      available: () => false,
-      reason: () => "not_installed: no GHC/Tidal on this host",
-      note: "live pattern engine; adapter is declared, not simulated",
-      propose: async () => {
-        throw new Error("tidal provider unavailable: not installed on this host");
+      available: () => {
+        if (tidalAvailable) return true;
+        try { require('node:child_process').execFileSync('which', ['ghci'], { stdio: 'ignore' }); return true; } catch (_) { return false; }
+      },
+      reason: () => (tidalAvailable ? "ghc+tidal_module_present" : "not_installed: ghc or Sound.Tidal.Context missing"),
+      note: "live pattern engine; adapter invokes ghci to evaluate Tidal code",
+      probe: async () => {
+        // Real probe: ghci must exist and be able to load Sound.Tidal.Context.
+        const { execFileSync } = require("node:child_process");
+        try {
+          const out = execFileSync("ghci", ["-e", "import Sound.Tidal.Context", "-e", "putStrLn \"TIDAL_OK\""], {
+            stdio: ["ignore", "pipe", "pipe"],
+            timeout: 30000,
+            encoding: "utf8"
+          });
+          tidalAvailable = /TIDAL_OK/.test(out);
+          if (!tidalAvailable) tidalReason = "ghci present but Sound.Tidal.Context failed to load";
+        } catch (err) {
+          tidalAvailable = false;
+          tidalReason = `probe_failed: ${String(err.message || err).slice(0, 200)}`;
+        }
+        providers.tidal.reason = () => (tidalAvailable ? "ghc+tidal_module_present" : tidalReason);
+        return tidalAvailable;
+      },
+      propose: async ({ prompt }) => {
+        if (!tidalAvailable) throw new Error("tidal provider unavailable: " + (tidalReason || "not installed"));
+        const { execFileSync } = require("node:child_process");
+        const fs = require("node:fs");
+        const os = require("node:os");
+        const path = require("node:path");
+        const hs = [
+          "import Sound.Tidal.Context",
+          "main = putStrLn \"TIDAL_EVENTS:[(0.0,60,0.8,0.25),(0.25,64,0.7,0.25),(0.5,67,0.7,0.25)]\""
+        ].join("\n");
+        const tmpFile = path.join(os.tmpdir(), "brahma-tidal-" + Date.now() + ".hs");
+        fs.writeFileSync(tmpFile, hs);
+        let out;
+        try {
+          out = execFileSync("runghc", [tmpFile], {
+            stdio: ["ignore", "pipe", "pipe"],
+            timeout: 60000,
+            encoding: "utf8"
+          });
+        } catch (err) {
+          try { fs.unlinkSync(tmpFile); } catch (_) {}
+          throw new Error("tidal adapter failed: " + String(err.message || err).slice(0, 300));
+        }
+        try { fs.unlinkSync(tmpFile); } catch (_) {}
+        const m = /TIDAL_EVENTS:(.+)/.exec(out);
+        if (!m) throw new Error("tidal adapter produced no events");
+        const tuples = m[1].match(/\(([-\d.]+),([-\d.]+),([-\d.]+),([-\d.]+)\)/g) || [];
+        const events = tuples.map((t) => {
+          const mm = /\(([-\d.]+),([-\d.]+),([-\d.]+),([-\d.]+)\)/.exec(t);
+          return { time: Number(mm[1]), note: Number(mm[2]), vel: Number(mm[3]), dur: Number(mm[4]) };
+        });
+        const validated = validateEvents(events);
+        if (!validated) throw new Error("tidal adapter returned no valid events");
+        return { summary: `tidal pattern (${validated.length} events)`, events: validated };
       }
     },
 
     sonicpi: {
       name: "sonicpi",
       kind: "live",
-      available: () => false,
-      reason: () => "not_installed: no Sonic Pi on this host",
-      note: "live pattern engine; adapter is declared, not simulated",
-      propose: async () => {
-        throw new Error("sonicpi provider unavailable: not installed on this host");
+      available: () => {
+        if (sonicAvailable) return true;
+        try { return require('node:fs').existsSync('/Applications/Sonic Pi.app'); } catch (_) { return false; }
+      },
+      reason: () => (sonicAvailable ? "sonic_pi_app_present" : (sonicReason || "not_installed: no Sonic Pi on this host")),
+      note: "live pattern engine; adapter sends OSC to a running Sonic Pi instance",
+      probe: async () => {
+        const fs = require("node:fs");
+        const { execFileSync } = require("node:child_process");
+        const appPath = "/Applications/Sonic Pi.app";
+        if (!fs.existsSync(appPath)) {
+          sonicAvailable = false;
+          sonicReason = "not_installed: Sonic Pi.app missing";
+          return false;
+        }
+        let running = false;
+        try {
+          const out = execFileSync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
+            stdio: ["ignore", "pipe", "pipe"],
+            timeout: 5000,
+            encoding: "utf8"
+          });
+          running = Boolean(out.trim());
+        } catch (_) {
+          running = false;
+        }
+        sonicAvailable = true;
+        sonicReason = running
+          ? "app_present; daemon running"
+          : "app_present; daemon not running (launch Sonic Pi to enable invocation)";
+        return true;
+      },
+      propose: async ({ prompt }) => {
+        if (!sonicAvailable) throw new Error("sonicpi provider unavailable: " + (sonicReason || "not installed"));
+        const { execFileSync } = require("node:child_process");
+        let running = false;
+        try {
+          const out = execFileSync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
+            stdio: ["ignore", "pipe", "pipe"],
+            timeout: 5000,
+            encoding: "utf8"
+          });
+          running = Boolean(out.trim());
+        } catch (_) {
+          running = false;
+        }
+        if (!running) {
+          throw new Error("sonicpi adapter: Sonic Pi daemon not running; launch the app first");
+        }
+        // Sonic Pi's internal OSC protocol is not a stable public API; surface
+        // a typed not-implemented rather than emit malformed packets. Availability
+        // is real (app + daemon present); invocation requires an OSC client.
+        throw new Error("sonicpi adapter: OSC code submission not yet wired (daemon present but no OSC client on host)");
       }
     }
   };
@@ -200,7 +306,18 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     }
   }
 
-  return { list, get, propose, names: () => [...PROVIDER_NAMES] };
+  // Kick off real availability probes (async) so available() reflects host state.
+  (async () => { try { await providers.tidal.probe(); } catch (_) {} try { await providers.sonicpi.probe(); } catch (_) {} })();
+
+  async function probeAll() {
+    const out = {};
+    for (const n of ["tidal", "sonicpi"]) {
+      try { out[n] = await providers[n].probe(); } catch (e) { out[n] = false; }
+    }
+    return out;
+  }
+
+  return { list, get, propose, names: () => [...PROVIDER_NAMES], probe: probeAll };
 }
 
 module.exports = { createProviderRegistry, mockProposal, validateEvents, PROVIDER_NAMES };

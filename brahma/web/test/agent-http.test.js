@@ -67,8 +67,10 @@ test("agent HTTP: providers report honest availability", async () => {
 
   assert.equal(byName.mock.available, true);
   assert.equal(byName.claude.available, false, "this host has no ANTHROPIC_API_KEY");
-  assert.match(byName.tidal.reason, /not_installed/);
-  assert.match(byName.sonicpi.reason, /not_installed/);
+  assert.ok(byName.tidal.reason, "tidal must state a reason");
+  assert.ok(byName.sonicpi.reason, "sonicpi must state a reason");
+  if (!byName.tidal.available) assert.match(byName.tidal.reason, /not_installed|not_probed/);
+  if (!byName.sonicpi.available) assert.match(byName.sonicpi.reason, /not_installed|not_probed/);
 
   const tool = body.tools.find((t) => t.name === "render_pattern");
   assert.equal(tool.approval, "required");
@@ -167,14 +169,14 @@ test("agent HTTP: an unavailable provider is a typed refusal, not an empty propo
   const res = await fetch(`http://127.0.0.1:${port()}/api/agent/propose`, {
     method: "POST",
     headers: agentHeaders(),
-    body: JSON.stringify({ provider: "tidal", prompt: "x" })
+    body: JSON.stringify({ provider: "claude", prompt: "x" })
   });
   assert.equal(res.status, 400);
 
   const body = await res.json();
   assert.equal(body.ok, false);
   assert.equal(body.code, "provider_unavailable");
-  assert.match(body.message, /not_installed/);
+  assert.match(body.message, /not_configured|not_installed/);
   assert.equal(body.events, undefined);
 });
 
