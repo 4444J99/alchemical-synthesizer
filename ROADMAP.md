@@ -214,6 +214,7 @@ We categorize items in our GitHub Project using these fields:
 
 ## CI Progress
 
+- 2026-10-24: CI Minimal succeeded on pr47-final (security hardening merge, commit b2a3e0f03da8ff635ff5db7f6e3b115fa6ee46af). Workflow: https://github.com/4444J99/alchemical-synthesizer/actions/runs/40123691617
 - 2026-10-24: npm_and_yarn Dependabot update (Update #1649779999) succeeded on main (commit 99382c0434611474634af8a8801c0bb43bd3b1f0). Workflow: https://github.com/4444J99/alchemical-synthesizer/actions/runs/40082978089
 
 ---
