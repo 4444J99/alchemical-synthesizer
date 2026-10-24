@@ -51,3 +51,51 @@ Lane: `organvm-ii-poiesis` / `alchemical-synthesizer` — Brahma browser live-co
 ## Hand-off note for next session
 
 Pick up PR #55 once CI clears → run the a-i--skills release/install lifecycle → read back `~/.config/opencode/skills/closeout/SKILL.md` to confirm the repointed paths. Then investigate why `organvm context sync` reports "Plans: unknown" / drops the Active Directives table for the shelves path (likely a registry resolution issue with the additional workspace root), so the repo-level CLAUDE.md/AGENTS.md refresh can be landed cleanly. Atom recovery remains a separate, human-gated investigation.
+
+---
+
+## Post-closeout correction (2026-10-24, follow-up pass)
+
+### Finding: PR #55 CI had failed, not merely pending
+
+On re-verification, PR #55 (`a-i--skills`, `fix/closeout-skill-tracked-plans`) was not
+"in progress" — CI had **completed with failures**: `validate` (generated files out of
+date), `test (3.11)`, and `build-install` all FAILED. Root cause: the source edit
+(`skills/tools/closeout/SKILL.md`) was committed but the regenerated distribution
+artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/SKILL.md`,
+`skills-lock.json`, `skills-registry.json`) were not. The `validate` step runs
+`refresh_skill_collections.py` + `git diff --exit-code`, which caught the drift.
+
+### Fix applied
+
+- Ran `python3 scripts/refresh_skill_collections.py` on the PR branch → regenerated
+  6 distribution files; `validate_generated_dirs.py` and `validate_skills.py` pass;
+  `git diff --exit-code` clean.
+- Committed as `c0b0a37` ("fix(closeout): regenerate distribution SKILL.md + lock/registry
+  after source repoint") and pushed to `fix/closeout-skill-tracked-plans`.
+- PR #55 head now `c0b0a37`; CI re-running. Not re-submitted to merge-drain (prior
+  submission recorded BLOCKED; will let CI settle, then merge once green via the
+  authorized `--match-head-commit` route).
+
+### Status reclassification
+
+- F6 release/install/readback: still blocked on CI, but now on a **fixed head** rather
+  than a failing one. Implemented (fix pushed) / Tested (local validate pass) /
+  Observed (CI re-running, not yet green).
+- F2 "land refreshed CLAUDE.md/AGENTS.md via PR": unchanged — repo-level gate red
+  (stale 2026-04-14 autogen tail) is the documented, deferred state; home-level gate
+  green. Registry resolution for the shelves path remains open (organvm verify system
+  prints "Could not load registry: /Users/4jp/Code/organvm/.../registry-v2.json" while
+  still reporting PASS 10/10).
+- Untracked local state: `data/context/context-sync-changelog.jsonl` in
+  `organvm-corpvs-testamentvm` (append-only rollback log written by `organvm context
+  sync`; not gitignored, not committed by the sync command; treated as operational
+  log, not a durable artifact).
+
+### Net state after correction
+
+- alchemical-synthesizer: main == origin/main @ 67f0661, clean, 0/0; this correction
+  on branch `docs/closeout-correction-2026-10-24`.
+- a-i--skills: PR #55 open @ c0b0a37, CI re-running.
+- portvs: main == origin/main @ ae843ec, clean.
+- organvm-engine + organvm-corpvs-testamentvm restored; engine editable installed.
