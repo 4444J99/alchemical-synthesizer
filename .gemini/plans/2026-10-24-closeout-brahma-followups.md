@@ -158,3 +158,56 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
   `npm --prefix brahma/web test` 143/143; home gate exit 0.
 - Remaining open (human-gated / infrastructure): praxis-perpetua clone for sync
   refresh, atom pipeline run, audible judgment, credentials, AGPL legal, Tidal/Sonic Pi.
+
+---
+
+## Post-closeout correction #3 (2026-10-24, verification pass)
+
+### Repository freshness gate — RESOLVED (was red)
+
+- Root cause: `praxis-perpetua` was not cloned on this host, so `_system_library_stats()`
+  returned "unknown" for plans/chains/sops and the sync could not regenerate a
+  fresh autogen tail without degrading content. Additionally, `ORGANVM_CORPUS_DIR`
+  pointed at a husk (fixed in correction #2).
+- Fix: cloned `4444J99/praxis-perpetua` into
+  `~/Workspace/library/shelves/meta-organvm/praxis-perpetua` (library present:
+  269 plans, 5 chains). Ran `organvm context sync --write` with
+  `ORGANVM_WORKSPACE_DIR=~/Workspace/library/shelves`; regenerated CLAUDE.md/
+  GEMINI.md/AGENTS.md with fresh timestamp (2026-10-24T14:40:54Z), Plans: 269
+  indexed, 53 active directives, SOPs: 81.
+- `claude-md-autogen-gate` now exits **0** from the Brahma repo (was exit 1,
+  April 14 timestamps). Home gate also exit 0.
+- Landed via PR #62 (merged 2026-10-24T14:41:14Z). Repo main @ e3ae442.
+
+### F4 native OpenCode handshake — VERIFIED (was stdio-only)
+
+- Earlier evidence was the stdio bridge (initialize + tools/list → 5 tools).
+  Native verification now performed: started a standalone opencode serve on port
+  49997 with the committed example config
+  (`brahma/web/examples/mcp/opencode.jsonc`, local stdio bridge), ran
+  `opencode run` with a prompt, and observed OpenCode's MCP client discover
+  and invoke the brahma server.
+- Observed tool list (5, matching bridge enumeration):
+  `brahma_approvals`, `brahma_engine_status`, `brahma_job`,
+  `brahma_propose_pattern`, `brahma_provider_status`.
+- Accept/reject/run tools remain absent (role-scoped). Accept/execute
+  separation and human-cookie auth unchanged.
+- No host-global client config was mutated; committed example + docs remain
+  the deliverable.
+
+### Final verification (fresh, this pass)
+
+- `claude-md-autogen-gate` (Brahma repo) → **exit 0** (was exit 1).
+- `organvm verify system` → **PASS** (10/10, no registry warning).
+- `npm --prefix brahma/web test` → **143/143 pass**.
+- OpenCode native MCP → **5 brahma tools discovered** (native client, not
+  just stdio).
+
+### Accurate disposition
+
+- Merged follow-up work: preserved (PRs #56 #57 #58 #59 #60 #61 #62, portvs #22,
+  a-i--skills #55, domus #559, corpvs #604).
+- Remaining work: documented (audible judgment, credentials, AGPL legal,
+  Tidal/Sonic Pi, atom pipeline run, product/ PRs #47/#53).
+- Session DONE: now supported — repository freshness green, native OpenCode
+  handshake verified.
