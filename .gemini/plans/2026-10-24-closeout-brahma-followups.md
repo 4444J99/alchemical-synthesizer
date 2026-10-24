@@ -99,3 +99,62 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
 - a-i--skills: PR #55 open @ c0b0a37, CI re-running.
 - portvs: main == origin/main @ ae843ec, clean.
 - organvm-engine + organvm-corpvs-testamentvm restored; engine editable installed.
+
+---
+
+## Post-closeout correction #2 (2026-10-24, assigned-work pass)
+
+### F6 — closeout skill: COMPLETE
+
+- PR #55 merged (squash, admin, 2026-10-24T13:44:22Z) on fixed head c0b0a37; all CI green (validate, test 3.11/3.12, build-install, semgrep, CodeRabbit).
+- Release/install lifecycle run: `python3 scripts/skills_install.py install` → release
+  `9fb0d7f5824bdc556f5709b0b930c09b13880c089cbb744788d518041ddd477d`.
+- Readback of `~/.config/opencode/skills/closeout/SKILL.md` confirms repointed paths:
+  `~/.Codex/plans` → `.gemini/plans` (description, ls, filter, abandoned-move, output path).
+  Line 160 retains `~/.Codex/plans/` as recorded historical stat (intentional).
+- `skills_install.py path` → installed release path confirmed.
+
+### F2 registry resolution — ROOT CAUSE + FIX
+
+- Investigation: `ORGANVM_CORPUS_DIR` pointed at the husk `~/Code/organvm/organvm-corpvs-testamentvm`
+  (no registry), while the real corpus (with registry) lives at
+  `~/Workspace/library/shelves/meta-organvm/organvm-corpvs-testamentvm`. Hence
+  `organvm verify system` printed "Could not load registry" and context sync
+  reported "Plans: unknown".
+- Fix: repointed `ORGANVM_CORPUS_DIR` in chezmoi source `dot_zshenv.tmpl` to the
+  shelves path; PR #559 merged (domus-genoma-private, 2026-10-24T13:38:41Z);
+  `chezmoi apply --force` deployed; `organvm verify system` now PASS with no
+  "Could not load registry" warning.
+- Secondary finding: context sync regenerates auto-generated sections from data
+  sources that are less rich than the committed (manually enriched) versions on
+  this host — `praxis-perpetua/library/` is absent (no plans/chains/sops counts)
+  and the Active Directives table collapses to a single entry. Running sync
+  `--write` therefore DEGRADES content. The sync changes applied during
+  investigation were reverted in alchemical-synthesizer, corpus, and engine.
+  Landing the repo-level refresh needs either (a) cloning praxis-perpetua or
+  (b) a sync mode that preserves enriched directives. Filed as follow-up.
+
+### F3 atom recovery — ROOT CAUSE (no action taken)
+
+- `prompt-atoms.json` is gitignored (commit e557ccd, "gitignore 140MB of generated
+  prompt-registry JSON"). It is regenerable pipeline output, not a missing artifact.
+  Recovery = run the atomization pipeline (heavy, human-gated). Human closure
+  authority intact. No pipeline run performed.
+
+### Untracked operational state — RESOLVED
+
+- `data/context/context-sync-changelog.jsonl` in organvm-corpvs-testamentvm is now
+  gitignored (PR #604 merged, 2026-10-24T13:44:46Z). Sync's append-only rollback
+  log is explicitly excluded; no longer surfaces as untracked.
+
+### Net state after assigned-work pass
+
+- All touched repos clean, main == origin/main, 0/0:
+  alchemical-synthesizer @ 53704af, portvs @ ae843ec, a-i--skills @ (post-#55 merge),
+  organvm-engine @ ba27786, organvm-corpvs-testamentvm @ 88660ef,
+  domus-genoma @ 8ee2f5ee.
+- PR #55 (a-i--skills) MERGED; release installed; skill readback confirms repoint.
+- `organvm --help` exit 0; `organvm verify system` PASS (10/10, no registry warning);
+  `npm --prefix brahma/web test` 143/143; home gate exit 0.
+- Remaining open (human-gated / infrastructure): praxis-perpetua clone for sync
+  refresh, atom pipeline run, audible judgment, credentials, AGPL legal, Tidal/Sonic Pi.
