@@ -276,3 +276,7 @@ paid product, the AGPL position needs your review before that ships. Recorded, n
 **First action on approval:** commit this file into the repo at
 `.gemini/plans/2026-10-23-brahma-workbench-continued.md`, push, then start M1.5 (the token handoff
 alone unblocks the browser).
+
+---
+
+Merged: #56 / 99382c0 (squash merge commit `99382c0434611474634af8a8801c0bb43bd3b1f0`; merged tree `d5b3a948db6e17a1e0bad6f72cf52095428fc1d2`; verified head `e65d44d`; issue #55 CLOSED; PRs #52/#54 superseded by #56).
