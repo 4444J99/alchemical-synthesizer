@@ -5,9 +5,13 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "mcp": "node bin/brahma-mcp.js",
     "test": "node --test test/**/*.test.js",
     "build:workbench": "node ../../tools/build-workbench.mjs",
     "test:e2e": "node --test test/e2e/*.e2e.js"
+  },
+  "bin": {
+    "brahma-mcp": "bin/brahma-mcp.js"
   },
   "keywords": [
     "supercollider",

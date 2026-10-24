@@ -9,12 +9,19 @@ const { createDirtBridge } = require("./lib/dirt");
 const { createTokenBucket } = require("./lib/ratelimit");
 const { createLiveSessions, createSession, oscArgs } = require("./lib/session");
 const { createAgentLayer } = require("./lib/agent");
+const { createAgentGateway, writeAgentTokenFile } = require("./lib/mcp/client");
+const { handleRpc, SERVER_INFO, PROTOCOL_VERSION, toolsFor } = require("./lib/mcp/server");
 
 const HOST = process.env.HOST || "127.0.0.1";
 const HTTP_PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 3000;
 const OSC_UDP_PORT = Number(process.env.BRAHMA_OSC_LISTEN_PORT || 57122); // Listening for SC
 const OSC_SEND_PORT = Number(process.env.BRAHMA_OSC_SEND_PORT || 57120); // Sending to SC
 const DIRT_PORT = Number(process.env.BRAHMA_DIRT_PORT || process.env.DIRT_PORT) || 57130;
+
+// Per-launch runtime state (gitignored). Only the agent token is written here; the
+// human token stays in memory and the launch URL. A local MCP bridge reads the agent
+// token so Claude/Codex/OpenCode/agy need no secret pasted into their config.
+const RUNTIME_DIR = process.env.BRAHMA_RUNTIME_DIR || path.join(__dirname, ".runtime");
 
 // Namespace whitelist: all OSC address prefixes allowed from browser → SC.
 // /dirt/ is deliberately absent: Dirt traffic arrives on the UDP bridge (57130),
@@ -243,18 +250,80 @@ app.get("/api/agent/jobs/:id", (req, res) => {
     return res.json({ job });
 });
 
-// REST API: Runtime status discovery
-app.get("/api/runtimes", (req, res) => {    const role = auth.roleOf(req);
-    const runtimesList = runtimes.getRuntimeStatus({ role, sandboxStatus });
+// MCP over HTTP JSON-RPC. Same handler as the stdio bridge (bin/brahma-mcp.js), and
+// the same role-scoped tool list: an agent caller never sees accept/run.
+function mcpRole(req, res) {
+    if (!auth.originOk(req)) {
+        res.status(403).json({ jsonrpc: "2.0", id: null, error: { code: -32000, message: "forbidden_origin" } });
+        return null;
+    }
+    const role = auth.roleOf(req);
+    if (!role) {
+        res.status(401).json({ jsonrpc: "2.0", id: null, error: { code: -32001, message: "auth_required" } });
+        return null;
+    }
+    return role;
+}
+
+app.get("/mcp", (req, res) => {
+    const role = mcpRole(req, res);
+    if (!role) return;
     return res.json({
+        service: SERVER_INFO,
+        protocol: "mcp",
+        protocolVersion: PROTOCOL_VERSION,
+        transport: "http-jsonrpc + stdio",
+        endpoint: "/mcp",
+        stdio: "node brahma/web/bin/brahma-mcp.js",
+        role,
+        tools: toolsFor(role).map((t) => t.name)
+    });
+});
+
+app.post("/mcp", async (req, res) => {
+    const role = mcpRole(req, res);
+    if (!role) return;
+
+    const api = createAgentGateway({ agent, role, engine: () => runtimeSnapshot(role) });
+    const body = req.body;
+
+    try {
+        if (Array.isArray(body)) {
+            const responses = [];
+            for (const message of body) {
+                const out = await handleRpc(message, { role, api });
+                if (out !== null) responses.push(out);
+            }
+            return responses.length ? res.json(responses) : res.status(202).end();
+        }
+        const out = await handleRpc(body, { role, api });
+        return out === null ? res.status(202).end() : res.json(out);
+    } catch (err) {
+        return res.status(500).json({
+            jsonrpc: "2.0",
+            id: body && body.id != null ? body.id : null,
+            error: { code: -32603, message: err.message }
+        });
+    }
+});
+
+// One snapshot shape for both the REST route and the MCP `brahma_engine_status`
+// tool. A second hand-written copy would drift the moment a runtime is added.
+function runtimeSnapshot(role) {
+    return {
         sandbox: {
             ok: sandboxStatus.ok,
             backend: sandboxStatus.backend,
             checks: sandboxStatus.checks,
             reason: sandboxStatus.reason
         },
-        runtimes: runtimesList
-    });
+        runtimes: runtimes.getRuntimeStatus({ role, sandboxStatus })
+    };
+}
+
+// REST API: Runtime status discovery
+app.get("/api/runtimes", (req, res) => {
+    return res.json(runtimeSnapshot(auth.roleOf(req)));
 });
 
 // REST API: Sandboxed SuperCollider sclang evaluation (opt-in behind BRAHMA_ALLOW_SCLANG=1 and human role)
@@ -289,6 +358,15 @@ server = app.listen(HTTP_PORT, HOST, () => {
     console.log(`--- VISUAL CORTEX ONLINE: http://${HOST}:${port} ---`);
     console.log(`--- GOLEM UI: http://${HOST}:${port}/golem ---`);
     console.log(`--- CORTEX UI: http://${HOST}:${port}/cortex ---`);
+    console.log(`--- MCP (agent): http://${HOST}:${port}/mcp ---`);
+    // Hand the agent token to local MCP bridges. The human token is deliberately NOT
+    // written: a file would let any local process accept/run on the human's behalf.
+    try {
+        const tokenPath = writeAgentTokenFile(RUNTIME_DIR, auth.agentToken, port);
+        console.log(`--- AGENT TOKEN FILE: ${tokenPath} (0600, local MCP bridges) ---`);
+    } catch (err) {
+        console.warn(`[mcp] could not write agent token file (${err.message}); set BRAHMA_AGENT_TOKEN for MCP bridges`);
+    }
     // Human token handoff. Without this, no browser can obtain the human role and
     // the workbench is unusable: the token is per-launch and random.
     if (process.env.BRAHMA_HUMAN_TOKEN) {
@@ -479,6 +557,7 @@ module.exports = {
     server,
     wss,
     auth,
+    agent,
     dirtBridge,
     sandboxStatus,
     initSandbox,
@@ -488,5 +567,6 @@ module.exports = {
     liveSessions,
     ALLOWED_NAMESPACES,
     HOST,
-    HTTP_PORT
+    HTTP_PORT,
+    RUNTIME_DIR
 };

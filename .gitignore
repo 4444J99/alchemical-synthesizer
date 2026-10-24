@@ -56,3 +56,7 @@ __pycache__/
 # Workbench bundle — a build artefact, rebuilt by `npm run build:workbench`.
 # Generated from brahma/web/public/workbench/src/, never edited by hand.
 brahma/web/public/workbench/vendor/
+
+# Per-launch gateway runtime state. Holds the agent token (0600) that local MCP
+# bridges read; never the human token. Must never be committed.
+brahma/web/.runtime/
