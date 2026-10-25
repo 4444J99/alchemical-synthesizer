@@ -13,6 +13,8 @@
 # locally (`make dist`).
 #
 set -euo pipefail
+# macOS tar otherwise adds AppleDouble sidecars alongside the release root.
+export COPYFILE_DISABLE=1
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"

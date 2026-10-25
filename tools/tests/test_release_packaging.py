@@ -17,7 +17,8 @@ class ReleasePackagingTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.repo = Path(self.tmp.name) / "repo"
         self.repo.mkdir()
-        self.env = {**os.environ, "COPYFILE_DISABLE": "1"}
+        self.env = dict(os.environ)
+        self.env.pop("COPYFILE_DISABLE", None)
         self.run_cmd("git", "init", "-q")
         self.run_cmd("git", "config", "user.name", "Packaging Test")
         self.run_cmd("git", "config", "user.email", "test@example.invalid")
@@ -55,6 +56,7 @@ class ReleasePackagingTests(unittest.TestCase):
         with zipfile.ZipFile(self.repo / "dist/alchemical-synthesizer-fixture.zip") as archive:
             zip_names = archive.namelist()
         for names in (tar_names, zip_names):
+            self.assertFalse(any(part.startswith("._") for name in names for part in name.split("/")))
             names = {name.split("/", 1)[1].removeprefix("./") for name in names if "/" in name}
             self.assertIn(BUNDLE, names)
             self.assertIn("brahma/sc/tests/example.scd", names)
