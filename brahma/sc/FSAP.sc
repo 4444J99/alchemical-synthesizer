@@ -39,11 +39,11 @@ FSAP {
     }
     
     // 3. Integration Phase
-    integrate { |fidelity=1.0|
+    integrate { |fidelity=1.0, contractName|
         if (state == \ABSORBING) {
-            if (AdamKadmon.validateTraitMap(currentObservation)) {
+            if (AdamKadmon.validateTraitMap(currentObservation, contractName) and: { AdamKadmon.validateMeasurement(currentObservation) }) {
                 state = \INTEGRATING;
-                currentObservation = AdamKadmon.normalize(currentObservation);
+                currentObservation = AdamKadmon.normalize(currentObservation, contractName);
                 "FSAP: Integrated with fidelity %".format(fidelity).postln;
             } {
                 "FSAP Error: TraitMap failed AdamKadmon validation".warn;

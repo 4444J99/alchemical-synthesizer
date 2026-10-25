@@ -117,5 +117,25 @@ const Substrates = (() => {
     function seatFor(type) { return (INDEX[type] && INDEX[type].seat) || "tiferet"; }
     function colorFor(type) { return (INDEX[type] && INDEX[type].color) || [255, 255, 255]; }
 
-    return { LIST, active, setActive, cycle, byKey, seatFor, colorFor };
+    // Shared source of truth: these are the JSON files loaded by AdamKadmon.
+    // This loads schemas, not measured live traits or a synthetic SC readback.
+    async function loadContracts(fetcher = fetch) {
+        const contracts = await Promise.all(LIST.map(async sub => {
+            const response = await fetcher(`/api/substrates/${sub.id}.json`);
+            if (!response.ok) throw new Error(`Contract unavailable: ${sub.id}`);
+            const contract = await response.json();
+            if (contract.substrate !== sub.id || !Array.isArray(contract.axes) || contract.axes.length !== 4 ||
+                !Array.isArray(contract.requiredKeys) || contract.requiredKeys.length !== 4) {
+                throw new Error(`Invalid substrate contract: ${sub.id}`);
+            }
+            return contract;
+        }));
+        contracts.forEach((contract, i) => { LIST[i].contract = contract; LIST[i].axes = contract.axes; });
+        return contracts;
+    }
+
+    if (typeof window !== "undefined" && typeof fetch === "function") {
+        loadContracts().catch(error => console.error("Brahma substrate contract load failed:", error));
+    }
+    return { LIST, active, setActive, cycle, byKey, seatFor, colorFor, loadContracts };
 })();

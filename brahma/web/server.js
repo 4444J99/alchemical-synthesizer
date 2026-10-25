@@ -43,6 +43,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));
+app.use("/api/substrates", express.static(path.join(__dirname, "..", "substrate")));
 
 // Shared live-pattern registry. One gateway, one engine, one state.
 const liveSessions = createLiveSessions();
