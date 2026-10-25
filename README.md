@@ -10,9 +10,9 @@
 > **Three organs live in this repo — see [`ORGANS.md`](ORGANS.md) for the boundary map.**
 > **Brahma** — the audio synthesizer engine + Visual Cortex (this README), the shared substrate;
 > **[Forge](forge/ORGAN.md)** — the audio → track + visual production pipeline; and
-> **[AETHER](deploy/aether/ORGAN.md)** — the 24/7 living-radio streaming service. They share the
+> **[AETHER](aether/deploy/ORGAN.md)** — the 24/7 living-radio streaming service. They share the
 > Brahma engine but each owns its own lane (`feat(brahma|forge|aether):`); AETHER's boundary and
-> gated standalone-extraction recipe are declared in [`deploy/aether/`](deploy/aether/README.md).
+> gated standalone-extraction recipe are declared in [`aether/deploy/`](aether/deploy/README.md).
 
 ---
 
@@ -89,20 +89,19 @@ make dist           # -> dist/alchemical-synthesizer-<version>.{tar.gz,zip} + SH
 ```
 
 ### SuperCollider Class Files
-The `.sc` class files must be installed for the SC class compiler:
+The six `.sc` class files must be installed for the SC class compiler. From the repo root, the recommended path is:
+
 ```bash
-# Find your SC Extensions directory (platform-dependent):
-# In SuperCollider: Platform.userExtensionDir
-# macOS default: ~/Library/Application Support/SuperCollider/Extensions/
-# Linux default: ~/.local/share/SuperCollider/Extensions/
-
-SC_EXT=$(sclang -e 'Platform.userExtensionDir.postln; 0.exit' 2>/dev/null | tail -1)
-
-for f in AdamKadmon BridgeRouter FSAP BrahmaScale BrahmaMPE BrahmaModBus; do
-    ln -s "$(pwd)/brahma/sc/${f}.sc" "${SC_EXT}/"
-done
+make install
 ```
-Then recompile the class library in SC IDE (Cmd+Shift+L).
+
+`make install` runs [`tools/install-brahma.sh`](tools/install-brahma.sh), which symlinks `AdamKadmon`, `BridgeRouter`, `FSAP`, `BrahmaScale`, `BrahmaMPE`, and `BrahmaModBus` into the SuperCollider Extensions directory and recompiles the class library. You can run the script directly:
+
+```bash
+bash tools/install-brahma.sh
+```
+
+Manual fallback: symlink those six files from `brahma/sc/` into `Platform.userExtensionDir` (macOS `~/Library/Application Support/SuperCollider/Extensions/`, Linux `~/.local/share/SuperCollider/Extensions/`), then recompile in the SC IDE (Cmd+Shift+L).
 
 ### Running the Ritual
 1.  Launch **SuperCollider** and evaluate `brahma/sc/loader.scd` (Cmd+Return).
