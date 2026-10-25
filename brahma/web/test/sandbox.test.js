@@ -221,6 +221,28 @@ test("Suite 5: Runtime Status Gating Matrix", async (t) => {
 });
 
 test("Suite 6: Sclang Runtime Spec and Execution Guard", async (t) => {
+  await t.test("headless evaluation coexists with an occupied IDE port", {
+    skip: sandbox.backend() !== "seatbelt" || !runtimes.findSclang()
+  }, async () => {
+    const occupied = dgram.createSocket("udp4");
+    let ownsPort = false;
+    await new Promise((resolve, reject) => {
+      occupied.once("error", error => {
+        if (error.code === "EADDRINUSE") resolve();
+        else reject(error);
+      });
+      occupied.bind(57120, "127.0.0.1", () => { ownsPort = true; resolve(); });
+    });
+    try {
+      const result = await runtimes.executeSclang({ code: "1+1", env: { BRAHMA_ALLOW_SCLANG: "1" } });
+      assert.equal(result.ok, true, `${result.reason}: ${result.stderr}`);
+      assert.match(result.stdout, /^2$/m);
+      assert.doesNotMatch(result.stdout, /Operation not permitted/);
+    } finally {
+      if (ownsPort) occupied.close();
+    }
+  });
+
   await t.test("sclangRuntimeSpec builds readRoots and execs for valid path", () => {
     // Test with mock or existing node binary path as a valid filesystem target
     const spec = sandbox.sclangRuntimeSpec(process.execPath);

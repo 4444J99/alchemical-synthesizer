@@ -20,36 +20,29 @@ AdamKadmon {
     classvar <ontologyProfile = 'canonical_v1';
     classvar <strictness = 0.85;        // gate threshold: traits below this fail validation
     classvar <contracts;                // name -> contract dict
-    classvar <provenanceLog = List.new; // list of {time, contract, valid, provenance, confidence, missingKeys}
+    classvar provenanceLog; // list of {time, contract, valid, provenance, confidence, missingKeys}
 
     *initClass {
         contracts = Dictionary.new;
+        provenanceLog = List.new;
     }
 
     // --- Resolve a named contract (fallback to canonical_v1) ---
     *contractFor { |contractName|
-        var contract = if (contractName.notNil) { contracts.at(contractName) } { nil };
-        contract = if (contract.notNil) { contract } { ~defaultContract };
-        ^contract;
+        if(contractName.isNil or: { contractName.asSymbol == \canonical_v1 }) { ^this.defaultContract };
+        ^contracts[contractName.asSymbol] ? contracts[(contractName.asString ++ "_v1").asSymbol];
     }
 
     // --- Default canonical schema (fallback when no named contract) ---
     *defaultContract {
-        ^Dictionary.newFromPairs([
-            #[\name -> "canonical_v1",
-              \requiredKeys -> [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response],
-              \ranges -> Dictionary.newFromPairs([
-                  #[\spectral_profile -> (\min -> 0.0, \max -> 1.0),
-                    \temporal_topology -> (\min -> 0.0, \max -> 1.0),
-                    \modulation_graph -> (\min -> 0.0, \max -> 1.0),
-                    \performance_response -> (\min -> 0.0, \max -> 1.0)]
-              ])
-        ]);
+        ^(name: \canonical_v1,
+            requiredKeys: [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response],
+            ranges: ());
     }
 
     // --- Validate a trait map against a named contract (manual provenance, full confidence) ---
     *validateTraitMap { |map, contractName|
-        ^~validateCore(map, ~contractFor(contractName), \manual, 1.0);
+        ^this.validateCore(map, this.contractFor(contractName), \manual, 1.0);
     }
 
     // --- Validate with provenance: records where the trait map came from ---
@@ -57,59 +50,36 @@ AdamKadmon {
     //   confidence: 0..1, how much we trust this map
     *validateTraitMapWithProvenance { |map, contractName, provenance, confidence|
         provenance = if (provenance.notNil) { provenance } { \manual };
-        confidence = if (confidence.notNil) { confidence.clip(0.0, 1.0) } { 1.0 };
-        ^~validateCore(map, ~contractFor(contractName), provenance, confidence);
+        confidence = if (confidence.notNil) { confidence } { 1.0 };
+        ^this.validateCore(map, this.contractFor(contractName), provenance, confidence);
     }
 
     // --- Internal: shared validation core that delegates to BrahmaContracts and records provenance ---
-    *~validateCore { |map, contract, provenance, confidence|
-        var valid = true;
-        var missingKeys = List.new;
-
-        if (contract.isNil) {
-            ("AdamKadmon: No contract available for validation").warn;
-            valid = false;
-        } {
-            // Required-keys presence check (AdamKadmon-level, complementary to BrahmaContracts)
-            var requiredKeys = contract[\requiredKeys] ?? [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response];
-            requiredKeys.do { |key|
-                if (map.includesKey(key).not) {
-                    ("AdamKadmon: Missing required trait dimension: " ++ key).warn;
-                    valid = false;
-                    missingKeys.add(key);
-                };
-            };
-
-            // Delegate deep validation (types, ranges, requireMeasured, validMeasurement) to BrahmaContracts
-            if (BrahmaContracts.validate(map, contract, ~strictness).not) {
-                valid = false;
-            };
+    *validateCore { |map, contract, provenance, confidence|
+        var valid, missingKeys = List.new;
+        valid = BrahmaContracts.validate(map, contract, strictness);
+        if(map.isKindOf(Dictionary) and: { contract.notNil }) {
+            contract[\requiredKeys].do { |key| if(map.includesKey(key).not) { missingKeys.add(key) } };
         };
-
-        // Strictness gate: if provenance claims measured but confidence < strictness, fail
-        if (provenance == \measured and: { confidence < ~strictness }) {
-            ("AdamKadmon: Measured confidence " ++ confidence ++ " below strictness " ++ ~strictness ++ " — rejecting").warn;
-            valid = false;
+        if(BrahmaContracts.finiteNumber(confidence).not) { valid = false } {
+            valid = valid and: { confidence.inclusivelyBetween(0, 1) };
         };
-
-        // Record provenance entry
-        ~provenanceLog.add(Dictionary.newFromPairs([
-            #[\time -> Date.getDate,
-              \contract -> (if (contract.isNil) { "none" } { contract[\name] ?? "canonical_v1" }),
-              \valid -> valid,
-              \provenance -> provenance.asSymbol,
-              \confidence -> confidence,
-              \missingKeys -> missingKeys]
-        ]));
-        // Cap log size to prevent unbounded growth
-        if (~provenanceLog.size > 1000) { ~provenanceLog.removeFirst(~provenanceLog.size - 1000); };
-
+        if([\measured, \proxy, \manual].includes(provenance).not) { valid = false };
+        if(provenance == \measured) {
+            valid = valid and: { BrahmaContracts.validMeasurement(map, strictness) and: {
+                (confidence - map[\confidence]).abs < 1e-6
+            } };
+        };
+        provenanceLog.add((time: Date.getDate,
+            contract: if(contract.isNil) { "none" } { contract[\name] },
+            valid: valid, provenance: provenance, confidence: confidence, missingKeys: missingKeys.asArray));
+        if(provenanceLog.size > 1000) { provenanceLog.removeAt(0) };
         ^valid;
     }
 
     // --- Normalize a trait map using a named contract's ranges (delegates to BrahmaContracts) ---
     *normalize { |map, contractName|
-        ^BrahmaContracts.normalize(map, ~contractFor(contractName));
+        ^BrahmaContracts.normalize(map, this.contractFor(contractName));
     }
 
     // --- Load one contract JSON file into ~contracts ---
@@ -123,16 +93,16 @@ AdamKadmon {
 
     // --- Load all substrate contracts from a directory (brahma/substrate/*.json) ---
     *loadSubstrateContracts { |dirPath|
-        var dir = Folder(dirPath);
         var loaded = List.new;
-        if (dir.notNil and: { dir.exists }) {
-            dir.files.do { |f|
-                if (f.endsWith(".json")) {
-                    var name = ~loadContract(dirPath ++ "/" ++ f);
-                    if (name.notNil) { loaded.add(name); };
+        if(PathName(dirPath).isFolder) {
+            PathName(dirPath).files.do { |file|
+                var name;
+                if(file.extension == "json") {
+                    name = this.loadContract(file.fullPath);
+                    if(name.notNil) { loaded.add(name) };
                 };
             };
-        }
+        };
         ^loaded;
     }
 
@@ -141,12 +111,14 @@ AdamKadmon {
     }
 
     *provenanceLog {
-        ^~provenanceLog;
+        ^provenanceLog;
     }
 
     *clearProvenanceLog {
-        ~provenanceLog = List.new;
+        provenanceLog = List.new;
     }
+
+    *validateMeasurement { |map| ^BrahmaContracts.validMeasurement(map, strictness) }
 
     *checkPermission { |srcId, dstId, mode|
         // mode: read, write, infect
@@ -156,7 +128,7 @@ AdamKadmon {
     }
 
     *issueCapabilityToken { |entityId, capability|
-        // Issue a signed token for an action
-        ^Hash.new((entityId ++ capability ++ Date.getDate).asString);
+        // Correlation identifier only; this is not a signed authorization token.
+        ^[entityId, capability, Date.getDate.rawSeconds].asCompileString.hash;
     }
 }

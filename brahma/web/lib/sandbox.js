@@ -58,7 +58,7 @@ const q = (s) => JSON.stringify(String(s)); // Seatbelt string literals are doub
  * @param {number}   o.udpPort     the only UDP destination port
  * @param {boolean}  [o.allowFork] runtimes that fork helpers (default false)
  */
-function buildProfile({ readRoots = [], readFiles = [], execs = [], scratch, udpPort, allowFork = false }) {
+function buildProfile({ readRoots = [], readFiles = [], execs = [], scratch, udpPort, inboundUdpPort = udpPort, allowFork = false }) {
   const lines = [
     "(version 1)",
     "(deny default)",
@@ -81,7 +81,7 @@ function buildProfile({ readRoots = [], readFiles = [], execs = [], scratch, udp
   lines.push('(allow network-bind (local udp "*:*"))');
   // sclang opens its own inbound UDP port at startup and dies noisily without this:
   // binding is not receiving, and Seatbelt treats them as separate operations.
-  lines.push(`(allow network-inbound (local udp "*:${Number(udpPort)}"))`);
+  lines.push(`(allow network-inbound (local udp "*:${Number(inboundUdpPort)}"))`);
   lines.push(`(allow network-outbound (remote udp "localhost:${Number(udpPort)}"))`);
   return lines.join("\n") + "\n";
 }

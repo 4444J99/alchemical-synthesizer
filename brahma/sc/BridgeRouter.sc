@@ -9,11 +9,17 @@
 
 BridgeRouter {
     classvar <tickHz = 1000;
-    classvar <peers = Dictionary.new;      // host -> {port, lastSeen, offsetMs}
-    classvar <linkPaths = Dictionary.new;  // "src->dst" -> List of {pathId, mode, ttl, expiry, healthy}
+    classvar <peers;      // host -> {port, lastSeen, offsetMs}
+    classvar <linkPaths;  // "src->dst" -> List of {pathId, mode, ttl, expiry, healthy}
     classvar <heartbeatInterval = 5000;    // ms between peer heartbeats
     classvar <lastHeartbeat = 0;
+    classvar nextPathId = 0;
     
+    *initClass {
+        peers = Dictionary.new;
+        linkPaths = Dictionary.new;
+    }
+
     // --- v1: emitLinkSet (backward compatible) ---
     *emitLinkSet { |bridgeState, src, dst, mode, ttl|
         var link = (
@@ -22,16 +28,17 @@ BridgeRouter {
             mode: mode, 
             ttl: ttl, 
             expiry: Date.getDate.rawSeconds + (ttl/1000.0),
-            pathId: 0,
+            pathId: nextPathId,
             healthy: true
         );
+        var key = src.asString ++ "->" ++ dst.asString;
+        var paths = linkPaths.at(key);
+        nextPathId = nextPathId + 1;
         
         // Register as a link path for redundancy tracking
-        var key = src ++ "->" ++ dst;
-        var paths = ~linkPaths.at(key);
         if (paths.isNil) {
             paths = List.new;
-            ~linkPaths[key] = paths;
+            linkPaths[key] = paths;
         };
         paths.add(link.copy);
         
@@ -42,24 +49,20 @@ BridgeRouter {
     // --- v2: register a peer host for distributed OSC ---
     *registerPeer { |host, port, offsetMs|
         offsetMs = if (offsetMs.notNil) { offsetMs } { 0 };
-        ~peers[host] = Dictionary.newFromPairs([
-            #[\port -> port,
-              \lastSeen -> Date.getDate.rawSeconds * 1000,
-              \offsetMs -> offsetMs,
-              \healthy -> true]
-        ]);
+        peers[host] = (port: port, lastSeen: Date.getDate.rawSeconds * 1000,
+            offsetMs: offsetMs, healthy: true);
         "BRIDGE: Peer registered %:% (clock offset % ms)".format(host, port, offsetMs).postln;
     }
     
     // --- v2: record a heartbeat from a peer ---
     *peerHeartbeat { |host, timestampMs|
-        var peer = ~peers.at(host);
+        var peer = peers.at(host);
         if (peer.notNil) {
-            peer[\lastSeen] = timestampMs;
-            peer[\healthy] = true;
-            // Estimate clock offset from round-trip (simplified: one-way assumption)
             var now = Date.getDate.rawSeconds * 1000;
             var offset = now - timestampMs;
+            peer[\lastSeen] = now;
+            peer[\healthy] = true;
+            // Estimate clock offset from round-trip (simplified: one-way assumption)
             peer[\offsetMs] = offset.clip(-1000, 1000);
         } {
             ("BRIDGE: Heartbeat from unknown peer %".format(host)).warn;
@@ -68,8 +71,8 @@ BridgeRouter {
     
     // --- v2: mark a link path unhealthy (for redundancy failover) ---
     *markLinkUnhealthy { |src, dst, pathId|
-        var key = src ++ "->" ++ dst;
-        var paths = ~linkPaths.at(key);
+        var key = src.asString ++ "->" ++ dst.asString;
+        var paths = linkPaths.at(key);
         if (paths.notNil) {
             paths.do { |p|
                 if (p[\pathId] == pathId) { p[\healthy] = false; };
@@ -80,8 +83,8 @@ BridgeRouter {
     
     // --- v2: get healthy link paths for a src->dst pair (redundancy) ---
     *healthyPaths { |src, dst|
-        var key = src ++ "->" ++ dst;
-        var paths = ~linkPaths.at(key);
+        var key = src.asString ++ "->" ++ dst.asString;
+        var paths = linkPaths.at(key);
         if (paths.isNil) { ^List.new; };
         ^paths.select { |p| p[\healthy] };
     }
@@ -97,14 +100,14 @@ BridgeRouter {
         };
         
         // Expire stale link paths (TTL)
-        ~linkPaths.do { |key, paths|
-            ~linkPaths[key] = paths.select { |p|
+        linkPaths.keysValuesDo { |key, paths|
+            linkPaths[key] = paths.select { |p|
                 p.expiry > now
             };
         };
         
         // Peer health: mark stale peers unhealthy
-        ~peers.do { |host, peer|
+        peers.keysValuesDo { |host, peer|
             var ageMs = nowMs - peer[\lastSeen];
             if (ageMs > 30000) {  // 30 s stale = unhealthy
                 peer[\healthy] = false;
@@ -113,9 +116,9 @@ BridgeRouter {
         };
         
         // Heartbeat: emit to all peers if interval elapsed
-        if (nowMs - ~lastHeartbeat > ~heartbeatInterval) {
-            ~lastHeartbeat = nowMs;
-            "BRIDGE: Heartbeat cycle (%d peers, %d link keys)".format(~peers.size, ~linkPaths.size).postln;
+        if (nowMs - lastHeartbeat > heartbeatInterval) {
+            lastHeartbeat = nowMs;
+            "BRIDGE: Heartbeat cycle (%d peers, %d link keys)".format(peers.size, linkPaths.size).postln;
         };
         
         // Arbitration logic would go here
@@ -123,23 +126,20 @@ BridgeRouter {
     
     // --- v2: peer status summary ---
     *peerStatus {
-        ^~peers.collect { |host, peer|
-            Dictionary.newFromPairs([
-                #[\host -> host,
-                  \port -> peer[\port],
-                  \healthy -> peer[\healthy],
-                  \offsetMs -> peer[\offsetMs],
-                  \lastSeenAgoMs -> (Date.getDate.rawSeconds * 1000 - peer[\lastSeen])]
-            ]);
-        }.asArray;
+        var result = List.new;
+        peers.keysValuesDo { |host, peer|
+            result.add((host: host, port: peer[\port], healthy: peer[\healthy],
+                offsetMs: peer[\offsetMs], lastSeenAgoMs: Date.getDate.rawSeconds * 1000 - peer[\lastSeen]));
+        };
+        ^result.asArray;
     }
-    
+
     // --- v1 (unchanged) ---
     *checkPermission { |srcId, dstId, mode|
         ^true;
     }
     
     *issueCapabilityToken { |entityId, capability|
-        ^Hash.new((entityId ++ capability ++ Date.getDate).asString);
+        ^[entityId, capability, Date.getDate.rawSeconds].asCompileString.hash;
     }
 }

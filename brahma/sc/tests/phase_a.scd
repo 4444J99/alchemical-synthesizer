@@ -1,5 +1,6 @@
 (
 var check, source, changed, noise, traits, idea, fsap, registry, stereo, mixed;
+var root = thisProcess.nowExecutingPath.dirname.dirname;
 check = { |condition, label|
     if(condition.not) { Error("FAIL: " ++ label).throw; };
     ("PASS: " ++ label).postln;
@@ -9,7 +10,7 @@ try {
     changed = Signal.fill(4096, { |i| sin(2pi * (i.squared / 4096)) });
     thisThread.randSeed = 741;
     noise = Signal.fill(4096, { 1.0.rand2 });
-    (thisProcess.nowExecutingPath.dirname.dirname +/+ "11_metrics.scd").load;
+    (root +/+ "11_metrics.scd").load;
     check.value(~metric_collector.notNil, "metrics file compiles");
     check.value(~metric_collector.measureCoherence(source) > 0.95, "steady spectral coherence");
     check.value(~metric_collector.measureEntropy(noise) > (~metric_collector.measureEntropy(source) + 2), "noise has higher spectral entropy than tone");
@@ -27,11 +28,12 @@ try {
     check.value(AdamKadmon.validateTraitMap(traits), "canonical nested traits validate");
     check.value(AdamKadmon.validateTraitMap(traits, \unknown).not, "unknown contract fails closed");
     check.value(AdamKadmon.validateTraitMap(traits.copy.put(\confidence, 0.2)).not, "low confidence fails validation");
-    check.value(AdamKadmon.loadContract(thisProcess.nowExecutingPath.dirname.dirname.dirname +/+ "substrate/idea.json").notNil, "JSON substrate contract loads");
-    idea = (abstraction: 0.2, development: 0.3, implication: 0.4, provocation: 0.5, confidence: 0.95, provenance: \manual);
-    check.value(AdamKadmon.validateTraitMap(idea.copy.put(\abstraction, \garbage), \idea_v1).not, "numeric substrate axes reject strings");
+    ("JSONPATH " ++ root.dirname +/+ "substrate/idea.json").postln;
+    check.value(AdamKadmon.loadContract(root.dirname +/+ "substrate/idea.json").notNil, "JSON substrate contract loads");
+    idea = ~metric_collector.attachMeasurements((spectral_profile: 0.2, temporal_topology: 0.3, modulation_graph: 0.4, performance_response: 0.5), 0.9, 2.0, 0.95);
+    check.value(AdamKadmon.validateTraitMap(idea.copy.put(\spectral_profile, \garbage), \idea_v1).not, "numeric substrate axes reject strings");
     check.value(AdamKadmon.validateTraitMap(traits.copy.put(\spectral_profile, (centroid: \garbage))).not, "numeric audio traits reject strings");
-    check.value(AdamKadmon.validateTraitMap(idea.copy.put(\abstraction, (value: 0.2)), \idea_v1).not, "scalar substrate axes reject dictionaries");
+    check.value(AdamKadmon.validateTraitMap(idea.copy.put(\spectral_profile, (value: 0.2)), \idea_v1).not, "scalar substrate axes reject dictionaries");
     check.value(AdamKadmon.validateTraitMap(idea, \idea_v1), "non-audio substrate validates");
     check.value(AdamKadmon.normalize(traits.copy.put(\spectral_profile, (centroid: 2.0)))[\spectral_profile][\centroid] == 1, "nested normalization preserves dimensions");
     fsap = FSAP.new;

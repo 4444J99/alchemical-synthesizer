@@ -12,14 +12,39 @@ BrahmaContracts {
     }
 
     *load { |path|
-        var value;
+        var value, valid = true;
         if(File.exists(path).not) { ^nil };
         try { value = this.symbolize(path.parseJSONFile) } { |err| err.reportError; value = nil };
         if(value.isKindOf(Dictionary).not) { ^nil };
         if(value[\name].isNil or: { value[\requiredKeys].isArray.not }) { ^nil };
         if(value[\requiredKeys].isEmpty) { ^nil };
         value[\requiredKeys] = value[\requiredKeys].collect(_.asSymbol);
+        // SC's parseJSON aliases parseYAML and returns scalar strings. Decode
+        // typed schema fields explicitly; preserve labels and organism names.
+        if(value[\requireMeasured] == "true") { value[\requireMeasured] = true };
+        if(value[\requireMeasured] == "false") { value[\requireMeasured] = false };
+        if(value[\requireMeasured].notNil and: { [true, false].includes(value[\requireMeasured]).not }) { ^nil };
+        (value[\ranges] ? ()).values.do { |spec|
+            [\min, \max].do { |key|
+                if(spec[key].notNil) {
+                    spec[key] = this.schemaNumber(spec[key]);
+                    if(spec[key].isNil) { valid = false };
+                };
+            };
+            if(spec[\min].notNil and: { spec[\max].notNil and: { spec[\min] > spec[\max] } }) { valid = false };
+        };
+        if(valid.not) { ^nil };
         ^value;
+    }
+
+    *schemaNumber { |value|
+        var number;
+        if(this.finiteNumber(value)) { ^value };
+        if(value.isKindOf(String) and: { "^[-+]?[0-9]*[.]?[0-9]+([eE][-+]?[0-9]+)?$".matchRegexp(value) }) {
+            number = value.asFloat;
+            if(this.finiteNumber(number)) { ^number };
+        };
+        ^nil;
     }
 
     *finiteNumber { |value|

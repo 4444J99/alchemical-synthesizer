@@ -23,7 +23,18 @@ def main():
         port = sock.getsockname()[1]
     root = Path(__file__).resolve().parents[1]
     command = [args.sclang, "-D", "-u", str(port)]
+    source = root / "brahma/sc"
+    extension_roots = [Path.home() / "Library/Application Support/SuperCollider/Extensions",
+                       Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "SuperCollider/Extensions"]
+    installed = [directory / "Brahma" for directory in extension_roots if (directory / "Brahma").exists()]
+    already_installed = any(directory.resolve() == source for directory in installed)
     if not args.core_only:
+        # Select this checkout's classes while retaining all other extensions,
+        # including FluCoMa. Two copies of the same SC class cannot coexist.
+        for directory in installed:
+            if directory.resolve() != source:
+                command += ["--exclude-path", str(directory), "--exclude-path", str(directory.resolve())]
+    if not args.core_only and not already_installed:
         command += ["--include-path", str(root / "brahma/sc")]
     command.append(str(args.script.resolve()))
     print(f"SC test: {args.script.name}; private UDP port={port}; deadline={args.timeout}s", flush=True)

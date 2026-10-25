@@ -12,10 +12,10 @@
   "requiredKeys": ["spectral_profile", "temporal_topology", "modulation_graph", "performance_response"],
   "organisms": ["Axiom", "Insight", "Theory", "Synthesis", "Critique", "Thesis", "Metaphor", "Paradox", "Heresy", "Praxis"],
   "ranges": {
-    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — abstraction density, conceptual primitives" },
-    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — development arc, implication timing" },
-    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — implication links, provocation edges" },
-    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — critique velocity, thesis resilience" }
+    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — abstraction density, conceptual primitives", "type": "number" },
+    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — development arc, implication timing", "type": "number" },
+    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — implication links, provocation edges", "type": "number" },
+    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — critique velocity, thesis resilience", "type": "number" }
   },
   "provenance_min_confidence": 0.85,
   "requireMeasured": true

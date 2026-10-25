@@ -12,10 +12,10 @@
   "requiredKeys": ["spectral_profile", "temporal_topology", "modulation_graph", "performance_response"],
   "organisms": ["Void", "Singularity", "Field", "Expansion", "Gravity", "Star", "Life", "Mind", "Recurrence", "World"],
   "ranges": {
-    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — matter distribution, field structure" },
-    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — expansion rate, gravitational collapse" },
-    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — gravity wells, emergent pathways" },
-    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — emergence threshold, world-state shift" }
+    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — matter distribution, field structure", "type": "number" },
+    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — expansion rate, gravitational collapse", "type": "number" },
+    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — gravity wells, emergent pathways", "type": "number" },
+    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — emergence threshold, world-state shift", "type": "number" }
   },
   "provenance_min_confidence": 0.85,
   "requireMeasured": true
