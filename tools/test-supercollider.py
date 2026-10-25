@@ -23,7 +23,12 @@ def main():
         port = sock.getsockname()[1]
     root = Path(__file__).resolve().parents[1]
     command = [args.sclang, "-D", "-u", str(port)]
-    if not args.core_only:
+    extension_roots = [Path.home() / "Library/Application Support/SuperCollider/Extensions",
+                       Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "SuperCollider/Extensions"]
+    already_installed = any((directory / "Brahma").is_symlink() and
+                            (directory / "Brahma").resolve() == root / "brahma/sc"
+                            for directory in extension_roots)
+    if not args.core_only and not already_installed:
         command += ["--include-path", str(root / "brahma/sc")]
     command.append(str(args.script.resolve()))
     print(f"SC test: {args.script.name}; private UDP port={port}; deadline={args.timeout}s", flush=True)

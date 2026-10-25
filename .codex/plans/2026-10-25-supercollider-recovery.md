@@ -27,3 +27,9 @@ Baseline: clean origin/main 24651b0693808bd91836ab2013ad1f5f357a1d41; isolated b
 
 - Fresh whole-branch review completed. Fixed all four important findings: stereo frame cap, symbolic/nonnumeric schema values, absent/contradictory measured evidence, and native-runner output bound. Added regression checks; runner flood test changed from exit0 to bounded exit125. Explicit numeric non-audio axes reject dictionary values as well as strings/symbols. Full live trait extraction is not claimed.
 - Web suite:146/146 passing, zero skipped. Real FluCoMa Buffer tests pass, including the stereo8192-frame cap. Native scalar/contract/FSAP suite passes.
+
+## Installed runtime and retention
+
+The repaired classes are installed through source links in both native/XDG extension roots. The IDE recompiled422 files successfully and evaluated `[FluidBufSpectralShape, AdamKadmon, BrahmaMetrics]` to all three class objects with Interpreter Active. The diagnostic runner avoids adding a duplicate include path when those same source classes are already installed.
+
+Retain this worktree: installed Brahma class links depend on it. Branch and all source artifacts are pushed; PR84 owns integration. No raw transcripts, package binaries, runtime tokens, or crash reports are committed. The report supplied at08:38 describes PID42666's08:22:25 crash, before the fix, not a new post-fix failure.
