@@ -1,0 +1,19 @@
+{
+  "name": "product_v1",
+  "substrate": "product",
+  "description": "Trait schema for the Product substrate — value, adoption and network dynamics.",
+  "requiredKeys": ["spectral_profile", "temporal_topology", "modulation_graph", "performance_response"],
+  "ranges": {
+    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — utility features, core value props" },
+    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — adoption curve, lifecycle stages" },
+    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — network effects, integration edges" },
+    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — desire elasticity, market response" }
+  },
+  "axis_labels": {
+    "spectral_profile": "Utility",
+    "temporal_topology": "Adoption",
+    "modulation_graph": "Network",
+    "performance_response": "Desire"
+  },
+  "provenance_min_confidence": 0.85
+}

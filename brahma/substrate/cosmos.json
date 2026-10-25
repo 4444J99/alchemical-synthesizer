@@ -1,0 +1,19 @@
+{
+  "name": "cosmos_v1",
+  "substrate": "cosmos",
+  "description": "Trait schema for the Cosmos substrate — worlds, order, expansion, gravity, emergence.",
+  "requiredKeys": ["spectral_profile", "temporal_topology", "modulation_graph", "performance_response"],
+  "ranges": {
+    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — matter distribution, field structure" },
+    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — expansion rate, gravitational collapse" },
+    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — gravity wells, emergent pathways" },
+    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — emergence threshold, world-state shift" }
+  },
+  "axis_labels": {
+    "spectral_profile": "Order",
+    "temporal_topology": "Expansion",
+    "modulation_graph": "Gravity",
+    "performance_response": "Emergence"
+  },
+  "provenance_min_confidence": 0.85
+}

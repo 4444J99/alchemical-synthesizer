@@ -62,6 +62,12 @@ s.doWhenBooted({
     (root +/+ "12_test_bench.scd").load;
     (root +/+ "13_nrt_renderer.scd").load;
 
+    // === 10B: Substrate contracts (AdamKadmon trait schema for all 4 substrates) ===
+    // Loads brahma/substrate/*.json into AdamKadmon's contract registry.
+    // Real (Flucoma-measured) traits replace proxy traits when available.
+    AdamKadmon.loadSubstrateContracts(root ++ "/brahma/substrate");
+    TransmutationEngine.init.postln;
+
     // === 14: Visual Cortex ===
     (root +/+ "14_visual_cortex.scd").load;
 

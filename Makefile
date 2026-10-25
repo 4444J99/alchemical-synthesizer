@@ -4,6 +4,8 @@
 #   make dist      build distributable artifacts into dist/
 #   make serve     install web deps and launch the Visual Cortex (port 3000)
 #   make validate  validate an audio specimen:  make validate FILE=path/to.wav
+#   make install   symlink SC .sc classes into SC Extensions + recompile
+#   make start     layered start (SC -> Web -> Pd; --no-sc/--no-web/--no-pd)
 #   make clean     remove build output and installed web deps
 #
 #   -- The Forge: sample -> track pipeline --
@@ -22,7 +24,7 @@
 #   make demucs    install TRUE separation (htdemucs) for higher-quality rips
 #   make video     install headless video export (puppeteer) for videotrack
 
-.PHONY: help smoke dist serve validate clean stations tune rip forge render track stemtrack videotrack package broadcast rebroadcast submit demucs video
+.PHONY: help smoke dist serve validate clean install start stations tune rip forge render track stemtrack videotrack package broadcast rebroadcast submit demucs video
 
 help:
 	@grep -E '^#   make ' Makefile | sed 's/^#   /  /'
@@ -42,6 +44,17 @@ validate:
 
 clean:
 	rm -rf dist brahma/web/node_modules
+
+# install: symlink the six Brahma .sc classes into SC Extensions and recompile.
+install:
+	bash tools/install-brahma.sh
+
+# start: layered start of the rack (SC engine -> Visual Cortex -> Pure Data).
+#   make start                # all tiers
+#   make start --no-pd        # skip Pure Data
+#   make start PORT=4000      # custom web port
+start:
+	bash tools/start-brahma.sh $(if $(PORT),--port $(PORT),)
 
 # ---- The Forge: sample -> track pipeline ----
 
