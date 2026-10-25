@@ -373,7 +373,15 @@ app.post("/api/runtimes/sclang/eval", async (req, res) => {
 });
 
 // Bind HTTP server to loopback by default
-server = app.listen(HTTP_PORT, HOST, () => {
+server = app.listen(HTTP_PORT, HOST);
+server.on("error", (err) => {
+    console.error(`[http] server error: ${err.code || err.message}`);
+    if (err.code === "EADDRINUSE") {
+        console.error("port in use; exiting so smoke can surface the cause");
+        process.exit(1);
+    }
+});
+server.on("listening", () => {
     const port = server.address() ? server.address().port : HTTP_PORT;
     console.log(`--- VISUAL CORTEX ONLINE: http://${HOST}:${port} ---`);
     console.log(`--- GOLEM UI: http://${HOST}:${port}/golem ---`);
@@ -570,6 +578,14 @@ function closeServer(cb) {
 }
 
 process.on("SIGTERM", () => closeServer());
+process.on("uncaughtException", (err) => {
+  console.error("[uncaught]", err.stack || err);
+  process.exit(1);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("[unhandledRejection]", err);
+  process.exit(1);
+});
 process.on("SIGINT", () => closeServer());
 
 module.exports = {
