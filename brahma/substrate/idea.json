@@ -1,0 +1,53 @@
+{
+  "name": "idea_v1",
+  "substrate": "idea",
+  "axes": [
+    "Abstraction",
+    "Development",
+    "Implication",
+    "Provocation"
+  ],
+  "requiredKeys": [
+    "abstraction",
+    "development",
+    "implication",
+    "provocation"
+  ],
+  "organisms": [
+    "Axiom",
+    "Insight",
+    "Theory",
+    "Synthesis",
+    "Critique",
+    "Thesis",
+    "Narrative",
+    "Model",
+    "Metaphor",
+    "Praxis",
+    "Paradox",
+    "Heresy"
+  ],
+  "ranges": {
+    "abstraction": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "development": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "implication": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "provocation": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    }
+  },
+  "requireMeasured": false
+}

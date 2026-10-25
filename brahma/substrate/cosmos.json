@@ -1,0 +1,51 @@
+{
+  "name": "cosmos_v1",
+  "substrate": "cosmos",
+  "axes": [
+    "Order",
+    "Expansion",
+    "Gravity",
+    "Emergence"
+  ],
+  "requiredKeys": [
+    "order",
+    "expansion",
+    "gravity",
+    "emergence"
+  ],
+  "organisms": [
+    "Void",
+    "Singularity",
+    "Field",
+    "Expansion",
+    "Gravity",
+    "Star",
+    "Life",
+    "Mind",
+    "Recurrence",
+    "World"
+  ],
+  "ranges": {
+    "order": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "expansion": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "gravity": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "emergence": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    }
+  },
+  "requireMeasured": false
+}

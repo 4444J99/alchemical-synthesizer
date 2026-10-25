@@ -13,3 +13,17 @@ Constraints: existing execution lease codex-supercollider-01a172f6; one serial l
 Review focus: asynchronous Buffer reads, missing dependencies, empty/nonfinite signals, stereo correlation, no silent acceptance of unknown contracts. Spectral entropy uses spectral magnitudes (not spectral shape moments, which do not encode the distribution).
 
 Baseline: clean origin/main 24651b0693808bd91836ab2013ad1f5f357a1d41; isolated branch fix/supercollider-recovery-20261025. Native IDE had a blank document and active interpreter; no scsynth or local OSC bridge found on standard ports. First ordinary Quit/relaunch produced no new crash report.
+
+## Implementation ledger
+
+- Root cause reproduced: malformed packet caused SIGABRT / `Bad OSC message size` in disposable child on random port53992. Found the actual raw `x` probe in `sandbox.selfTest`, called with the live engine port by `server.initSandbox`. Corrected probe regression failed before fix, then 24 sandbox checks passed. The corrected probe left both disposable and IDE interpreters active.
+- A1: official1.0.10 package checksum/arm64 verified; installed one copy and XDG symlink. Real server plugin processed buffer and printed1.0.10 version.
+- A2-A4: class compile and async Buffer access repaired; native FFT spectral entropy, FluCoMa centroid stability with padding0, per-channel positive correlation. Native sample and server-Buffer tests pass.
+- A5: measured provenance/reconstruction-confidence threshold wired into FSAP; native tests reject low-confidence maps and accumulate high-confidence measured maps.
+- A6: four JSON substrate schemas loaded by SC and the browser from one shared registry. Idea contract validates natively.
+- Additional demonstrated defect: headless sandbox eval collided with IDE57120, auto-incremented to57121, then spun on sandbox receive denials. Explicit private inbound port preserves57120 egress; conformance changed from failure to10/10 passing.
+- Ruling: spectral entropy comes from the spectral distribution, not spectral-shape moments. Shared JSON schema loading does not assert a live SC-to-browser measurement feed. Full Phase B trait derivation and transmutation are outside this directly related Phase A recovery.
+- Historical Qt/Cocoa cleanup crashes remain unreproduced; no system accessibility capability or saved session was removed to manufacture a pass.
+
+- Fresh whole-branch review completed. Fixed all four important findings: stereo frame cap, symbolic/nonnumeric schema values, absent/contradictory measured evidence, and native-runner output bound. Added regression checks; runner flood test changed from exit0 to bounded exit125. Explicit numeric non-audio axes reject dictionary values as well as strings/symbols. Full live trait extraction is not claimed.
+- Web suite:146/146 passing, zero skipped. Real FluCoMa Buffer tests pass, including the stereo8192-frame cap. Native scalar/contract/FSAP suite passes.

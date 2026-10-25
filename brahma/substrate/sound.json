@@ -1,0 +1,54 @@
+{
+  "name": "sound_v1",
+  "substrate": "sound",
+  "axes": [
+    "Spectrum",
+    "Envelope",
+    "Modulation",
+    "Play"
+  ],
+  "requiredKeys": [
+    "spectral_profile",
+    "temporal_topology",
+    "modulation_graph",
+    "performance_response"
+  ],
+  "organisms": [
+    "Proteus",
+    "Relinquished",
+    "Golem",
+    "Typhon",
+    "AgentSmith",
+    "Ditto",
+    "Additive",
+    "Wavetable",
+    "PD",
+    "Granular",
+    "Formant",
+    "WestCoast",
+    "Subtractive",
+    "FM",
+    "Vector",
+    "Physical",
+    "Ableton"
+  ],
+  "ranges": {
+    "spectral_profile": {
+      "min": 0,
+      "max": 1
+    },
+    "temporal_topology": {
+      "min": 0,
+      "max": 1
+    },
+    "modulation_graph": {
+      "min": 0,
+      "max": 1
+    },
+    "performance_response": {
+      "min": 0,
+      "max": 1
+    }
+  },
+  "requireMeasured": true
+}

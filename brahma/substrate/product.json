@@ -1,0 +1,51 @@
+{
+  "name": "product_v1",
+  "substrate": "product",
+  "axes": [
+    "Utility",
+    "Adoption",
+    "Network",
+    "Desire"
+  ],
+  "requiredKeys": [
+    "utility",
+    "adoption",
+    "network",
+    "desire"
+  ],
+  "organisms": [
+    "Vision",
+    "Spark",
+    "Architecture",
+    "Platform",
+    "Moat",
+    "Offering",
+    "Market",
+    "Protocol",
+    "Tool",
+    "Revenue"
+  ],
+  "ranges": {
+    "utility": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "adoption": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "network": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    },
+    "desire": {
+      "min": 0,
+      "max": 1,
+      "type": "number"
+    }
+  },
+  "requireMeasured": false
+}

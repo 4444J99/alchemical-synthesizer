@@ -13,89 +13,38 @@
 AdamKadmon {
     classvar <ontologyProfile = 'canonical_v1';
     classvar <strictness = 0.85;
-    classvar <contracts = Dictionary.new;   // name -> contract dict
+    classvar <contracts;   // name -> contract dict
+
+    *initClass { contracts = Dictionary.new; }
     
     // --- Canonical Schema Definition (default, fallback) ---
     *validateTraitMap { |map, contractName|
-        var contract = if (contractName.notNil) { ~contracts.at(contractName) } { nil };
-        contract = if (contract.notNil) { contract } { ~defaultContract };
-        var valid = true;
-        var requiredKeys = contract[\requiredKeys] ?? [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response];
-        
-        requiredKeys.do { |key|
-            if (map.includesKey(key).not) {
-                ("AdamKadmon: Missing required trait dimension: " ++ key).warn;
-                valid = false;
-            };
-        };
-        
-        // Type + range validation when contract provides them
-        contract[\ranges].doIfNotNil { |ranges|
-            ranges.do { |key, spec|
-                if (map.includesKey(key)) {
-                    var v = map[key];
-                    var lo = spec[\min] ?? 0.0;
-                    var hi = spec[\max] ?? 1.0;
-                    if (v < lo or: { v > hi }) {
-                        ("AdamKadmon: Trait " ++ key ++ " = " ++ v ++ " outside range [" ++ lo ++ ", " ++ hi ++ "]").warn;
-                        valid = false;
-                    };
-                };
-            };
-        };
-        
-        ^valid;
+        var contract = this.contractFor(contractName);
+        ^BrahmaContracts.validate(map, contract, strictness);
     }
     
     *normalize { |map, contractName|
-        var contract = if (contractName.notNil) { ~contracts.at(contractName) } { nil };
-        contract = if (contract.notNil) { contract } { ~defaultContract };
-        var newMap = map.deepCopy;
-        
-        contract[\ranges].doIfNotNil { |ranges|
-            ranges.do { |key, spec| 
-                if (newMap.includesKey(key)) {
-                    var lo = spec[\min] ?? 0.0;
-                    var hi = spec[\max] ?? 1.0;
-                    newMap[key] = newMap[key].clip(lo, hi);
-                };
-            };
-        };
-        
-        // Default normalization for spectral profile (back-compat)
-        if (newMap[\spectral_profile].notNil) {
-            newMap[\spectral_profile].keysValuesChange { |k, v|
-                v.clip(0.0, 1.0);
-            };
-        };
-        
-        ^newMap;
+        ^BrahmaContracts.normalize(map, this.contractFor(contractName));
     }
     
     *loadContract { |path|
-        var file = File(path, "r");
-        var contract;
-        if (file.exists) {
-            contract = JSON.parse(file.readAllString);
-            file.close;
-            if (contract.notNil and: { contract[\name].notNil }) {
-                ~contracts[contract[\name]] = contract;
-                ("AdamKadmon: Loaded contract '" ++ contract[\name] ++ "' from " ++ path).postln;
-                ^contract[\name];
-            } {
-                file.close;
-                ("AdamKadmon: Contract at " ++ path ++ " missing 'name' field").warn;
-                ^nil;
-            };
-        } {
-            ("AdamKadmon: Contract file not found: " ++ path).warn;
-            file.close;
-            ^nil;
-        };
+        var contract = BrahmaContracts.load(path);
+        if(contract.isNil) { ^nil };
+        contracts[contract[\name].asSymbol] = contract;
+        ^contract[\name].asSymbol;
     }
     
     *contractNames {
-        ^~contracts.keys.asArray;
+        ^contracts.keys.asArray;
+    }
+
+    *contractFor { |name|
+        if(name.isNil or: { name.asSymbol == \canonical_v1 }) { ^this.defaultContract };
+        ^contracts[name.asSymbol];
+    }
+
+    *validateMeasurement { |map|
+        ^BrahmaContracts.validMeasurement(map, strictness);
     }
     
     *checkPermission { |srcId, dstId, mode|
@@ -107,19 +56,13 @@ AdamKadmon {
     
     *issueCapabilityToken { |entityId, capability|
         // Issue a signed token for an action
-        ^Hash.new((entityId ++ capability ++ Date.getDate).asString);
+        // Correlation identifier only; this is not a signed authorization token.
+        ^[entityId, capability, Date.getDate.rawSeconds].asCompileString.hash;
     }
     
     *defaultContract {
-        ^Dictionary.newFromPairs([
-            #[\name -> "canonical_v1",
-              \requiredKeys -> [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response],
-              \ranges -> Dictionary.newFromPairs([
-                  #[\spectral_profile -> (\min -> 0.0, \max -> 1.0),
-                    \temporal_topology -> (\min -> 0.0, \max -> 1.0),
-                    \modulation_graph -> (\min -> 0.0, \max -> 1.0),
-                    \performance_response -> (\min -> 0.0, \max -> 1.0)]
-              ])
-        ]);
+        ^(name: \canonical_v1,
+            requiredKeys: [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response],
+            ranges: ());
     }
 }
