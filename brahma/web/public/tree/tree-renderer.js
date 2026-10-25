@@ -18,6 +18,7 @@ const Tree = (() => {
     let occupants = {};                // key -> organism (per frame)
     let topPositions = {};             // key -> {x,y,r} at depth 0 (for picking)
     let recursionBudget = 0;           // per-frame cap to bound nested trees
+    let selected = null;               // {key, occ} — currently picked organism for trait-map overlay
 
     // ------------------------------------------------------------------ state
     function buildOccupants(organisms) {
@@ -79,6 +80,7 @@ const Tree = (() => {
         if (depth === 0) drawPillars(box, alpha);
         drawPaths(box, depth, alpha);
         if (flash.active && depth === 0) drawLightning(box, alpha);
+        if (depth === 0) drawTraitMap(box, alpha);
 
         const nodeR = box.treeW * 0.072;
         COSMOS.SEPHIROT.forEach(s => {
@@ -196,6 +198,113 @@ const Tree = (() => {
         }
     }
 
+    // -------------------------------------------------------------- trait map overlay
+    // Radar/spider chart of the four AdamKadmon trait dimensions for the selected
+    // organism: spectral_profile, temporal_topology, modulation_graph,
+    // performance_response. Drawn as a browser-based overlay at top level.
+    const TRAIT_AXES = [
+        { key: "spectral_profile",   label: "SPECTRAL",   color: [255, 100, 100] },
+        { key: "temporal_topology",  label: "TEMPORAL",   color: [100, 255, 100] },
+        { key: "modulation_graph",   label: "MODULATION", color: [100, 100, 255] },
+        { key: "performance_response", label: "PERFORM",   color: [255, 255, 100] }
+    ];
+
+    // Derive a trait map from an organism: uses OSC-provided traits when
+    // present, falls back to substrate-axis proxies, then to coherence/entropy.
+    function traitMapFor(occ) {
+        const tm = occ.traitMap;
+        if (tm) {
+            return TRAIT_AXES.map(a => {
+                const sub = tm[a.key];
+                if (sub && sub.value !== undefined) return constrain(sub.value, 0, 1);
+                if (typeof sub === "number") return constrain(sub, 0, 1);
+                return 0.5;
+            });
+        }
+        // Proxy from coherence + entropy + type-based drift
+        const c = constrain(occ.coherence ?? 0.5, 0, 1);
+        const e = constrain((occ.entropy ?? 5) / 12, 0, 1);
+        return TRAIT_AXES.map((_, i) => {
+            const base = [c, 1 - e, c * 0.7 + 0.3, e * 0.5 + 0.25][i] ?? 0.5;
+            return constrain(base + (Math.sin(i) * 0.1 - 0.05), 0, 1);
+        });
+    }
+
+    function drawTraitMap(box, alpha) {
+        if (!selected) return;
+        const { key, occ } = selected;
+        const vals = traitMapFor(occ);
+        const n = TRAIT_AXES.length;
+        const cx = box.cx + box.treeW * 0.72;
+        const cy = box.top + box.treeH * 0.28;
+        const radius = box.treeW * 0.14;
+
+        push();
+        translate(cx, cy);
+
+        // backdrop panel
+        noStroke();
+        fill(0, 0, 0, alpha * 0.75);
+        rect(-radius - 18, -radius - 48, radius * 2 + 36, radius * 2 + 66, 10);
+
+        // title
+        fill(255, 255, 255, alpha * 0.95);
+        textAlign(CENTER);
+        textSize(12);
+        text("TRAIT MAP — " + (occ.type || key), 0, -radius - 24);
+
+        // axis spokes + labels
+        TRAIT_AXES.forEach((axis, i) => {
+            const ang = (TWO_PI / n) * i - HALF_PI;
+            const x2 = cos(ang) * radius;
+            const y2 = sin(ang) * radius;
+            stroke(120, 120, 140, alpha * 0.35);
+            strokeWeight(1);
+            line(0, 0, x2, y2);
+            fill(200, 200, 220, alpha * 0.8);
+            textAlign(CENTER, CENTER);
+            textSize(10);
+            text(axis.label, x2 * 1.22, y2 * 1.22);
+        });
+
+        // concentric rings
+        noFill();
+        stroke(100, 100, 120, alpha * 0.25);
+        strokeWeight(1);
+        [0.25, 0.5, 0.75, 1.0].forEach(ring => {
+            beginShape();
+            for (let i = 0; i <= n; i++) {
+                const ang = (TWO_PI / n) * i - HALF_PI;
+                vertex(cos(ang) * radius * ring, sin(ang) * radius * ring);
+            }
+            endShape(CLOSE);
+        });
+
+        // trait polygon
+        const col = TRAIT_AXES[0].color;
+        fill(col[0], col[1], col[2], alpha * 0.15);
+        stroke(col[0], col[1], col[2], alpha * 0.85);
+        strokeWeight(2);
+        beginShape();
+        vals.forEach((v, i) => {
+            const ang = (TWO_PI / n) * i - HALF_PI;
+            vertex(cos(ang) * radius * v, sin(ang) * radius * v);
+        });
+        endShape(CLOSE);
+
+        // trait vertices
+        vals.forEach((v, i) => {
+            const ang = (TWO_PI / n) * i - HALF_PI;
+            const x = cos(ang) * radius * v;
+            const y = sin(ang) * radius * v;
+            fill(255, 255, 255, alpha * 0.95);
+            noStroke();
+            circle(x, y, 4);
+        });
+
+        pop();
+    }
+
     function drawSephirah(s, x, y, r, e, occ, alpha, depth) {
         const baseCol = occ ? Substrates.colorFor(occ.type) : s.color;
         // blend vessel's own color with its occupant
@@ -260,8 +369,11 @@ const Tree = (() => {
             const p = topPositions[key];
             if (dist(mx, my, p.x, p.y) < p.r * 1.2) hit = p;
         }
+        selected = hit;
         return hit;
     }
 
-    return { update, render, pick, triggerFlash, get topPositions() { return topPositions; } };
+    function deselect() { selected = null; }
+
+    return { update, render, pick, deselect, triggerFlash, get topPositions() { return topPositions; } };
 })();

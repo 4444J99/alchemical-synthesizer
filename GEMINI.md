@@ -77,9 +77,9 @@ Every primary module (e.g., **Relinquished**) adheres to a strict stage specific
 ---
 
 ## TODO / Roadmap
-- [ ] Implement actual `FluidBuf` analysis in `MetricCollector`.
-- [ ] Expand `AdamKadmon` to include a full JSON-based contract system.
-- [ ] Create 3D visualizations for trait maps in a browser-based overlay.
+- [ ] Implement actual `FluidBuf` analysis in `MetricCollector`. (blocked: Fluid Corpus Manipulation UGens not installed on this host)
+- [x] Expand `AdamKadmon` to include a full JSON-based contract system. (brahma/sc/AdamKadmon.sc: loadContract, contractNames, validateTraitMap with contract-scoped ranges)
+- [x] Create 3D visualizations for trait maps in a browser-based overlay. (brahma/web/public/tree/tree-renderer.js: radar-chart trait-map overlay on organism pick)
 
 <!-- ORGANVM:AUTO:START -->
 ## System Context (auto-generated — do not edit)
