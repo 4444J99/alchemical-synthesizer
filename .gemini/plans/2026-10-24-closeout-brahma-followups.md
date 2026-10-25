@@ -311,3 +311,43 @@ artifacts (`distributions/{claude,codex,direct,extensions/gemini}/.../closeout/S
 
 - **Lane (alchemical-synthesizer / Brahma follow-ups): safe to close.** All executed work merged to main, parity achieved, tests green, no uncommitted work, local-only branch resolved.
 - **Broader workspace WIP (out of lane)**: D6 atom recovery, AGPL legal, audible judgment, Tidal/Sonic Pi invocation, praxis-perpetua sync. None block this lane's close.
+
+
+---
+
+## Post-closeout correction #8 (2026-10-25, independent live reconciliation)
+
+This correction supersedes conflicting status claims above; it is a bounded checkpoint,
+not implementation completion or native session-release proof.
+
+- Monorepo live remote main and local HEAD both equal `bf6c8257ac976efaf526ae1b612bb7371f96f64a`;
+  tracked tree clean, one worktree. PRs #53 and #73-#77 are in local main history.
+- PR #47 was still OPEN, as was replacement attempt #72. Comparing each preserved
+  branch with #73's source showed only `product/package-lock.json` differed.
+  Both superseded PRs were closed during this verification; their branches were retained.
+  #47 was superseded by #73, not itself merged.
+- Standalone `4444J99/aether-radio` exists and its main contains the extracted tree.
+  History publication does not prove a self-contained build or deployment.
+- AETHER build defect reproduced without Docker: checking Dockerfile COPY sources
+  against the monorepo root exits 1. Line 32 still references absent
+  `deploy/aether/serve.js` and `deploy/aether/entrypoint.sh`.
+  Other COPY sources retain `aether/` prefixes and a `forge/bounce.sh` dependency,
+  so the subtree-root build also requires reconciliation. Owner: AETHER extraction lane.
+- `aether/README.md` still describes pre-consolidation paths and says no subtree
+  prefix exists. Update the existing docs and standalone repository pointer alongside
+  the build repair. Paid deployment, credentials and human acceptance remain pending.
+- D6's missing-location premise is stale: `CLAUDE_CONFIG_DIR/projects` resolves to
+  `/Users/4jp/Workspace/limen/.agent-runtime/claude/projects`, containing 242
+  project-level session JSONLs. The extractor still hardcodes `~/.claude/projects`.
+  No raw transcripts were read or regenerated. Owner: existing corpus D6 lane;
+  next action is bounded explicit-input extraction in private custody staging.
+- praxis-perpetua/library exists. Its checkout has modified AGENTS.md, CLAUDE.md
+  and GEMINI.md; ownership was not established, so those changes were left untouched.
+  The blanket missing-clone claim in correction #7 is stale.
+- Host admission status `--no-probe` returned `allowed: false`, reason
+  `swap-fraction`, with cached observation 2026-10-24T17:31:47Z. No worktree,
+  Docker workload, provider call or additional API spend was initiated.
+- No test suites were rerun in this pass; the earlier test totals remain historical.
+  The 30-minute attempt window elapsed before repair; implementation stops here.
+- Checkout disposition: retain the existing monorepo checkout and all preserved branches.
+  This checkpoint is pushed through its own PR; no direct main push or CI polling.
