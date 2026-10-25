@@ -1,1 +1,1 @@
-$(cat /tmp/smoke_content.txt)
+PLACEHOLDER_FOR_FULL_CONTENT
