@@ -38,8 +38,20 @@ jobs:
       - name: Run smoke test
         run: bash tools/smoke.sh --strict
 
+      - name: Provider startup regression tests
+        working-directory: brahma/web
+        run: node --test --test-concurrency=1 test/provider-probes.test.js
+
+      - name: Release packaging regression tests
+        run: python3 -m unittest discover -s tools/tests -p 'test_release*.py' -v
+
       - name: Build distribution artifacts (dry run)
         run: bash tools/build_release.sh
+
+      - name: Verify unpacked release
+        run: |
+          python3 tools/check-release-artifact.py dist/*.tar.gz
+          python3 tools/check-release-artifact.py dist/*.zip --structure-only
 
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v7

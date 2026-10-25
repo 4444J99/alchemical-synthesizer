@@ -48,6 +48,11 @@ jobs:
       - name: Build artifacts
         run: bash tools/build_release.sh "${{ steps.ver.outputs.version }}"
 
+      - name: Verify unpacked release before upload
+        run: |
+          python3 tools/check-release-artifact.py dist/*.tar.gz
+          python3 tools/check-release-artifact.py dist/*.zip --structure-only
+
       - name: Upload workflow artifact (always)
         uses: actions/upload-artifact@v7
         with:
