@@ -141,6 +141,19 @@ if command -v node >/dev/null 2>&1; then
       sleep 0.2
     done
     code="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/" 2>/dev/null || echo 000)"
+    # Snapshot the process before teardown. A 000 means either "died" or "never
+    # bound", and those need different fixes; killing first destroys the evidence
+    # and makes the liveness message below meaningless.
+    if kill -0 "$WEB_PID" 2>/dev/null; then
+      if command -v ss >/dev/null 2>&1; then
+        listening="$(ss -ltn 2>/dev/null | grep -c ":${PORT} " || true)"
+      else
+        listening="$(lsof -nP -iTCP:"${PORT}" -sTCP:LISTEN 2>/dev/null | grep -c LISTEN || true)"
+      fi
+      probe_state="alive ($(ps -o stat= -p "$WEB_PID" 2>/dev/null | tr -d ' ')), listening=${listening:-?}"
+    else
+      probe_state="gone"
+    fi
     api="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/api/modules" 2>/dev/null || echo 000)"
     wb="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/workbench/" 2>/dev/null || echo 000)"
     wbsrc="$(curl -q -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/workbench/source.json" 2>/dev/null || echo 000)"
@@ -159,14 +172,23 @@ if command -v node >/dev/null 2>&1; then
     printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
       | ( cd "$ROOT" && BRAHMA_GATEWAY_URL="http://127.0.0.1:${PORT}" node brahma/web/bin/brahma-mcp.js ) \
       >/tmp/brahma_mcp_stdio.json 2>/tmp/brahma_mcp_stdio.err
-    kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
     if [ "$code" = "200" ] && [ "$api" = "200" ]; then
       ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
     else
       bad "Visual Cortex boot (/ = $code, /api/modules = $api; see /tmp/brahma_web.log)"
       echo "=== brahma_web.log ==="
       cat /tmp/brahma_web.log 2>/dev/null || echo "(no log)"
-      if ! kill -0 "$WEB_PID" 2>/dev/null; then echo "server process $WEB_PID is dead"; fi
+      # A server that answers 000 leaves a one-line log and no explanation. Capture
+      # the facts that distinguish the causes: whether the process survived, whether
+      # it ever took the port, whether the dependency tree and its native binding
+      # are real, and how the install ended.
+      echo "=== boot diagnostics ==="
+      echo "server: ${probe_state:-unknown}"
+      echo "node: $(node -v 2>&1)"
+      echo "web modules: $(ls brahma/web/node_modules 2>/dev/null | wc -l | tr -d ' ')"
+      echo "require osc: $( ( cd brahma/web && node -e 'require("osc"); console.log("ok")' ) 2>&1 | tail -2 | tr '\n' ' ')"
+      tail -3 /tmp/brahma_npm.log 2>/dev/null | sed 's/^/npm: /'
+      echo "=== end diagnostics ==="
     fi
     if [ "$wb" = "200" ] && [ "$wbsrc" = "200" ]; then
       ok "workbench page + source offer served (200/200)"
@@ -199,6 +221,9 @@ if command -v node >/dev/null 2>&1; then
     else
       bad "human launch URL does not target the workbench (see /tmp/brahma_web.log)"
     fi
+    # Teardown last, so every check above reads a live server and the failure
+    # diagnostics can still see the process.
+    kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
   else
     if [ "$STRICT" = "1" ]; then bad "could not install web deps (offline?)"; else skip "web deps unavailable (offline) — endpoint boot"; fi
   fi
