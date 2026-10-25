@@ -80,11 +80,62 @@ mkdir -p "$DIST"
 # Checksums.
 ( cd "$DIST" && sha256sum "${SLUG}.tar.gz" "${SLUG}.zip" > "SHA256SUMS.txt" )
 
+# SBOM — SPDX 2.3 inventory of top-level components and their provenance.
+( cd "$STAGE" && cat > "${SLUG}.spdx" <<SPDX
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: alchemical-synthesizer
+DocumentNamespace: https://github.com/4444J99/alchemical-synthesizer/build/${VERSION}
+Creator: Tool: build_release.sh
+Created: ${BUILT_AT}
+
+PackageName: alchemical-synthesizer
+SPDXID: SPDXRef-PKG-brahma
+PackageVersion: ${VERSION}
+PackageDownloadLocation: https://github.com/4444J99/alchemical-synthesizer/releases/tag/${VERSION}
+FilesAnalyzed: false
+LicenseConcluded: MIT
+LicenseInfoInFile: MIT
+PackageSummary: Brahma Meta-Rack — modular alchemical synthesizer
+PackageDescription: SuperCollider DSP engine, Pure Data performance UI, Node.js/p5.js Visual Cortex, Forge production pipeline, AETHER living radio deploy unit.
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-PKG-brahma
+SPDX
+)
+
+# Provenance attestation — signed-by-commit metadata for reproducibility.
+cat > "$STAGE/PROVENANCE.json" <<EOF
+{
+  "schema": "https://github.com/4444J99/alchemical-synthesizer/provenance/v1",
+  "version": "${VERSION}",
+  "commit": "${COMMIT}",
+  "built_at": "${BUILT_AT}",
+  "builder": "${USER:-unknown}",
+  "host": "$(hostname 2>/dev/null || echo unknown)",
+  "components": {
+    "supercollider_scd": ${SCD_COUNT},
+    "supercollider_sc": ${SC_CLASS_COUNT},
+    "pure_data_patches": ${PD_COUNT}
+  },
+  "artifacts": [
+    "${SLUG}.tar.gz",
+    "${SLUG}.zip"
+  ],
+  "checksums_file": "SHA256SUMS.txt",
+  "sbom": "${SLUG}.spdx"
+}
+EOF
+
+# Move SBOM + provenance into dist root alongside checksums.
+mv "$STAGE/${SLUG}.spdx" "$DIST/${SLUG}.spdx" 2>/dev/null || true
+mv "$STAGE/PROVENANCE.json" "$DIST/PROVENANCE.json" 2>/dev/null || true
+
 # Clean the staging directory; keep only the packaged artifacts.
 rm -rf "$STAGE"
 
 echo "=== Artifacts ==="
-( cd "$DIST" && ls -lh "${SLUG}.tar.gz" "${SLUG}.zip" SHA256SUMS.txt )
+( cd "$DIST" && ls -lh "${SLUG}.tar.gz" "${SLUG}.zip" SHA256SUMS.txt "${SLUG}.spdx" PROVENANCE.json )
 echo
 cat "$DIST/SHA256SUMS.txt"
 echo "=== Done: dist/${SLUG}.{tar.gz,zip} ==="
