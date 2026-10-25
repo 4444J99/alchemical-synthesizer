@@ -164,6 +164,9 @@ if command -v node >/dev/null 2>&1; then
       ok "Visual Cortex served / (200) and /api/modules (200)"; web_ok=1
     else
       bad "Visual Cortex boot (/ = $code, /api/modules = $api; see /tmp/brahma_web.log)"
+      echo "=== brahma_web.log ==="
+      cat /tmp/brahma_web.log 2>/dev/null || echo "(no log)"
+      if ! kill -0 "$WEB_PID" 2>/dev/null; then echo "server process $WEB_PID is dead"; fi
     fi
     if [ "$wb" = "200" ] && [ "$wbsrc" = "200" ]; then
       ok "workbench page + source offer served (200/200)"
