@@ -89,6 +89,11 @@ test("HTTP binds and serves provider status while ghci is still pending", async 
     const tidal = (await response.json()).providers.find((p) => p.name === "tidal");
     assert.equal(tidal.available, false);
     assert.match(tidal.reason, /not_probed|probing/);
+    child.kill("SIGTERM");
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("shutdown must cancel the pending provider probe")), 1000);
+      exit.then(() => { clearTimeout(timer); resolve(); }, reject);
+    });
   } finally {
     // This process group is created by this test; no unrelated server is touched.
     try { process.kill(-child.pid, "SIGKILL"); } catch (error) {

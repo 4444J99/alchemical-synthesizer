@@ -78,6 +78,8 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
   let sonicAvailable = false;
   let sonicReason = "not_probed";
   let probing = null;
+  let closed = false;
+  const probeController = new AbortController();
   // Injected in tests. The default performs a real API call, which is why the
   // provider reports unavailable on a host with no key rather than faking one.
   const claudeTransport = transport || (async ({ prompt, apiKey, model }) => {
@@ -210,11 +212,13 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
       note: "live pattern engine; adapter invokes ghci to evaluate Tidal code",
       probe: async () => {
         // Real probe: ghci must exist and be able to load Sound.Tidal.Context.
+        if (closed) return false;
         tidalAvailable = false;
         tidalReason = "not_probed: discovery in progress";
         try {
           const { stdout } = await execFileAsync("ghci", ["-e", "import Sound.Tidal.Context", "-e", "putStrLn \"TIDAL_OK\""], {
             env,
+            signal: probeController.signal,
             timeout: 30000,
             killSignal: "SIGKILL",
             maxBuffer: 64 * 1024,
@@ -272,6 +276,7 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
       reason: () => (sonicAvailable ? "sonic_pi_app_present" : (sonicReason || "not_installed: no Sonic Pi on this host")),
       note: "live pattern engine; adapter sends OSC to a running Sonic Pi instance",
       probe: async () => {
+        if (closed) return false;
         const fs = require("node:fs");
         const appPath = "/Applications/Sonic Pi.app";
         if (!fs.existsSync(appPath)) {
@@ -283,6 +288,7 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
         try {
           const { stdout } = await execFileAsync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
             env,
+            signal: probeController.signal,
             timeout: 5000,
             killSignal: "SIGKILL",
             maxBuffer: 64 * 1024,
@@ -419,6 +425,7 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
   }
 
   function probeAll() {
+    if (closed) return Promise.resolve({ tidal: false, sonicpi: false });
     if (probing) return probing;
     probing = (async () => {
       const out = {};
@@ -430,8 +437,15 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     return probing;
   }
 
+  function close() {
+    closed = true;
+    tidalAvailable = false;
+    sonicAvailable = false;
+    probeController.abort();
+  }
+
   void probeAll();
-  return { list, get, propose, names: () => [...PROVIDER_NAMES], probe: probeAll };
+  return { list, get, propose, names: () => [...PROVIDER_NAMES], probe: probeAll, close };
 }
 
 module.exports = { createProviderRegistry, mockProposal, validateEvents, PROVIDER_NAMES };
