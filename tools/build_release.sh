@@ -13,6 +13,8 @@
 # locally (`make dist`).
 #
 set -euo pipefail
+# macOS tar otherwise adds AppleDouble sidecars alongside the release root.
+export COPYFILE_DISABLE=1
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -29,7 +31,7 @@ echo "=== Building ${SLUG} ==="
 # loads as its entry module (/workbench/vendor/workbench.js). Refuse to pack a
 # release whose workbench page would 404 on its own script.
 WB_BUNDLE="brahma/web/public/workbench/vendor/workbench.js"
-if [ ! -f "${ROOT}/${WB_BUNDLE}" ]; then
+if [ ! -s "${ROOT}/${WB_BUNDLE}" ] || [ -L "${ROOT}/${WB_BUNDLE}" ]; then
   echo "ERROR: ${WB_BUNDLE} is missing — the packaged workbench page would 404." >&2
   echo "Build it first: (cd brahma/web && npm install && npm run build:workbench)" >&2
   exit 1
@@ -38,25 +40,18 @@ fi
 rm -rf "$DIST"
 mkdir -p "$STAGE"
 
-# Copy the working tree, excluding VCS internals, build output, and installed
-# dependencies (these are reconstructed on the user side). Note: the built
-# workbench bundle lives under a `vendor/` directory and is a runtime asset, so
-# no `*/vendor` exclusion — dropping it ships a page that cannot load.
-tar \
-  --exclude='./.git' \
-  --exclude='./dist' \
-  --exclude='*/node_modules' \
-  --exclude='*/__pycache__' \
-  --exclude='*.pyc' \
-  --exclude='*/.pytest_cache' \
-  --exclude='*.tgz' \
-  --exclude='*.abletonextension' \
-  -cf - -C "$ROOT" . | tar -xf - -C "$STAGE"
+# Package committed source, never arbitrary ignored or untracked working state
+# (in particular .runtime agent tokens, .env files, and local media). Ignore
+# host-global attributes: a host's `tests export-ignore` must not strip our tests.
+git -c core.attributesFile=/dev/null archive --format=tar HEAD | tar -xf - -C "$STAGE"
+# This is the sole generated runtime asset, built explicitly before packaging.
+mkdir -p "${STAGE}/$(dirname "$WB_BUNDLE")"
+cp "${ROOT}/${WB_BUNDLE}" "${STAGE}/${WB_BUNDLE}"
 
 # The pre-flight check above is only half the contract: prove the staged tree
 # actually carries the bundle, so a future exclude pattern cannot silently
 # strip it again.
-if [ ! -f "${STAGE}/${WB_BUNDLE}" ]; then
+if [ ! -s "${STAGE}/${WB_BUNDLE}" ]; then
   echo "ERROR: ${WB_BUNDLE} did not survive staging — check the tar exclude list." >&2
   exit 1
 fi

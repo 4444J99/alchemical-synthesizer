@@ -314,6 +314,12 @@ if [ -f aether/deploy/Dockerfile ]; then
   else
     bad "aether/deploy/Dockerfile missing FROM or ENTRYPOINT"
   fi
+  if python3 tools/check-aether-context.py >/tmp/brahma_docker_context.log 2>&1; then
+    ok "AETHER Dockerfile COPY sources exist in the declared build context"
+  else
+    bad "AETHER Dockerfile COPY sources (see /tmp/brahma_docker_context.log)"
+    cat /tmp/brahma_docker_context.log
+  fi
 fi
 [ -f aether/deploy/README.md ] && ok "exists: aether/deploy/README.md" || bad "missing: aether/deploy/README.md"
 for scd in brahma/sc/13_nrt_renderer.scd brahma/sc/14_stem_voices.scd; do

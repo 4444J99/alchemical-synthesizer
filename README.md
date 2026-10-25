@@ -87,6 +87,14 @@ distributable artifacts locally:
 ```bash
 make dist           # -> dist/alchemical-synthesizer-<version>.{tar.gz,zip} + SHA256SUMS.txt
 ```
+Run smoke first to build the workbench bundle. Packaging includes committed `HEAD`
+plus that bundle; local edits, credentials, and runtime state are excluded.
+Verify an archive by unpacking it, installing its locked dependencies, and checking
+the served page and bundle:
+```bash
+python3 tools/check-release-artifact.py dist/*.tar.gz
+python3 tools/check-release-artifact.py dist/*.zip --structure-only
+```
 
 ### SuperCollider Class Files
 The six `.sc` class files must be installed for the SC class compiler. From the repo root, the recommended path is:

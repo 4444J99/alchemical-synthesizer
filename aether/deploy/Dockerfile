@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  AETHER plan §5.3. Runs the METABOLISM organism (tools/cellcycle.py) driving
 #  tools/broadcast.sh -> a LIVE HLS stream, served by the dependency-free
-#  deploy/aether/serve.js (node builtins only — no npm install, no native
+#  aether/deploy/serve.js (node builtins only — no npm install, no native
 #  builds). No SuperCollider in this image: the broadcast's graceful fallback
 #  tiers (folded donor / genome-reactive tone) keep the stream live without it,
 #  so the sovereign host is small and reliable. SC re-expression is a heavier
@@ -29,7 +29,7 @@ COPY aether/tools/ /app/tools/
 # but kept for parity).
 COPY aether/tools/tune.py forge/bounce.sh /app/forge/
 COPY aether/web/listener/ /app/player/
-COPY deploy/aether/serve.js deploy/aether/entrypoint.sh /app/
+COPY aether/deploy/serve.js aether/deploy/entrypoint.sh /app/
 
 RUN mkdir -p /live \
  && chmod +x /app/entrypoint.sh /app/tools/broadcast.sh /app/tools/*.py 2>/dev/null || true

@@ -585,6 +585,7 @@ sendPort.open();
 initSandbox();
 
 function closeServer(cb) {
+    agent.providers.close();
     try { dirtBridge.close(); } catch (_) {}
     try { udpPort.close(); } catch (_) {}
     try { sendPort.close(); } catch (_) {}

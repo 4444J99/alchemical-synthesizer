@@ -32,14 +32,31 @@ jobs:
         working-directory: product
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Install audio smoke dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Run security regression tests
         run: node --test product/src/api/account-security.test.js product/src/api/acp.test.js product/src/auth/rate-limit.test.js product/public/dashboard/session.test.js docs/absorb-alchemize/engine-path.test.cjs
 
       - name: Run smoke test
         run: bash tools/smoke.sh --strict
 
+      - name: Provider startup regression tests
+        working-directory: brahma/web
+        run: node --test --test-concurrency=1 test/provider-probes.test.js
+
+      - name: Release packaging regression tests
+        run: python3 -m unittest discover -s tools/tests -p 'test_release*.py' -v
+
       - name: Build distribution artifacts (dry run)
         run: bash tools/build_release.sh
+
+      - name: Verify unpacked release
+        run: |
+          python3 tools/check-release-artifact.py dist/*.tar.gz
+          python3 tools/check-release-artifact.py dist/*.zip --structure-only
 
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v7
