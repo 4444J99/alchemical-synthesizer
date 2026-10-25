@@ -15,13 +15,10 @@
  */
 
 const crypto = require("node:crypto");
+const { promisify } = require("node:util");
+const execFileAsync = promisify(require("node:child_process").execFile);
 
 const PROVIDER_NAMES = ["mock", "claude", "gemini", "tidal", "sonicpi"];
-
-let tidalAvailable = false;
-let tidalReason = "not_probed";
-let sonicAvailable = false;
-let sonicReason = "not_probed";
 
 function hashSeed(text) {
   return crypto.createHash("sha256").update(String(text)).digest().readUInt32BE(0);
@@ -75,6 +72,12 @@ function validateEvents(events) {
 }
 
 function createProviderRegistry({ env = process.env, transport, now = () => Date.now() } = {}) {
+  // Discovery belongs to this registry and must never block the HTTP event loop.
+  let tidalAvailable = false;
+  let tidalReason = "not_probed";
+  let sonicAvailable = false;
+  let sonicReason = "not_probed";
+  let probing = null;
   // Injected in tests. The default performs a real API call, which is why the
   // provider reports unavailable on a host with no key rather than faking one.
   const claudeTransport = transport || (async ({ prompt, apiKey, model }) => {
@@ -202,28 +205,27 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     tidal: {
       name: "tidal",
       kind: "live",
-      available: () => {
-        if (tidalAvailable) return true;
-        try { require('node:child_process').execFileSync('which', ['ghci'], { stdio: 'ignore' }); return true; } catch (_) { return false; }
-      },
-      reason: () => (tidalAvailable ? "ghc+tidal_module_present" : "not_installed: ghc or Sound.Tidal.Context missing"),
+      available: () => tidalAvailable,
+      reason: () => (tidalAvailable ? "ghc+tidal_module_present" : tidalReason),
       note: "live pattern engine; adapter invokes ghci to evaluate Tidal code",
       probe: async () => {
         // Real probe: ghci must exist and be able to load Sound.Tidal.Context.
-        const { execFileSync } = require("node:child_process");
+        tidalAvailable = false;
+        tidalReason = "not_probed: discovery in progress";
         try {
-          const out = execFileSync("ghci", ["-e", "import Sound.Tidal.Context", "-e", "putStrLn \"TIDAL_OK\""], {
-            stdio: ["ignore", "pipe", "pipe"],
+          const { stdout } = await execFileAsync("ghci", ["-e", "import Sound.Tidal.Context", "-e", "putStrLn \"TIDAL_OK\""], {
+            env,
             timeout: 30000,
+            killSignal: "SIGKILL",
+            maxBuffer: 64 * 1024,
             encoding: "utf8"
           });
-          tidalAvailable = /TIDAL_OK/.test(out);
-          if (!tidalAvailable) tidalReason = "ghci present but Sound.Tidal.Context failed to load";
+          tidalAvailable = /TIDAL_OK/.test(stdout);
+          if (!tidalAvailable) tidalReason = "not_installed: Sound.Tidal.Context failed to load";
         } catch (err) {
           tidalAvailable = false;
-          tidalReason = `probe_failed: ${String(err.message || err).slice(0, 200)}`;
+          tidalReason = `not_installed: probe_failed: ${String(err.message || err).slice(0, 200)}`;
         }
-        providers.tidal.reason = () => (tidalAvailable ? "ghc+tidal_module_present" : tidalReason);
         return tidalAvailable;
       },
       propose: async ({ prompt }) => {
@@ -266,15 +268,11 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     sonicpi: {
       name: "sonicpi",
       kind: "live",
-      available: () => {
-        if (sonicAvailable) return true;
-        try { return require('node:fs').existsSync('/Applications/Sonic Pi.app'); } catch (_) { return false; }
-      },
+      available: () => sonicAvailable,
       reason: () => (sonicAvailable ? "sonic_pi_app_present" : (sonicReason || "not_installed: no Sonic Pi on this host")),
       note: "live pattern engine; adapter sends OSC to a running Sonic Pi instance",
       probe: async () => {
         const fs = require("node:fs");
-        const { execFileSync } = require("node:child_process");
         const appPath = "/Applications/Sonic Pi.app";
         if (!fs.existsSync(appPath)) {
           sonicAvailable = false;
@@ -283,12 +281,14 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
         }
         let running = false;
         try {
-          const out = execFileSync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
-            stdio: ["ignore", "pipe", "pipe"],
+          const { stdout } = await execFileAsync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
+            env,
             timeout: 5000,
+            killSignal: "SIGKILL",
+            maxBuffer: 64 * 1024,
             encoding: "utf8"
           });
-          running = Boolean(out.trim());
+          running = Boolean(stdout.trim());
         } catch (_) {
           running = false;
         }
@@ -418,17 +418,19 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     }
   }
 
-  // Kick off real availability probes (async) so available() reflects host state.
-  (async () => { try { await providers.tidal.probe(); } catch (_) {} try { await providers.sonicpi.probe(); } catch (_) {} })();
-
-  async function probeAll() {
-    const out = {};
-    for (const n of ["tidal", "sonicpi"]) {
-      try { out[n] = await providers[n].probe(); } catch (e) { out[n] = false; }
-    }
-    return out;
+  function probeAll() {
+    if (probing) return probing;
+    probing = (async () => {
+      const out = {};
+      for (const n of ["tidal", "sonicpi"]) {
+        try { out[n] = await providers[n].probe(); } catch (_) { out[n] = false; }
+      }
+      return out;
+    })().finally(() => { probing = null; });
+    return probing;
   }
 
+  void probeAll();
   return { list, get, propose, names: () => [...PROVIDER_NAMES], probe: probeAll };
 }
 

@@ -61,3 +61,6 @@ unpacked release and refuses missing assets or private runtime state.
   is confirmed; hosted causality remains to be verified.
 - Existing local tar and zip each contain 233 runtime token paths; values unread.
 - Prior untracked Gemini plan remains preserved in the canonical checkout.
+- Task 1: three provider regressions failed on the base and now pass. Serial web
+  suite: 150/150. Probes use bounded asynchronous children, registry-local state,
+  and shared in-flight refreshes. No provider or measurement gate removed.
