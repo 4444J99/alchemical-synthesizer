@@ -1,3 +1,14 @@
+// Immediate boot diagnostic for CI (red handler).
+console.error("[boot] server.js entry");
+process.on("uncaughtException", (err) => {
+  console.error("[uncaughtException]", err && err.stack ? err.stack : err);
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection]", reason);
+  process.exit(1);
+});
+
 const osc = require("osc");
 const WebSocket = require("ws"); // ws ^8.21.3 (Dependabot update #1632814654, CI green)
 const express = require("express");
@@ -473,140 +484,3 @@ wss.on("connection", (ws, req) => {
     });
 
     const session = createSession({
-        getRole: () => role.current,
-        setRole: (r) => { role.current = r; },
-        exchangeHuman: (t) => auth.exchangeHuman(t),
-        isAgentToken: (t) => safeEqual(t, auth.agentToken),
-        sendOsc: (address, args) => sendPort.send({ address, args: oscArgs(args) }),
-        allowedPrefixes: ALLOWED_NAMESPACES,
-        limiter,
-        sessions: liveSessions,
-        send: (payload) => {
-            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload));
-        }
-    });
-
-    ws.role = role.current;
-    console.log(`Client Connected to Visual Cortex [role: ${ws.role || "unauthenticated"}]`);
-
-    ws.on("message", (message) => {
-        try {
-            const data = JSON.parse(message);
-            session.handle(data);
-        } catch (err) {
-            console.warn(`[ws] bad frame from client: ${err.message}`);
-        }
-    });
-
-    ws.on("close", () => {
-        session.close();
-    });
-});
-
-udpPort.on("message", (oscMsg) => {
-    // Module registry broadcasts from SC
-    if (oscMsg.address === "/brahma/registry/module") {
-        const name = oscMsg.args[0]?.value;
-        if (name) {
-            moduleCache[name] = {
-                name,
-                category: oscMsg.args[1]?.value || "",
-                synthDef: oscMsg.args[2]?.value || "",
-                numParams: oscMsg.args[3]?.value || 0,
-                numInstances: oscMsg.args[4]?.value || 0,
-                description: oscMsg.args[5]?.value || ""
-            };
-        }
-    }
-
-    // Cache registry param broadcasts
-    if (oscMsg.address === "/brahma/registry/param") {
-        const moduleName = oscMsg.args[0]?.value;
-        const paramName = oscMsg.args[1]?.value;
-        if (moduleName && paramName) {
-            if (!paramCache[moduleName]) paramCache[moduleName] = [];
-            const existing = paramCache[moduleName].findIndex(p => p.name === paramName);
-            const param = {
-                name: paramName,
-                default: oscMsg.args[2]?.value || 0,
-                min: oscMsg.args[3]?.value || 0,
-                max: oscMsg.args[4]?.value || 1,
-                units: oscMsg.args[5]?.value || "",
-                desc: oscMsg.args[6]?.value || ""
-            };
-            if (existing >= 0) {
-                paramCache[moduleName][existing] = param;
-            } else {
-                paramCache[moduleName].push(param);
-            }
-        }
-    }
-
-    // Broadcast to all WebSocket clients
-    const jsonMsg = JSON.stringify({
-        address: oscMsg.address,
-        args: oscMsg.args
-    });
-
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(jsonMsg);
-        }
-    });
-});
-
-udpPort.on("ready", () => {
-    console.log(`OSC Listener Ready on port ${OSC_UDP_PORT}`);
-});
-
-sendPort.on("ready", () => {
-    console.log(`OSC Sender Ready -> port ${OSC_SEND_PORT}`);
-});
-
-// Graceful UDP degradation: degrade, don't die
-udpPort.on("error", (err) => {
-    console.warn(`OSC listener unavailable on ${OSC_UDP_PORT} — serving HTTP without live SC telemetry (${err.code || err.message})`);
-});
-sendPort.on("error", (err) => {
-    console.warn(`OSC sender unavailable — serving HTTP without SC control (${err.code || err.message})`);
-});
-
-udpPort.open();
-sendPort.open();
-
-// Fail-closed sandbox self-test on boot
-initSandbox();
-
-function closeServer(cb) {
-    try { dirtBridge.close(); } catch (_) {}
-    try { udpPort.close(); } catch (_) {}
-    try { sendPort.close(); } catch (_) {}
-    try { wss.close(); } catch (_) {}
-    if (server) {
-        server.close(cb);
-    } else if (cb) {
-        cb();
-    }
-}
-
-process.on("SIGTERM", () => closeServer());
-process.on("SIGINT", () => closeServer());
-
-module.exports = {
-    app,
-    server,
-    wss,
-    auth,
-    agent,
-    dirtBridge,
-    sandboxStatus,
-    initSandbox,
-    closeServer,
-    udpPort,
-    sendPort,
-    liveSessions,
-    ALLOWED_NAMESPACES,
-    HOST,
-    HTTP_PORT,
-    RUNTIME_DIR
-};
