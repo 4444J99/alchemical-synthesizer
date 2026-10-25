@@ -1,0 +1,195 @@
+{
+  "tested_head": "223ebce9abc407a5594a6b931397b94febdbac03",
+  "gates": [
+    {
+      "gate": "web",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "\u2714 workbench licence: full AGPL text ships (0.738834ms)",
+        "\u2714 workbench licence: NOTICE lists the bundled dependencies (0.16825ms)",
+        "\u2714 workbench licence: every shipped source carries an AGPL SPDX header (1.300625ms)",
+        "\u2714 workbench licence: the page offers its source and imports only its own bundle (0.134125ms)",
+        "\u2714 GET /workbench/source.json names the licence, repository and dependencies (20.090458ms)",
+        "\u2714 GET /workbench/ serves the page (3.76825ms)",
+        "\u2714 event-map: note control becomes a Brahma event (0.890167ms)",
+        "\u2714 event-map: a sound matching a real module selects that engine (0.202375ms)",
+        "\u2714 event-map: note names become MIDI, since Strudel passes strings (0.350875ms)",
+        "\u2714 event-map: pitch comes from note, freq, or nothing (0.203ms)",
+        "\u2714 event-map: velocity, duration and params are clamped and filtered (0.664833ms)",
+        "[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)",
+        "\u2139 tests 151",
+        "\u2139 suites 0",
+        "\u2139 pass 151",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 6701.100125"
+      ]
+    },
+    {
+      "gate": "security",
+      "command": [
+        "node",
+        "--test",
+        "product/src/api/account-security.test.js",
+        "product/src/api/acp.test.js",
+        "product/src/auth/rate-limit.test.js",
+        "product/public/dashboard/session.test.js",
+        "docs/absorb-alchemize/engine-path.test.cjs"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "\u2714 example engine updates cannot traverse prototypes or absent properties (2.337208ms)",
+        "\u2714 old stored credentials migrate into this page once, then reload signs out (1.0495ms)",
+        "\u2714 session generations invalidate pending same-account responses (0.260125ms)",
+        "\u2714 disabled browser storage does not prevent an in-memory session (0.662792ms)",
+        "\u2714 key identity and revocation stay bound to the authenticated account (71.708417ms)",
+        "\u2714 ACP keeps structured directives and command precedence (1.90325ms)",
+        "\u2714 repeated command words and absent suffixes finish within a bounded process (78.297ms)",
+        "\u2714 limits one peer, ignores spoofed forwarding, and recovers after expiry (0.4785ms)",
+        "\u2714 bounded peer table refuses new identities without evicting live budgets (0.074625ms)",
+        "\u2714 bounded peer table removes entries that expire before the scheduled sweep (0.065834ms)",
+        "\u2714 invalid limits fail at initialization (0.389958ms)",
+        "\u2714 REST admission covers both account routes and audio before expensive work (106.483625ms)",
+        "\u2139 tests 12",
+        "\u2139 suites 0",
+        "\u2139 pass 12",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 205.056542"
+      ]
+    },
+    {
+      "gate": "product",
+      "command": [
+        "node",
+        "product/bin/smoke.js"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "  \u2713 POST /render (metered) succeeds",
+        "  \u2713 render usage incremented",
+        "  \u2713 POST /render without key \u2192 401",
+        "  \u2713 MCP tools/list returns tools",
+        "  \u2713 MCP tools/call list_modules works",
+        "  \u2713 MCP costed tool without key \u2192 JSON-RPC error",
+        "  \u2713 ACP GET /agents lists brahma",
+        "  \u2713 ACP POST /runs completes",
+        "  \u2713 ACP jsonrpc session/prompt works",
+        "  \u2713 GET /plans returns tiers",
+        "  \u2713 checkout returns a url (stub or stripe)",
+        "  \u2713 POST /waitlist joins",
+        "  \u2713 GET / serves the AETHER radio home",
+        "  \u2713 GET /specimens/:id/audio streams the real file (200)",
+        "  \u2713 audio endpoint advertises Range support",
+        "  \u2713 audio Range request \u2192 206 partial content",
+        "  \u2713 simulated specimen audio \u2192 409",
+        "  \u2713 real specimen, missing file \u2192 404",
+        "",
+        "Smoke: 21 passed, 0 failed"
+      ]
+    },
+    {
+      "gate": "native_phase_a",
+      "command": [
+        "python3",
+        "tools/test-supercollider.py",
+        "brahma/sc/tests/phase_a.scd"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "AdamKadmon: Loaded contract 'idea_v1' from /Users/4jp/Workspace/.worktrees/alchemical-verify-repair-20261025/brahma/substrate/idea.json",
+        "PASS: JSON substrate contract loads",
+        "PASS: numeric substrate axes reject strings",
+        "PASS: numeric audio traits reject strings",
+        "PASS: scalar substrate axes reject dictionaries",
+        "PASS: non-audio substrate validates",
+        "PASS: nested normalization preserves dimensions",
+        "FSAP: Observed 1",
+        "FSAP: Absorbed target",
+        "WARNING: FSAP Error: TraitMap failed AdamKadmon validation",
+        "PASS: FSAP blocks low-confidence accumulation",
+        "PASS: provenance requires actual metric evidence",
+        "FSAP: Observed 1",
+        "FSAP: Absorbed target",
+        "FSAP: Integrated with fidelity 1.0",
+        "FSAP: Accumulated. Stack depth: 1",
+        "PASS: FSAP accepts measured high-confidence traits",
+        "BRAHMA_TEST_PASS",
+        "cleaning up OSC",
+        ""
+      ]
+    },
+    {
+      "gate": "native_class_runtime",
+      "command": [
+        "python3",
+        "tools/test-supercollider.py",
+        "brahma/sc/tests/class_runtime.scd"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "PASS: transmutation class initializes its operators",
+        "Transmutation: Absorbed sound donor traits",
+        "PASS: transmutation resolves substrate aliases",
+        "WARNING: Transmutation: Result failed validation for sound \u2014 rejecting invalid output",
+        "PASS: transformed output cannot reuse donor measurement proof",
+        "PASS: operators handle nested measured dimensions",
+        "Transmutation: sound \u2192 sound via default",
+        "PASS: unchanged identity retains valid measurement proof",
+        "Transmutation: Registered operator default",
+        "WARNING: Transmutation: Result failed validation for sound \u2014 rejecting invalid output",
+        "PASS: custom default cannot retain stale measurement proof",
+        "PASS: custom operators cannot mutate donor proof",
+        "BRIDGE: Peer registered test.local:57230 (clock offset 0 ms)",
+        "PASS: peer heartbeat and status use class state",
+        "BRIDGE: Link Set 1 -> 2 (Mode: read, TTL: -1, path #1)",
+        "BRIDGE: Heartbeat cycle (1d peers, 1d link keys)",
+        "PASS: bridge tick expires links in both registries",
+        "BRAHMA_TEST_PASS",
+        "cleaning up OSC",
+        ""
+      ]
+    },
+    {
+      "gate": "native_flucoma_buffer",
+      "command": [
+        "python3",
+        "tools/test-supercollider.py",
+        "brahma/sc/tests/flucoma_buffer.scd"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "      0  channels 2",
+        "",
+        "SC_AudioDriver: sample rate = 48000.000000, driver's block size = 512",
+        "SuperCollider 3 server ready.",
+        "Requested notification messages from server 'brahmaMetricTest'",
+        "brahmaMetricTest: server process's maxLogins (1) matches with my options.",
+        "brahmaMetricTest: keeping clientID (0) as confirmed by server process.",
+        "Shared memory server interface initialized",
+        "Fluid Corpus Manipulation Toolkit: version 1.0.10+sha.c1ca9ec.core.sha.f1551f70",
+        "PASS: real FluCoMa server plugin processes audio buffer",
+        "[coherence, 1.0]",
+        "PASS: async FluCoMa coherence",
+        "PASS: async spectral entropy",
+        "PASS: async Buffer fidelity",
+        "PASS: stereo reads are capped at 8192 frames",
+        "server 'brahmaMetricTest' disconnected shared memory interface",
+        "'/quit' message sent to server 'brahmaMetricTest'.",
+        "BRAHMA_TEST_PASS",
+        "cleaning up OSC",
+        ""
+      ]
+    }
+  ]
+}

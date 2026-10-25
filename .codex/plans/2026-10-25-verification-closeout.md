@@ -76,3 +76,14 @@ unpacked release and refuses missing assets or private runtime state.
 - The previous untracked Gemini plan is copied byte-for-byte into this branch as
   historical evidence. Its earlier permanent-stall and completeness assertions
   are superseded by this plan; its original file remains untouched.
+- Independent read-only review (base..223ebce plus ffmpeg workflow setup): no
+  Critical/Important findings. Minor negative-runtime-check and same-registry
+  refresh coverage suggestions are retained under #93; they do not invalidate
+  the executed artifact proof. No second review loop is scheduled.
+- Additional lifecycle regression: SIGTERM with a pending ghci probe failed its
+  shutdown deadline; server shutdown now aborts registry discovery, and the real
+  HTTP/startup/shutdown regression passes. This method is used by production
+  closeServer, not a test-only cleanup API.
+- Full local gates: web 151/151, security 12/12, product 21/21, native phase_a /
+  class_runtime / flucoma_buffer all BRAHMA_TEST_PASS; smoke 75/0/0. Native runner
+  pins this checkout's classes without touching SC Extensions symlinks.
