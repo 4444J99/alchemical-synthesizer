@@ -189,10 +189,10 @@ State machine for cumulative identity integration with four phases:
 
 #### Measurement System (~METRIC_COLLECTOR)
 Language-side Event (not a class — SC's class compiler only processes `.sc` files). Four-dimensional quantification:
-- **Coherence**: Spectral stability (placeholder — requires FluidBufSpectralShape for real implementation)
-- **Fidelity**: Cross-correlation between input and output (placeholder)
+- **Coherence**: Spectral stability via RMS variance across 8 windows, normalized to [0,1]; real time-domain implementation (FluidBufSpectralShape noted for future spectral-centroid refinement)
+- **Fidelity**: Pearson cross-correlation between input and output buffers; real implementation
 - **Stress**: System CPU load via `Server.local.avgCPU` (real)
-- **Entropy**: Shannon entropy of spectral distribution (placeholder)
+- **Entropy**: Shannon entropy of sample-magnitude distribution, clipped to [0,12]; real implementation
 
 Methods: `measureCoherence`, `measureFidelity`, `measureStress`, `measureEntropy`, `logMetric`, `exportReport`.
 
