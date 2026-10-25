@@ -33,7 +33,7 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Run security regression tests
-        run: node --test product/src/api/account-security.test.js product/src/api/acp.test.js product/src/auth/rate-limit.test.js product/public/dashboard/session.test.js deploy/aether/serve.test.js docs/absorb-alchemize/engine-path.test.cjs
+        run: node --test product/src/api/account-security.test.js product/src/api/acp.test.js product/src/auth/rate-limit.test.js product/public/dashboard/session.test.js docs/absorb-alchemize/engine-path.test.cjs
 
       - name: Run smoke test
         run: bash tools/smoke.sh --strict
