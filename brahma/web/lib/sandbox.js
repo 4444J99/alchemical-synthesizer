@@ -206,7 +206,10 @@ t("exec_shell",()=>cp.execFileSync("/bin/sh",["-c","true"]));
 let n=0;const fin=()=>{if(++n===3)console.log("RESULT "+JSON.stringify(r))};
 const c=net.connect({host:"127.0.0.1",port:${tcpPort},timeout:1500});
 c.on("connect",()=>{r.tcp="allowed";c.destroy();fin()});c.on("error",()=>{r.tcp="denied";fin()});c.on("timeout",()=>{r.tcp="denied";c.destroy();fin()});
-const u=(k,p)=>{const s=dgram.createSocket("udp4");s.send(Buffer.from("x"),p,"127.0.0.1",(e)=>{r[k]=e?"denied":"allowed";s.close();fin()})};
+// OSC address string (24 bytes) + empty type-tag string (4 bytes).
+// Raw non-OSC bytes can abort sclang 3.14.x, including an already-running IDE.
+const packet=Buffer.alloc(28);packet.write("/brahma/sandbox/probe");packet[24]=44;
+const u=(k,p)=>{const s=dgram.createSocket("udp4");s.send(packet,p,"127.0.0.1",(e)=>{r[k]=e?"denied":"allowed";s.close();fin()})};
 u("udp_other",9);u("udp_engine",${Number(udpPort)});
 `);
   const spec = nodeRuntimeSpec();
