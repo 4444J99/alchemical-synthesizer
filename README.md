@@ -89,7 +89,16 @@ make dist           # -> dist/alchemical-synthesizer-<version>.{tar.gz,zip} + SH
 ```
 
 ### SuperCollider Class Files
-The `.sc` class files must be installed for the SC class compiler:
+The `.sc` class files must be installed for the SC class compiler.
+
+**Automated (recommended):**
+```bash
+bash tools/install-brahma.sh
+# or: make install
+```
+Handles backup of any existing links, symlinks the 6 Brahma classes into the SC Extensions directory, and triggers a class library recompile.
+
+**Manual:**
 ```bash
 # Find your SC Extensions directory (platform-dependent):
 # In SuperCollider: Platform.userExtensionDir
