@@ -32,6 +32,11 @@ jobs:
         working-directory: product
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Install audio smoke dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Run security regression tests
         run: node --test product/src/api/account-security.test.js product/src/api/acp.test.js product/src/auth/rate-limit.test.js product/public/dashboard/session.test.js docs/absorb-alchemize/engine-path.test.cjs
 
