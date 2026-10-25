@@ -259,7 +259,7 @@ done
 # (audio -> visualizer video -> FLV) must actually produce a stream (dry-run, no
 # push, no key). Uses showwaves (most portable ffmpeg filter).
 if [ -f aether/deploy/rebroadcast.json ] && command -v python3 >/dev/null 2>&1; then
-  if python3 -c 'import json,sys; c=json.load(open("aether/deploy/rebroadcast.json")); sys.exit(0 if c.get("targets") && c.get("video") && c.get("audio") else 1)' >/dev/null 2>&1; then
+  if python3 -c 'import json,sys; c=json.load(open("aether/deploy/rebroadcast.json")); sys.exit(0 if c.get("targets") and c.get("video") and c.get("audio") else 1)' >/dev/null 2>&1; then
     ok "rebroadcast.json valid (targets + video + audio)"
   else
     bad "rebroadcast.json malformed or missing targets/video/audio"
@@ -277,7 +277,7 @@ fi
 # AETHER 24/7 sovereign host (deploy/aether): the container deploy unit must be
 # structurally sound even though the image build + wrangler deploy are gated.
 if [ -f aether/deploy/wrangler.toml ] && command -v python3 >/dev/null 2>&1; then
-  if python3 -c 'import tomllib,sys; d=tomllib.load(open("aether/deploy/wrangler.toml","rb")); sys.exit(0 if d.get("name") && d.get("containers") && d.get("r2_buckets") else 1)' >/dev/null 2>&1; then
+  if python3 -c 'import tomllib,sys; d=tomllib.load(open("aether/deploy/wrangler.toml","rb")); sys.exit(0 if d.get("name") and d.get("containers") and d.get("r2_buckets") else 1)' >/dev/null 2>&1; then
     ok "aether/deploy/wrangler.toml valid (name + containers + r2_buckets)"
   else
     bad "aether/deploy/wrangler.toml malformed or missing containers/r2_buckets"
