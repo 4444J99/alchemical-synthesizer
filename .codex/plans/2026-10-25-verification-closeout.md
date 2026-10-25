@@ -64,3 +64,15 @@ unpacked release and refuses missing assets or private runtime state.
 - Task 1: three provider regressions failed on the base and now pass. Serial web
   suite: 150/150. Probes use bounded asynchronous children, registry-local state,
   and shared in-flight refreshes. No provider or measurement gate removed.
+- Added a real HTTP regression with ghci held pending: current code serves provider
+  status in 178 ms; the identical test loading the original provider module fails
+  its 5-second bind deadline. This supersedes the old runner-console blocker.
+- Task 2: fake-private-state and empty-bundle regressions failed then passed.
+  Six packaging/checker tests pass. A real unpacked tar at 99e171e installed from
+  its lockfile and served /, /workbench/, source.json and the 955078-byte bundle
+  (hash matched); zip structure also passes. No private runtime members remain.
+- Task 3: COPY validator failed on deploy/aether/serve.js, then passed for all six
+  sources after correcting the Dockerfile. No Docker image build performed.
+- The previous untracked Gemini plan is copied byte-for-byte into this branch as
+  historical evidence. Its earlier permanent-stall and completeness assertions
+  are superseded by this plan; its original file remains untouched.
