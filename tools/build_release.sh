@@ -25,11 +25,23 @@ STAGE="${DIST}/${SLUG}"
 
 echo "=== Building ${SLUG} ==="
 
+# The workbench bundle is a build artefact (gitignored) that the served page
+# loads as its entry module (/workbench/vendor/workbench.js). Refuse to pack a
+# release whose workbench page would 404 on its own script.
+WB_BUNDLE="brahma/web/public/workbench/vendor/workbench.js"
+if [ ! -f "${ROOT}/${WB_BUNDLE}" ]; then
+  echo "ERROR: ${WB_BUNDLE} is missing — the packaged workbench page would 404." >&2
+  echo "Build it first: (cd brahma/web && npm install && npm run build:workbench)" >&2
+  exit 1
+fi
+
 rm -rf "$DIST"
 mkdir -p "$STAGE"
 
 # Copy the working tree, excluding VCS internals, build output, and installed
-# dependencies / vendored binaries (these are reconstructed on the user side).
+# dependencies (these are reconstructed on the user side). Note: the built
+# workbench bundle lives under a `vendor/` directory and is a runtime asset, so
+# no `*/vendor` exclusion — dropping it ships a page that cannot load.
 tar \
   --exclude='./.git' \
   --exclude='./dist' \
@@ -37,10 +49,17 @@ tar \
   --exclude='*/__pycache__' \
   --exclude='*.pyc' \
   --exclude='*/.pytest_cache' \
-  --exclude='*/vendor' \
   --exclude='*.tgz' \
   --exclude='*.abletonextension' \
   -cf - -C "$ROOT" . | tar -xf - -C "$STAGE"
+
+# The pre-flight check above is only half the contract: prove the staged tree
+# actually carries the bundle, so a future exclude pattern cannot silently
+# strip it again.
+if [ ! -f "${STAGE}/${WB_BUNDLE}" ]; then
+  echo "ERROR: ${WB_BUNDLE} did not survive staging — check the tar exclude list." >&2
+  exit 1
+fi
 
 # Build manifest — records exactly what shipped, for reproducibility.
 COMMIT="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
