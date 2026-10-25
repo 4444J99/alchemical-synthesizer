@@ -11,6 +11,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const dgram = require("node:dgram");
 const sandbox = require("./sandbox");
 
 /**
@@ -185,6 +186,16 @@ async function executeSclang({
 
   const scratch = sandbox.makeScratch();
   const scriptFile = path.join(scratch, "headless_eval.scd");
+  // A running IDE owns 57120. Auto-incrementing to 57121 would disagree with
+  // the sandbox's receive permission and spin on EPERM until the output limit.
+  const privatePort = await new Promise((resolve, reject) => {
+    const socket = dgram.createSocket("udp4");
+    socket.once("error", error => { socket.close(); reject(error); });
+    socket.bind(0, "127.0.0.1", () => {
+      const port = socket.address().port;
+      socket.close(() => resolve(port));
+    });
+  });
 
   // Wrap script to execute cleanly in headless sclang and exit with 0 or report error and exit 1.
   // The result is printed: an eval whose value cannot be observed is not verifiable,
@@ -207,7 +218,8 @@ try {
     ...spec,
     readFiles: [scriptFile],
     scratch,
-    udpPort: 57120 // SuperCollider engine port
+    udpPort: 57120, // Approved engine destination remains unchanged.
+    inboundUdpPort: privatePort
   });
 
   let stdout = "";
@@ -215,7 +227,8 @@ try {
 
   const handle = sandbox.launch({
     cmd: spec.execs[0],
-    args: [scriptFile],
+    args: ["-D", "-u", String(privatePort), scriptFile],
+    env: { LANG: "en_US.UTF-8", LC_ALL: "en_US.UTF-8" },
     profile,
     scratch,
     limits: { wallMs: timeoutMs, outputBytes: 256 * 1024 },
