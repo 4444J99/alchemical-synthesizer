@@ -5,8 +5,32 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
+const dgram = require("node:dgram");
 const sandbox = require("../lib/sandbox");
 const runtimes = require("../lib/runtimes");
+
+test("sandbox network probe sends a valid harmless OSC message", { skip: sandbox.backend() !== "seatbelt" }, async () => {
+  const receiver = dgram.createSocket("udp4");
+  await new Promise(resolve => receiver.bind(0, "127.0.0.1", resolve));
+  let timer;
+  const packet = new Promise((resolve, reject) => {
+    timer = setTimeout(() => reject(new Error("no UDP probe received")), 10000);
+    receiver.once("message", resolve);
+  });
+  try {
+    const result = await sandbox.selfTest({ udpPort: receiver.address().port });
+    const data = await packet;
+    assert.equal(result.ok, true, result.reason);
+    assert.equal(data.length % 4, 0, "OSC packet must be 4-byte aligned");
+    const end = data.indexOf(0);
+    assert.equal(data.subarray(0, end).toString(), "/brahma/sandbox/probe");
+    const args = (end + 4) & ~3;
+    assert.deepEqual(data.subarray(args), Buffer.from([44, 0, 0, 0]));
+  } finally {
+    clearTimeout(timer);
+    receiver.close();
+  }
+});
 
 test("Suite 1: Sandbox Backend & Profile Generation", async (t) => {
   await t.test("backend() identifies seatbelt on darwin", () => {
