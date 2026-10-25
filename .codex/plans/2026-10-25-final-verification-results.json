@@ -1,0 +1,161 @@
+{
+  "tested_head": "8a107e9cb03c2376fb272621acccfecbe89b8da3",
+  "gates": [
+    {
+      "gate": "web",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "\u2714 event-map: note names become MIDI, since Strudel passes strings (0.360166ms)",
+        "\u2714 event-map: pitch comes from note, freq, or nothing (0.180917ms)",
+        "\u2714 event-map: velocity, duration and params are clamped and filtered (0.588209ms)",
+        "[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)",
+        "\u2139 tests 151",
+        "\u2139 suites 0",
+        "\u2139 pass 151",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 5171.327042"
+      ]
+    },
+    {
+      "gate": "smoke",
+      "command": [
+        "bash",
+        "tools/smoke.sh",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "  PASS  AETHER Dockerfile COPY sources exist in the declared build context",
+        "  PASS  exists: aether/deploy/README.md",
+        "  PASS  exists: brahma/sc/13_nrt_renderer.scd",
+        "  PASS  exists: brahma/sc/14_stem_voices.scd",
+        "  PASS  exists: brahma/web/public/tree/video.js",
+        "  PASS  exists: aether/web/listener/index.html",
+        "  PASS  exists: aether/web/listener/aether.js",
+        "  PASS  exists: brahma/web/public/instrument/index.html",
+        "  PASS  Ouroboros: submission absorbed + lineage recorded",
+        "",
+        "=== Summary: 75 passed, 0 failed, 0 skipped ===",
+        "SMOKE: PASS"
+      ]
+    },
+    {
+      "gate": "release_regressions",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_release*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "test_complete_archives_pass_structure_check (test_release_artifact_check.ArtifactCheckTests.test_complete_archives_pass_structure_check) ... ok",
+        "test_missing_bundle_fails (test_release_artifact_check.ArtifactCheckTests.test_missing_bundle_fails) ... ok",
+        "test_private_state_path_is_rejected (test_release_artifact_check.ArtifactCheckTests.test_private_state_path_is_rejected) ... ok",
+        "test_traversal_and_links_are_rejected (test_release_artifact_check.ArtifactCheckTests.test_traversal_and_links_are_rejected) ... ok",
+        "test_archives_include_runtime_assets_but_not_private_working_state (test_release_packaging.ReleasePackagingTests.test_archives_include_runtime_assets_but_not_private_working_state) ... ok",
+        "test_missing_or_empty_bundle_fails_before_touching_existing_dist (test_release_packaging.ReleasePackagingTests.test_missing_or_empty_bundle_fails_before_touching_existing_dist) ... ok",
+        "",
+        "----------------------------------------------------------------------",
+        "Ran 6 tests in 0.687s",
+        "",
+        "OK"
+      ]
+    },
+    {
+      "gate": "copy_sources",
+      "command": [
+        "python3",
+        "tools/check-aether-context.py"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "AETHER COPY context: PASS (6 sources; image build not performed)"
+      ]
+    },
+    {
+      "gate": "packer_shellcheck",
+      "command": [
+        "shellcheck",
+        "tools/build_release.sh"
+      ],
+      "exit_code": 0,
+      "output_tail": []
+    },
+    {
+      "gate": "release_build",
+      "command": [
+        "bash",
+        "tools/build_release.sh",
+        "verification"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "=== Building alchemical-synthesizer-verification ===",
+        "=== Artifacts ===",
+        "-rw-r--r--@ 1 4jp  staff   805B Oct 25 11:49 alchemical-synthesizer-verification.spdx",
+        "-rw-r--r--@ 1 4jp  staff   1.2M Oct 25 11:49 alchemical-synthesizer-verification.tar.gz",
+        "-rw-r--r--@ 1 4jp  staff   1.4M Oct 25 11:49 alchemical-synthesizer-verification.zip",
+        "-rw-r--r--@ 1 4jp  staff   582B Oct 25 11:49 PROVENANCE.json",
+        "-rw-r--r--@ 1 4jp  staff   215B Oct 25 11:49 SHA256SUMS.txt",
+        "",
+        "a8092173ac6f2ce8ac556281b1c5a7b5197b862a9416a0eda0af022bbe4c596b  alchemical-synthesizer-verification.tar.gz",
+        "f00c8ecd3a8d7287d3d9a5008a19e26633def47883c73b5c10ae7689a959b511  alchemical-synthesizer-verification.zip",
+        "=== Done: dist/alchemical-synthesizer-verification.{tar.gz,zip} ==="
+      ]
+    },
+    {
+      "gate": "tar_runtime",
+      "command": [
+        "python3",
+        "tools/check-release-artifact.py",
+        "dist/alchemical-synthesizer-verification.tar.gz"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "STRUCTURE PASS: 386 files, bundle 955078 bytes, no private state",
+        "INSTALL PASS: unpacked lockfile dependencies",
+        "HTTP PASS: / -> 200 (1127 bytes)",
+        "HTTP PASS: /workbench/ -> 200 (1808 bytes)",
+        "HTTP PASS: /workbench/source.json -> 200 (955 bytes)",
+        "HTTP PASS: /workbench/vendor/workbench.js -> 200 (955078 bytes)",
+        "RELEASE ARTIFACT: PASS"
+      ]
+    },
+    {
+      "gate": "zip_structure",
+      "command": [
+        "python3",
+        "tools/check-release-artifact.py",
+        "dist/alchemical-synthesizer-verification.zip",
+        "--structure-only"
+      ],
+      "exit_code": 0,
+      "output_tail": [
+        "STRUCTURE PASS: 386 files, bundle 955078 bytes, no private state",
+        "RELEASE ARTIFACT: PASS"
+      ]
+    }
+  ],
+  "reused_security_product_native_from": ".codex/plans/2026-10-25-verification-results.json",
+  "unchanged_input_trees": {
+    "brahma/sc": "4076bbfe6b83a2314fdbced2b3b34abe92b13b1f",
+    "brahma/substrate": "a8bdc45e8a39abc49d1e6a5dd3ecf39682621dea",
+    "product": "32b1be58145c362bb3bbaa18e16cd374577db7df",
+    "docs/absorb-alchemize/engine-path.test.cjs": "01cb25fb0f457d568a0989cab00a938690007fda"
+  }
+}
