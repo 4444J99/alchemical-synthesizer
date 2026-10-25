@@ -25,7 +25,7 @@
   "dependencies": {
     "express": "^4.22.3",
     "osc": "^2.4.4",
-    "ws": "^8.21.2"
+    "ws": "^8.22.0"
   },
   "optionalDependencies": {
     "stripe": "^14.0.0"
