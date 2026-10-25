@@ -2,18 +2,21 @@
   "name": "sound_v1",
   "substrate": "sound",
   "description": "Trait schema for the Sound substrate — timbre, the first reality Brahma learned to absorb.",
-  "requiredKeys": ["spectral_profile", "temporal_topology", "modulation_graph", "performance_response"],
-  "ranges": {
-    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — spectral centroid, flatness, bandwidth" },
-    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — attack, decay, sustain, release" },
-    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — LFO routing, FM depth, cross-modulation" },
-    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — velocity, aftertouch, XY sensitivity" }
-  },
+  "axes": ["Spectrum", "Envelope", "Modulation", "Play"],
   "axis_labels": {
     "spectral_profile": "Spectrum",
     "temporal_topology": "Envelope",
     "modulation_graph": "Modulation",
     "performance_response": "Play"
   },
-  "provenance_min_confidence": 0.85
+  "requiredKeys": ["spectral_profile", "temporal_topology", "modulation_graph", "performance_response"],
+  "organisms": ["Proteus", "Relinquished", "Golem", "Typhon", "AgentSmith", "Ditto", "Additive", "Wavetable", "PD", "Granular", "Formant", "WestCoast", "Subtractive", "FM", "Vector", "Physical", "Ableton"],
+  "ranges": {
+    "spectral_profile": { "min": 0.0, "max": 1.0, "description": "What is it made of? — spectral centroid, flatness, bandwidth" },
+    "temporal_topology": { "min": 0.0, "max": 1.0, "description": "How does it unfold? — attack, decay, sustain, release" },
+    "modulation_graph": { "min": 0.0, "max": 1.0, "description": "How does it connect? — LFO routing, FM depth, cross-modulation" },
+    "performance_response": { "min": 0.0, "max": 1.0, "description": "How does it answer contact? — velocity, aftertouch, XY sensitivity" }
+  },
+  "provenance_min_confidence": 0.85,
+  "requireMeasured": true
 }
