@@ -79,7 +79,7 @@ sanitized evidence under `.codex/plans/`; private artifacts under `forge/out/`.
   save/reopen and export through the real browser instrument.
 - [x] Measure source/output integrity, duration/non-silence and reopen fidelity.
 - [x] Run scoped regressions, one independent review, resolve substantive issues.
-- [ ] Commit/push code and evidence as a stacked PR; verify remote parity and
+- [x] Commit/push code and evidence as a stacked PR; verify remote parity and
   retain private project/audio in the session-owned checkout.
 
 ## Preflight
@@ -107,3 +107,14 @@ also exposed hidden-worktree file retrieval; a direct HTTP regression now covers
 the fix. No deferred minors remain. Artistic acceptance, hardware/live-rack
 behavior, external deployment and independent media custody were outside the
 read-only review; this delivery claims only the measured local behavior.
+
+## Publication receipt
+
+Implementation `b6c7e91115713c57fb822cd086e63e0b192c8e21` was pushed and
+read back from origin with clean tracked state. Code and sanitized evidence are
+published as a PR stacked on #99. The retained private listening/editable-project
+entry is `forge/out/sketches/20261026-095501-7b178473/verification-lsccVh/index.html`.
+The system browser was opened to that local page. Acceptance servers and browser
+workers were stopped after verification; no persistent service or deployment is
+claimed, and the worktree is retained with private originals, prior takes and
+installed dependencies. No checkout deletion or archive-readiness is claimed.
