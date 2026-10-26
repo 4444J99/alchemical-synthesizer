@@ -13,6 +13,7 @@ const { createLiveSessions, createSession, oscArgs } = require("./lib/session");
 const { createAgentLayer } = require("./lib/agent");
 const { createAgentGateway, writeAgentTokenFile } = require("./lib/mcp/client");
 const { handleRpc, SERVER_INFO, PROTOCOL_VERSION, toolsFor } = require("./lib/mcp/server");
+const { createNativeSamplesRouter } = require("./lib/native-samples");
 
 // Surface startup crashes in CI logs (red handler diagnostic).
 process.on("uncaughtException", (err) => {
@@ -51,7 +52,8 @@ const paramCache = {};
 
 // 1. HTTP Server & Middleware
 const app = express();
-app.use(express.json());
+const defaultJson = express.json();
+app.use((req, res, next) => req.path.startsWith("/api/instrument/native/") ? next() : defaultJson(req, res, next));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));
@@ -66,6 +68,8 @@ const auth = createAuth({
     humanToken: process.env.BRAHMA_HUMAN_TOKEN,
     agentToken: process.env.BRAHMA_AGENT_TOKEN
 });
+const nativeSamples = createNativeSamplesRouter({ auth });
+app.use("/api/instrument/native", nativeSamples);
 
 // AETHER live broadcast: tools/broadcast.sh writes a rolling HLS stream +
 // telemetry.json into out/live (gitignored). Serve it at /live so the theatron
@@ -585,6 +589,7 @@ sendPort.open();
 initSandbox();
 
 function closeServer(cb) {
+    nativeSamples.service.close();
     agent.providers.close();
     try { dirtBridge.close(); } catch (_) {}
     try { udpPort.close(); } catch (_) {}

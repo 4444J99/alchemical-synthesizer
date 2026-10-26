@@ -30,6 +30,7 @@ from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 SC = ROOT / 'brahma/sc'
+CONTROL_SPECS = json.loads((ROOT / 'forge/native-controls.json').read_text())
 DEADLINE: float | None = None
 DEFAULT_MODULES = ['mnemosyne_voice_stereo', 'protean_hound_stereo',
                    'chrysalid_siren_stereo', 'ossuary_monk_stereo',
@@ -112,6 +113,23 @@ def catalogue(directory: Path = SC) -> list[dict]:
             for item in extract_modules(path.read_text(), path.name)]
 
 
+def validate_controls(module: str, values: dict) -> dict:
+    if module not in {item['name'] for item in catalogue()}:
+        raise ValueError('Unknown native module')
+    if not isinstance(values, dict):
+        raise ValueError('Controls must be an object')
+    specs = CONTROL_SPECS.get(module, {})
+    for name, value in values.items():
+        if name not in specs:
+            raise ValueError('Unsupported native control: ' + name)
+        _, minimum, maximum, step, _ = specs[name]
+        if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value) or not minimum <= value <= maximum:
+            raise ValueError('Native control outside range: ' + name)
+        if step == 1 and int(value) != value:
+            raise ValueError('Native control must be an integer: ' + name)
+    return dict(values)
+
+
 def sc_string(value: str) -> str:
     if '\x00' in value:
         raise ValueError('NUL is not allowed in native paths')
@@ -134,18 +152,23 @@ def run(command: list[str], log: Path, timeout: float = 120) -> int:
         process = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT,
                                    start_new_session=True, preexec_fn=lambda: os.nice(10))
         reason = None
-        while process.poll() is None:
-            if time.monotonic() - started > timeout:
-                reason = 124; break
-            if log.stat().st_size > 2 * 1024 * 1024:
-                reason = 125; break
-            time.sleep(.05)
+        try:
+            while process.poll() is None:
+                if time.monotonic() - started > timeout:
+                    reason = 124; break
+                if log.stat().st_size > 2 * 1024 * 1024:
+                    reason = 125; break
+                time.sleep(.05)
+        finally:
+            if process.poll() is None:
+                try:
+                    os.killpg(process.pid, signal.SIGTERM)
+                    process.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL); process.wait()
+                except ProcessLookupError:
+                    process.wait()
         if reason:
-            os.killpg(process.pid, signal.SIGTERM)
-            try:
-                process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL); process.wait()
             return reason
         return process.returncode
 
@@ -277,6 +300,8 @@ def module_args(module: dict) -> dict:
     for index, name in enumerate(control_outputs):
         args[name] = 16 + index
     args.update({key: value for key, value in PRESETS.get(module['name'], {}).items() if key in module['params']})
+    if module.get('overrides'):
+        args.update(validate_controls(module['name'], module['overrides']))
     return args
 
 
@@ -343,6 +368,9 @@ def audition_html(manifest: dict, destination: Path) -> None:
 
 def main() -> int:
     global DEADLINE
+    def interrupted(*_):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, interrupted)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', nargs='?', help='local audio or one HTTPS YouTube video URL')
     parser.add_argument('--out', type=Path, default=ROOT / 'forge/out/assimilation')
@@ -350,12 +378,14 @@ def main() -> int:
     parser.add_argument('--duration', type=float, default=8)
     parser.add_argument('--deadline', type=float, default=600, help='overall wall-time budget in seconds (1-3600)')
     parser.add_argument('--module', action='append', default=[])
+    parser.add_argument('--param', action='append', default=[], help='safe musical control NAME=VALUE for exactly one --module')
     parser.add_argument('--all', action='store_true', help='render native audio/buffer, source-driven generator, and source-modulation paths')
     parser.add_argument('--catalogue', action='store_true', help='print every discovered module and interface role')
     args = parser.parse_args()
     catalog = catalogue()
     if args.catalogue:
-        print(json.dumps([{k: v for k, v in item.items() if k != 'definition'} for item in catalog], indent=2)); return 0
+        print(json.dumps([{**{k: v for k, v in item.items() if k != 'definition'},
+                           'controls': CONTROL_SPECS.get(item['name'], {})} for item in catalog], indent=2)); return 0
     if not args.source:
         parser.error('provide a source or --catalogue')
     if not math.isfinite(args.start) or args.start < 0 or not math.isfinite(args.duration) or not 1 <= args.duration <= 600:
@@ -367,6 +397,20 @@ def main() -> int:
     unknown = selected - {item['name'] for item in catalog}
     if unknown:
         parser.error('unknown modules: ' + ', '.join(sorted(unknown)))
+    if args.param:
+        if len(args.module) != 1 or args.all:
+            parser.error('--param requires exactly one --module')
+        try:
+            values = {}
+            for entry in args.param:
+                key, value = entry.split('=', 1)
+                if key in values:
+                    raise ValueError('Duplicate native control: ' + key)
+                values[key] = float(value)
+            overrides = validate_controls(args.module[0], values)
+            next(item for item in catalog if item['name'] == args.module[0])['overrides'] = overrides
+        except ValueError as exc:
+            parser.error(str(exc))
     args.out.mkdir(parents=True, exist_ok=True, mode=0o700)
     render_count = sum(item['role'] != 'infrastructure' and bool(item['audio_outputs'] or item['control_outputs'])
                        and (args.all or item['name'] in selected) for item in catalog)
@@ -422,6 +466,9 @@ def main() -> int:
     except (ValueError, OSError) as exc:
         (destination / 'failure.json').write_text(json.dumps({'error': str(exc)}, indent=2) + '\n')
         print('assimilation: ' + str(exc), file=sys.stderr); return 2
+    except KeyboardInterrupt:
+        (destination / 'failure.json').write_text(json.dumps({'error': 'Render cancelled; earlier results retained'}) + '\n')
+        return 130
 
 
 if __name__ == '__main__':

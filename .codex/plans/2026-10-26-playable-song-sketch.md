@@ -46,13 +46,13 @@ references after save/reopen; active child termination and concurrent admission.
 Files: `forge/assimilate.py`, `forge/native-controls.json`, new
 `brahma/web/lib/native-samples.js`, `brahma/web/server.js`, native tests.
 
-- [ ] Add failing tests for parameter validation, request/auth/PCM admission,
+- [x] Add failing tests for parameter validation, request/auth/PCM admission,
   native result hashes, concurrency, and failures.
-- [ ] Add safe native control metadata and CLI parameter overrides; preserve all
+- [x] Add safe native control metadata and CLI parameter overrides; preserve all
   module catalogue roles and prevent bus/buffer overrides.
-- [ ] Implement authenticated local jobs and private result retrieval, bounded
+- [x] Implement authenticated local jobs and private result retrieval, bounded
   child execution and cancellation; verify native synthetic render end to end.
-- [ ] Commit after implicated Python and Node contracts pass.
+- [x] Commit after implicated Python and Node contracts pass.
 
 ## Task 2: Instrument native controls and portable recipes
 

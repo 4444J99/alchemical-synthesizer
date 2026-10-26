@@ -6,6 +6,8 @@ import os
 import pathlib
 import subprocess
 import sys
+import types
+import time
 import tempfile
 import unittest
 import wave
@@ -115,6 +117,21 @@ class DonorContracts(unittest.TestCase):
         self.assertEqual(args['outBus'], 16)
         self.assertEqual(len({args[p] for p in module['control_outputs']}), len(module['control_outputs']))
 
+    def test_native_controls_accept_finite_musical_values_but_never_routing(self):
+        validate = getattr(app, 'validate_controls', None)
+        self.assertTrue(callable(validate), 'native controls need shared validation')
+        self.assertEqual(validate('solve_pitch_shift', {'semitones': -12}), {'semitones': -12})
+        for values in [{'outBus': 0}, {'semitones': float('nan')}, {'semitones': 1000}, {'semitones': True}]:
+            with self.assertRaises(ValueError):
+                validate('solve_pitch_shift', values)
+        with self.assertRaises(ValueError):
+            validate('not_a_module', {})
+
+    def test_requested_parameters_survive_score_generation_and_override_presets(self):
+        module = next(m for m in app.catalogue() if m['name'] == 'solve_pitch_shift')
+        module['overrides'] = {'semitones': 7}
+        self.assertEqual(app.module_args(module)['semitones'], 7)
+
     def test_admission_preserves_source_even_with_output_like_basename(self):
         try:
             app.binary('ffmpeg')
@@ -148,6 +165,24 @@ class DonorContracts(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'deadline'):
                 app.run(['never-start'], pathlib.Path(directory) / 'log')
             child.assert_not_called()
+
+    def test_interrupted_runner_reaps_its_real_child(self):
+        children = []
+        original = subprocess.Popen
+        def launch(*args, **kwargs):
+            child = original(*args, **kwargs); children.append(child); return child
+        def interrupted(_):
+            raise KeyboardInterrupt
+        clock = types.SimpleNamespace(monotonic=time.monotonic, sleep=interrupted)
+        with tempfile.TemporaryDirectory() as directory, patch.object(app.subprocess, 'Popen', side_effect=launch), patch.object(app, 'time', clock):
+            try:
+                with self.assertRaises(KeyboardInterrupt):
+                    app.run([sys.executable, '-c', 'import time; time.sleep(60)'], pathlib.Path(directory) / 'log')
+                self.assertIsNotNone(children[0].poll(), 'interrupted native runner must reap its process')
+            finally:
+                for child in children:
+                    if child.poll() is None:
+                        child.kill(); child.wait()
 
     def test_cli_rejects_nonfinite_and_excessive_budgets_before_creating_output(self):
         with tempfile.TemporaryDirectory() as directory:
