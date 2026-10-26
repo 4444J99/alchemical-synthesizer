@@ -160,11 +160,11 @@
       }
     },
     "nucleus_freeze": {
-      "claim": "Retained audio buffer; not the complete multi-kernel genome store.",
+      "claim": "Persistence switches retained playback: low persistence records into the buffer with muted output. Not the complete multi-kernel genome store.",
       "targets": {
         "freeze": [
           "persistence",
-          1
+          4
         ]
       }
     },

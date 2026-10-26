@@ -36,12 +36,17 @@ and solid/liquid/gas water responses. Earlier interrupted evidence is retained.
 Four silent synthetic outputs remain `silent`: `chaos_oracle`,
 `horologium_divider`, `pneuma_onset`, `daemon_clock_divider_random`.
 The catalogue keeps unmapped modules and patch-dependent definitions visible.
-All 26 mapped synthetic profiles produced measured audio in every material stage.
+All 26 mapped synthetic profiles produced retained native results in every
+material stage. Nucleus is explicitly silent in gas: its native `freeze=0` state
+records into the buffer with muted output. The other 25 gas renders are
+non-silent; neutral, repeat, solid and liquid have 26 non-silent renders each.
+The native CLI reports that silent gas result with exit 1; `stages_complete`
+records that the comparison ran, and does not convert it into an audio pass.
 
 For the song, Relinquished, Agent Smith and Typhon had zero repeated-neutral PCM
 difference and nonzero differences in all three phases. Ditto's repeated neutral
-already varied (RMS delta 0.048257); solid, liquid and gas deltas were 0.304035,
-0.059301 and 0.046368. Its stochastic variation makes waveform difference alone
+already varied (RMS delta 0.047770); solid, liquid and gas deltas were 0.303437,
+0.057576 and 0.046337. Its stochastic variation makes waveform difference alone
 insufficient to establish an isolated material effect. Actual effective controls
 and material receipts were independently checked. No run labels waveform change
 as proof of memory, retained identity, trait copying or full original mimicry.
@@ -51,7 +56,7 @@ as proof of memory, retained identity, trait copying or full original mimicry.
 `tools/verify-material-vessels.cjs` opened the existing portable song sketch,
 rendered Ditto with 50% water / 50% silica in each phase through authenticated
 HTTP and installed SuperCollider, applied it while playing, and saved/reopened
-each project. Three output hashes differed. Exported loop RMS was -19.61 dBFS
+each project. Three output hashes differed. Exported loop RMS was -19.60 dBFS
 (solid), -26.03 dBFS (liquid), and -26.80 dBFS (gas). The input project hash stayed
 unchanged and original restoration passed. Desktop 1440px and mobile 390px views
 were visually inspected; the mobile page had no horizontal document overflow.
@@ -70,7 +75,7 @@ python3 -m unittest tools.tests.test_materials tools.tests.test_material_compari
 bash tools/smoke.sh --strict
 ```
 
-Observed: web 173 passed / 1 opt-in installed-native skipped; browser 15 passed;
+Observed: web 174 passed / 1 opt-in installed-native skipped; browser 16 passed;
 Python 26 passed / 1 opt-in installed-native skipped; strict smoke 107 passed,
 0 failed, 0 skipped. The separate installed native runs above supplied runtime
 evidence beyond those unit-suite skips.
@@ -80,3 +85,32 @@ by the native comparison and real browser acceptance above. These measurements
 establish signal rendering, versioned control response and portable state. Full
 organism-specific fidelity/retention acceptance and live modular routing remain
 separate requirements.
+
+## Independent review and dispositions
+
+One fresh whole-branch reviewer found three Important issues and no Critical or
+Minor issues. All three were reproduced RED, then corrected and verified GREEN:
+the reused-native check now reads the producer's canonical `overrides` field;
+fractional mixtures and influence survive real-browser reopening and resaving
+exactly; Nucleus persistence can switch its native integer playback/recording
+gate instead of remaining invariant at the default. The model hash changed and
+the native comparisons and real-song browser acceptance were refreshed. Earlier
+private measurements remain retained. No second review replaced the regression
+tests or final suite.
+
+Execution decisions and their costs:
+
+- The existing design approval authorized continuous implementation. The initial
+  palette and per-vessel defaults are editable; a different artistic choice
+  would require changing those defaults.
+- Portable state uses optional fields and retains historical rendered recipes.
+  Future schema migrations must preserve that distinction.
+- Full original mimicry/memory/retention and coordinated patches remain with
+  #95. Those behaviors need their own implementation and acceptance.
+- Material properties remain an artistic model. Scientific simulation would
+  require a separate DSP model.
+- Local runtime evidence does not establish performer listening acceptance or
+  production deployment. Both still need their own observation.
+- The executor reran the full implicated suites after fixes; the reviewer did
+  not launch duplicate services. Tests remain bounded behavioral evidence and
+  cannot replace artistic acceptance.

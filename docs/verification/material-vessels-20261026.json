@@ -2,9 +2,9 @@
   "schema": "brahma.material-verification.v1",
   "observed_date": "2026-10-26",
   "synthetic": {
-    "ledger_sha256": "3928a9b3dfc217d45d94c570415ec75b565e0dc3cdc97fa2b22b2e37a4241c8e",
+    "ledger_sha256": "a75e51bacb603e2efde9622ffe610ff4e4e7f19b8725be2fa6c8d93caaf01c05",
     "source_sha256": "fb90c62d175d7f06d208a84781409cefa150aff9e73a08387fa2b680986d5de8",
-    "model_sha256": "1d062198db235e4bb6156853dcd5e703c6e40143fccda62e4e60c0790196a765",
+    "model_sha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
     "catalogue_count": 245,
     "stages_complete": true,
     "signal_counts": {
@@ -41,7 +41,8 @@
       "gas": {
         "not_selected": 198,
         "requires_patch": 21,
-        "rendered": 26
+        "rendered": 25,
+        "silent": 1
       }
     },
     "compared_modules": [
@@ -259,9 +260,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 7.263450290590488e-05,
-            "shape_delta": 0.0003243772353045169,
-            "first_rms": 0.2237708730089205,
+            "rms_delta": 7.805232968649392e-05,
+            "shape_delta": 0.00034850543253977514,
+            "first_rms": 0.22377145330915632,
             "second_rms": 0.22376821207774567,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -270,10 +271,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 8.817767587392732e-05,
-            "shape_delta": 0.0003936147651543154,
-            "first_rms": 0.2237708730089205,
-            "second_rms": 0.22376669622171377,
+            "rms_delta": 7.500939880818733e-05,
+            "shape_delta": 0.0003345303907070776,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22376668292642135,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -281,10 +282,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.016457667734202885,
-            "shape_delta": 0.07344573259135895,
-            "first_rms": 0.2237708730089205,
-            "second_rms": 0.2242205879172681,
+            "rms_delta": 0.016456998473360983,
+            "shape_delta": 0.07344174665758983,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22422398700311422,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -292,10 +293,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.01414659637391589,
-            "shape_delta": 0.06323242481706627,
-            "first_rms": 0.2237708730089205,
-            "second_rms": 0.22366387915726993,
+            "rms_delta": 0.014146515796868863,
+            "shape_delta": 0.06323198667363103,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22366365832708335,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -303,10 +304,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.012505530886510742,
-            "shape_delta": 0.05582002265284959,
-            "first_rms": 0.2237708730089205,
-            "second_rms": 0.2241203755145087,
+            "rms_delta": 0.012502473992750203,
+            "shape_delta": 0.05580798644981954,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22411384646179625,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -661,9 +662,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.01191718544055453,
-            "shape_delta": 0.041810527919267315,
-            "first_rms": 0.2850849570938321,
+            "rms_delta": 0.00679141024882908,
+            "shape_delta": 0.023789933301649913,
+            "first_rms": 0.28526432737908314,
             "second_rms": 0.2849110552441365,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -672,10 +673,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.004949974064562681,
-            "shape_delta": 0.017327098301108772,
-            "first_rms": 0.2850849570938321,
-            "second_rms": 0.28472046748267965,
+            "rms_delta": 0.017429405932123315,
+            "shape_delta": 0.06112678072617358,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.28463579744570683,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -683,9 +684,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.02515912747248055,
-            "shape_delta": 0.08387966499265527,
-            "first_rms": 0.2850849570938321,
+            "rms_delta": 0.02657499214491677,
+            "shape_delta": 0.08910719886719695,
+            "first_rms": 0.28526432737908314,
             "second_rms": 0.29196647401258186,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -694,10 +695,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.019467544360710663,
-            "shape_delta": 0.06796932159865197,
-            "first_rms": 0.2850849570938321,
-            "second_rms": 0.28641379505992587,
+            "rms_delta": 0.020443989971075938,
+            "shape_delta": 0.07041098058420037,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.2884327330819723,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -705,10 +706,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.06576931995720153,
-            "shape_delta": 0.2102415722274059,
-            "first_rms": 0.2850849570938321,
-            "second_rms": 0.2509834318680423,
+            "rms_delta": 0.0549337255604217,
+            "shape_delta": 0.17363148148593063,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.2568209909060484,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -924,14 +925,14 @@
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
-            "status": "compared",
+            "status": "silence_transition",
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.0,
-            "shape_delta": 0.0,
+            "rms_delta": 0.10434711909435941,
+            "shape_delta": null,
             "first_rms": 0.10434711909435941,
-            "second_rms": 0.10434711909435941,
+            "second_rms": 0.0,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -1064,7 +1065,7 @@
               "inBus": 4,
               "buf": 1,
               "outBus": 8,
-              "freeze": 1
+              "freeze": 0
             }
           }
         ]
@@ -1310,10 +1311,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.14112800378056856,
-            "shape_delta": 1.3856269541128419,
+            "rms_delta": 0.14443280490674984,
+            "shape_delta": 1.4181372466319226,
             "first_rms": 0.10222333969297642,
-            "second_rms": 0.10147792300702013,
+            "second_rms": 0.10146896964362088,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -1321,10 +1322,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.11642980072709047,
-            "shape_delta": 1.1334930919898858,
+            "rms_delta": 0.11905572185971533,
+            "shape_delta": 1.1590646949712056,
             "first_rms": 0.10222333969297642,
-            "second_rms": 0.1032070780096367,
+            "second_rms": 0.10320613852016698,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -1914,9 +1915,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.04783017267899346,
-            "shape_delta": 0.5893814085246273,
-            "first_rms": 0.08115382269527001,
+            "rms_delta": 0.04766965487199003,
+            "shape_delta": 0.5860414859775117,
+            "first_rms": 0.08152644789297327,
             "second_rms": 0.0811525275600348,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -1925,10 +1926,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.04792848101006057,
-            "shape_delta": 0.5914651535004005,
-            "first_rms": 0.08115382269527001,
-            "second_rms": 0.08091124758187769,
+            "rms_delta": 0.047324322271701094,
+            "shape_delta": 0.5813993650332097,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.08126583627194348,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -1936,10 +1937,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.30015153621944246,
-            "shape_delta": 1.3132360433332122,
-            "first_rms": 0.08115382269527001,
-            "second_rms": 0.3003636608464602,
+            "rms_delta": 0.300787758149515,
+            "shape_delta": 1.3191179465941452,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.30031774023822494,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -1947,10 +1948,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.0572952159281276,
-            "shape_delta": 0.6965088878799897,
-            "first_rms": 0.08115382269527001,
-            "second_rms": 0.08326878719413547,
+            "rms_delta": 0.05736285243688762,
+            "shape_delta": 0.695003456702386,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.08346296191718551,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -1958,10 +1959,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.04747572897642856,
-            "shape_delta": 0.49461175938301616,
-            "first_rms": 0.08115382269527001,
-            "second_rms": 0.09845379290532047,
+            "rms_delta": 0.04683298246743127,
+            "shape_delta": 0.4841546703556922,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.09892751150698384,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -2121,9 +2122,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.17246628044948303,
-            "shape_delta": 1.445269130903717,
-            "first_rms": 0.13406378080515147,
+            "rms_delta": 0.16109893198959926,
+            "shape_delta": 1.3490252013675934,
+            "first_rms": 0.1337078739522498,
             "second_rms": 0.10270718631204173,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -2132,10 +2133,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.19303118550419787,
-            "shape_delta": 1.4349408697523112,
-            "first_rms": 0.13406378080515147,
-            "second_rms": 0.13497884961411843,
+            "rms_delta": 0.18847504487612612,
+            "shape_delta": 1.4076976077138605,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.1340696212549312,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -2143,10 +2144,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.17073774572539274,
-            "shape_delta": 1.305694589697946,
-            "first_rms": 0.13406378080515147,
-            "second_rms": 0.12734795136089466,
+            "rms_delta": 0.16834647780076947,
+            "shape_delta": 1.2918903737092624,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.12678401542911946,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -2154,10 +2155,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.18330814761110975,
-            "shape_delta": 1.3503197864839558,
-            "first_rms": 0.13406378080515147,
-            "second_rms": 0.13741484351838368,
+            "rms_delta": 0.1952251753329256,
+            "shape_delta": 1.4311436223320257,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.13906599713283302,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -2165,10 +2166,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.19498627098189858,
-            "shape_delta": 1.3728768786057566,
-            "first_rms": 0.13406378080515147,
-            "second_rms": 0.14951897396606292,
+            "rms_delta": 0.20801721492550923,
+            "shape_delta": 1.4764114272931248,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.14778591478817854,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -2318,9 +2319,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.09612877525296698,
-            "shape_delta": 0.9636104417601338,
-            "first_rms": 0.09444685556824749,
+            "rms_delta": 0.10791757073111903,
+            "shape_delta": 1.0049646593064638,
+            "first_rms": 0.11025241268735422,
             "second_rms": 0.10426962521214997,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -2329,10 +2330,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.10390770093215476,
-            "shape_delta": 1.0438793764552179,
-            "first_rms": 0.09444685556824749,
-            "second_rms": 0.10401765469512947,
+            "rms_delta": 0.09848527442731192,
+            "shape_delta": 0.9103348121027373,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.10595582015946003,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -2340,10 +2341,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.1256976775431949,
-            "shape_delta": 1.2653280544971572,
-            "first_rms": 0.09444685556824749,
-            "second_rms": 0.10389615174748823,
+            "rms_delta": 0.11614872878579277,
+            "shape_delta": 1.099718645918763,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.1004563281532801,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -2351,10 +2352,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.11240393746160499,
-            "shape_delta": 1.1792873227955092,
-            "first_rms": 0.09444685556824749,
-            "second_rms": 0.0961688338795822,
+            "rms_delta": 0.11943594571196955,
+            "shape_delta": 1.114067876759507,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.10395612587038876,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -2362,10 +2363,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.13111026896346725,
-            "shape_delta": 1.2250444505483684,
-            "first_rms": 0.09444685556824749,
-            "second_rms": 0.11752157021627334,
+            "rms_delta": 0.1372002236701397,
+            "shape_delta": 1.3209797825192928,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.09691877750290386,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -2531,9 +2532,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.07236551605400295,
-            "shape_delta": 1.440655652155047,
-            "first_rms": 0.048967324617863725,
+            "rms_delta": 0.06995490393818625,
+            "shape_delta": 1.4184921676763647,
+            "first_rms": 0.047070170821465716,
             "second_rms": 0.05146578274100186,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -2542,10 +2543,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.06903524771038651,
-            "shape_delta": 1.410885629448319,
-            "first_rms": 0.048967324617863725,
-            "second_rms": 0.04889351746529844,
+            "rms_delta": 0.06634283098453594,
+            "shape_delta": 1.3955613010801968,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.048001931791381236,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -2553,10 +2554,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.06939210831949646,
-            "shape_delta": 1.4179955246062705,
-            "first_rms": 0.048967324617863725,
-            "second_rms": 0.04890617881373253,
+            "rms_delta": 0.0682936447709659,
+            "shape_delta": 1.416355856827202,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.04933901224046336,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -2564,10 +2565,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.07006445699968195,
-            "shape_delta": 1.431367519520128,
-            "first_rms": 0.048967324617863725,
-            "second_rms": 0.04893129544360877,
+            "rms_delta": 0.06621807798792534,
+            "shape_delta": 1.340254788744172,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.051615649465195056,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -2575,10 +2576,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.06949966296246675,
-            "shape_delta": 1.3985017530181314,
-            "first_rms": 0.048967324617863725,
-            "second_rms": 0.05041328086410272,
+            "rms_delta": 0.06833388639672636,
+            "shape_delta": 1.479580977076063,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.045284797098436365,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -2744,9 +2745,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.583252292330044,
-            "shape_delta": 1.4108495033007642,
-            "first_rms": 0.4214290247624522,
+            "rms_delta": 0.5768975384490392,
+            "shape_delta": 1.4017207884506362,
+            "first_rms": 0.41780727375753646,
             "second_rms": 0.40522064782592326,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -2755,10 +2756,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.607461659230526,
-            "shape_delta": 1.4536201700709592,
-            "first_rms": 0.4214290247624522,
-            "second_rms": 0.41433554908367765,
+            "rms_delta": 0.5589521244490445,
+            "shape_delta": 1.3550718205324874,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.4070885259993987,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -2766,10 +2767,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.6072834648919746,
-            "shape_delta": 1.4063717669426412,
-            "first_rms": 0.4214290247624522,
-            "second_rms": 0.4419392010075075,
+            "rms_delta": 0.5829039338378859,
+            "shape_delta": 1.4054414570193414,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.411665275531565,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -2777,10 +2778,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.577476941386779,
-            "shape_delta": 1.3704841529869374,
-            "first_rms": 0.4214290247624522,
-            "second_rms": 0.4213051769919761,
+            "rms_delta": 0.5843087291088666,
+            "shape_delta": 1.404322528173427,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.41434276342491705,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -2788,10 +2789,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.5713033532525411,
-            "shape_delta": 1.3842688110127763,
-            "first_rms": 0.4214290247624522,
-            "second_rms": 0.4037885212527089,
+            "rms_delta": 0.5915978389758423,
+            "shape_delta": 1.421510597384048,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.4145373720225444,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -3157,9 +3158,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.27667546969725854,
-            "shape_delta": 1.4712312415765054,
-            "first_rms": 0.18882675205987948,
+            "rms_delta": 0.24797556704134954,
+            "shape_delta": 1.3239790332050854,
+            "first_rms": 0.18730662738887294,
             "second_rms": 0.18728475250486473,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -3168,10 +3169,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.25984269322723386,
-            "shape_delta": 1.375986659433923,
-            "first_rms": 0.18882675205987948,
-            "second_rms": 0.18885524161813524,
+            "rms_delta": 0.24985119325837546,
+            "shape_delta": 1.3353139830569607,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.1869140060422052,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -3179,10 +3180,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.25667183368419405,
-            "shape_delta": 1.3966901809204153,
-            "first_rms": 0.18882675205987948,
-            "second_rms": 0.17856572798687778,
+            "rms_delta": 0.23790443701016503,
+            "shape_delta": 1.3017609338261522,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.1780454337580214,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -3190,10 +3191,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.2772673480371441,
-            "shape_delta": 1.4459053351536015,
-            "first_rms": 0.18882675205987948,
-            "second_rms": 0.19465356895097638,
+            "rms_delta": 0.2496818777548522,
+            "shape_delta": 1.3065881937644717,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.1947842076781111,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -3201,10 +3202,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.2722224299811468,
-            "shape_delta": 1.3677091976563767,
-            "first_rms": 0.18882675205987948,
-            "second_rms": 0.20867992544035965,
+            "rms_delta": 0.2961865659225702,
+            "shape_delta": 1.4996276303685299,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.20731219276944957,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -3373,9 +3374,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.16409995674404343,
-            "shape_delta": 1.1090218980251587,
-            "first_rms": 0.14654115563905418,
+            "rms_delta": 0.18478198364491924,
+            "shape_delta": 1.2689482141537882,
+            "first_rms": 0.14172272947818262,
             "second_rms": 0.14936487107121202,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -3384,10 +3385,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.2046208080256071,
-            "shape_delta": 1.3913309264939482,
-            "first_rms": 0.14654115563905418,
-            "second_rms": 0.1475936290130008,
+            "rms_delta": 0.18536604298063625,
+            "shape_delta": 1.260236007210283,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15217202657218734,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -3395,10 +3396,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.1808141768934563,
-            "shape_delta": 1.235294689841435,
-            "first_rms": 0.14654115563905418,
-            "second_rms": 0.14620515872941756,
+            "rms_delta": 0.16143446647444978,
+            "shape_delta": 1.1027852072987,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15073544897360636,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -3406,10 +3407,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.19878852194399527,
-            "shape_delta": 1.3566950904215678,
-            "first_rms": 0.14654115563905418,
-            "second_rms": 0.1465070344319442,
+            "rms_delta": 0.20863626213883274,
+            "shape_delta": 1.424352222696877,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15108778878968415,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -3417,10 +3418,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.18144357143006606,
-            "shape_delta": 1.2410137981805638,
-            "first_rms": 0.14654115563905418,
-            "second_rms": 0.14586946399177106,
+            "rms_delta": 0.20283489695952567,
+            "shape_delta": 1.3888451064864284,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15023550418330894,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -3601,9 +3602,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.1447056405116123,
-            "shape_delta": 1.4690540165581518,
-            "first_rms": 0.09593538773669168,
+            "rms_delta": 0.1433403371271801,
+            "shape_delta": 1.4302612803792885,
+            "first_rms": 0.09941937581909517,
             "second_rms": 0.10101393751175428,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -3612,10 +3613,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.1426030422834884,
-            "shape_delta": 1.4532265057499036,
-            "first_rms": 0.09593538773669168,
-            "second_rms": 0.1002787818694717,
+            "rms_delta": 0.1338143484864962,
+            "shape_delta": 1.3353669001714963,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.10098883800621672,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -3623,10 +3624,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.13726391252207304,
-            "shape_delta": 1.415038630141161,
-            "first_rms": 0.09593538773669168,
-            "second_rms": 0.09806030292369304,
+            "rms_delta": 0.14290645047283,
+            "shape_delta": 1.4470489064664274,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.09809089128977415,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -3634,10 +3635,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.1296370042477832,
-            "shape_delta": 1.3652727806753273,
-            "first_rms": 0.09593538773669168,
-            "second_rms": 0.09395920679844547,
+            "rms_delta": 0.13730800926948952,
+            "shape_delta": 1.391986820030796,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.09785753416987938,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -3645,10 +3646,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.13940156995473593,
-            "shape_delta": 1.4683265144878794,
-            "first_rms": 0.09593538773669168,
-            "second_rms": 0.09393375041551766,
+            "rms_delta": 0.1308786962013882,
+            "shape_delta": 1.3491652395747762,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.09452088978265981,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -3829,9 +3830,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.5290972389831574,
-            "shape_delta": 1.3124431411874933,
-            "first_rms": 0.39858342926162266,
+            "rms_delta": 0.5679411610072816,
+            "shape_delta": 1.3965576510289444,
+            "first_rms": 0.40571418140099735,
             "second_rms": 0.4076278365117327,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -3840,10 +3841,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.5994864668448933,
-            "shape_delta": 1.4934395298037242,
-            "first_rms": 0.39858342926162266,
-            "second_rms": 0.40422739876206837,
+            "rms_delta": 0.571628763101018,
+            "shape_delta": 1.3928382488904092,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.41504095882141406,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -3851,10 +3852,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.5806458779107694,
-            "shape_delta": 1.4101768093679634,
-            "first_rms": 0.39858342926162266,
-            "second_rms": 0.42451152374245293,
+            "rms_delta": 0.5986098288565229,
+            "shape_delta": 1.4351078099944674,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.4282360713813102,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -3862,10 +3863,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.5645436154890058,
-            "shape_delta": 1.3802778279670993,
-            "first_rms": 0.39858342926162266,
-            "second_rms": 0.4191467945087034,
+            "rms_delta": 0.5730314549509707,
+            "shape_delta": 1.386373991981964,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.42079915671097484,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -3873,10 +3874,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.5699330140843478,
-            "shape_delta": 1.4284358401454542,
-            "first_rms": 0.39858342926162266,
-            "second_rms": 0.39939812903537275,
+            "rms_delta": 0.5673178775288757,
+            "shape_delta": 1.4118714780043495,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.39788699446431836,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -4669,9 +4670,9 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.08419888272340142,
-            "shape_delta": 1.3554678941820122,
-            "first_rms": 0.059863009870997685,
+            "rms_delta": 0.08840752184471705,
+            "shape_delta": 1.5371965380606685,
+            "first_rms": 0.05014024231009873,
             "second_rms": 0.06428040640443924,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
@@ -4680,10 +4681,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.08408515170628585,
-            "shape_delta": 1.4674882784916032,
-            "first_rms": 0.059863009870997685,
-            "second_rms": 0.054631949285361435,
+            "rms_delta": 0.07337296156296357,
+            "shape_delta": 1.3270153620818093,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.05989481588537078,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -4691,10 +4692,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.0838846539164019,
-            "shape_delta": 1.4151895444659495,
-            "first_rms": 0.059863009870997685,
-            "second_rms": 0.058680106429740364,
+            "rms_delta": 0.07642375249999916,
+            "shape_delta": 1.3515168021513035,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.06218703378979513,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -4702,10 +4703,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.0851740690143054,
-            "shape_delta": 1.4459994462859154,
-            "first_rms": 0.059863009870997685,
-            "second_rms": 0.05792899751149924,
+            "rms_delta": 0.07686742935028912,
+            "shape_delta": 1.4202686305449481,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.05783414449018829,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -4713,10 +4714,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.08237754718865224,
-            "shape_delta": 1.4126633284946142,
-            "first_rms": 0.059863009870997685,
-            "second_rms": 0.05672178293470449,
+            "rms_delta": 0.08522485024587945,
+            "shape_delta": 1.4395687200723142,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.067124510731675,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -5478,9 +5479,9 @@
     "original_behavior_acceptance": "not_measured"
   },
   "retained_song": {
-    "ledger_sha256": "4bfdee3a758226312ec1efb870c53c4d6a51aff5071f0887cf5e68e651f249cd",
+    "ledger_sha256": "e4d63808d90bf85161e12356b5b0ea8bb8d3a69c906a6b7eddc2898972f93e14",
     "source_sha256": "d8166bed01fd564bda29c24f7c83325b13697abadc90b3453bb54aabf8f6ee14",
-    "model_sha256": "1d062198db235e4bb6156853dcd5e703c6e40143fccda62e4e60c0790196a765",
+    "model_sha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
     "catalogue_count": 245,
     "stages_complete": true,
     "signal_counts": {
@@ -5952,10 +5953,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.04816287271882879,
-            "shape_delta": 0.6362931200789148,
-            "first_rms": 0.07572190530598037,
-            "second_rms": 0.07566379947692271,
+            "rms_delta": 0.04837140335198124,
+            "shape_delta": 0.6387363318209243,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.07537117421768906,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "repeat": {
@@ -5963,10 +5964,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.048256854081045714,
-            "shape_delta": 0.6341234192853037,
-            "first_rms": 0.07572190530598037,
-            "second_rms": 0.07646218098316077,
+            "rms_delta": 0.047770265976998745,
+            "shape_delta": 0.6296259695627257,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.07566249944025492,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "solid": {
@@ -5974,10 +5975,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.3040353346386528,
-            "shape_delta": 1.3458720910044433,
-            "first_rms": 0.07572190530598037,
-            "second_rms": 0.30168312337297687,
+            "rms_delta": 0.30343665360090616,
+            "shape_delta": 1.3443557277904097,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.3011671608427126,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "liquid": {
@@ -5985,10 +5986,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.059300822158494054,
-            "shape_delta": 0.7669907377366666,
-            "first_rms": 0.07572190530598037,
-            "second_rms": 0.0787396565901488,
+            "rms_delta": 0.05757556652003308,
+            "shape_delta": 0.7439954343876204,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.07857406883954542,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           },
           "gas": {
@@ -5996,10 +5997,10 @@
             "frames_compared": 88256,
             "sample_rate": 44100,
             "channels": 2,
-            "rms_delta": 0.046367543197007255,
-            "shape_delta": 0.5300861157885501,
-            "first_rms": 0.07572190530598037,
-            "second_rms": 0.09061718717382534,
+            "rms_delta": 0.046336956394622694,
+            "shape_delta": 0.5269948889609383,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.09103375702480768,
             "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
           }
         },
@@ -6377,8 +6378,8 @@
     "phases": [
       {
         "phase": "solid",
-        "milliseconds": 2183,
-        "outputSha256": "78b3cfae5a6f5308e6f3b7efe26b00c7d0aa30ea826af438f8803a4afd501cb0",
+        "milliseconds": 2217,
+        "outputSha256": "d9b860666b40b655a20bc71035caebdef07024a1fb5377ea6d885eb0e7b1d6bc",
         "effectiveParams": {
           "observe": 0.1,
           "assume": 0.9,
@@ -6389,18 +6390,18 @@
           "assume": 0.5,
           "mutate": 0.1
         },
-        "modelSha256": "1d062198db235e4bb6156853dcd5e703c6e40143fccda62e4e60c0790196a765",
+        "modelSha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
         "exported": {
-          "sha256": "498887df87971df4921050edbc38e845229b32405c4b751578a2da45890e0089",
+          "sha256": "4ae22a2c1639d59899344c315fcb7b9c6d9c7684bd7a46975e18579b82bab9cf",
           "frames": 230087,
-          "peakDbfs": -6.176258473523641,
-          "rmsDbfs": -19.605039080551162
+          "peakDbfs": -6.218459839197548,
+          "rmsDbfs": -19.599129493378218
         }
       },
       {
         "phase": "liquid",
-        "milliseconds": 2015,
-        "outputSha256": "4e157e189eb7e11cc3287d14fb320e04246418dd7f4aaec6a4383c244e0f83f4",
+        "milliseconds": 2031,
+        "outputSha256": "7becf3cac5e43fc2880ac175aaae59c7a37cd54b8f9ae563970e8a763fe72597",
         "effectiveParams": {
           "observe": 0.42,
           "assume": 0.68,
@@ -6411,18 +6412,18 @@
           "assume": 0.5,
           "mutate": 0.1
         },
-        "modelSha256": "1d062198db235e4bb6156853dcd5e703c6e40143fccda62e4e60c0790196a765",
+        "modelSha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
         "exported": {
-          "sha256": "1b6b15fcfbbb0a54ec27a7643c6f477bc94084adb92509045295008a7dc9907a",
+          "sha256": "0bbd0840c29467ab22e8a29f92192ab512ecb2f2ae221b1d4255f4c9bb1ef61b",
           "frames": 230087,
-          "peakDbfs": -9.28054537741367,
-          "rmsDbfs": -26.025985023378297
+          "peakDbfs": -9.151114304703754,
+          "rmsDbfs": -26.029670213105028
         }
       },
       {
         "phase": "gas",
-        "milliseconds": 2112,
-        "outputSha256": "42e8ea02cf0bb439322fef88a43fcdd88623bf0e99ad7fa5ae1e23e9a8bfbad2",
+        "milliseconds": 2151,
+        "outputSha256": "1a8001cb180e640b5278d2382db222d091fd255fda807edbcfc105230232db1b",
         "effectiveParams": {
           "observe": 0.7,
           "assume": 0.4,
@@ -6433,12 +6434,12 @@
           "assume": 0.5,
           "mutate": 0.1
         },
-        "modelSha256": "1d062198db235e4bb6156853dcd5e703c6e40143fccda62e4e60c0790196a765",
+        "modelSha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
         "exported": {
-          "sha256": "f4e633bd94e2724f83d8b529f9e8d5ed37e956281f2a6fd61826261e7672a2b7",
+          "sha256": "73ee51d6645ec9139b11e985cb5061619bad624901e519d1791aae505ebc7e8d",
           "frames": 230087,
-          "peakDbfs": -9.704292778949464,
-          "rmsDbfs": -26.801784771922303
+          "peakDbfs": -9.749781503485407,
+          "rmsDbfs": -26.79552325488503
         }
       }
     ]

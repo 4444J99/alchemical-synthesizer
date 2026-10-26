@@ -51,10 +51,18 @@ test("mixture order canonicalizes and extreme material settings stay inside nati
   }
 });
 
+test("Nucleus persistence switches between retained playback and its native muted recording state", () => {
+  const M = model();
+  assert.equal(M.resolve("nucleus_freeze", {}, water("solid")).params.freeze, 1);
+  assert.equal(M.resolve("nucleus_freeze", {}, water("gas")).params.freeze, 0);
+  assert.equal(M.resolve("nucleus_freeze", {}, { ...water("gas"), amount: 0 }).params.freeze, 1);
+});
+
 test("Node/browser and native Python use identical material properties, mappings and model identity", () => {
   const M = model();
   const cases = ["solid", "liquid", "gas"].map(phase => ["ditto_morphic_core", { observe: .5 }, water(phase)]);
   cases.push(["mnemosyne_voice_stereo", { age: .1 }, { ...water("liquid"), composition: [{ id: "water", fraction: .4 }, { id: "silica", fraction: .6 }] }]);
+  for (const phase of ["solid", "liquid", "gas"]) cases.push(["nucleus_freeze", {}, water(phase)]);
   const script = "import json,sys; from forge.materials import resolve; print(json.dumps([resolve(*case) for case in json.load(sys.stdin)]))";
   const native = JSON.parse(execFileSync("python3", ["-c", script], { cwd: ROOT, input: JSON.stringify(cases), encoding: "utf8" }));
   assert.deepEqual(native, cases.map(args => M.resolve(...args)));
