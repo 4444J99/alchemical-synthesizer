@@ -147,7 +147,7 @@
     for (var t = 0; t < scene.tracks; t++) {
       var tr = document.createElement("tr");
       var name = document.createElement("td");
-      name.className = "trk"; name.textContent = P.TRACKS[t]; tr.appendChild(name);
+      name.className = "trk"; name.textContent = samples ? samples.trackLabel(t) : P.TRACKS[t]; tr.appendChild(name);
       for (var s = 0; s < scene.steps; s++) {
         var td = document.createElement("td");
         if (s % 4 === 0) td.className = "beat";

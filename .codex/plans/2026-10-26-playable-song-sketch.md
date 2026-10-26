@@ -73,12 +73,12 @@ Files: existing `sample-project.js`, `sample-controls.js`, `instrument.js`,
 Files: Forge sketch builder, synthetic contract fixtures, README/design updates,
 sanitized evidence under `.codex/plans/`; private artifacts under `forge/out/`.
 
-- [ ] Build eight donor chops plus a small native palette and render actual
+- [x] Build eight donor chops plus a small native palette and render actual
   Golem kick/snare/hat presets from their existing source definitions.
-- [ ] Create a 32-step, five-track starter project with a modest editable groove;
+- [x] Create a 32-step, five-track starter project with a modest editable groove;
   save/reopen and export through the real browser instrument.
-- [ ] Measure source/output integrity, duration/non-silence and reopen fidelity.
-- [ ] Run scoped regressions, one independent review, resolve substantive issues.
+- [x] Measure source/output integrity, duration/non-silence and reopen fidelity.
+- [x] Run scoped regressions, one independent review, resolve substantive issues.
 - [ ] Commit/push code and evidence as a stacked PR; verify remote parity and
   retain private project/audio in the session-owned checkout.
 
@@ -89,3 +89,21 @@ commits (0 behind, 13 ahead). Host admission reports observed swap pressure; mod
 is observe. No lease names this checkout. Work stays bounded and serial for native
 processing. An existing unrelated server on 49374 is not this checkout; no Brahma
 server is active for this lane. No other checkout or branch will be modified.
+
+## Final validation and review
+
+Actual project acceptance is recorded in `2026-10-26-playable-song-sketch-verification.json`.
+Seven sources, eight chops, five tracks, 32 steps, 92 BPM. Real playback was
+measured through the analyser; saved/reopened source bytes, recipes and chops
+matched. Baseline and reopened WAVs differed by only three samples at one PCM
+quantization step; this tolerance is explicit, not a bit-identical render claim.
+The real authenticated HTTP/native/browser path applied a +5-semitone, 75%-wet
+variation in 1433 ms while transport remained playing; its recipe reopened.
+All three full originals still match their acquisition-era render manifests.
+
+Independent review found donor-receipt and shutdown-admission gaps. Both were
+accepted and fixed with failing-then-passing regressions. Actual HTTP acceptance
+also exposed hidden-worktree file retrieval; a direct HTTP regression now covers
+the fix. No deferred minors remain. Artistic acceptance, hardware/live-rack
+behavior, external deployment and independent media custody were outside the
+read-only review; this delivery claims only the measured local behavior.

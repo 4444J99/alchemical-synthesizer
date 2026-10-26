@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-26",
+  "scope": "Son of a Preacher Man playable browser sketch plus native render/apply controls",
+  "private_project_run": "20261026-095501-7b178473",
+  "private_verification_run": "verification-lsccVh",
+  "original_recordings_preserved": 3,
+  "builder_replayed_with_donor_hash_and_successful_receipts": true,
+  "observed": {
+    "checks": {
+      "originalProjectPreserved": true,
+      "playbackMeasured": true,
+      "saveReopenExact": true,
+      "reopenedWavWithinOnePcmStep": true,
+      "nativeHttpDspRender": true,
+      "nativeAppliedWhilePlaying": true,
+      "nativeRecipeReopened": true,
+      "restoreOriginal": true
+    },
+    "nativeMilliseconds": 1433,
+    "reopenDifference": {
+      "maxPcmDelta": 1,
+      "changedSamples": 3
+    },
+    "sources": 7,
+    "variationSources": 8,
+    "tempo": 92,
+    "steps": 32,
+    "baseline": {
+      "sha256": "de3dcb3066e5d52f803edcf295469d2c7a2b0ad7991c85988697e93180309f12",
+      "frames": 230087,
+      "duration": 5.217392290249433,
+      "peakDbfs": -9.775882421653495,
+      "rmsDbfs": -26.18825030094284
+    },
+    "variation": {
+      "sha256": "f49d47091457accf73ff1bf50c402bb84abef9b4a5de390fcacfc30370fc6a6e",
+      "frames": 230087,
+      "duration": 5.217392290249433,
+      "peakDbfs": -10.101303269226813,
+      "rmsDbfs": -27.10872753633149
+    }
+  },
+  "tests": {
+    "web": {
+      "passed": 167,
+      "failed": 0,
+      "skipped": 0,
+      "native_enabled": true
+    },
+    "browser": {
+      "passed": 8,
+      "failed": 0
+    },
+    "python_assimilation": {
+      "passed": 19,
+      "failed": 0,
+      "native_enabled": true
+    },
+    "python_sketch": {
+      "passed": 1,
+      "failed": 0
+    },
+    "smoke": {
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "review": {
+    "independent": true,
+    "fixed": [
+      "Reject changed donor excerpt and failed native receipts before constructing recipe provenance",
+      "Refuse native job admission after shutdown, including catalogue-await race",
+      "Serve validated native output from hidden worktrees with an explicit safe root"
+    ],
+    "deferred_minors": []
+  },
+  "decisions": [
+    "Use background native NRT renders and browser sample playback; native controls currently require 1-30-second sounds",
+    "WebAudio reopen state is exact; repeated WAV rendering compared within one PCM quantization step",
+    "Musical acceptance and real-time hardware/live-rack behavior are not established by these measurements",
+    "Retain all original media and private projects; no deletion or retirement performed"
+  ],
+  "private_artifact_entry": "forge/out/sketches/20261026-095501-7b178473/verification-lsccVh/index.html",
+  "source_code_sha256": {
+    "forge/sketch.py": "3a6253977bf9b869cb101212c136b185fadafc0843b64faef895e64b77ef0662",
+    "forge/assimilate.py": "156c790ddfeab86112190c2ba267f3edffa469164a426d21a7b1fe59bf763826",
+    "brahma/web/lib/native-samples.js": "2b5588a574ed50c9961bf74aa4c343b269a54d990c4015f0c2f831622f8c0301",
+    "brahma/web/public/instrument/native-controls.js": "924676e60e3e6c660160025ec0291baeffba64f70f80446cf93fa8e393356121"
+  }
+}

@@ -55,7 +55,8 @@ promised. Failed runs and earlier renders remain available for diagnosis.
 Full originals, download metadata and derived audio stay under ignored `forge/out/`.
 Each run uses a new private directory and checks original hashes after processing.
 No audio device is opened. This does not install a live rack or broadcast material.
-The browser's native sample-transfer/shared-transport integration remains in #95.
+The browser now offers background native render/apply controls and saves recipes.
+Real-time SC sample transfer and shared live-rack transport remain in #95.
 
 Sources are limited to 64 MiB. Excerpts may be 1-600 seconds; default is 8 seconds
 starting at 30 seconds. Disk admission reserves the estimated selected render size

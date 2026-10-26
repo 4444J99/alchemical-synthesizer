@@ -75,7 +75,7 @@ async function runNative(directory, request, donor, onChild) {
 }
 function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), catalogue = loadCatalogue,
   render = runNative, maxJobs = 64 } = {}) {
-  const jobs = new Map(); let active = null;
+  const jobs = new Map(); let active = null, closed = false;
   let catalogPromise;
   const getCatalogue = () => catalogPromise || (catalogPromise = Promise.resolve().then(catalogue).catch(error => {
     catalogPromise = null; throw error;
@@ -85,7 +85,9 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
       sourceSha256: job.sourceSha256, error: job.error || null, result: job.result || null };
   }
   async function start(body) {
+    if (closed) fail("Native service is closed", 503);
     const catalog = await getCatalogue();
+    if (closed) fail("Native service is closed", 503);
     if (active) fail("A native sound is already rendering", 409);
     if (jobs.size >= maxJobs) fail("Native session render budget reached; restart the local server for a new session", 429);
     const module = catalog.find(item => item.name === body.module);
@@ -129,7 +131,7 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
   return { catalogue: getCatalogue, start, cancel, get: id => jobs.has(id) ? view(jobs.get(id)) : null,
     output(id) { const job = jobs.get(id); if (!job || job.state !== "completed") fail("Native audio is not ready", 404); return job.output; },
     async drain() { await Promise.all([...jobs.values()].map(job => job.promise)); },
-    close() { for (const job of jobs.values()) if (job.state === "running") cancel(job.id); } };
+    close() { closed = true; for (const job of jobs.values()) if (job.state === "running") cancel(job.id); } };
 }
 function createNativeSamplesRouter({ auth, service = createNativeService() }) {
   const router = express.Router();
@@ -151,7 +153,10 @@ function createNativeSamplesRouter({ auth, service = createNativeService() }) {
   });
   router.delete("/jobs/:id", (req, res, next) => { try { res.json(service.cancel(req.params.id)); } catch (error) { next(error); } });
   router.get("/jobs/:id/audio", (req, res, next) => {
-    try { res.type("audio/wav").sendFile(service.output(req.params.id)); } catch (error) { next(error); }
+    try {
+      const output = service.output(req.params.id);
+      res.type("audio/wav").sendFile(path.basename(output), { root: path.dirname(output), dotfiles: "deny" });
+    } catch (error) { next(error); }
   });
   router.use((error, req, res, next) => res.status(error.status || 503).json({ error: error.message }));
   router.service = service;

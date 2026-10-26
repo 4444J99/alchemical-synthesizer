@@ -157,7 +157,7 @@ required for this browser sample workflow.
 
 Stop cancels sounding and scheduled browser voices, including pending pad
 auditions. Switching engines stops transport. Imported samples require WebAudio;
-native SC sample transfer, modular routing, shared Golem transport, and album
+real-time SC sample transfer, live modular routing, shared live Golem transport, and album
 arrangement remain tracked in [#95](https://github.com/4444J99/alchemical-synthesizer/issues/95).
 
 Default project limits are 64 MiB of total original audio, 90 MiB of project JSON,
@@ -166,6 +166,30 @@ size. These are validation budgets, not a browser process memory cap: decoding
 and transactional replacement can temporarily use more memory. Hosts can set
 `window.BRAHMA_SAMPLE_LIMITS` before the instrument scripts load; keys are
 `maxSourceBytes`, `maxProjectBytes`, `maxDecodedBytes`, and `maxSources`.
+
+Native transformations are available in the same instrument. Start the local
+server and open its printed **INSTRUMENT (human)** link, then connect the native
+engine. Select a source of 1-30 seconds, choose a module and its musical controls,
+and press **Render and use on this track**. The loop continues during rendering;
+future notes on that track use the result. **Restore original** changes them back.
+Stop, opening a project, or changing sources cancels a pending application. Saving
+includes the original excerpt, transformed sound, exact recipe, and source hashes.
+Processing runs on the local server and is never sent to a remote provider.
+Repeated browser WAV exports preserve the project exactly but can differ by one
+PCM quantization step because of floating-point rendering; native random DSP also
+remains stochastic. The verification record reports these distinctions.
+
+Build a portable starter sketch from a validated Forge audition:
+
+```sh
+python3 forge/sketch.py forge/out/assimilation/RUN/manifest.json
+```
+
+Open the printed `.brahma.json` in the instrument. It contains eight donor chops,
+a small native palette, actual Golem kick/snare/hi-hat renders, and an editable
+32-step groove. Rendered drums use the existing Golem factory presets and source
+SynthDefs. Playback and WAV export share the browser transport; this does not
+start Golem's separate live SC sequencer.
 
 ## System Overview
 

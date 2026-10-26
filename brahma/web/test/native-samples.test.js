@@ -79,6 +79,20 @@ test("cancelled native jobs cannot become completed when a late render returns",
     assert.throws(() => service.output(job.id), /not ready/i);
   } finally { service.close(); await service.drain(); fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+test("shutdown refuses requests still awaiting catalogue admission", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "native-shutdown-"));
+  let ready, renders = 0;
+  const loaded = new Promise(resolve => { ready = resolve; });
+  const service = api().createNativeService({ root, catalogue: () => loaded,
+    render: () => { renders++; throw new Error("render must never start after shutdown"); } });
+  try {
+    const starting = service.start(body());
+    service.close(); ready(catalogue());
+    await assert.rejects(starting, /closed|shutdown/i);
+    assert.equal(renders, 0);
+  } finally { await service.drain(); fs.rmSync(root, { recursive: true, force: true }); }
+});
 test("native routes require human role and trusted loopback Origin before reading uploaded audio", async () => {
   const express = require("express"), { createAuth } = require("../lib/auth");
   const app = express(); let server;
@@ -94,6 +108,26 @@ test("native routes require human role and trusted loopback Origin before readin
     const response = await fetch(base + "/native/catalogue", { headers: { cookie: "brahma_human=human-fixture", origin: base } });
     assert.equal(response.status, 200); assert.equal((await response.json()).modules[0].name, "solve_pitch_shift");
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+});
+
+test("completed native audio is retrievable from an owned hidden worktree directory", async () => {
+  const express = require("express"), { createAuth } = require("../lib/auth");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), ".native-audio-"));
+  const service = api().createNativeService({ root, catalogue, render: (dir, job, donor) => result(dir, job, donor) });
+  const app = express(); let server;
+  const auth = createAuth({ getPort: () => server.address().port, humanToken: "audio-fixture" });
+  app.use("/native", api().createNativeSamplesRouter({ auth, service }));
+  server = app.listen(0, "127.0.0.1"); await new Promise(resolve => server.once("listening", resolve));
+  try {
+    const job = await service.start(body()); await service.drain();
+    const response = await fetch("http://127.0.0.1:" + server.address().port + "/native/jobs/" + job.id + "/audio",
+      { headers: { cookie: "brahma_human=audio-fixture" } });
+    assert.equal(response.status, 200);
+    assert.ok(Buffer.from(await response.arrayBuffer()).equals(wav()));
+  } finally {
+    service.close(); await service.drain(); server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve)); fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("installed Forge pipeline produces a measured native sound from admitted PCM", {

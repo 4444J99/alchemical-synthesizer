@@ -47,6 +47,10 @@ req_files=(
   "forge/validate_audio.py"
   "forge/assimilate.py"
   "brahma/sc/32_donor_rack.scd"
+  "forge/native-controls.json"
+  "forge/sketch.py"
+  "tools/verify-song-sketch.cjs"
+  "brahma/web/public/instrument/native-controls.js"
   "README.md"
 )
 for f in "${req_files[@]}"; do
@@ -75,6 +79,8 @@ if command -v node >/dev/null 2>&1; then
             brahma/web/public/instrument/pattern.js brahma/web/public/instrument/instrument.js \
             brahma/web/public/instrument/sample-project.js brahma/web/public/instrument/sample-audio.js \
             brahma/web/public/instrument/sample-controls.js \
+            brahma/web/public/instrument/native-controls.js \
+            tools/verify-song-sketch.cjs \
             aether/deploy/serve.js aether/deploy/worker.mjs forge/render_video.mjs; do
     [ -f "$js" ] || continue
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
@@ -88,6 +94,11 @@ if command -v node >/dev/null 2>&1; then
   else
     bad "sample project contracts (see /tmp/brahma_sample_project.log)"; tail -12 /tmp/brahma_sample_project.log
   fi
+  if node --test brahma/web/test/native-samples.test.js >/tmp/brahma_native_samples.log 2>&1; then
+    ok "native sample service admission, authorization, cancellation and integrity contracts"
+  else
+    bad "native sample service contracts"; tail -12 /tmp/brahma_native_samples.log
+  fi
 else
   skip "node not installed — JS syntax"
 fi
@@ -98,6 +109,11 @@ if command -v python3 >/dev/null 2>&1; then
     ok "donor assimilation contracts (native integration separately opt-in)"
   else
     bad "donor assimilation contracts"; tail -12 /tmp/brahma_assimilate.log
+  fi
+  if python3 -m unittest discover -s tools/tests -p 'test_sketch.py' >/tmp/brahma_sketch.log 2>&1; then
+    ok "portable native song sketch contracts"
+  else
+    bad "portable native song sketch contracts"; tail -12 /tmp/brahma_sketch.log
   fi
   TONE="$(mktemp -d)/test_tone.wav"
   if python3 tools/gen_test_tone.py "$TONE" >/dev/null 2>&1 \
@@ -257,7 +273,7 @@ fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
 if command -v python3 >/dev/null 2>&1; then
-  for py in forge/assimilate.py forge/rip.py forge/stemforge.py forge/analyze_audio.py forge/validate_audio.py tools/gen_test_tone.py aether/tools/tune.py aether/tools/cellcycle.py aether/tools/hls_append.py; do
+  for py in forge/sketch.py forge/assimilate.py forge/rip.py forge/stemforge.py forge/analyze_audio.py forge/validate_audio.py tools/gen_test_tone.py aether/tools/tune.py aether/tools/cellcycle.py aether/tools/hls_append.py; do
     [ -f "$py" ] || continue
     if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
   done

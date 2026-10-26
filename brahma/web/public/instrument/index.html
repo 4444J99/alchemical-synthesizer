@@ -28,7 +28,7 @@
         .grid-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:10px; }
         table.grid { border-collapse:collapse; }
         table.grid td { width:26px; height:26px; border:1px solid #0e1430; text-align:center; font-size:10px; cursor:pointer; user-select:none; color:var(--dim); }
-        table.grid td.trk { width:120px; text-align:left; padding-left:8px; color:var(--accent); cursor:default; font-size:12px; }
+        table.grid td.trk { min-width:150px; max-width:220px; overflow-wrap:anywhere; text-align:left; padding:6px; color:var(--accent); cursor:default; font-size:12px; }
         table.grid td.beat { border-left:1px solid #223; }
         table.grid td.on { background:var(--hit); color:#04122e; font-weight:bold; }
         table.grid td.playhead { box-shadow: inset 0 0 0 2px var(--warn); }
@@ -151,7 +151,7 @@
         The <b>arc</b> (READABLE → CLUSTER → DISPERSAL) is the same metabolism the live broadcast runs
         (<code>aether/tools/cellcycle.py</code>); "auto" walks it. Imported samples play in
         <b>WebAudio (local)</b>. The legacy OSC adapter does not transfer sample audio;
-        native SuperCollider sample control is a separate integration. Existing synth notes
+        native transformations render in the background and become playable samples. Existing synth notes
         remain available alongside sample notes. Numbered blue cells play chops.
     </p>
 </div>

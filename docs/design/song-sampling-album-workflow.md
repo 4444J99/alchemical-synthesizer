@@ -6,9 +6,13 @@ implements local import, editable chops, sample sequencing, embedded portable
 projects, and loop WAV export; see the README and sample-load-save plan/evidence.
 Forge now provides [native song assimilation](../../forge/ASSIMILATION.md):
 preserved local/YouTube donors, bounded module auditions, and a listening index.
-Native browser sample transfer, shared Golem transport, live modular routing,
-and album arrangement below remain unfinished. Render validation with selected
-songs does not establish musical acceptance.
+The instrument now sends short sounds to Forge for native transformations and
+applies the result to future notes while its browser sequence keeps playing.
+Portable projects retain original excerpts, transformed audio, recipes and chops;
+the starter sketch includes actual rendered Golem presets on that transport.
+Real-time SC buffer transfer, the separate live Golem sequencer, live modular
+routing, and album arrangement below remain unfinished. Render validation with
+selected songs does not establish musical acceptance.
 
 ## Intent
 
@@ -86,7 +90,8 @@ intensity does not establish a publication status.
 
 Recommendation: the first approach, with Forge as its file-processing backend.
 The browser load/save milestone extends the existing instrument with a shared
-live/offline WebAudio renderer; it does not yet connect the native sample engine.
+live/offline WebAudio renderer. Native controls now connect it to Forge's measured
+background renders; immediate live-rack parameter control is a later integration.
 Do not create a second sampler application or make AETHER a prerequisite.
 
 ## First acceptance slice

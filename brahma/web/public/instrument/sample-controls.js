@@ -184,6 +184,7 @@
     return {
       report,
       cancelNative: invalidateNative,
+      trackLabel(index) { const source = sources.find(item => item.id === trackSources[index]); return source ? source.name : P.TRACKS[index]; },
       cell(trackIndex, base) {
         const sourceId = trackSources[trackIndex];
         if (sourceId) return Object.assign({}, base, { note: 60, sampleId: sourceId,
