@@ -138,7 +138,7 @@ def validate_native_reuse(catalogue, run, selected):
             raise ValueError("Reused native definition changed: " + module["name"])
         if item.get("status") == "not_selected":
             raise ValueError("Reused native audition is missing a selected result")
-        if item.get("material") is not None or item.get("parameter_overrides"):
+        if item.get("material") is not None or item.get("overrides"):
             raise ValueError("Reused native stage must use native defaults, without material or overrides")
 
 

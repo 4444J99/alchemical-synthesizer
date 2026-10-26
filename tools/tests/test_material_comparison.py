@@ -100,10 +100,10 @@ class MaterialComparisonTest(unittest.TestCase):
     def test_reused_native_stage_cannot_mislabel_material_renders_or_missing_selected_results(self):
         tool = self.model()
         catalog = [{"name": "ditto_morphic_core", "role": "audio_processor", "definition_sha256": "a" * 64}]
-        item = {**catalog[0], "status": "rendered", "parameter_overrides": {}, "parameters": {"inBus": 4, "outBus": 8}}
+        item = {**catalog[0], "status": "rendered", "overrides": {}, "parameters": {"inBus": 4, "outBus": 8}}
         tool.validate_native_reuse(catalog, {"modules": [item]}, {"ditto_morphic_core"})
         with self.assertRaisesRegex(ValueError, "missing|selected"):
             tool.validate_native_reuse(catalog, {"modules": []}, {"ditto_morphic_core"})
-        for changed in [{"material": {"phase": "gas"}}, {"parameter_overrides": {"observe": .9}}]:
+        for changed in [{"material": {"phase": "gas"}}, {"overrides": {"observe": .9}}]:
             with self.assertRaisesRegex(ValueError, "native|default|material"):
                 tool.validate_native_reuse(catalog, {"modules": [{**item, **changed}]}, {"ditto_morphic_core"})
