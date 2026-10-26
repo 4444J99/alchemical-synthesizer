@@ -374,4 +374,26 @@ describe("local sample instrument", () => {
       assert.deepEqual(ctx.errors, []);
     } finally { await cleanup(); }
   });
+
+  it("reopens and resaves fractional mixtures without rounding or rejecting canonical material state", async t => {
+    if (skip(t)) return;
+    const original = JSON.parse(fs.readFileSync(ctx.saved));
+    const material = { schema: "brahma.material-state.v1", modelVersion: 1, phase: "liquid", amount: .333333,
+      composition: [{ id: "iron", fraction: .333334 }, { id: "silica", fraction: .333333 }, { id: "water", fraction: .333333 }] };
+    original.vessels = [{ module: "ditto_morphic_core", params: { observe: .5, assume: .5, mutate: .1 }, material }, null, null, null, null];
+    const filename = path.join(ctx.dir, "fractional-mixture.brahma.json");
+    fs.writeFileSync(filename, JSON.stringify(original));
+    await ctx.page.reload(); await upload("#open-project", filename); await status("Opened");
+    await ctx.page.waitForFunction(() => document.querySelector("#native-module").options.length > 200);
+    assert.equal(await ctx.page.$eval("#material-error", el => el.textContent), "");
+    assert.equal(await ctx.page.$eval("#material-amount", el => Number(el.value)), material.amount);
+    await setInput("#project-name", "Fractional reopened"); await ctx.page.click("#freeze"); await status("Saved");
+    const saved = await until(() => { try { return JSON.parse(fs.readFileSync(path.join(ctx.dir, "Fractional-reopened.brahma.json"))); } catch (_) { return null; } });
+    assert.deepEqual(saved.vessels[0].material, material);
+    await setInput('[data-material="iron"]', 0);
+    await setInput('[data-material="silica"]', 49.5);
+    await setInput('[data-material="water"]', 50.5);
+    assert.equal(await ctx.page.$eval("#material-error", el => el.textContent), "");
+    assert.equal(await ctx.page.$eval("#native-render", el => el.disabled), false);
+  });
 });

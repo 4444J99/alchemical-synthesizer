@@ -4,11 +4,11 @@
   const M = window.MaterialModel, library = M.payload.library;
   const $ = id => document.getElementById(id);
   window.MaterialControls = { attach(bridge) {
-    const inputs = new Map(), cards = [];
+    const inputs = new Map(), restoredFractions = new Map(), cards = [];
     for (const [id, spec] of Object.entries(library.materials)) {
       const label = document.createElement("label"), input = document.createElement("input");
       label.textContent = spec.name + " %"; input.type = "number"; input.min = 0; input.max = 100;
-      input.step = 1; input.value = id === "water" ? 100 : 0; input.dataset.material = id;
+      input.step = "any"; input.value = id === "water" ? 100 : 0; input.dataset.material = id;
       input.setAttribute("aria-label", spec.name + " percentage"); label.appendChild(input);
       $("material-composition").appendChild(label); inputs.set(id, input);
       input.addEventListener("input", changed);
@@ -18,7 +18,9 @@
       const composition = [];
       for (const [id, input] of inputs) {
         if (!input.checkValidity() || input.value === "") throw new Error("Material percentages must be between 0 and 100");
-        if (Number(input.value) > 0) composition.push({ id, fraction: Number(input.value) / 100 });
+        const restored = restoredFractions.get(id);
+        const fraction = restored && restored.value === input.value ? restored.fraction : Number(input.value) / 100;
+        if (fraction > 0) composition.push({ id, fraction });
       }
       return M.validate({ schema: M.SCHEMA, modelVersion: library.version,
         phase: $("material-phase").value, amount: Number($("material-amount").value), composition });
@@ -30,8 +32,11 @@
       $("material-enable").checked = !!state;
       $("material-phase").value = state ? state.phase : "liquid";
       $("material-amount").value = state ? state.amount : 1;
-      for (const [id, input] of inputs) input.value = state ?
-        Math.round((state.composition.find(component => component.id === id)?.fraction || 0) * 10000) / 100 : id === "water" ? 100 : 0;
+      for (const [id, input] of inputs) {
+        const fraction = state ? state.composition.find(component => component.id === id)?.fraction || 0 : id === "water" ? 1 : 0;
+        input.value = fraction * 100;
+        restoredFractions.set(id, { value: input.value, fraction });
+      }
       refresh();
     }
     function refresh() {
