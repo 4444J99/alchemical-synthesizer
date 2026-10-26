@@ -48,6 +48,13 @@ req_files=(
   "forge/assimilate.py"
   "brahma/sc/32_donor_rack.scd"
   "forge/native-controls.json"
+  "forge/materials.json"
+  "forge/materials.py"
+  "forge/compare.py"
+  "brahma/web/public/instrument/material-model.js"
+  "brahma/web/public/instrument/material-controls.js"
+  "brahma/web/public/instrument/material-vessels.css"
+  "tools/verify-material-vessels.cjs"
   "forge/sketch.py"
   "tools/verify-song-sketch.cjs"
   "brahma/web/public/instrument/native-controls.js"
@@ -80,6 +87,8 @@ if command -v node >/dev/null 2>&1; then
             brahma/web/public/instrument/sample-project.js brahma/web/public/instrument/sample-audio.js \
             brahma/web/public/instrument/sample-controls.js \
             brahma/web/public/instrument/native-controls.js \
+            brahma/web/public/instrument/material-model.js brahma/web/public/instrument/material-controls.js \
+            tools/verify-material-vessels.cjs \
             tools/verify-song-sketch.cjs \
             aether/deploy/serve.js aether/deploy/worker.mjs forge/render_video.mjs; do
     [ -f "$js" ] || continue
@@ -99,12 +108,22 @@ if command -v node >/dev/null 2>&1; then
   else
     bad "native sample service contracts"; tail -12 /tmp/brahma_native_samples.log
   fi
+  if node --test brahma/web/test/materials.test.js >/tmp/brahma_materials_node.log 2>&1; then
+    ok "material model and Node/Python resolution parity"
+  else
+    bad "material model contracts"; tail -12 /tmp/brahma_materials_node.log
+  fi
 else
   skip "node not installed — JS syntax"
 fi
 
 echo "=== [4/6] Python audio validator ==="
 if command -v python3 >/dev/null 2>&1; then
+  if python3 -m unittest tools.tests.test_materials tools.tests.test_material_comparison >/tmp/brahma_materials_python.log 2>&1; then
+    ok "material and source-bound comparison contracts"
+  else
+    bad "material comparison contracts"; tail -12 /tmp/brahma_materials_python.log
+  fi
   if python3 -m unittest discover -s tools/tests -p 'test_assimilate.py' >/tmp/brahma_assimilate.log 2>&1; then
     ok "donor assimilation contracts (native integration separately opt-in)"
   else

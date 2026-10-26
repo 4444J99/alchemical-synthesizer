@@ -34,9 +34,9 @@
 
 **Interfaces:** `validate(state)` returns canonical `brahma.material-state.v1`; `resolve(module, baseParams, state)` returns canonical material state, resolved properties and bounded effective controls. Python exports the same functions. `describe(module)` returns mapping support and intended control effects. Native requests optionally carry `material`; receipts retain `baseParams`, effective `params`, material state and model hash.
 
-- [ ] Write tests for composition/phase validation, deterministic cross-runtime resolution, unsupported mappings and unchanged amount-zero controls; watch RED.
-- [ ] Implement the common palette/properties and mappings for core organisms and the existing sampler/native controls. Map only actual used DSP controls; keep other definitions visibly unsupported.
-- [ ] Pass material state through CLI/service rendering and validate the exact completed receipt before applying it. Run model, service and Python suites; commit.
+- [x] Write tests for composition/phase validation, deterministic cross-runtime resolution, unsupported mappings and unchanged amount-zero controls; watch RED.
+- [x] Implement the common palette/properties and mappings for core organisms and the existing sampler/native controls. Map only actual used DSP controls; keep other definitions visibly unsupported.
+- [x] Pass material state through CLI/service rendering and validate the exact completed receipt before applying it. Run model, service and Python suites; commit.
 
 ### Task 2: Portable vessels and a working instrument surface
 
@@ -44,9 +44,9 @@
 
 **Interfaces:** Optional project `vessels[5]` stores `{module, params, material}` per track. Native recipes optionally store `{material, baseParams, modelSha256}` alongside effective controls. `Renderer.level(track)` reads actual playing audio for the glass display. Native controls consume/restore selected vessel settings and expose dry/current comparisons without replacing sources.
 
-- [ ] Write failing save/reopen, malformed-state and real-browser material/track-fencing tests.
-- [ ] Add mixture/phase/amount controls, readable effective-control previews, transparent vessel rendering tied to actual waveform/level, and original/processed audition actions. Keep draft versus applied material state explicit.
-- [ ] Restore vessel settings on track/project changes; fence pending renders on edits. Verify old projects, sound continuity, stop/cancel and exported audio. Run suites; commit.
+- [x] Write failing save/reopen, malformed-state and real-browser material/track-fencing tests.
+- [x] Add mixture/phase/amount controls, readable effective-control previews, transparent vessel rendering tied to actual waveform/level, and original/processed audition actions. Keep draft versus applied material state explicit.
+- [x] Restore vessel settings on track/project changes; fence pending renders on edits. Verify old projects, sound continuity, stop/cancel and exported audio. Run suites; commit.
 
 ### Task 3: Module comparison and observed acceptance
 
@@ -54,9 +54,9 @@
 
 **Interfaces:** Comparison consumes existing audition manifests plus an explicit source, runs native baseline/material phases through the same renderer, and writes a self-contained listening index and JSON ledger. The ledger lists every catalogue definition and separates signal response, material mapping support and original-behavior acceptance.
 
-- [ ] Write failing tests for source/hash mismatches, missing results, silence, bounded waveform comparisons and complete catalogue disposition.
-- [ ] Implement bounded serial comparisons, source-bound measurements and listening links; never treat waveform difference as proof of full mimicry.
-- [ ] Run native comparisons with synthetic probes and a retained selected-song excerpt; exercise the actual browser, save/reopen and export. Run web/Python suites and implicated native smoke checks.
+- [x] Write failing tests for source/hash mismatches, missing results, silence, bounded waveform comparisons and complete catalogue disposition.
+- [x] Implement bounded serial comparisons, source-bound measurements and listening links; never treat waveform difference as proof of full mimicry.
+- [x] Run native comparisons with synthetic probes and a retained selected-song excerpt; exercise the actual browser, save/reopen and export. Run web/Python suites and implicated native smoke checks.
 - [ ] Obtain one fresh whole-branch review, fix significant findings with regression tests, commit/push the implementation and a reviewable PR stacked on #101. Retain all private sound artifacts.
 
 ## Execution record

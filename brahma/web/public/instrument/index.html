@@ -117,6 +117,11 @@
             <button id="native-audition-current">Audition current chop</button>
         </div>
         <p id="native-status" role="status" aria-live="polite">Native processing runs on this computer. The loop continues while a new sound renders.</p>
+        <details class="module-ledger">
+            <summary id="module-count">All native modules and material responses</summary>
+            <label>Find a module <input id="module-filter" type="search" placeholder="Name or role"></label>
+            <div class="table-scroll"><table><thead><tr><th>Module</th><th>Role</th><th>Material response and behavior</th></tr></thead><tbody id="module-ledger"></tbody></table></div>
+        </details>
     </section>
 
     <div class="controls">

@@ -175,6 +175,24 @@ future notes on that track use the result. **Restore original** changes them bac
 Stop, opening a project, or changing sources cancels a pending application. Saving
 includes the original excerpt, transformed sound, exact recipe, and source hashes.
 Processing runs on the local server and is never sent to a remote provider.
+Each track has a transparent vessel. Enable **Use material**, mix water, silica,
+iron and air to 100%, choose solid/liquid/gas, and set its influence. The displayed
+base-to-effective control changes describe the actual native render. Edits remain
+a draft until **Render and use on this track** finishes. Vessel motion and waveform
+follow actual per-track audio and stop with playback. **Audition original chop**
+and **Audition current chop** provide an immediate comparison.
+
+Material settings are local to each track and survive project save/reopen along
+with base controls, effective controls, model version and retained originals.
+There are 26 explicit material mappings; the complete 245-definition catalogue
+shows unmapped modules and the 21 definitions needing coordinated patches.
+These artistic material responses change existing DSP controls. They do not
+implement every original organism's proposed memory or mimicry behavior; see
+[the design and acceptance contract](docs/design/mimicry-material-universe.md).
+For a source-bound listening comparison, run `python3 forge/compare.py song.wav`;
+[comparison instructions](forge/ASSIMILATION.md#material-vessels-and-comparisons)
+explain the native/neutral/repeated/phase measurements.
+
 Repeated browser WAV exports preserve the project exactly but can differ by one
 PCM quantization step because of floating-point rendering; native random DSP also
 remains stochastic. The verification record reports these distinctions.

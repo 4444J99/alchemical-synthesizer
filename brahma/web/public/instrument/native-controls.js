@@ -61,6 +61,21 @@
         if (auth.role !== "human") throw new Error("Open the instrument launch link printed by the local server, then connect here.");
         const catalogue = await json("/api/instrument/native/catalogue");
         modules = catalogue.modules;
+        const ledger = $("module-ledger"); ledger.replaceChildren();
+        let mapped = 0, coordinated = 0;
+        for (const item of modules) {
+          const support = window.MaterialModel.describe(item.name), row = document.createElement("tr");
+          const requiresPatch = item.role === "infrastructure" || !(item.audio_outputs.length || item.control_outputs.length);
+          if (support.supported) mapped++; if (requiresPatch) coordinated++;
+          row.dataset.search = item.name + " " + item.role;
+          for (const text of [item.name, item.role.replaceAll("_", " "),
+            (requiresPatch ? "Requires its coordinated patch. " : "Standalone audition available. ") +
+            (support.supported ? "Material changes: " + Object.keys(support.targets).join(", ") + ". " : "Material not mapped. ") + support.claim]) {
+            const cell = document.createElement("td"); cell.textContent = text; row.appendChild(cell);
+          }
+          ledger.appendChild(row);
+        }
+        $("module-count").textContent = modules.length + " native definitions · " + mapped + " material mappings · " + coordinated + " require coordinated patches";
         const select = $("native-module"); select.replaceChildren();
         modules.forEach(item => {
           const unavailable = item.role === "infrastructure" || !(item.audio_outputs.length || item.control_outputs.length);
@@ -137,6 +152,10 @@
       } finally { if (generation === revision) { pending = null; refresh(); } }
     }
     $("native-connect").addEventListener("click", connect);
+    $("module-filter").addEventListener("input", event => {
+      const query = event.target.value.toLowerCase();
+      for (const row of $("module-ledger").children) row.hidden = !row.dataset.search.includes(query);
+    });
     $("native-module").addEventListener("change", () => {
       cancel(); controls();
       if (matter && !window.MaterialModel.describe($("native-module").value).supported) matter.restore(null);

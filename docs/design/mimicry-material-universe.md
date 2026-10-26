@@ -4,7 +4,11 @@ Reconciliation: 2026-10-26. Native implementation reference: `3b971f8e849a8e0ca7
 Owner: Brahma instrument / Forge integration, [issue #95](https://github.com/4444J99/alchemical-synthesizer/issues/95).
 This document records recovered intent, source inspection, and the next-version
 design contract. The material system and behavioral acceptance suite described
-below have not been implemented by this documentation change.
+below were specified by the original documentation change. The first
+implementation now supplies per-track glass vessels, four mixable materials,
+three phases, 26 native control mappings and a source-bound comparison ledger.
+[Observed implementation results](../verification/material-vessels-20261026.md)
+separate these working paths from the organism-specific behavior still required.
 
 ## The foundation that carries forward
 
@@ -268,7 +272,7 @@ the rest of the required ledger.
 
 The remaining work stays with issue #95 and this design lane: obtain authoritative
 provider title/ID coverage, reconcile missing originals and earlier code variants,
-implement the behavioral ledger and material mappings, then verify the integrated
+extend the behavioral ledger and material mappings, then verify the integrated
 performance workflow. None of those gaps is marked complete by this report.
 
 ## Sources

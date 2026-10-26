@@ -244,6 +244,8 @@ describe("local sample instrument", () => {
     assert.ok(await ctx.page.$("#native-connect"), "the instrument needs native transformation controls");
     await ctx.page.click("#native-connect");
     await ctx.page.waitForFunction(() => document.querySelector("#native-module").options.length > 200);
+    assert.match(await ctx.page.$eval("#module-count", el => el.textContent), /245 native definitions.*26 material mappings.*21/);
+    assert.equal(await ctx.page.$$eval("#module-ledger tr", rows => rows.length), 245);
     await ctx.page.select("#native-module", "solve_pitch_shift");
     await setInput('#native-params input[data-param="semitones"]', "7");
   }

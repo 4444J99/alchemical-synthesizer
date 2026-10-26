@@ -481,7 +481,7 @@ def main() -> int:
             if code or re.search(r'FAILURE IN SERVER|Exception|ERROR', logtext):
                 result['status'] = 'render_failed'; result['reason'] = 'See ' + log.name
             record.update(result); record['render_exit_code'] = code
-            if result['status'] == 'rendered':
+            if result['status'] in ('rendered', 'silent'):
                 record['output'] = output.name; record['output_sha256'] = sha256(output)
             print(item['name'] + ': ' + record['status'], flush=True)
             (destination / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
