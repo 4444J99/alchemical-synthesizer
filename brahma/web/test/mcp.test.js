@@ -118,7 +118,7 @@ test("mcp HTTP: the agent tool list offers propose and no decision tools", async
   for (const expected of ["brahma_provider_status", "brahma_propose_pattern", "brahma_approvals", "brahma_job", "brahma_engine_status"]) {
     assert.ok(names.includes(expected), `missing ${expected}`);
   }
-  for (const forbidden of ["brahma_accept", "brahma_reject", "brahma_run"]) {
+  for (const forbidden of ["brahma_accept", "brahma_reject", "brahma_run", "brahma_stop"]) {
     assert.equal(names.includes(forbidden), false, `${forbidden} must not be exposed to an agent`);
   }
 });
@@ -143,9 +143,18 @@ test("mcp HTTP: propose files an approval and does not run", async () => {
 test("mcp HTTP: the human tool list adds accept/reject/run", async () => {
   const out = await rpc(humanHeaders(), { jsonrpc: "2.0", id: 1, method: "tools/list" });
   const names = out.body.result.tools.map((t) => t.name);
-  for (const expected of ["brahma_accept", "brahma_reject", "brahma_run", "brahma_propose_pattern"]) {
+  for (const expected of ["brahma_accept", "brahma_reject", "brahma_run", "brahma_stop", "brahma_propose_pattern"]) {
     assert.ok(names.includes(expected), `missing ${expected}`);
   }
+});
+
+test("mcp HTTP: human stop succeeds and agent stop is not exposed", async () => {
+  const human = await call(humanHeaders(), "brahma_stop");
+  assert.equal(human.body.result.isError, false);
+  assert.equal(human.body.result.structuredContent.ok, true);
+  const agent = await call(agentHeaders(), "brahma_stop");
+  assert.equal(agent.body.result.isError, true);
+  assert.equal(agent.body.result.structuredContent.code, "unknown_tool");
 });
 
 test("mcp HTTP: accepting is a separate act from running", async () => {

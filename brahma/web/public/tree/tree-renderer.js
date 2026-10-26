@@ -18,7 +18,7 @@ const Tree = (() => {
     let occupants = {};                // key -> organism (per frame)
     let topPositions = {};             // key -> {x,y,r} at depth 0 (for picking)
     let recursionBudget = 0;           // per-frame cap to bound nested trees
-    let selected = null;               // {key, occ} — currently picked organism for trait-map overlay
+    let selected = null;               // vessel key; resolve its current occupant each frame
 
     // ------------------------------------------------------------------ state
     function buildOccupants(organisms) {
@@ -36,6 +36,7 @@ const Tree = (() => {
 
     function update(organisms, dt, settings) {
         occupants = buildOccupants(organisms);
+        if (selected && !occupants[selected]) selected = null;
 
         // Automatic Lightning Flash
         flashTimer += dt;
@@ -214,30 +215,34 @@ const Tree = (() => {
     function traitMapFor(occ) {
         const tm = occ.traitMap;
         if (tm) {
-            return TRAIT_AXES.map(a => {
+            const values = TRAIT_AXES.map(a => {
                 const sub = tm[a.key];
-                if (sub && sub.value !== undefined) return constrain(sub.value, 0, 1);
-                if (typeof sub === "number") return constrain(sub, 0, 1);
-                return 0.5;
+                const value = typeof sub === "number" ? sub : sub?.value;
+                return typeof value === "number" && Number.isFinite(value) ? constrain(value, 0, 1) : null;
             });
+            return { values: values.every(v => v !== null) ? values : null,
+                label: values.every(v => v !== null) ? "CAPTURED TRAIT VALUES" : "INCOMPLETE TRAIT MAP" };
         }
-        // Proxy from coherence + entropy + type-based drift
+        // These are visual proxies, not a measured four-dimensional trait map.
         const c = constrain(occ.coherence ?? 0.5, 0, 1);
         const e = constrain((occ.entropy ?? 5) / 12, 0, 1);
-        return TRAIT_AXES.map((_, i) => {
+        const values = TRAIT_AXES.map((_, i) => {
             const base = [c, 1 - e, c * 0.7 + 0.3, e * 0.5 + 0.25][i] ?? 0.5;
             return constrain(base + (Math.sin(i) * 0.1 - 0.05), 0, 1);
         });
+        return { values, label: "PROXY · NOT MEASURED" };
     }
 
     function drawTraitMap(box, alpha) {
-        if (!selected) return;
-        const { key, occ } = selected;
-        const vals = traitMapFor(occ);
+        const occ = selected && occupants[selected];
+        if (!occ || width < 160 || height < 160) return;
+        const traits = traitMapFor(occ);
+        const vals = traits.values;
         const n = TRAIT_AXES.length;
-        const cx = box.cx + box.treeW * 0.72;
-        const cy = box.top + box.treeH * 0.28;
-        const radius = box.treeW * 0.14;
+        const radius = Math.max(20, Math.min(box.treeW * 0.14, (width - 112) / 2, (height - 112) / 2));
+        const halfWidth = radius + 48, halfHeight = radius + 48;
+        const cx = constrain(box.cx + box.treeW * 0.72, halfWidth + 8, width - halfWidth - 8);
+        const cy = constrain(box.top + box.treeH * 0.28, halfHeight + 8, height - halfHeight - 8);
 
         push();
         translate(cx, cy);
@@ -245,13 +250,16 @@ const Tree = (() => {
         // backdrop panel
         noStroke();
         fill(0, 0, 0, alpha * 0.75);
-        rect(-radius - 18, -radius - 48, radius * 2 + 36, radius * 2 + 66, 10);
+        rect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2, 10);
 
         // title
         fill(255, 255, 255, alpha * 0.95);
         textAlign(CENTER);
         textSize(12);
-        text("TRAIT MAP — " + (occ.type || key), 0, -radius - 24);
+        text("TRAITS — " + String(occ.type || selected).slice(0, 12), 0, -radius - 28);
+        textSize(9);
+        text(traits.label, 0, radius + 34);
+        if (!vals) { pop(); return; }
 
         // axis spokes + labels
         TRAIT_AXES.forEach((axis, i) => {
@@ -369,7 +377,7 @@ const Tree = (() => {
             const p = topPositions[key];
             if (dist(mx, my, p.x, p.y) < p.r * 1.2) hit = p;
         }
-        selected = hit;
+        selected = hit?.occ ? hit.sephirah.key : null;
         return hit;
     }
 

@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "mcp": "node bin/brahma-mcp.js",
-    "test": "node --test test/**/*.test.js",
+    "test": "node --test 'test/**/*.test.js'",
     "build:workbench": "node ../../tools/build-workbench.mjs",
-    "test:e2e": "node --test test/e2e/*.e2e.js"
+    "test:e2e": "node --test 'test/e2e/*.e2e.js'"
   },
   "bin": {
     "brahma-mcp": "bin/brahma-mcp.js"
@@ -21,6 +21,14 @@
   ],
   "author": "4444J99",
   "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "overrides": {
+    "osc": {
+      "ws": "^8.22.0"
+    }
+  },
   "dependencies": {
     "@codemirror/lang-javascript": "6.2.5",
     "@codemirror/state": "6.7.6",

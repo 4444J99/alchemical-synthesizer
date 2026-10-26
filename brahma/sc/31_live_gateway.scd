@@ -44,12 +44,12 @@
 
 ~live_voice_count = {
     var n = 0;
-    ~engine_voices.do({ |inst| n = n + inst[\voices].size });
+    ~engine_voices.do({ |inst| n = n + inst[\activeNodes].size });
     n
 };
 
 OSCdef(\live_play, { |msg|
-    var engine, instance, note, vel, dur, extra, spec, task, ok;
+    var engine, instance, note, vel, dur, extra, spec, task, ok, voice;
     if(msg.size < 6) {
         ~live_error.("bad_args", "play needs <engine> <instance> <note> <vel> <dur>");
     } {
@@ -73,9 +73,16 @@ OSCdef(\live_play, { |msg|
             if(ok.not) {
                 ~live_error.("engine_unavailable", "engine voice manager not loaded");
             } {
+                voice = ~engine_voices[instance][\voices][note];
                 task = Routine({
                     dur.wait;
-                    ~live_call.(\engine_noteOff, ["/brahma/engine/noteOff", instance, note]);
+                    // A later play may have replaced this note. Its older
+                    // timer must never release the newer node.
+                    if(~engine_voices[instance].notNil and: {
+                        ~engine_voices[instance][\voices][note] === voice
+                    }) {
+                        ~live_call.(\engine_noteOff, ["/brahma/engine/noteOff", instance, note]);
+                    };
                     ~live_gateway[\tasks].remove(thisThread);
                 });
                 ~live_gateway[\tasks].add(task);
@@ -114,8 +121,7 @@ OSCdef(\live_panic, {
     });
     // 3. every engine voice
     ~engine_voices.do({ |inst|
-        inst[\voices].do({ |s| s.free; voices = voices + 1 });
-        inst[\voices] = IdentityDictionary.new;
+        voices = voices + ~engineVoiceFreeAll.(inst);
     });
     // 4. every instantiated registry module
     ~module_registry[\modules].do({ |spec|
@@ -129,7 +135,10 @@ OSCdef(\live_panic, {
 }, "/brahma/live/panic");
 
 OSCdef(\live_ping, {
-    ~live_gateway[\web].sendMsg("/brahma/live/pong", ~module_registry.count, ~live_voice_count.value);
+    // Event already inherits Collection.count; dot dispatch would call that
+    // method instead of the registry's count function.
+    ~live_gateway[\web].sendMsg("/brahma/live/pong",
+        ~module_registry[\modules].size, ~live_voice_count.value);
 }, "/brahma/live/ping");
 
 "--- BRAHMA: Live Gateway Responders Online ---".postln;

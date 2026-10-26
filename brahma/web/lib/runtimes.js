@@ -4,8 +4,8 @@
  *
  * Runtimes supported:
  *   - strudel: browser-side client execution (always available)
- *   - tidalcycles: sandboxed server execution (reported not_installed)
- *   - sonicpi: sandboxed server execution (reported not_installed)
+ *   - tidalcycles: installation discovery only; server adapter not implemented
+ *   - sonicpi: installation discovery only; server adapter not implemented
  *   - sclang: SuperCollider sclang execution (opt-in behind BRAHMA_ALLOW_SCLANG=1 and human role)
  */
 
@@ -14,11 +14,7 @@ const path = require("path");
 const dgram = require("node:dgram");
 const sandbox = require("./sandbox");
 
-/**
- * Searches standard macOS application paths, Homebrew paths, and environment overrides
- * for the SuperCollider sclang executable.
- * @returns {string|null} Resolved absolute path or null if not found
- */
+/** Find a GHCi path; this alone does not verify that the Tidal module is installed. */
 function findTidal() {
   const candidates = [
     process.env.TIDAL_PATH,
@@ -47,13 +43,15 @@ function findSonicPi() {
   return null;
 }
 
+/** Search application, Homebrew, Linux and override paths for a sclang file. */
 function findSclang() {
   const candidates = [
     process.env.SCLANG_PATH,
     "/Applications/SuperCollider.app/Contents/MacOS/sclang",
     "/Applications/SuperCollider/SuperCollider.app/Contents/MacOS/sclang",
     "/usr/local/bin/sclang",
-    "/opt/homebrew/bin/sclang"
+    "/opt/homebrew/bin/sclang",
+    "/usr/bin/sclang"
   ].filter(Boolean);
 
   for (const c of candidates) {
@@ -93,16 +91,26 @@ function getRuntimeStatus({
     tidalcycles: {
       name: "TidalCycles",
       available: false,
-      reason: "not_installed",
+      reason: "adapter_not_implemented",
+      installed: Boolean(tidalBinary),
+      discovery: {
+        status: tidalBinary ? "detected" : "not_installed",
+        reason: tidalBinary ? "GHCi path found; Tidal module not checked" : "GHCi path not found"
+      },
       execution: "sandboxed_server",
-      binary: null
+      binary: tidalBinary
     },
     sonicpi: {
       name: "Sonic Pi",
       available: false,
-      reason: "not_installed",
+      reason: "adapter_not_implemented",
+      installed: Boolean(sonicPiApp),
+      discovery: {
+        status: sonicPiApp ? "detected" : "not_installed",
+        reason: sonicPiApp ? "Application path found; server not checked" : "Application path not found"
+      },
       execution: "sandboxed_server",
-      app: null
+      app: sonicPiApp
     },
     sclang: {
       name: "SuperCollider sclang",
@@ -133,26 +141,6 @@ function getRuntimeStatus({
     runtimes.sclang.available = true;
     runtimes.sclang.binary = sclangBinary;
     runtimes.sclang.mode = "headless";
-  }
-
-  // Evaluate TidalCycles availability:
-  if (!tidalBinary) {
-    runtimes.tidalcycles.available = false;
-    runtimes.tidalcycles.reason = "not_installed";
-  } else {
-    runtimes.tidalcycles.available = true;
-    runtimes.tidalcycles.binary = tidalBinary;
-    runtimes.tidalcycles.reason = "installed";
-  }
-
-  // Evaluate Sonic Pi availability:
-  if (!sonicPiApp) {
-    runtimes.sonicpi.available = false;
-    runtimes.sonicpi.reason = "not_installed";
-  } else {
-    runtimes.sonicpi.available = true;
-    runtimes.sonicpi.app = sonicPiApp;
-    runtimes.sonicpi.reason = "installed";
   }
 
   return runtimes;

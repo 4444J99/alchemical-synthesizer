@@ -1,9 +1,13 @@
 (
-var server, options, check;
+var server, options, check, fluidDataSet, fluidSpectral;
 check = { |condition, label| if(condition.not) { Error("FAIL: " ++ label).throw }; ("PASS: " ++ label).postln };
 options = ServerOptions.new.numInputBusChannels_(0).numOutputBusChannels_(2).memSize_(8192).maxNodes_(128);
 server = Server(\brahmaMetricTest, NetAddr("127.0.0.1", NetAddr.langPort + 1), options);
-Server.program = "/Applications/Supercollider/SuperCollider.app/Contents/Resources/scsynth";
+fluidDataSet = \FluidDataSet.asClass; fluidSpectral = \FluidBufSpectralShape.asClass;
+if(fluidDataSet.isNil or: { fluidSpectral.isNil }) {
+    "FAIL: optional FluCoMa classes are unavailable".postln; 1.exit;
+};
+if("BRAHMA_SCSYNTH".getenv.notNil) { Server.program = "BRAHMA_SCSYNTH".getenv };
 (thisProcess.nowExecutingPath.dirname.dirname +/+ "11_metrics.scd").load;
 server.waitForBoot({
     Routine({
@@ -15,13 +19,13 @@ server.waitForBoot({
             features = Buffer(server);
             stereo = Buffer.loadCollection(server, Signal.fill(18000, { 0.25 }), 2);
             server.sync;
-            FluidDataSet.version(server);
-            FluidBufSpectralShape.processBlocking(server, source: source, features: features, select: [\centroid], windowSize: 512, hopSize: 256);
+            fluidDataSet.version(server);
+            fluidSpectral.processBlocking(server, source: source, features: features, select: [\centroid], windowSize: 512, hopSize: 256);
             server.sync;
             features.loadToFloatArray(action: { |data|
                 try {
                     check.value(data.size > 0 and: { data.every { |n| n.isNumber and: { n.isNaN.not } } }, "real FluCoMa server plugin processes audio buffer");
-                    ~metric_collector.measureCoherence(source, { |coherence|
+                    BrahmaMetrics.fluidCoherence(source, { |coherence|
                         try {
                             [\coherence, coherence].postln; check.value(coherence > 0.95, "async FluCoMa coherence");
                             ~metric_collector.measureEntropy(source, { |entropy|

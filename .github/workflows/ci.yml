@@ -4,7 +4,6 @@ on:
   push:
     branches: [main, master]
   pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
 permissions:
@@ -14,14 +13,14 @@ jobs:
   smoke:
     name: Smoke test (shipped-test)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -32,23 +31,63 @@ jobs:
         working-directory: product
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Install workbench dependencies
+        working-directory: brahma/web
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
       - name: Install audio smoke dependency
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg
 
-      - name: Run security regression tests
-        run: node --test product/src/api/account-security.test.js product/src/api/acp.test.js product/src/auth/rate-limit.test.js product/public/dashboard/session.test.js docs/absorb-alchemize/engine-path.test.cjs
+      - name: Check production dependency advisories
+        run: |
+          npm --prefix brahma/web audit --omit=dev --audit-level=high
+          npm --prefix product audit --omit=dev --audit-level=high
+
+      - name: Run Foundry and security regression tests
+        run: node --test 'product/src/**/*.test.js' 'product/public/**/*.test.js' aether/deploy/serve.test.js docs/absorb-alchemize/engine-path.test.cjs
+
+      - name: Run workbench regression tests
+        working-directory: brahma/web
+        run: npm test
+
+      - name: Run AETHER integration and listener regressions
+        run: node --test aether/deploy/integration.test.js aether/deploy/worker.test.js aether/web/listener/aether.test.js
+
+      - name: Build workbench and install test browser
+        working-directory: brahma/web
+        run: |
+          npm run build:workbench
+          CHROME_VERSION=$(node -p "require('puppeteer-core').PUPPETEER_REVISIONS.chrome")
+          sudo apt-get update
+          sudo "$(command -v node)" node_modules/@puppeteer/browsers/lib/main-cli.js install "chrome@$CHROME_VERSION" --path "$RUNNER_TEMP/brahma-chrome" --install-deps
+          CHROME_PATH=$(node -e "console.log(require('@puppeteer/browsers').computeExecutablePath({browser:'chrome',buildId:process.argv[1],cacheDir:process.argv[2]}))" "$CHROME_VERSION" "$RUNNER_TEMP/brahma-chrome")
+          echo "BRAHMA_CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+
+      - name: Run required workbench browser acceptance
+        working-directory: brahma/web
+        env:
+          BRAHMA_REQUIRE_BROWSER: "1"
+          # Disposable CI browser visits only the local test gateway.
+          BRAHMA_BROWSER_NO_SANDBOX: "1"
+        run: npm run test:e2e
+
+      - name: Verify render failure handling
+        run: python3 tools/test_forge.py
+
+      - name: Verify release isolation and built assets
+        run: python3 tools/test_release.py
+
+      - name: Verify release inspection and launch tools
+        run: python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
 
       - name: Run smoke test
         run: bash tools/smoke.sh --strict
 
-      - name: Provider startup regression tests
-        working-directory: brahma/web
-        run: node --test --test-concurrency=1 test/provider-probes.test.js
-
-      - name: Release packaging regression tests
-        run: python3 -m unittest discover -s tools/tests -p 'test_release*.py' -v
+      - name: Run Foundry smoke test
+        working-directory: product
+        run: npm run smoke
 
       - name: Build distribution artifacts (dry run)
         run: bash tools/build_release.sh
@@ -64,3 +103,23 @@ jobs:
           name: dist-${{ github.sha }}
           path: dist/
           if-no-files-found: error
+
+  native-dsp:
+    name: Native DSP and NRT acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install native audio tools
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y supercollider-language supercollider-server jackd2 ffmpeg
+      - name: Run native predicates with isolated dummy audio
+        env:
+          BRAHMA_DSP_DUMMY_AUDIO: "1"
+        run: python3 tools/dsp/test_dsp.py
+
+      - name: Verify real Forge NRT renders and failure propagation
+        env:
+          BRAHMA_FORGE_NATIVE: "1"
+        run: python3 tools/test_forge.py

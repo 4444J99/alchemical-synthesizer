@@ -17,7 +17,8 @@
 # Plain-score form (one event per line, whitespace separated):
 #   <time_seconds> <midi_note> <velocity 0..1> <duration_seconds>
 #
-# Exit codes: 0 ok · 2 usage/input · 3 SuperCollider or python3 missing · 4 render failed
+# Exit codes: 0 ok; nonzero on invalid input, missing tools, or render failure.
+# Renderer and timeout process failures retain their original exit status.
 set -euo pipefail
 
 IN="${1:?usage: render-pattern.sh <pattern.json|score.txt> <output.wav> [duration]}"
@@ -50,109 +51,169 @@ if [ -z "$SCLANG" ] || [ -z "$SCSYNTH" ]; then
   exit 3
 fi
 
-mkdir -p "$(dirname "$OUT")"
-work="$(mktemp -d)"; trap 'rm -rf "$work"' EXIT
+# Stage next to the destination so publication is atomic and failed attempts
+# leave any existing output untouched.
+case "$OUT" in /*) ;; *) OUT="$PWD/$OUT" ;; esac
+case "$SCLANG" in /*) ;; *) SCLANG="$PWD/$SCLANG" ;; esac
+case "$SCSYNTH" in /*) ;; *) SCSYNTH="$PWD/$SCSYNTH" ;; esac
+out_dir="${OUT%/*}"
+mkdir -p -- "${out_dir:-/}"
+work="$(mktemp -d "${out_dir:-/}/.brahma-render.XXXXXXXX")"
+trap 'rm -rf -- "$work"' EXIT
 score="$work/pattern.score"
 
 # --- normalize input to the plain score the renderer reads -------------------
-# sclang has no JSON parser in this build, so conversion happens here, once.
-python3 - "$IN" "$score" <<'PY'
-import json, sys
+# Validate numeric values before creating OSC events or calculating a timeout.
+metadata="$(python3 - "$IN" "$score" "$DUR" <<'PY'
+import json, math, sys
 
-src, dst = sys.argv[1], sys.argv[2]
+src, dst, requested = sys.argv[1:]
 
-with open(src, "r", encoding="utf-8") as fh:
-    raw = fh.read()
-
-events = None
-if src.lower().endswith(".json") or raw.lstrip().startswith(("{", "[")):
-    data = json.loads(raw)
-    events = data.get("events") if isinstance(data, dict) else data
-    if not isinstance(events, list):
-        sys.stderr.write("render-pattern: JSON has no events array\n")
-        sys.exit(2)
+try:
+    with open(src, "r", encoding="utf-8") as fh:
+        raw = fh.read()
     rows = []
-    for e in events:
-        rows.append((
-            float(e.get("time", 0.0)),
-            float(e["note"]),
-            float(e.get("vel", 0.8)),
-            float(e.get("dur", 0.5)),
-        ))
-else:
-    rows = []
-    for line in raw.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = line.split()
-        if len(parts) < 4:
-            continue
-        rows.append((float(parts[0]), float(parts[1]), float(parts[2]), float(parts[3])))
-
-if not rows:
-    sys.stderr.write("render-pattern: no events to render\n")
+    if src.lower().endswith(".json") or raw.lstrip().startswith(("{", "[")):
+        data = json.loads(raw)
+        events = data.get("events") if isinstance(data, dict) else data
+        if not isinstance(events, list):
+            raise ValueError("JSON has no events array")
+        for event in events:
+            if not isinstance(event, dict):
+                raise ValueError("each event must be an object")
+            rows.append(tuple(float(value) for value in (
+                event.get("time", 0), event["note"],
+                event.get("vel", 0.8), event.get("dur", 0.5))))
+    else:
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split()
+            if len(parts) != 4:
+                raise ValueError("score rows must contain time, note, velocity, duration")
+            rows.append(tuple(map(float, parts)))
+    if not rows:
+        raise ValueError("no events to render")
+    for time, note, velocity, length in rows:
+        if not all(map(math.isfinite, (time, note, velocity, length))):
+            raise ValueError("event numbers must be finite")
+        if time < 0 or not 0 <= note <= 127 or not 0 <= velocity <= 1 or length <= 0:
+            raise ValueError("events need time >= 0, MIDI note 0..127, velocity 0..1, duration > 0")
+    end = max(time + length for time, _, _, length in rows)
+    duration = float(requested) if requested else max(2.0, end + 1.5)
+    # Stereo PCM16 at 44.1kHz must fit RIFF's 32-bit data-size field.
+    if not math.isfinite(duration) or not 0 < duration < (2**32 - 4096) / 176400 - 1.2:
+        raise ValueError("duration must be positive, finite, and fit a PCM16 RIFF WAV")
+    if duration < end:
+        raise ValueError("duration must cover the end of the last event")
+    rows.sort(key=lambda row: row[0])
+    with open(dst, "w", encoding="utf-8") as fh:
+        fh.write("# brahma pattern score v1\n")
+        for row in rows:
+            fh.write(" ".join(format(value, ".17g") for value in row) + "\n")
+except (OSError, ValueError, TypeError, KeyError) as error:
+    sys.stderr.write(f"render-pattern: invalid input: {error}\n")
     sys.exit(2)
-
-rows.sort(key=lambda r: r[0])
-with open(dst, "w", encoding="utf-8") as fh:
-    fh.write("# brahma pattern score v1\n")
-    for t, note, vel, dur in rows:
-        fh.write(f"{t:.4f} {note:g} {vel:.4f} {dur:.4f}\n")
-
-end = max(t + d for t, _, _, d in rows)
-PY
-
-# First line of stdout is "<event_count> <last_event_end>"; also tail the file so the
-# numbers come from the score actually written, not from a parallel computation.
-n_events="$(grep -vc '^#' "$score" || true)"
-end_time="$(python3 - "$score" <<'PY'
-import sys
-rows = [l.split() for l in open(sys.argv[1]) if not l.startswith("#") and l.strip()]
-print(f"{max(float(r[0]) + float(r[3]) for r in rows):.4f}")
+print(f"{len(rows)} {duration:.17g} {math.ceil(duration * 4 + 60)}")
 PY
 )"
-
-if [ -z "$DUR" ]; then
-  DUR="$(python3 -c "print(max(2.0, $end_time + 1.5))")"
-fi
+read -r n_events DUR limit <<< "$metadata"
 
 # --- write and run the sclang driver -----------------------------------------
+# Do not interpolate paths or numbers into SC source. Score.recordNRT itself
+# builds a shell command, so its output/OSC filenames are fixed relative names
+# inside the private staging directory; paths remain literal filesystem data.
+export BRAHMA_RENDER_SCSYNTH="$SCSYNTH" BRAHMA_RENDERER="$RENDERER"
+export BRAHMA_RENDER_INPUT="$score" BRAHMA_RENDER_OUTPUT="render.wav"
+export BRAHMA_RENDER_DURATION="$DUR"
 driver="$work/driver.scd"
-cat > "$driver" <<SCD
-Server.program = "$SCSYNTH";
-"$RENDERER".load;
-~nrt_renderer.renderPattern("$score", "$OUT", ${DUR}.asFloat, true);
+cat > "$driver" <<'SCD'
+(
+try {
+    var renderer;
+    Server.program = "BRAHMA_RENDER_SCSYNTH".getenv;
+    Score.program = Server.program.shellQuote;
+    renderer = File.readAllString("BRAHMA_RENDERER".getenv).compile;
+    if(renderer.isNil) { Error("NRT renderer failed to compile").throw };
+    renderer.value;
+    ~nrt_renderer.renderPattern("BRAHMA_RENDER_INPUT".getenv,
+        "BRAHMA_RENDER_OUTPUT".getenv, "BRAHMA_RENDER_DURATION".getenv.asFloat, true);
+} { |error|
+    error.reportError;
+    1.exit;
+};
+)
 SCD
 
 echo "render-pattern: sclang=$SCLANG" >&2
 echo "render-pattern: ${n_events} events, rendering ${DUR}s -> $OUT" >&2
 
 timeout_bin="$(command -v timeout || command -v gtimeout || true)"
-limit=$(( ${DUR%.*} * 4 + 60 ))
+cd -- "$work"
+driver="driver.scd"
+if [ "$(uname -s)" = "Linux" ]; then
+  export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
+fi
+status=0
 if [ -n "$timeout_bin" ]; then
-  "$timeout_bin" "$limit" "$SCLANG" "$driver" || true
+  timeout_args=(--kill-after=5)
+  if [ "${BRAHMA_SUPERVISED_PROCESS_GROUP:-0}" = "1" ]; then
+    # The gateway owns this process group and its timeout. Keep descendants in
+    # that group so cancellation reaches sclang, scsynth and the watchdog.
+    timeout_args=(--foreground "${timeout_args[@]}")
+  fi
+  "$timeout_bin" "${timeout_args[@]}" "$limit" "$SCLANG" -D -u 0 "$driver" || status=$?
 else
-  "$SCLANG" "$driver" &
-  pid=$!
-  ( sleep "$limit"; kill "$pid" 2>/dev/null || true ) & watcher=$!
-  wait "$pid" 2>/dev/null || true
-  kill "$watcher" 2>/dev/null || true
+  python3 - "$limit" "$SCLANG" "$driver" <<'PY' || status=$?
+import os, signal, subprocess, sys
+own_group = os.environ.get("BRAHMA_SUPERVISED_PROCESS_GROUP") != "1"
+child = subprocess.Popen([sys.argv[2], "-D", "-u", "0", sys.argv[3]],
+                         start_new_session=own_group)
+try:
+    status = child.wait(timeout=float(sys.argv[1]))
+except subprocess.TimeoutExpired:
+    if own_group:
+        os.killpg(child.pid, signal.SIGTERM)
+    else:
+        child.terminate()
+    try:
+        child.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        child.kill()
+        child.wait()
+    status = 124
+finally:
+    if own_group:
+        try:
+            os.killpg(child.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+sys.exit(status if status >= 0 else 128 - status)
+PY
 fi
 
-rm -f "$OUT.osc" 2>/dev/null || true
-if [ -s "$OUT" ]; then
-  dur_out="$(python3 - "$OUT" <<'PY'
-import sys, wave
-try:
-    with wave.open(sys.argv[1], "rb") as w:
-        print(f"{w.getnframes() / w.getframerate():.2f}")
-except Exception:
-    print("?")
-PY
-)"
-  echo "render-pattern: OK -> $OUT (${dur_out}s)"
-else
-  echo "render-pattern: FAILED — no output produced (see sclang output above)" >&2
-  exit 4
+if [ "$status" -ne 0 ]; then
+  echo "render-pattern: FAILED — renderer exited with status $status" >&2
+  exit "$status"
 fi
+
+python3 - "$work/render.wav" "$OUT" "$DUR" <<'PY'
+import os, sys, wave
+try:
+    with wave.open(sys.argv[1], "rb") as audio:
+        if (audio.getnchannels(), audio.getframerate(), audio.getsampwidth(), audio.getcomptype()) != (2, 44100, 2, "NONE"):
+            raise ValueError("expected stereo 44.1kHz PCM16 WAV")
+        frames = audio.getnframes()
+        if frames <= 0 or abs(frames - (float(sys.argv[3]) + 1.2) * 44100) > 128:
+            raise ValueError("render duration does not match the requested duration plus 1.2s tail")
+        count = 0
+        while chunk := audio.readframes(65536):
+            count += len(chunk)
+        if count != frames * 4:
+            raise ValueError("truncated WAV sample data")
+    os.replace(sys.argv[1], sys.argv[2])
+except (OSError, ValueError, EOFError, wave.Error) as error:
+    sys.exit(f"render-pattern: FAILED — {error}")
+print(f"render-pattern: OK -> {sys.argv[2]} ({frames / 44100:.3f}s)")
+PY

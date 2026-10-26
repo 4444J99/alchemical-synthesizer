@@ -3,8 +3,8 @@
 **Kind:** tool (a repeatable pipeline). **Lane:** `feat(forge):`.
 Registered in [`../ORGANS.md`](../ORGANS.md).
 
-The repeatable spine that turns any audio into a shippable track + matching
-visual, so a track ships a couple times a week and each one pushes the sampler:
+The pipeline for turning source audio into rendered audio, a matching visual and
+an export package:
 
 ```
 ingest ─▶ rip (stems) ─▶ forge (recombine) ─▶ render (NRT through Brahma) ─▶ visual ─▶ package
@@ -20,14 +20,15 @@ The pipeline tools and its runtime output both live here (`forge/stems/`,
 | `forge/ingest.sh` | any song → scsynth-ready WAV (ffmpeg) |
 | `forge/rip.py` | song → stems (demucs → ffmpeg fallback cascade) |
 | `forge/forge.sh` · `forge/stemforge.py` | recombine stolen stems into a recipe + provenance |
-| `forge/bounce.sh` | headless NRT bounce (`brahma/sc/13_nrt_renderer.scd`) |
-| `forge/tune.py` · `forge/validate_audio.py` | tuning + audio validation |
+| `forge/bounce.sh` · `forge/render-pattern.sh` | headless NRT audio and event rendering through Brahma |
+| `forge/validate_audio.py` | audio validation |
 | `forge/analyze_audio.py` · `forge/render_video.mjs` · `forge/videotrack.sh` | audio-reactive visual export (`brahma/web`) |
 | `forge/package.sh` | social-ready bundle (video + cover) |
 | `forge/setup-demucs.sh` · `forge/setup-video.sh` | one-time provisioning |
 
 Makefile targets: `ingest rip forge render track stemtrack demucs videotrack
-video package tune validate`.
+video package validate`. Station capture (`make tune`, `make stations`) belongs to
+[`aether/tools/tune.py`](../aether/tools/tune.py).
 
 ## Boundary
 
@@ -36,22 +37,19 @@ video package tune validate`.
   track to the radio is Aether's job (`make submit`).
 - `tools/build_release.sh` is **not** Forge — it is repo-level release infra
   (CI-coupled). Leave it in `tools/`.
+- AETHER can call Forge/Brahma NRT on a local host with SuperCollider. Its current
+  [container](../aether/deploy/Dockerfile) copies only AETHER source and uses
+  donor/tone rendering; it does not bundle Forge or SuperCollider.
 
-## Consolidation — DONE
+## Consolidation and acceptance
 
-All 13 tools moved `tools/ → forge/` via `git mv`; every `tools/X` reference was
-repointed in lockstep across the `Makefile`, `ROADMAP.md`, `product/`, the moved
-scripts' own sibling calls, and the smoke harness — verified with `make -n` and
-`make smoke`. Because each script computes repo-root as *parent of its own dir*
-(`dirname(dirname(__file__))` / `$(dirname "$0")/..`), and `tools/` and `forge/`
-are both one level under root, the base-path logic needed **zero** changes.
+Forge source consolidation is complete. The later AETHER move transferred
+`tune.py` into `aether/tools/`; no repeat move is needed. New Forge features land
+under `forge/` and shared acceptance harnesses remain in `tools/`.
 
-One cross-lane wrinkle, handled: Aether's `broadcast.sh` reuses `forge/tune.py`
-(submission capture) and `forge/bounce.sh` (SC-gated NRT tier) at runtime, and
-the container's `COPY tools/` was wholesale — so `deploy/aether/Dockerfile` now
-also `COPY`s those two into `/app/forge/`. Both calls degrade gracefully if
-absent and the 24/7 container is not yet deployed, so no live-radio risk; it just
-keeps the eventual gated deploy consistent. This is a legitimate Aether → Forge
-dependency (the arrow only forbids Forge → Aether).
-
-No remaining lane-hygiene work. Future Forge features land under `forge/`.
+On 2026-10-25, the wrapper/native suite passed **11/11** with
+`BRAHMA_FORGE_NATIVE=1 python3 tools/test_forge.py`. It checks argument and path
+handling, render failures/timeouts, and publication of the expected valid WAV.
+These checks do not establish the entire ingest-to-video pipeline, listening
+acceptance, or a deployed radio. See the current acceptance section in
+[ROADMAP.md](../ROADMAP.md#current-acceptance--2026-10-25).

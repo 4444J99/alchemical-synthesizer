@@ -93,16 +93,26 @@ async function main() {
     connected: false,
     role: null,
     engine: null,
-    running: null
+    running: null,
+    runningTab: null,
+    pendingRun: null,
+    evaluating: null,
+    dirty: false,
+    disconnectedPatterns: new Set()
   };
+  const sessionId = crypto.randomUUID().slice(0, 8);
+  let runSequence = 0;
 
   const editor = createEditor({
     mount: $("#editor"),
     tabs: STARTER_TABS,
-    onChange: () => {
-      // Editing invalidates the running buffer's identity; the server holds the
-      // authority, but the UI should stop claiming a pattern is current.
-      if (state.running) setRunning(null);
+    onChange: (id) => {
+      // The edited document is a new draft. The previous performance still
+      // owns its instance and must remain stoppable until Run or Stop.
+      if (state.runningTab === id) {
+        state.dirty = true;
+        renderRunning();
+      }
     }
   });
 
@@ -110,11 +120,10 @@ async function main() {
     send: (frame) => socket.send(frame),
     onError: (err) => {
       ui.line("error", `evaluate: ${err.message}`);
-      state.running = null;
-      setRunning(null);
+      stopPlayback();
     },
     onState: ({ started }) => {
-      if (!started) state.running = null;
+      if (!started && state.running) stopPlayback();
     }
   });
 
@@ -122,11 +131,16 @@ async function main() {
     onOpen: () => {
       state.connected = true;
       ui.line("info", "socket connected");
+      for (const id of state.disconnectedPatterns) socket.send({ type: "stop", id });
+      state.disconnectedPatterns.clear();
       socket.send({ type: "status" });
       refreshStatus();
     },
     onClose: () => {
       state.connected = false;
+      const id = state.running || state.pendingRun?.id;
+      if (id) state.disconnectedPatterns.add(id);
+      stopPlayback({ notifyServer: false });
       ui.line("warn", "socket closed — retrying");
       refreshStatus();
     },
@@ -135,13 +149,31 @@ async function main() {
         state.role = frame.role;
       } else if (frame.type === "ack") {
         ui.line("info", `${frame.action}${frame.id ? " " + frame.id : ""} ok`);
-        if (frame.action === "run") setRunning(frame.id);
-        if (frame.action === "stop" || frame.action === "stop_all") setRunning(null);
+        if (frame.action === "run" && state.pendingRun?.id === frame.id) {
+          const request = state.pendingRun;
+          state.pendingRun = null;
+          state.evaluating = request.id;
+          setRunning(request.id, request.tab);
+          strudel.evaluate(request.code, request).catch((err) => {
+            if (state.running === request.id) {
+              ui.line("error", `evaluate: ${err.message}`);
+              stopPlayback();
+            }
+          }).finally(() => { if (state.evaluating === request.id) state.evaluating = null; });
+        }
+        // Stop changes local ownership immediately. Its delayed acknowledgement
+        // must never clear a newer run, even if both came from the same tab.
       } else if (frame.type === "status") {
         state.role = frame.role || state.role;
         state.engine = frame.engine;
       } else if (frame.type === "error") {
         ui.line("error", `${frame.code}: ${frame.message}`);
+        // A refused registration cannot start the scheduler.
+        if (state.pendingRun && ["bad_id", "duplicate_id", "too_many_patterns", "forbidden"].includes(frame.code)) {
+          state.pendingRun = null;
+          strudel.stop();
+          setRunning(null);
+        }
       } else if (frame.address === "/brahma/live/error") {
         ui.line("error", `engine: ${frame.args?.[0]} ${frame.args?.[1] ?? ""}`);
       } else if (frame.address === "/brahma/live/panic/done") {
@@ -151,10 +183,17 @@ async function main() {
     }
   });
 
-  function setRunning(id) {
+  function setRunning(id, tab = null) {
     state.running = id;
+    state.runningTab = tab;
+    state.dirty = false;
+    renderRunning();
+  }
+
+  function renderRunning() {
+    const id = state.running;
     const badge = $("#running");
-    if (badge) badge.textContent = id ? `running: ${id}` : "stopped";
+    if (badge) badge.textContent = id ? `running: ${state.runningTab || id}${state.dirty ? " (edited; Run to apply)" : ""}` : "stopped";
     if (badge) badge.className = id ? "badge badge-live" : "badge";
   }
 
@@ -170,30 +209,41 @@ async function main() {
 
   function run() {
     if (!requireHuman("run")) return;
-    const id = editor.active;
-    const code = editor.getText(id);
+    if (!state.connected) { ui.line("error", "Wait for the gateway connection before running."); return; }
+    if (state.pendingRun || state.evaluating) { ui.line("info", "The previous run is still being acknowledged or evaluated."); return; }
+    const tab = editor.active;
+    const code = editor.getText(tab);
     if (!code.trim()) {
       ui.line("warn", "nothing to run");
       return;
     }
     const engine = $("#engine")?.value || DEFAULT_ENGINE;
-    socket.send({ type: "run", id, engine, source: code });
+    stopPlayback();
+    const id = `${tab}.${sessionId}.${++runSequence}`;
+    state.pendingRun = { id, tab, engine, code };
+    socket.send({ type: "run", id, engine, instance: id, source: code });
     ui.line("info", `run ${id} → ${engine}`);
-    strudel.evaluate(code, { id, engine });
+  }
+
+  function stopPlayback({ notifyServer = true } = {}) {
+    const id = state.running || state.pendingRun?.id;
+    state.pendingRun = null;
+    state.evaluating = null;
+    setRunning(null);
+    strudel.stop();
+    if (id && notifyServer && state.connected) socket.send({ type: "stop", id });
   }
 
   function stopOne() {
     if (!requireHuman("stop")) return;
-    if (state.running) socket.send({ type: "stop", id: state.running });
-    strudel.stop();
-    setRunning(null);
+    stopPlayback();
   }
 
   function panic() {
     if (!requireHuman("panic")) return;
     socket.send({ type: "stop_all" });
-    strudel.stop();
-    setRunning(null);
+    stopPlayback({ notifyServer: false });
+    state.disconnectedPatterns.clear();
     ui.line("warn", "panic sent");
   }
 

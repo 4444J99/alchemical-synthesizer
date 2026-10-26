@@ -47,9 +47,13 @@ INTERVAL="${AETHER_SYNC_INTERVAL:-5}"
 DEST="s3://${R2_BUCKET}/${PREFIX}"
 
 sync_once() {
-  # --size-only avoids re-uploading immutable .ts; the playlist is small + always synced.
+  # Publish listener artifacts only. Never upload the intake queue, consumed
+  # records, or generator state. Previously uploaded private keys require an
+  # operator audit; excluded keys are deliberately not deleted by this sync.
   aws s3 sync "$DIR" "$DEST" --endpoint-url "$R2_ENDPOINT" \
-      --no-progress --exact-timestamps --delete >/dev/null 2>&1 \
+      --no-progress --exact-timestamps --delete --no-follow-symlinks \
+      --exclude '*' --include 'stream.m3u8' --include 'seg_*.ts' \
+      --include 'telemetry.json' --include 'lineage.json' --exclude '*/*' >/dev/null 2>&1 \
     || echo "r2_sync: a sync pass failed (will retry)" >&2
 }
 

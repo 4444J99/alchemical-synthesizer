@@ -6,6 +6,7 @@
 (
 ~visual_cortex = (
     target: NetAddr("127.0.0.1", 57122), // Node.js server
+    demoMode: false,
 
     // Broadcast an update for an entity
     broadcastUpdate: { |self, entityId, type, coherence, entropy|
@@ -15,11 +16,10 @@
     // Broadcast Golem-specific state at 10Hz
     broadcastGolem: { |self|
         if(~golem.notNil and: { ~golem_seq.notNil }) {
-            // Organism-level update
-            var coherence = ~metric_collector.measureCoherence(nil);
-            var entropy = ~metric_collector.measureEntropy(nil);
-            self.target.sendMsg("/golem/organism/update",
-                ~golem[\entityId], "Golem", coherence, entropy);
+            // This controller has no captured audio buffer. Do not turn
+            // absent measurements into numeric organism telemetry.
+            self.target.sendMsg("/brahma/organism/measurement/status",
+                ~golem[\entityId], "Golem", "unavailable", "no_audio_capture");
 
             // Sequencer state
             self.target.sendMsg("/golem/seq/state",
@@ -64,9 +64,11 @@
     startStream: { |self|
         Tdef(\viz_stream, {
             loop {
-                // Existing organism broadcasts
-                self.broadcastUpdate(1001, "Relinquished", rrand(0.4, 0.9), rrand(1.0, 5.0));
-                self.broadcastUpdate(1002, "Proteus", rrand(0.8, 1.0), rrand(0.1, 2.0));
+                // Synthetic data is opt-in and labeled in the organism type.
+                if(self.demoMode) {
+                    self.broadcastUpdate(1001, "DEMO Relinquished", rrand(0.4, 0.9), rrand(1.0, 5.0));
+                    self.broadcastUpdate(1002, "DEMO Proteus", rrand(0.8, 1.0), rrand(0.1, 2.0));
+                };
 
                 // Golem broadcast
                 self.broadcastGolem;
@@ -74,7 +76,11 @@
                 0.1.wait; // 10Hz update rate
             }
         }).play;
-        "--- VISUAL CORTEX STREAM ACTIVE ---".postln;
+        if(self.demoMode) {
+            "--- VISUAL CORTEX STREAM ACTIVE (DEMO: synthetic organism metrics) ---".postln;
+        } {
+            "--- VISUAL CORTEX STREAM ACTIVE (organism measurements unavailable: no live capture) ---".postln;
+        };
     },
 
     stopStream: {
@@ -83,6 +89,6 @@
     }
 );
 
-// Start by default for demo purposes
+// Stream transport/track state. Set demoMode=true explicitly for synthetic visuals.
 ~visual_cortex.startStream;
 )

@@ -17,12 +17,22 @@
     if(~engine_voices[instanceName.asSymbol].isNil) {
         ~engine_voices[instanceName.asSymbol] = (
             voices: IdentityDictionary.new, // note -> Synth
+            activeNodes: List.new, // includes release tails, in creation order
             params: IdentityDictionary.new, // extra params
             outBus: 0,
             engineName: engineName.asSymbol
         );
     };
     ~engine_voices[instanceName.asSymbol];
+};
+
+// Keep release tails reachable until /n_end, so panic can stop every node.
+~engineVoiceFreeAll = { |inst|
+    var count = inst[\activeNodes].size;
+    inst[\activeNodes].do(_.free);
+    inst[\activeNodes] = List.new;
+    inst[\voices] = IdentityDictionary.new;
+    count
 };
 
 // ==========================================
@@ -38,15 +48,24 @@ OSCdef(\engine_noteOn, { |msg|
     var spec = ~module_registry.getSpec(engineName);
 
     if(spec.notNil) {
-        var freq, args, i, synth;
+        var freq, args, i, synth, previous;
 
-        // Enforce max 16 voices
-        if(inst[\voices].size >= 16) {
-            var oldestKey = inst[\voices].keys.asArray.sort.first;
-            if(oldestKey.notNil) {
-                inst[\voices][oldestKey].set(\gate, 0);
-                inst[\voices].removeAt(oldestKey);
+        // Retriggering a held note releases its previous node before replacing
+        // the lookup. Its release tail remains in activeNodes until /n_end.
+        previous = inst[\voices][note];
+        if(previous.notNil) {
+            previous.set(\gate, 0);
+            inst[\voices].removeAt(note);
+        };
+
+        // Bound all allocated voices, including release tails. Steal the
+        // oldest node, not the lowest MIDI note.
+        if(inst[\activeNodes].size >= 16) {
+            var oldest = inst[\activeNodes].removeAt(0);
+            inst[\voices].keys.asArray.do { |key|
+                if(inst[\voices][key] === oldest) { inst[\voices].removeAt(key) };
             };
+            oldest.free;
         };
 
         // Convert MIDI note to frequency using microtonal system if available
@@ -73,6 +92,11 @@ OSCdef(\engine_noteOn, { |msg|
 
         synth = Synth(spec[\synthDef], args, spec[\group], \addToTail);
         inst[\voices][note] = synth;
+        inst[\activeNodes].add(synth);
+        synth.onFree {
+            inst[\activeNodes].remove(synth);
+            if(inst[\voices][note] === synth) { inst[\voices].removeAt(note) };
+        };
     } {
         "ENGINE_VOICES: Unknown engine '%'".format(engineName).postln;
     };
@@ -142,8 +166,7 @@ OSCdef(\engine_freeAll, { |msg|
     var inst = ~engine_voices[instanceName];
 
     if(inst.notNil) {
-        inst[\voices].do({ |synth| synth.free });
-        inst[\voices] = IdentityDictionary.new;
+        ~engineVoiceFreeAll.(inst);
         "ENGINE_VOICES: Freed all voices for '%'".format(instanceName).postln;
     };
 }, "/brahma/engine/freeAll");

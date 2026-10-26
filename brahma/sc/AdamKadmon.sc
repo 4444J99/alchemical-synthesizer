@@ -10,7 +10,7 @@
   - validateTraitMap(map, contractName) validates a trait map against a named contract.
   - validateTraitMapWithProvenance(map, contractName, provenance, confidence)
       validates and records where the trait map came from
-      (provenance: \measured / \proxy / \manual; confidence: 0..1).
+      (provenance: \measured / \proxy / \manual; confidence: 0..1 or nil when unknown).
   - normalize(map, contractName) normalizes a trait map using a named contract's ranges.
   - contractNames() returns the list of loaded contract names.
   - provenanceLog returns the full validation provenance log.
@@ -18,7 +18,7 @@
 
 AdamKadmon {
     classvar <ontologyProfile = 'canonical_v1';
-    classvar <strictness = 0.85;        // gate threshold: traits below this fail validation
+    classvar <strictness = 0.85;        // default confidence threshold; schema strictness is metadata
     classvar <contracts;                // name -> contract dict
     classvar provenanceLog; // list of {time, contract, valid, provenance, confidence, missingKeys}
 
@@ -37,20 +37,25 @@ AdamKadmon {
     *defaultContract {
         ^(name: \canonical_v1,
             requiredKeys: [\spectral_profile, \temporal_topology, \modulation_graph, \performance_response],
-            ranges: ());
+            ranges: (spectral_profile: (min: 0.0, max: 1.0)), strictness: strictness);
     }
 
-    // --- Validate a trait map against a named contract (manual provenance, full confidence) ---
+    // --- Validate a trait map using its declared evidence, without inventing confidence ---
     *validateTraitMap { |map, contractName|
-        ^this.validateCore(map, this.contractFor(contractName), \manual, 1.0);
+        ^this.validateTraitMapWithProvenance(map, contractName);
     }
 
     // --- Validate with provenance: records where the trait map came from ---
     //   provenance: \measured (real DSP / FluCoMa), \proxy (derived estimate), \manual (human-set)
-    //   confidence: 0..1, how much we trust this map
+    //   confidence: supplied 0..1 or nil (unknown) for manual/proxy traits.
+    // Omitted arguments may use fields already in the map, never a fabricated
+    // default. Measured provenance requires real confidence and metric evidence.
     *validateTraitMapWithProvenance { |map, contractName, provenance, confidence|
-        provenance = if (provenance.notNil) { provenance } { \manual };
-        confidence = if (confidence.notNil) { confidence } { 1.0 };
+        if(map.isKindOf(Dictionary)) {
+            provenance = provenance ? map[\provenance];
+            confidence = confidence ? map[\confidence];
+        };
+        provenance = provenance ? \manual;
         ^this.validateCore(map, this.contractFor(contractName), provenance, confidence);
     }
 
@@ -61,18 +66,24 @@ AdamKadmon {
         if(map.isKindOf(Dictionary) and: { contract.notNil }) {
             contract[\requiredKeys].do { |key| if(map.includesKey(key).not) { missingKeys.add(key) } };
         };
-        if(BrahmaContracts.finiteNumber(confidence).not) { valid = false } {
-            valid = valid and: { confidence.inclusivelyBetween(0, 1) };
+        if(confidence.notNil) {
+            valid = valid and: { BrahmaContracts.finiteNumber(confidence) and: {
+                confidence.inclusivelyBetween(0, 1)
+            } };
         };
         if([\measured, \proxy, \manual].includes(provenance).not) { valid = false };
         if(provenance == \measured) {
-            valid = valid and: { BrahmaContracts.validMeasurement(map, strictness) and: {
-                (confidence - map[\confidence]).abs < 1e-6
+            valid = valid and: { BrahmaContracts.finiteNumber(confidence) and: {
+                BrahmaContracts.validMeasurement(map,
+                    contract[\provenance_min_confidence] ? strictness) and: {
+                    (confidence - map[\confidence]).abs < 1e-6
+                }
             } };
         };
         provenanceLog.add((time: Date.getDate,
             contract: if(contract.isNil) { "none" } { contract[\name] },
-            valid: valid, provenance: provenance, confidence: confidence, missingKeys: missingKeys.asArray));
+            valid: valid, provenance: provenance, confidence: confidence,
+            confidenceAvailable: BrahmaContracts.finiteNumber(confidence), missingKeys: missingKeys.asArray));
         if(provenanceLog.size > 1000) { provenanceLog.removeAt(0) };
         ^valid;
     }
@@ -107,7 +118,7 @@ AdamKadmon {
     }
 
     *contractNames {
-        ^contracts.keys.asArray;
+        ^([\canonical_v1] ++ contracts.keys.asArray).sort;
     }
 
     *provenanceLog {
@@ -118,17 +129,20 @@ AdamKadmon {
         provenanceLog = List.new;
     }
 
-    *validateMeasurement { |map| ^BrahmaContracts.validMeasurement(map, strictness) }
+    *validateMeasurement { |map, contractName|
+        var contract = this.contractFor(contractName);
+        if(contract.isNil) { ^false };
+        ^BrahmaContracts.validMeasurement(map, contract[\provenance_min_confidence] ? strictness);
+    }
 
     *checkPermission { |srcId, dstId, mode|
         // mode: read, write, infect
-        // Simple mock permission logic
-        // In full implementation, this would check the Registry contracts
+        // Existing placeholder, not an authentication/authorization boundary.
         ^true;
     }
 
     *issueCapabilityToken { |entityId, capability|
-        // Correlation identifier only; this is not a signed authorization token.
-        ^[entityId, capability, Date.getDate.rawSeconds].asCompileString.hash;
+        // A hash is not a signed capability. No signing backend is configured.
+        ^Error("AdamKadmon capability signing is unavailable").throw;
     }
 }

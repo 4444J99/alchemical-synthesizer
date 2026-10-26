@@ -130,7 +130,7 @@ if command -v node >/dev/null 2>&1; then
     SMOKE_AGENT_TOKEN="smoke-agent-token-0001"
     # exec, so $! is node's own PID rather than a subshell: the teardown below has
     # to actually release the port, or the next run fails with EADDRINUSE.
-    ( cd brahma/web && exec env PORT=$PORT BRAHMA_AGENT_TOKEN="$SMOKE_AGENT_TOKEN" stdbuf -oL -eL node server.js >/tmp/brahma_web.log 2>&1 ) &
+    ( cd brahma/web && exec env PORT=$PORT BRAHMA_AGENT_TOKEN="$SMOKE_AGENT_TOKEN" node server.js >/tmp/brahma_web.log 2>&1 ) &
     WEB_PID=$!
     # curl -q ignores ~/.curlrc. A user config carrying --http2 makes curl send an
     # h2c Upgrade header, which this server answers 400 — a harness must not depend

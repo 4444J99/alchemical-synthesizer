@@ -56,6 +56,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));
 app.use("/api/substrates", express.static(path.join(__dirname, "..", "substrate")));
+app.use("/aether", express.static(path.join(__dirname, "..", "..", "aether", "web", "listener")));
 
 // Shared live-pattern registry. One gateway, one engine, one state.
 const liveSessions = createLiveSessions();
@@ -241,7 +242,7 @@ app.post("/api/agent/propose", async (req, res) => {
     const result = await agent.propose({
         provider: provider || "mock",
         prompt: prompt || "",
-        events: Array.isArray(events) ? events : undefined,
+        events,
         summary,
         duration,
         proposedBy: role
@@ -271,7 +272,7 @@ app.post("/api/agent/approvals/:id/run", (req, res) => {
 
 app.post("/api/agent/stop", (req, res) => {
     if (!agentGuard(req, res, { requireHuman: true })) return;
-    const result = agent.stop();
+    const result = agent.stop({ actor: "human" });
     return agentReply(res, result);
 });
 
@@ -497,6 +498,7 @@ wss.on("connection", (ws, req) => {
             // handing it an already-parsed object makes it re-parse "[object Object]"
             // and reject every legitimate frame as bad_json.
             session.handle(message.toString());
+            ws.role = role.current;
         } catch (err) {
             console.warn(`[ws] bad frame from client: ${err.message}`);
         }
@@ -511,6 +513,10 @@ wss.on("connection", (ws, req) => {
 });
 
 udpPort.on("message", (oscMsg) => {
+    if (oscMsg.address === "/brahma/live/pong") {
+        liveSessions.recordPong(oscMsg.args[0]?.value, oscMsg.args[1]?.value);
+    }
+
     // Module registry broadcasts from SC
     if (oscMsg.address === "/brahma/registry/module") {
         const name = oscMsg.args[0]?.value;

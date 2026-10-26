@@ -1,0 +1,1277 @@
+{
+  "snapshot_started_at_utc": "2026-10-26T17:50:37.305382+00:00",
+  "analysis_recorded_at_utc": "2026-10-26T17:54:56.618797+00:00",
+  "repository": "4444J99/alchemical-synthesizer",
+  "prior_integrated_revision": "24651b0693808bd91836ab2013ad1f5f357a1d41",
+  "main_sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+  "main_protected_flag": false,
+  "main_reachable_commits": 137,
+  "new_main_commits": 28,
+  "new_main_changed_files": 48,
+  "pull_request_counts": {
+    "open": 6,
+    "merged": 72,
+    "closed": 15
+  },
+  "pull_request_total": 93,
+  "issue_counts": {
+    "open": 3,
+    "closed": 6
+  },
+  "issue_total": 9,
+  "open_issues": [
+    {
+      "number": 96,
+      "title": "Foundry reports live renders without an engine or completion receipt",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/issues/96"
+    },
+    {
+      "number": 95,
+      "title": "Complete song sampling through the existing Brahma instrument",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/issues/95"
+    },
+    {
+      "number": 93,
+      "title": "Complete verification repair: nonblocking provider probes and release artifact boundaries",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/issues/93"
+    }
+  ],
+  "new_main_inventory": [
+    {
+      "sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "committed_at": "2026-10-25T11:51:26-04:00",
+      "subject": "fix: unblock web startup and verify clean release artifacts (#94)"
+    },
+    {
+      "sha": "ab8b569a7548f17b1e8d671ae4244856e2ef7d63",
+      "committed_at": "2026-10-25T10:52:36-04:00",
+      "subject": "fix(release): ship the workbench bundle and refuse to pack without it (#92)"
+    },
+    {
+      "sha": "b028fcfee13a211b64739f1b7b912a97c3989ea0",
+      "committed_at": "2026-10-25T10:19:02-04:00",
+      "subject": "docs: polish README install + AETHER path (green progress step on CI Minimal success) (#83)"
+    },
+    {
+      "sha": "12d4631256e3a0cd2ae6500fb34766b6e8d80d17",
+      "committed_at": "2026-10-25T10:17:18-04:00",
+      "subject": "fix(smoke): keep the Visual Cortex alive until every check, and explain a failed boot (#91)"
+    },
+    {
+      "sha": "1b3d1e2e65c2abe6b60d653de751c2c2baffc8cf",
+      "committed_at": "2026-10-25T09:47:43-04:00",
+      "subject": "docs: record CI Minimal success (run 40199157434) in roadmap"
+    },
+    {
+      "sha": "def46fd200b63ef87093c1d7bb7b730c83782d79",
+      "committed_at": "2026-10-25T09:47:38-04:00",
+      "subject": "docs: update landing page receipt for CI Minimal success (run 40199185265, head 2298e05)"
+    },
+    {
+      "sha": "675c9fadcd2c8b6b5677230986d604748d6bc71f",
+      "committed_at": "2026-10-25T09:47:21-04:00",
+      "subject": "fix(smoke): restore Python boolean operators in JSON validators (#90)"
+    },
+    {
+      "sha": "2298e05cdc62894a3923c9ca51780b922b98d0e2",
+      "committed_at": "2026-10-25T09:46:52-04:00",
+      "subject": "docs: polish GitHub Pages landing page receipt (green progress step on pages deploy success)"
+    },
+    {
+      "sha": "f6715729ec63e8c53f6e7f1593dcee06de75ac53",
+      "committed_at": "2026-10-25T09:46:29-04:00",
+      "subject": "docs: update landing page receipt for CI Minimal success (run 40199057116, head e2d8232)"
+    },
+    {
+      "sha": "23c0223ba2c429eb917a41bf93218526a95e3218",
+      "committed_at": "2026-10-25T09:46:15-04:00",
+      "subject": "docs: update landing page receipt for CI Minimal success (run 40198968866, head 910858a)"
+    },
+    {
+      "sha": "7a387dabe474b3995d7283fb2702bdbf2b49633d",
+      "committed_at": "2026-10-25T09:45:33-04:00",
+      "subject": "docs: update landing page receipt for CI Minimal success (run 40198900646, head 6543e0b)"
+    },
+    {
+      "sha": "e2d823264296b1d08170ef3de045feb5b1411a40",
+      "committed_at": "2026-10-25T09:45:12-04:00",
+      "subject": "fix(visual-cortex): restore truncated server and repair frame handling (#89)"
+    },
+    {
+      "sha": "910858a490673c9e798084ca247bcb9d547f4563",
+      "committed_at": "2026-10-25T09:44:05-04:00",
+      "subject": "ci: restore full server.js with early boot diagnostics (fix truncated file causing immediate exit)"
+    },
+    {
+      "sha": "4730c0ae445716fbbfa414ff7ca2ddca9957a3c3",
+      "committed_at": "2026-10-25T09:44:00-04:00",
+      "subject": "docs: polish GitHub Pages landing page receipt for concurrent pages deploy success (green progress step)"
+    },
+    {
+      "sha": "6543e0b01d546a0c75a5036e196bed19f18c2ced",
+      "committed_at": "2026-10-25T09:43:10-04:00",
+      "subject": "docs: update landing page receipt for CI Minimal success (run 40198594122)"
+    },
+    {
+      "sha": "f23cbe7a7e44974bad94081f89fae4336b5e2ad2",
+      "committed_at": "2026-10-25T09:40:15-04:00",
+      "subject": "ci: line-buffer server output in smoke so Visual Cortex boot failures surface the log"
+    },
+    {
+      "sha": "deecbc22a3b60814b475d34344c0604a6cf347a9",
+      "committed_at": "2026-10-25T09:39:14-04:00",
+      "subject": "ci: line-buffer server output in smoke so Visual Cortex boot failures surface the log"
+    },
+    {
+      "sha": "0b244d6d03c99400f8a15f0dbc282760f6ce30cc",
+      "committed_at": "2026-10-25T09:38:59-04:00",
+      "subject": "ci: complete server.js with full diagnostic handlers (fix truncated prior commit)"
+    },
+    {
+      "sha": "b10a816ecf074818eed7dd828a08041e297cadd4",
+      "committed_at": "2026-10-25T09:38:42-04:00",
+      "subject": "ci: prepend boot diagnostic and early uncaughtException handlers"
+    },
+    {
+      "sha": "a233999c59abb09649293128b9e86e0af346c062",
+      "committed_at": "2026-10-25T09:25:10-04:00",
+      "subject": "ci: restore server.js with uncaughtException handlers (correct content)"
+    },
+    {
+      "sha": "88ab801721a02de930d4935a00938c1a128c3b9b",
+      "committed_at": "2026-10-25T09:23:53-04:00",
+      "subject": "ci: add uncaughtException/unhandledRejection handlers to surface Visual Cortex boot crashes"
+    },
+    {
+      "sha": "9cd7306f9a74caa8374d1484e2430f42a8f1f484",
+      "committed_at": "2026-10-25T09:22:52-04:00",
+      "subject": "Fix native SuperCollider compilation and sandboxed evaluation (#88)"
+    },
+    {
+      "sha": "3d519290a33f9e78c1dec3bf6f92c3b89d1cdfe7",
+      "committed_at": "2026-10-25T09:08:25-04:00",
+      "subject": "ci: dump brahma_web.log on Visual Cortex boot failure in smoke"
+    },
+    {
+      "sha": "800b4944852cfb3394119543549a2fdc161c0177",
+      "committed_at": "2026-10-25T09:01:22-04:00",
+      "subject": "Add FluCoMa metrics, BrahmaContracts, and native validation tools (#87)"
+    },
+    {
+      "sha": "42ca9437de1da26881cd571b370e58bddc100ffc",
+      "committed_at": "2026-10-25T08:58:52-04:00",
+      "subject": "Fix SuperCollider crash probes and validate native Brahma measurements (#86)"
+    },
+    {
+      "sha": "3699ec0137c1fe0de523ba080bcb0d82d8cb41a1",
+      "committed_at": "2026-10-25T08:36:17-04:00",
+      "subject": "docs: update landing page receipt for CI Minimal success (run 40193607910, head 6740a91)"
+    },
+    {
+      "sha": "6740a91d73792a1c9b0c7ddb41ec1d95dd1afeb3",
+      "committed_at": "2026-10-25T08:33:03-04:00",
+      "subject": "docs: polish GitHub Pages landing page receipt (green progress step on pages deploy success)"
+    },
+    {
+      "sha": "8a497988307ce372e8d17ec77d83bd0a4b75f704",
+      "committed_at": "2026-10-25T08:24:30-04:00",
+      "subject": "feat: launch readiness + measurement foundation + distributed backplane (#82)"
+    }
+  ],
+  "pull_requests_82_and_later": [
+    {
+      "number": 82,
+      "title": "feat: launch readiness + measurement foundation + distributed backplane",
+      "state": "closed",
+      "created_at": "2026-10-25T12:24:21Z",
+      "merged_at": "2026-10-25T12:24:31Z",
+      "closed_at": "2026-10-25T12:24:31Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/82",
+      "head_sha": "dff22d51eedaca21504bcf3ad4a340d4c1049b6c",
+      "head_branch": "feat/launch-readiness-measurement-foundation",
+      "base_sha": "24651b0693808bd91836ab2013ad1f5f357a1d41",
+      "base_branch": "main",
+      "seconds_open_before_merge": 10.0,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-25T12:28:36Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/82#pullrequestreview-5643199567",
+          "after_merge": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T12:24:27Z",
+          "completed_at": "2026-10-25T12:24:27Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:24:24Z",
+          "completed_at": "2026-10-25T12:25:50Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253725050"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:24:27Z",
+          "completed_at": "2026-10-25T12:24:31Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40192958108/job/121167693734"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T12:24:27Z",
+          "completed_at": "2026-10-25T12:24:47Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40192958105/job/121167693709"
+        }
+      ]
+    },
+    {
+      "number": 83,
+      "title": "docs: polish README install + AETHER path (green progress step on CI Minimal success)",
+      "state": "closed",
+      "created_at": "2026-10-25T12:35:20Z",
+      "merged_at": "2026-10-25T14:19:02Z",
+      "closed_at": "2026-10-25T14:19:02Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/83",
+      "head_sha": "872060f4bdc37f6ccb4c6b05e52419bc7840c252",
+      "head_branch": "cursor/readme-install-aether-path-d0da",
+      "base_sha": "6740a91d73792a1c9b0c7ddb41ec1d95dd1afeb3",
+      "base_branch": "main",
+      "seconds_open_before_merge": 6222.0,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-25T12:39:41Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/83#pullrequestreview-5643232752",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T12:35:26Z",
+          "completed_at": "2026-10-25T12:35:26Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T12:35:26Z",
+          "completed_at": "2026-10-25T12:35:46Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40193776175/job/121170131379"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:35:23Z",
+          "completed_at": "2026-10-25T12:36:53Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253727657"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:35:26Z",
+          "completed_at": "2026-10-25T12:35:33Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40193775686/job/121170129274"
+        }
+      ]
+    },
+    {
+      "number": 84,
+      "title": "Fix SuperCollider crash probes and validate native Brahma measurements",
+      "state": "closed",
+      "created_at": "2026-10-25T12:39:45Z",
+      "merged_at": null,
+      "closed_at": "2026-10-25T12:59:45Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/84",
+      "head_sha": "c1c017371dd82be77a3dd60a214fb12b58a2f6ca",
+      "head_branch": "fix/supercollider-recovery-20261025",
+      "base_sha": "3699ec0137c1fe0de523ba080bcb0d82d8cb41a1",
+      "base_branch": "main",
+      "seconds_open_before_merge": null,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-25T12:43:31Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/84#pullrequestreview-5643244835",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:57:23Z",
+          "completed_at": "2026-10-25T12:59:12Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253732720"
+        },
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T12:41:38Z",
+          "completed_at": "2026-10-25T12:41:38Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:41:35Z",
+          "completed_at": "2026-10-25T12:43:35Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253728999"
+        }
+      ]
+    },
+    {
+      "number": 85,
+      "title": "Fix SuperCollider crash probes and validate native Brahma measurements",
+      "state": "closed",
+      "created_at": "2026-10-25T12:57:21Z",
+      "merged_at": null,
+      "closed_at": "2026-10-25T12:59:47Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/85",
+      "head_sha": "c1c017371dd82be77a3dd60a214fb12b58a2f6ca",
+      "head_branch": "fix/supercollider-recovery-20261025-resolved",
+      "base_sha": "3699ec0137c1fe0de523ba080bcb0d82d8cb41a1",
+      "base_branch": "main",
+      "seconds_open_before_merge": null,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-25T13:00:44Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/85#pullrequestreview-5643301131",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:57:23Z",
+          "completed_at": "2026-10-25T12:59:12Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253732720"
+        },
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T12:41:38Z",
+          "completed_at": "2026-10-25T12:41:38Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:41:35Z",
+          "completed_at": "2026-10-25T12:43:35Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253728999"
+        }
+      ]
+    },
+    {
+      "number": 86,
+      "title": "Fix SuperCollider crash probes and validate native Brahma measurements",
+      "state": "closed",
+      "created_at": "2026-10-25T12:58:34Z",
+      "merged_at": "2026-10-25T12:58:53Z",
+      "closed_at": "2026-10-25T12:58:53Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/86",
+      "head_sha": "f0fbc08f8e3fffca7bbd6cb11d0579215adbfb44",
+      "head_branch": "fix/supercollider-recovery-resolved",
+      "base_sha": "3699ec0137c1fe0de523ba080bcb0d82d8cb41a1",
+      "base_branch": "main",
+      "seconds_open_before_merge": 19.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T12:58:40Z",
+          "completed_at": "2026-10-25T12:58:40Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:58:40Z",
+          "completed_at": "2026-10-25T12:58:46Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40195505527/job/121175355486"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T12:58:40Z",
+          "completed_at": "2026-10-25T12:59:03Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40195505493/job/121175355467"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T12:58:37Z",
+          "completed_at": "2026-10-25T13:00:04Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253732940"
+        }
+      ]
+    },
+    {
+      "number": 87,
+      "title": "Add FluCoMa metrics, BrahmaContracts, and native validation tools",
+      "state": "closed",
+      "created_at": "2026-10-25T13:00:40Z",
+      "merged_at": "2026-10-25T13:01:22Z",
+      "closed_at": "2026-10-25T13:01:22Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/87",
+      "head_sha": "a1ca265879543081a3bb37922be85a3373760ebf",
+      "head_branch": "fix/supercollider-recovery-resolved",
+      "base_sha": "42ca9437de1da26881cd571b370e58bddc100ffc",
+      "base_branch": "main",
+      "seconds_open_before_merge": 42.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:01:16Z",
+          "completed_at": "2026-10-25T13:03:31Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253733577"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T13:01:19Z",
+          "completed_at": "2026-10-25T13:01:39Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40195711735/job/121175968572"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:01:18Z",
+          "completed_at": "2026-10-25T13:01:23Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40195711691/job/121175968318"
+        },
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T13:01:15Z",
+          "completed_at": "2026-10-25T13:01:15Z",
+          "details_url": "https://sourcery.ai"
+        }
+      ]
+    },
+    {
+      "number": 88,
+      "title": "Fix native SuperCollider compilation and sandboxed evaluation",
+      "state": "closed",
+      "created_at": "2026-10-25T13:08:27Z",
+      "merged_at": "2026-10-25T13:22:52Z",
+      "closed_at": "2026-10-25T13:22:53Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/88",
+      "head_sha": "cb36e8ede581ffdbc00c4e067b2937f60c386337",
+      "head_branch": "fix/sclang-eval-private-port-20261025",
+      "base_sha": "3d519290a33f9e78c1dec3bf6f92c3b89d1cdfe7",
+      "base_branch": "main",
+      "seconds_open_before_merge": 865.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T13:22:01Z",
+          "completed_at": "2026-10-25T13:22:01Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:22:03Z",
+          "completed_at": "2026-10-25T13:22:08Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40197275608/job/121180732025"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T13:22:03Z",
+          "completed_at": "2026-10-25T13:22:23Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40197275638/job/121180732000"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:21:58Z",
+          "completed_at": "2026-10-25T13:23:44Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253739020"
+        }
+      ]
+    },
+    {
+      "number": 89,
+      "title": "fix(visual-cortex): repair browser frame parsing and disconnect crash",
+      "state": "closed",
+      "created_at": "2026-10-25T13:40:11Z",
+      "merged_at": "2026-10-25T13:45:12Z",
+      "closed_at": "2026-10-25T13:45:12Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/89",
+      "head_sha": "d0fb7e730e420839e776ded9a46c434095d1fa97",
+      "head_branch": "fix/visual-cortex-ws-frames",
+      "base_sha": "910858a490673c9e798084ca247bcb9d547f4563",
+      "base_branch": "main",
+      "seconds_open_before_merge": 301.0,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-25T13:48:21Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/89#pullrequestreview-5643498833",
+          "after_merge": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T13:45:21Z",
+          "completed_at": "2026-10-25T13:45:21Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:45:01Z",
+          "completed_at": "2026-10-25T13:45:06Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40199032350/job/121186035650"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T13:45:01Z",
+          "completed_at": "2026-10-25T13:45:24Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40199032334/job/121186035505"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:44:56Z",
+          "completed_at": "2026-10-25T13:46:42Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253745632"
+        }
+      ]
+    },
+    {
+      "number": 90,
+      "title": "fix(smoke): restore Python boolean operators in JSON validators",
+      "state": "closed",
+      "created_at": "2026-10-25T13:47:18Z",
+      "merged_at": "2026-10-25T13:47:21Z",
+      "closed_at": "2026-10-25T13:47:21Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/90",
+      "head_sha": "617b7f824f69b588b6f04312638827bdd81a6f0c",
+      "head_branch": "fix/smoke-python-operators",
+      "base_sha": "2298e05cdc62894a3923c9ca51780b922b98d0e2",
+      "base_branch": "main",
+      "seconds_open_before_merge": 3.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T13:47:24Z",
+          "completed_at": "2026-10-25T13:47:24Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:47:21Z",
+          "completed_at": "2026-10-25T13:49:10Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253746313"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T13:47:25Z",
+          "completed_at": "2026-10-25T13:47:48Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40199218699/job/121186597116"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T13:47:24Z",
+          "completed_at": "2026-10-25T13:47:28Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40199218657/job/121186597063"
+        }
+      ]
+    },
+    {
+      "number": 91,
+      "title": "fix(smoke): keep the Visual Cortex alive until every check, and explain a failed boot",
+      "state": "closed",
+      "created_at": "2026-10-25T14:17:06Z",
+      "merged_at": "2026-10-25T14:17:19Z",
+      "closed_at": "2026-10-25T14:17:19Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/91",
+      "head_sha": "8e55a4e02b0b15922482f11bf36cc02850f95f67",
+      "head_branch": "fix/smoke-boot-evidence",
+      "base_sha": "1b3d1e2e65c2abe6b60d653de751c2c2baffc8cf",
+      "base_branch": "main",
+      "seconds_open_before_merge": 13.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T14:17:12Z",
+          "completed_at": "2026-10-25T14:17:12Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T14:17:09Z",
+          "completed_at": "2026-10-25T14:18:37Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253754698"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T14:17:13Z",
+          "completed_at": "2026-10-25T14:17:17Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40201513334/job/121193489666"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T14:17:13Z",
+          "completed_at": "2026-10-25T14:17:34Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40201513202/job/121193489152"
+        }
+      ]
+    },
+    {
+      "number": 92,
+      "title": "fix(release): ship the workbench bundle and refuse to pack without it",
+      "state": "closed",
+      "created_at": "2026-10-25T14:52:20Z",
+      "merged_at": "2026-10-25T14:52:37Z",
+      "closed_at": "2026-10-25T14:52:37Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/92",
+      "head_sha": "b99fd38aa290e6d9c5dc01095e3413dd5784f42e",
+      "head_branch": "fix/release-artifact-workbench-bundle",
+      "base_sha": "b028fcfee13a211b64739f1b7b912a97c3989ea0",
+      "base_branch": "main",
+      "seconds_open_before_merge": 17.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T14:52:26Z",
+          "completed_at": "2026-10-25T14:52:26Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T14:52:23Z",
+          "completed_at": "2026-10-25T14:54:06Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253764192"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "failure",
+          "started_at": "2026-10-25T14:52:26Z",
+          "completed_at": "2026-10-25T14:52:50Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40204266675/job/121201727687"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T14:52:26Z",
+          "completed_at": "2026-10-25T14:52:32Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40204266643/job/121201727376"
+        }
+      ]
+    },
+    {
+      "number": 94,
+      "title": "fix: unblock web startup and verify clean release artifacts",
+      "state": "closed",
+      "created_at": "2026-10-25T15:50:41Z",
+      "merged_at": "2026-10-25T15:51:27Z",
+      "closed_at": "2026-10-25T15:51:27Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/94",
+      "head_sha": "f9075851d5a24056bb4884bc346ca2acee369df4",
+      "head_branch": "fix/verification-closeout-20261025",
+      "base_sha": "ab8b569a7548f17b1e8d671ae4244856e2ef7d63",
+      "base_branch": "main",
+      "seconds_open_before_merge": 46.0,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-25T15:50:46Z",
+          "completed_at": "2026-10-25T15:52:36Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/253780067"
+        },
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-25T15:50:49Z",
+          "completed_at": "2026-10-25T15:50:49Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "success",
+          "started_at": "2026-10-25T15:50:47Z",
+          "completed_at": "2026-10-25T15:51:27Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40208860910/job/121215579718"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-25T15:50:48Z",
+          "completed_at": "2026-10-25T15:50:54Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40208860911/job/121215579686"
+        }
+      ]
+    },
+    {
+      "number": 97,
+      "title": "docs: review sampling readiness and verify existing system",
+      "state": "open",
+      "created_at": "2026-10-26T12:10:21Z",
+      "merged_at": null,
+      "closed_at": null,
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/97",
+      "head_sha": "52b57604104befa703fa7368f135c153a4cd5e19",
+      "head_branch": "docs/sampling-system-review-20261026",
+      "base_sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "base_branch": "main",
+      "seconds_open_before_merge": null,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-26T12:16:36Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/97#pullrequestreview-5651769673",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-26T12:22:55Z",
+          "completed_at": "2026-10-26T12:24:38Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/254220518"
+        },
+        {
+          "name": "validate",
+          "conclusion": "success",
+          "started_at": "2026-10-26T12:22:49Z",
+          "completed_at": "2026-10-26T12:22:55Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40322074067/job/121569242360"
+        },
+        {
+          "name": "Smoke test (shipped-test)",
+          "conclusion": "success",
+          "started_at": "2026-10-26T12:22:49Z",
+          "completed_at": "2026-10-26T12:23:28Z",
+          "details_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40322074083/job/121569242202"
+        },
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-26T12:22:46Z",
+          "completed_at": "2026-10-26T12:22:46Z",
+          "details_url": "https://sourcery.ai"
+        }
+      ],
+      "changed_files": [
+        ".codex/plans/2026-10-26-forge-verification.json",
+        ".codex/plans/2026-10-26-git-reconciliation.json",
+        ".codex/plans/2026-10-26-sampling-system-review.md",
+        ".codex/plans/2026-10-26-system-review-results.md",
+        ".codex/plans/2026-10-26-system-verification.json",
+        "docs/design/song-sampling-album-workflow.md",
+        "index.html"
+      ],
+      "paths_also_changed_in_hardening": []
+    },
+    {
+      "number": 98,
+      "title": "feat(brahma): import and sequence samples with portable projects",
+      "state": "open",
+      "created_at": "2026-10-26T12:37:37Z",
+      "merged_at": null,
+      "closed_at": null,
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/98",
+      "head_sha": "282269592ef66279762330fbfe1fe1264ef4754b",
+      "head_branch": "feat/song-sample-projects-20261026",
+      "base_sha": "52b57604104befa703fa7368f135c153a4cd5e19",
+      "base_branch": "docs/sampling-system-review-20261026",
+      "seconds_open_before_merge": null,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-26T12:41:17Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/98#pullrequestreview-5652089344",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-26T12:38:18Z",
+          "completed_at": "2026-10-26T12:38:18Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-26T12:38:16Z",
+          "completed_at": "2026-10-26T12:40:01Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/254229524"
+        }
+      ],
+      "changed_files": [
+        ".codex/plans/2026-10-26-sample-load-save-verification.json",
+        ".codex/plans/2026-10-26-sample-load-save.md",
+        ".github/workflows/ci.yml",
+        "README.md",
+        "brahma/web/public/instrument/index.html",
+        "brahma/web/public/instrument/instrument.js",
+        "brahma/web/public/instrument/pattern.js",
+        "brahma/web/public/instrument/sample-audio.js",
+        "brahma/web/public/instrument/sample-controls.js",
+        "brahma/web/public/instrument/sample-project.js",
+        "brahma/web/test/e2e/instrument.e2e.js",
+        "brahma/web/test/sample-project.test.js",
+        "docs/design/song-sampling-album-workflow.md",
+        "tools/smoke.sh"
+      ],
+      "paths_also_changed_in_hardening": [
+        ".github/workflows/ci.yml",
+        "README.md",
+        "tools/smoke.sh"
+      ]
+    },
+    {
+      "number": 99,
+      "title": "feat(forge): feed song donors through native Brahma modules",
+      "state": "open",
+      "created_at": "2026-10-26T13:18:19Z",
+      "merged_at": null,
+      "closed_at": null,
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/99",
+      "head_sha": "60d7ec7209d611074684157f434f1ea659181de6",
+      "head_branch": "feat/song-assimilation-20261026",
+      "base_sha": "282269592ef66279762330fbfe1fe1264ef4754b",
+      "base_branch": "feat/song-sample-projects-20261026",
+      "seconds_open_before_merge": null,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-26T13:22:52Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/99#pullrequestreview-5652636360",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-26T13:18:51Z",
+          "completed_at": "2026-10-26T13:18:51Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-26T13:18:48Z",
+          "completed_at": "2026-10-26T13:20:49Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/254254653"
+        }
+      ],
+      "changed_files": [
+        ".codex/plans/2026-10-26-song-assimilation-verification.json",
+        ".codex/plans/2026-10-26-song-assimilation.md",
+        "README.md",
+        "brahma/sc/04_relinquished.scd",
+        "brahma/sc/22_fx_spectral.scd",
+        "brahma/sc/32_donor_rack.scd",
+        "docs/design/song-sampling-album-workflow.md",
+        "forge/ASSIMILATION.md",
+        "forge/assimilate.py",
+        "tools/smoke.sh",
+        "tools/tests/test_assimilate.py"
+      ],
+      "paths_also_changed_in_hardening": [
+        "README.md",
+        "tools/smoke.sh"
+      ]
+    },
+    {
+      "number": 100,
+      "title": "feat(instrument): build playable song sketches with native transformation controls",
+      "state": "open",
+      "created_at": "2026-10-26T14:08:23Z",
+      "merged_at": null,
+      "closed_at": null,
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/100",
+      "head_sha": "3b971f8e849a8e0ca7d4687f299d8575b8241f0d",
+      "head_branch": "feat/playable-song-sketch-20261026",
+      "base_sha": "60d7ec7209d611074684157f434f1ea659181de6",
+      "base_branch": "feat/song-assimilation-20261026",
+      "seconds_open_before_merge": null,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-26T14:08:48Z",
+          "completed_at": "2026-10-26T14:08:48Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-26T14:08:46Z",
+          "completed_at": "2026-10-26T14:11:07Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/254291626"
+        }
+      ],
+      "changed_files": [
+        ".codex/plans/2026-10-26-playable-song-sketch-verification.json",
+        ".codex/plans/2026-10-26-playable-song-sketch.md",
+        "README.md",
+        "brahma/web/lib/native-samples.js",
+        "brahma/web/public/instrument/index.html",
+        "brahma/web/public/instrument/instrument.js",
+        "brahma/web/public/instrument/native-controls.js",
+        "brahma/web/public/instrument/sample-controls.js",
+        "brahma/web/public/instrument/sample-project.js",
+        "brahma/web/server.js",
+        "brahma/web/test/e2e/instrument.e2e.js",
+        "brahma/web/test/native-samples.test.js",
+        "brahma/web/test/sample-project.test.js",
+        "docs/design/song-sampling-album-workflow.md",
+        "forge/ASSIMILATION.md",
+        "forge/assimilate.py",
+        "forge/native-controls.json",
+        "forge/sketch.py",
+        "tools/smoke.sh",
+        "tools/tests/test_assimilate.py",
+        "tools/tests/test_sketch.py",
+        "tools/verify-song-sketch.cjs"
+      ],
+      "paths_also_changed_in_hardening": [
+        "README.md",
+        "brahma/web/server.js",
+        "tools/smoke.sh"
+      ]
+    },
+    {
+      "number": 101,
+      "title": "docs: reconcile original organisms and shared material universe",
+      "state": "open",
+      "created_at": "2026-10-26T15:59:43Z",
+      "merged_at": null,
+      "closed_at": null,
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/101",
+      "head_sha": "008209240bb4d97363957f329219b434e74a9562",
+      "head_branch": "docs/mimicry-material-universe-20261026",
+      "base_sha": "3b971f8e849a8e0ca7d4687f299d8575b8241f0d",
+      "base_branch": "feat/playable-song-sketch-20261026",
+      "seconds_open_before_merge": null,
+      "reviews": [],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-26T15:59:49Z",
+          "completed_at": "2026-10-26T15:59:49Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-26T15:59:45Z",
+          "completed_at": "2026-10-26T16:01:42Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/254381637"
+        }
+      ],
+      "changed_files": [
+        ".codex/plans/2026-10-26-mimicry-material-universe.md",
+        "docs/design/mimicry-material-source-inventory.json",
+        "docs/design/mimicry-material-universe.md",
+        "docs/design/song-sampling-album-workflow.md",
+        "docs/the-universal-synthesizer.md"
+      ],
+      "paths_also_changed_in_hardening": []
+    },
+    {
+      "number": 102,
+      "title": "Add glass material vessels and native module comparisons",
+      "state": "open",
+      "created_at": "2026-10-26T17:31:00Z",
+      "merged_at": null,
+      "closed_at": null,
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/pull/102",
+      "head_sha": "de89004982de728126de463c43a08a0cef94d680",
+      "head_branch": "feat/material-vessels-20261026",
+      "base_sha": "008209240bb4d97363957f329219b434e74a9562",
+      "base_branch": "docs/mimicry-material-universe-20261026",
+      "seconds_open_before_merge": null,
+      "reviews": [
+        {
+          "state": "COMMENTED",
+          "submitted_at": "2026-10-26T17:36:22Z",
+          "url": "https://github.com/4444J99/alchemical-synthesizer/pull/102#pullrequestreview-5656372730",
+          "after_merge": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "Sourcery review",
+          "conclusion": "skipped",
+          "started_at": "2026-10-26T17:31:38Z",
+          "completed_at": "2026-10-26T17:31:38Z",
+          "details_url": "https://sourcery.ai"
+        },
+        {
+          "name": "semgrep-cloud-platform/scan",
+          "conclusion": "success",
+          "started_at": "2026-10-26T17:31:35Z",
+          "completed_at": "2026-10-26T17:34:19Z",
+          "details_url": "https://semgrep.dev/orgs/4444j99/projects/5093816/scans/254459470"
+        }
+      ],
+      "changed_files": [
+        ".codex/plans/2026-10-26-material-vessels-implementation.md",
+        "README.md",
+        "brahma/web/lib/native-samples.js",
+        "brahma/web/public/instrument/index.html",
+        "brahma/web/public/instrument/material-controls.js",
+        "brahma/web/public/instrument/material-model.js",
+        "brahma/web/public/instrument/material-vessels.css",
+        "brahma/web/public/instrument/native-controls.js",
+        "brahma/web/public/instrument/sample-audio.js",
+        "brahma/web/public/instrument/sample-controls.js",
+        "brahma/web/public/instrument/sample-project.js",
+        "brahma/web/server.js",
+        "brahma/web/test/e2e/instrument.e2e.js",
+        "brahma/web/test/materials.test.js",
+        "brahma/web/test/native-samples.test.js",
+        "brahma/web/test/sample-project.test.js",
+        "docs/design/mimicry-material-universe.md",
+        "docs/verification/material-vessels-20261026.json",
+        "docs/verification/material-vessels-20261026.md",
+        "forge/ASSIMILATION.md",
+        "forge/assimilate.py",
+        "forge/compare.py",
+        "forge/materials.json",
+        "forge/materials.py",
+        "forge/native-controls.json",
+        "tools/smoke.sh",
+        "tools/tests/test_material_comparison.py",
+        "tools/tests/test_materials.py",
+        "tools/verify-material-vessels.cjs"
+      ],
+      "paths_also_changed_in_hardening": [
+        "README.md",
+        "brahma/web/server.js",
+        "tools/smoke.sh"
+      ]
+    }
+  ],
+  "main_runs": [
+    {
+      "id": 40297947217,
+      "name": "Stale Issues and PRs",
+      "event": "schedule",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "created_at": "2026-10-26T09:13:53Z",
+      "updated_at": "2026-10-26T09:14:03Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40297947217"
+    },
+    {
+      "id": 40208921139,
+      "name": "CI Minimal",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "created_at": "2026-10-25T15:51:29Z",
+      "updated_at": "2026-10-25T15:51:36Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40208921139"
+    },
+    {
+      "id": 40208921091,
+      "name": "CI",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "created_at": "2026-10-25T15:51:29Z",
+      "updated_at": "2026-10-25T15:52:13Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40208921091"
+    },
+    {
+      "id": 40208920394,
+      "name": "pages build and deployment",
+      "event": "dynamic",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "created_at": "2026-10-25T15:51:29Z",
+      "updated_at": "2026-10-25T15:51:53Z",
+      "html_url": "https://github.com/4444J99/alchemical-synthesizer/actions/runs/40208920394"
+    }
+  ],
+  "reviewed_remote_source_files": [
+    {
+      "path": "local-review-evidence/pr102-brahma--web--public--instrument--instrument.js",
+      "sha256": "53d33885a7dad59f76b0d94021a79add0900c9dc4ed7ebf7e21433aa15ddaaa1",
+      "git_blob_sha": "d92081fcde4c876859915741aa9a11823ff05f07"
+    },
+    {
+      "path": "local-review-evidence/pr102-brahma--web--public--instrument--sample-controls.js",
+      "sha256": "57fa77ff830907a54d7fa23bf996127adf1a09ec668ca94c96ede7ddc5b6a59b",
+      "git_blob_sha": "98962f09411aa364ab23b5b685f1666698c23410"
+    },
+    {
+      "path": "local-review-evidence/pr98-brahma--web--public--instrument--instrument.js",
+      "sha256": "e38b01ef60ab1c2ed402e85b7a76fac29cf10bf0610bc8c99bf7a49edc89a90f",
+      "git_blob_sha": "96d09f24463e7485ab87e4bcb8ae2b764dff3492"
+    },
+    {
+      "path": "local-review-evidence/pr98-brahma--web--public--instrument--sample-controls.js",
+      "sha256": "a1240b5e42e69a88647bf1548ca9ac82bb880e3a90ae3e7977a0d7c675246f83",
+      "git_blob_sha": "73021ccf740bdd73dcacc0fefca5c34d83fa5f74"
+    },
+    {
+      "path": "local-review-evidence/pr99-brahma--sc--32_donor_rack.scd",
+      "sha256": "5e9663cf7f3ea4babcce45fcf0e1733dbd22507f760f98910dd201bef684140d",
+      "git_blob_sha": "e627d8a84609d93efa1667075f5ce2ba15998461"
+    },
+    {
+      "path": "local-review-evidence/pr99-forge--assimilate.py",
+      "sha256": "32d86847e709d1cbd8c31c340cd7c1af1dd5911af1e620e68949f02884aafb04",
+      "git_blob_sha": "05b061a29ea06bc5f645fa98f93ea6e56db42533"
+    }
+  ],
+  "limits": [
+    "Read-only metadata and targeted source inspection; no open-stack runtime or listening acceptance performed.",
+    "Historical reviews are leads; original receipt counts do not certify this newer integration.",
+    "Exact-head checks are the check-runs API observation; workflow configuration and emitted checks explain absent Actions on non-main-base stacked PRs.",
+    "No repository edits, merges, PR comments, issue changes, or deployment were performed by this supplementary reviewer."
+  ],
+  "material_open_stack_findings": [
+    {
+      "pr": 98,
+      "head": "282269592ef66279762330fbfe1fe1264ef4754b",
+      "path": "brahma/web/public/instrument/sample-controls.js",
+      "review_url": "https://github.com/4444J99/alchemical-synthesizer/pull/98#discussion_r4377301888",
+      "finding": "Chop audition calls bridge.local without stopping a playing OSC transport; localEngine only switches adapters.",
+      "verification": "Current-head source inspection, including instrument.js; no browser replay.",
+      "acceptance": "With an imported source, synth-only grid and OSC transport playing, click a chop: either stop transport before engine selection changes or keep sequencing on OSC while auditioning locally."
+    },
+    {
+      "pr": 99,
+      "head": "60d7ec7209d611074684157f434f1ea659181de6",
+      "paths": [
+        "forge/assimilate.py",
+        "brahma/sc/32_donor_rack.scd"
+      ],
+      "review_url": "https://github.com/4444J99/alchemical-synthesizer/pull/99#discussion_r4377677460",
+      "finding": "Generator gate maps to donor-envelope bus6, which falls to zero in pauses; self-freeing ADSR generators can end before later donor audio.",
+      "verification": "Current-head source inspection of control_map and donor_source; no new native replay.",
+      "acceptance": "Render a donor with a pause longer than the generator release followed by a second tone; measure audible output after resumption, not only total file duration and peak."
+    },
+    {
+      "pr": 102,
+      "head": "de89004982de728126de463c43a08a0cef94d680",
+      "path": "brahma/web/public/instrument/sample-controls.js",
+      "review_url": "https://github.com/4444J99/alchemical-synthesizer/pull/102#discussion_r4380458712",
+      "finding": "Original/current comparison auditions use independently retained slice boundaries, so edited current chops compare different time spans.",
+      "verification": "Actual source callback executed in isolated DOM/audio fixture: original duration4 versus selected current duration1.",
+      "acceptance": "After editing a transformed chop to1..2s while retaining original0..4s metadata, both A/B auditions must play1..2s and leave retained original metadata unchanged."
+    },
+    {
+      "pr": 102,
+      "head": "de89004982de728126de463c43a08a0cef94d680",
+      "path": "brahma/web/public/instrument/sample-controls.js",
+      "review_url": "https://github.com/4444J99/alchemical-synthesizer/pull/102#discussion_r4380458718",
+      "finding": "Meter callback reads a lazily initialized local renderer reference; synth-only Play initializes instrument.sampleRenderer instead, leaving vessel meters at zero.",
+      "verification": "Actual source callback executed in isolated DOM/audio fixture: active rms0.4/peak0.7 versus callback rms0/peak0 before sample-control activity.",
+      "acceptance": "Fresh-page synth-only playback shows live per-track meter activity without importing/opening audio; idle rendering must not create an AudioContext merely to animate meters."
+    }
+  ],
+  "bounded_reproduction": {
+    "script": "local-review-evidence/reproduce-pr102.cjs",
+    "log": "local-review-evidence/pr102-reproduction.log",
+    "exit_code": 1,
+    "result": "Two desired-contract assertions fail on the inspected PR102 source",
+    "scope": "Actual JavaScript callbacks in isolated DOM/audio stubs, not full browser/native/audio acceptance",
+    "script_sha256": "b310956fc71706b0428bbafbd1cfb5586bce9604fe950639ac3202fa558be7dd",
+    "log_sha256": "9b06e526917fc4493bd4d86953dcae0bc61d94a1c741c1da78d2274454e3df90"
+  },
+  "integration_process_findings": {
+    "new_merged_pr_count": 10,
+    "merged_pr_heads_with_failed_full_ci": [
+      82,
+      83,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92
+    ],
+    "merged_pr_head_full_ci_success_same_second_as_merge": [
+      94
+    ],
+    "merged_within_46_seconds": [
+      82,
+      86,
+      87,
+      90,
+      91,
+      92,
+      94
+    ],
+    "post_merge_commented_reviews": [
+      82,
+      89
+    ],
+    "github_approved_review_submissions_found": 0,
+    "direct_commits": 18,
+    "direct_documentation_receipts": 10,
+    "direct_code_commits": 8,
+    "observed_truncations": [
+      {
+        "commit": "88ab801721a02de930d4935a00938c1a128c3b9b",
+        "path": "brahma/web/server.js",
+        "replacement": "PLACEHOLDER",
+        "url": "https://github.com/4444J99/alchemical-synthesizer/commit/88ab801721a02de930d4935a00938c1a128c3b9b"
+      },
+      {
+        "commit": "deecbc22a3b60814b475d34344c0604a6cf347a9",
+        "path": "tools/smoke.sh",
+        "replacement": "$(cat /tmp/new_smoke.sh)",
+        "url": "https://github.com/4444J99/alchemical-synthesizer/commit/deecbc22a3b60814b475d34344c0604a6cf347a9"
+      }
+    ]
+  },
+  "durable_callback_probe": "docs/reviews/probes/pr102-callbacks.cjs",
+  "durable_callback_record": "docs/reviews/2026-10-26-open-stack-reproduction.json"
+}

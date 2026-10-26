@@ -50,7 +50,7 @@
     // inputPath   : a stereo 44.1k WAV (bounce.sh guarantees this)
     // outputPath  : destination WAV
     // duration    : render length in seconds
-    // exitWhenDone: call 0.exit when the render finishes (for headless sclang)
+    // exitWhenDone: exit with the NRT server status (for headless sclang)
     renderSpecimen: { |self, inputPath, outputPath, duration = 12.0, exitWhenDone = false|
         var def, score, opts, osc;
 
@@ -81,9 +81,13 @@
             sampleFormat: "int16",
             options: opts,
             duration: duration + 0.6,
-            action: {
-                ("NRT render complete -> " ++ outputPath).postln;
-                if(exitWhenDone) { 0.exit(0) };
+            action: { |exitCode|
+                if(exitCode == 0) {
+                    ("NRT render complete -> " ++ outputPath).postln;
+                } {
+                    ("NRT render failed (exit " ++ exitCode ++ ") -> " ++ outputPath).error;
+                };
+                if(exitWhenDone) { exitCode.exit };
             }
         );
         outputPath
@@ -98,8 +102,7 @@
     //     # comment
     //     <time_seconds> <midi_note> <velocity 0..1> <duration_seconds>
     //
-    // Plain text rather than JSON on purpose: this SC build ships no JSON
-    // parser, and inventing a dependency for four numbers would be worse.
+    // The wrapper validates JSON/plain input and emits this numeric score.
     //
     // The voice is deliberately a fixed, documented timbre (filtered saw +
     // pulse). It exists so an agent-proposed pattern can be rendered and
@@ -144,7 +147,7 @@
     // scorePath   : plain-text pattern score (see above)
     // outputPath  : destination WAV
     // duration    : render length in seconds (must cover the last event)
-    // exitWhenDone: call 0.exit when finished (for headless sclang)
+    // exitWhenDone: exit with the NRT server status (for headless sclang)
     renderPattern: { |self, scorePath, outputPath, duration = 8.0, exitWhenDone = false|
         var def, events, score, opts, osc, tail;
 
@@ -184,9 +187,13 @@
             sampleFormat: "int16",
             options: opts,
             duration: duration + tail,
-            action: {
-                ("NRT pattern render complete -> " ++ outputPath).postln;
-                if(exitWhenDone) { 0.exit(0) };
+            action: { |exitCode|
+                if(exitCode == 0) {
+                    ("NRT pattern render complete -> " ++ outputPath).postln;
+                } {
+                    ("NRT pattern render failed (exit " ++ exitCode ++ ") -> " ++ outputPath).error;
+                };
+                if(exitWhenDone) { exitCode.exit };
             }
         );
         outputPath

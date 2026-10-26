@@ -1,64 +1,39 @@
-# Extracting AETHER into its own repository
+# AETHER standalone acceptance
 
-A **repeatable recipe**, not a one-off (per the cascade: protocol → precedent → ideal-form).
-It runs in two safe, verifiable stages. Do **not** skip the verification gates — AETHER is a
-**live** deploy (the 24/7 radio + the public funnel), so a broken build is a broken product.
+## Completed source consolidation
 
-## Preconditions
-- Green on this repo's CI (`.github/workflows/ci.yml`, `ci-minimal.yml`).
-- `wrangler` available for the deploy build check (the coupling that must survive the move).
-- A clean working tree on a topic branch (`refactor/aether-consolidate`).
+AETHER files already live under `aether/`. The previous `deploy/aether`, root
+broadcast-tool, and `brahma/web/public/aether` move recipe is historical and must
+not be run again. [MANIFEST.md](MANIFEST.md) is the current source map.
 
-## Stage 1 — Consolidate in place (this repo, verifiable here)
+Source export and operational acceptance are separate results. A matching exported
+tree does not prove its Docker context, optional Forge dependency, smoke command,
+or cloud deployment works independently.
 
-Move the [core files](MANIFEST.md#core--aethers-own-code-extraction-candidates) under a single
-`aether/` prefix so a later `git subtree split`/`filter-repo` has one clean path.
+## Remaining gates
 
-```bash
-git mv deploy/aether                         aether/deploy
-mkdir -p aether/tools aether/web aether/docs
-git mv tools/broadcast.sh tools/rebroadcast.sh tools/hls_append.py \
-       tools/ingest_queue.py tools/r2_sync.sh forge/tune.py \
-       tools/cellcycle.py tools/lineage.py                     aether/tools/
-git mv brahma/web/public/aether                aether/web/listener
-git mv stations.json                           aether/stations.json
-git mv docs/AETHER-BROADCAST-PLAN.md           aether/docs/BROADCAST-PLAN.md
-```
+1. Decide the standalone render contract: the present container uses donor/tone
+   rendering; Brahma/Forge NRT is an explicit optional integration.
+2. Adapt the Docker build context for a repository where AETHER files are at its
+   root. The monorepo command remains `docker build -f aether/deploy/Dockerfile .`.
+3. Carry the host/listener/edge predicates into that repository and run a bounded
+   ffmpeg broadcast with no monorepo path assumptions.
+4. Build and run the actual image. Verify startup, listener, playlist, segments,
+   operator-only intake, private queue exclusion, restart and shutdown.
+5. Verify the cloud platform adapter, secret injection and optional R2 write path
+   independently. The current base image does not supply the AWS CLI required by
+   `r2_sync.sh`; do not report R2 durability from configuration alone.
+6. Establish authenticated deployment and rollback against an identified target.
+   Repository creation, pushes, visibility changes and deployment are separate
+   actions governed by the current task's authorization.
 
-**Reference-update points** (each must be re-pointed, then verified):
-1. `aether/deploy/wrangler.toml` — the build context bundles `brahma/web/…`; move those assets
-   into `aether/web/` (or add an explicit copy step) and update the paths. **This is the hard part.**
-2. `Makefile` — repoint `broadcast`/`rebroadcast`/`submit`/`tune`/`stations` targets at `aether/tools/…`.
-3. `brahma/web/server.js` — the `/aether` route now serves from `aether/web/listener/` (or proxies).
-4. `product/**` funnel touchpoints — update any relative links to the listener/radio.
-5. Any `tools/broadcast.sh` internal `source`/path references to sibling tools.
-
-**Verification gate (must pass before committing):**
-```bash
-make stations && make broadcast SECONDS=8 SEGMENTS=2     # local broadcast smoke
-( cd aether/deploy && wrangler deploy --dry-run )        # deploy build context survives
-# plus the repo CI green on the PR
-```
-
-## Stage 2 — Lift into a standalone repo
-
-> **Human-gated atom (the only one):** creating the new `aether` repository. Agent sessions
-> cannot create repos (harness policy). Everything up to and after this is automated. Surface it
-> as: *"create empty repo `<org>/aether`"* — nothing more.
-
-```bash
-# History-preserving split of the consolidated prefix:
-git subtree split --prefix=aether -b aether-only
-# (or: git filter-repo --path aether/ --path-rename aether/:  for a cleaner root)
-
-# Push into the new repo once it exists:
-git push git@github.com:<org>/aether.git aether-only:main
-```
-
-Then in the new repo: restore the CF Pages (funnel) + CF Containers (`aether-radio`) deploy from
-`aether/deploy/`, wire secrets via the credential organ (never by hand), and leave a one-line
-pointer + redirect where AETHER used to live in this repo.
+A future history-preserving export may use `git subtree split --prefix=aether`
+on a clean topic branch. Inspect any existing destination first, preserve unique
+work, and compare exported tree IDs before updating it. Do not recreate a
+repository or overwrite its history merely because an old recipe says to do so.
 
 ## Rollback
-Stage 1 is a pure set of `git mv`s on a topic branch — `git checkout main` abandons it with zero
-effect on the live deploy. Nothing here touches production until Stage 2's push + deploy.
+
+Keep the monorepo integration runnable until the independent target meets its
+acceptance gates. A source-only branch does not change a running deployment.
+Retain the prior deployed image/configuration until the replacement is validated.

@@ -103,13 +103,15 @@ function interpret(text) {
 function execute(directive, apiKey) {
   const action = actions.getAction(directive.action);
   if (!action) return { ok: false, error: `unknown action: ${directive.action}` };
+  let auth = {};
   if (action.cost > 0) {
     if (!apiKey) return { ok: false, error: "missing_api_key", status: 401 };
     const charge = chargeKey(apiKey, action.cost);
     if (!charge.ok) return { ok: false, error: charge.error, status: charge.status || 402, detail: charge };
+    auth = charge.auth;
   }
   try {
-    return { ok: true, output: action.handler(directive.args) };
+    return { ok: true, output: actions.invoke(directive.action, directive.args, auth) };
   } catch (e) {
     return { ok: false, error: e.message };
   }
