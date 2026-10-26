@@ -69,7 +69,7 @@ voices, cancels active voices, and renders an offline loop through the same path
 
 ## Task 3: Review and publication
 
-- [ ] Independently review the complete implementation; fix substantive findings
+- [x] Independently review the complete implementation; fix substantive findings
   with regressions and preserve a concise execution record below.
 - [ ] Publish feature branch and a PR with #95, exact scope and verification.
 - [ ] Verify clean local state and exact remote head; retain worktree and samples.
@@ -90,3 +90,20 @@ voices, cancels active voices, and renders an offline loop through the same path
   future sample voices. Final gates: web 158/158, browser 7/7, strict smoke 82/0/0.
   Added portable-project regressions to smoke and sample browser acceptance to CI.
   Evidence: `2026-10-26-sample-load-save-verification.json`.
+- Independent review: no critical findings; accepted all four important findings.
+  Chrome regressions reproduced each failure before repair: pending pad audition
+  after Stop, engine switching during sample playback, 30 ms loop padding, and
+  duplicate decoding. Fixed with renderer cancellation generations, stop on engine
+  change plus dispatch validation, exact cycle frame counts, and hash-first reuse.
+  Loop policy: truncate overlap/effect tails at the cycle boundary. No added time.
+- Final scoped verification on `070340d`: web 158/158, browser 10/10, strict smoke
+  82/0/0. No skipped tests. Inspected the rendered Chrome UI with a loaded source,
+  waveform/chops, restored pattern, project controls, and export confirmation.
+- Review limits: physical audio quality, native SC operation, cross-browser
+  behavior, peak process memory, and acceptance with the user's songs are not
+  measured. README documents step-gated grid notes versus full-chop auditions,
+  changing the source for new notes, and temporary decode/replacement allocations.
+  Native/Golem/album work remains owned by #95; Foundry #96 is unchanged.
+- Reconciled the new remote review-doc commit `52b5760` into this isolated branch;
+  its sole change was an existing GitHub Pages review receipt. Other checkouts,
+  source media, stash, and provider state were not altered by this implementation.
