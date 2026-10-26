@@ -71,8 +71,8 @@ voices, cancels active voices, and renders an offline loop through the same path
 
 - [x] Independently review the complete implementation; fix substantive findings
   with regressions and preserve a concise execution record below.
-- [ ] Publish feature branch and a PR with #95, exact scope and verification.
-- [ ] Verify clean local state and exact remote head; retain worktree and samples.
+- [x] Publish feature branch and a PR with #95, exact scope and verification.
+- [x] Verify clean local state and exact remote head; retain worktree and samples.
 
 ## Execution record
 
@@ -107,3 +107,8 @@ voices, cancels active voices, and renders an offline loop through the same path
 - Reconciled the new remote review-doc commit `52b5760` into this isolated branch;
   its sole change was an existing GitHub Pages review receipt. Other checkouts,
   source media, stash, and provider state were not altered by this implementation.
+- Published PR #98, stacked on review PR #97. Clean checkout and remote branch
+  parity verified at `d855d1134d8fb607c0fb84cc066e82e86ea98707`; this final record
+  adds documentation only. Retain this worktree for review and continuation.
+  The PR is open, with no merge/deployment claimed and no synchronous CI wait.
+  Next integration owner remains #95. No project or user audio was published.
