@@ -46,11 +46,11 @@ Files: `public/instrument/sample-project.js`, `pattern.js`, `test/sample-project
 Interfaces: `createSource(bytes, metadata)`, `validateProject(project, limits)`,
 `serialize(project, limits)`, async `deserialize(text, limits)`, `equalSlices(duration, n)`.
 
-- [ ] Add failing tests for round trip/hash integrity, malformed bounds, missing
+- [x] Add failing tests for round trip/hash integrity, malformed bounds, missing
   sample references, budget refusal, and sample identity through pattern commands.
-- [ ] Implement validation and immutable serialization using schema
+- [x] Implement validation and immutable serialization using schema
   `brahma.sample-project.v1`; preserve optional sampleId/slice in pattern cells/events.
-- [ ] Run `node --test --test-concurrency=1 test/sample-project.test.js`; commit.
+- [x] Run `node --test --test-concurrency=1 test/sample-project.test.js`; commit.
 
 ## Task 2: Real browser playback, editing, and portable sessions
 
@@ -81,3 +81,6 @@ voices, cancels active voices, and renders an offline loop through the same path
 - Ruling: proceed with browser-local load/save first, as authorized by the user;
   native sample-buffer transport is explicitly unfinished. Cost: SC-only sampling
   requires the next integration slice, while this flow remains usable locally.
+- Task 1: seven regressions failed before implementation. Project and pattern
+  contracts now pass; full web suite 158/158. Fixture hash corrected against
+  independent Python hashlib output (last character was transcribed incorrectly).

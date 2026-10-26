@@ -61,6 +61,10 @@
     if (track < 0 || track >= scene.tracks || step < 0 || step >= scene.steps) return scene;
     scene.grid[track][step] = cell ? { note: cell.note != null ? cell.note : 60,
       vel: cell.vel != null ? cell.vel : 0.8, cmd: cell.cmd || "", amt: cell.amt != null ? cell.amt : 0 } : null;
+    if (cell && cell.sampleId != null) {
+      scene.grid[track][step].sampleId = cell.sampleId;
+      scene.grid[track][step].slice = cell.slice != null ? cell.slice : 0;
+    }
     return scene;
   }
 
@@ -85,7 +89,7 @@
   // ---- per-cell command expansion ------------------------------------------
   // Expand a cell into timed sub-events within its step slot [0, stepDur).
   // Returns [] or [{ t, note, gain, dur }] (t is an offset in seconds).
-  function expandCell(cell, stepDur, rng) {
+  function expandTiming(cell, stepDur, rng) {
     if (!cell || cell.note == null) return [];
     rng = rng || makeRng(1);
     var note = cell.note, vel = cell.vel != null ? cell.vel : 0.8;
@@ -122,6 +126,19 @@
     }
   }
 
+  function expandCell(cell, stepDur, rng) {
+    var events = expandTiming(cell, stepDur, rng);
+    if (cell && cell.sampleId != null) events.forEach(function (ev) {
+      ev.sampleId = cell.sampleId; ev.slice = cell.slice;
+    });
+    return events;
+  }
+
+  function inheritSample(source, changes) {
+    if (source.sampleId != null) { changes.sampleId = source.sampleId; changes.slice = source.slice; }
+    return changes;
+  }
+
   // ---- the generative arc: redistribute a scene for a phase ------------------
   // READABLE  → sparse, linear (downbeats only) — legible.
   // CLUSTER   → dense, repeating clusters — bulked up.
@@ -144,17 +161,17 @@
     if (phase === "readable") {
       // Keep structural downbeats only: every 4th step, no ornament commands.
       sources.forEach(function (h) {
-        if (h.s % 4 === 0) setCell(out, h.t, h.s, { note: h.cell.note, vel: h.cell.vel, cmd: "", amt: 0 });
+        if (h.s % 4 === 0) setCell(out, h.t, h.s, inheritSample(h.cell, { note: h.cell.note, vel: h.cell.vel, cmd: "", amt: 0 }));
       });
       // Guarantee at least a pulse on track 0.
-      if (activeCount(out) === 0) setCell(out, 0, 0, { note: 48, vel: 0.8, cmd: "", amt: 0 });
+      if (activeCount(out) === 0) setCell(out, sources[0].t, 0, inheritSample(sources[0].cell, { note: sources[0].cell.note, vel: 0.8, cmd: "", amt: 0 }));
     } else if (phase === "cluster") {
       // Redistribute each source into a short repeating cluster around it.
       sources.forEach(function (h) {
         var len = 2 + Math.floor(rng() * 3); // 2..4 wide
         for (var k = 0; k < len; k++) {
           var s = (h.s + k) % out.steps;
-          setCell(out, h.t, s, { note: h.cell.note, vel: 0.6 + rng() * 0.3, cmd: rng() < 0.3 ? "RT" : "", amt: 2 + Math.floor(rng() * 3) });
+          setCell(out, h.t, s, inheritSample(h.cell, { note: h.cell.note, vel: 0.6 + rng() * 0.3, cmd: rng() < 0.3 ? "RT" : "", amt: 2 + Math.floor(rng() * 3) }));
         }
       });
     } else { // dispersal
@@ -163,7 +180,7 @@
         var frags = 1 + Math.floor(rng() * 3);
         for (var f = 0; f < frags; f++) {
           var s2 = Math.floor(rng() * out.steps);
-          setCell(out, h.t, s2, { note: h.cell.note + Math.floor((rng() - 0.5) * 12), vel: 0.4 + rng() * 0.4, cmd: rng() < 0.6 ? "ST" : "HU", amt: rng() < 0.6 ? 3 + Math.floor(rng() * 4) : 0.3 });
+          setCell(out, h.t, s2, inheritSample(h.cell, { note: Math.max(0, Math.min(127, h.cell.note + Math.floor((rng() - 0.5) * 12))), vel: 0.4 + rng() * 0.4, cmd: rng() < 0.6 ? "ST" : "HU", amt: rng() < 0.6 ? 3 + Math.floor(rng() * 4) : 0.3 }));
         }
       });
     }
