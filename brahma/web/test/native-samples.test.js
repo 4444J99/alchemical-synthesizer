@@ -146,3 +146,21 @@ test("installed Forge pipeline produces a measured native sound from admitted PC
     assert.ok(Math.abs(complete.result.duration - 1) < .025);
   } finally { service.close(); await service.drain(); fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+test("material admission resolves controls and rejects a renderer with a different material receipt", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "native-material-"));
+  const material = { schema: "brahma.material-state.v1", modelVersion: 1, phase: "gas", amount: 1,
+    composition: [{ id: "water", fraction: 1 }] };
+  const service = api().createNativeService({ root, catalogue, render: (dir, job, donor) => result(dir, job, donor) });
+  try {
+    const job = await service.start({ ...body(), material });
+    assert.deepEqual(job.material, material);
+    assert.equal(job.baseParams.semitones, -7);
+    assert.notEqual(job.params.semitones, -7);
+    await service.drain();
+    assert.equal(service.get(job.id).state, "failed");
+    assert.match(service.get(job.id).error, /material|receipt/i);
+    await assert.rejects(service.start({ ...body(), material: { ...material, phase: "unknown" } }),
+      error => error.status === 400 && /phase/i.test(error.message));
+  } finally { service.close(); await service.drain(); fs.rmSync(root, { recursive: true, force: true }); }
+});

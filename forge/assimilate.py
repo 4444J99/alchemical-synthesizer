@@ -29,6 +29,9 @@ import wave
 from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from forge import materials
 SC = ROOT / 'brahma/sc'
 CONTROL_SPECS = json.loads((ROOT / 'forge/native-controls.json').read_text())
 DEADLINE: float | None = None
@@ -379,13 +382,15 @@ def main() -> int:
     parser.add_argument('--deadline', type=float, default=600, help='overall wall-time budget in seconds (1-3600)')
     parser.add_argument('--module', action='append', default=[])
     parser.add_argument('--param', action='append', default=[], help='safe musical control NAME=VALUE for exactly one --module')
+    parser.add_argument('--material-json', help='versioned material composition/phase JSON; source-owned mapping required')
     parser.add_argument('--all', action='store_true', help='render native audio/buffer, source-driven generator, and source-modulation paths')
     parser.add_argument('--catalogue', action='store_true', help='print every discovered module and interface role')
     args = parser.parse_args()
     catalog = catalogue()
     if args.catalogue:
         print(json.dumps([{**{k: v for k, v in item.items() if k != 'definition'},
-                           'controls': CONTROL_SPECS.get(item['name'], {})} for item in catalog], indent=2)); return 0
+                           'controls': CONTROL_SPECS.get(item['name'], {}),
+                           'material': materials.describe(item['name'])} for item in catalog], indent=2)); return 0
     if not args.source:
         parser.error('provide a source or --catalogue')
     if not math.isfinite(args.start) or args.start < 0 or not math.isfinite(args.duration) or not 1 <= args.duration <= 600:
@@ -411,8 +416,29 @@ def main() -> int:
             next(item for item in catalog if item['name'] == args.module[0])['overrides'] = overrides
         except ValueError as exc:
             parser.error(str(exc))
+    if args.material_json is not None:
+        try:
+            if len(args.material_json) > 8192:
+                raise ValueError('Material state exceeds size limit')
+            state = materials.validate(json.loads(args.material_json))
+            for item in catalog:
+                if args.all or item['name'] in selected:
+                    if item['name'] not in materials.LIBRARY['profiles']:
+                        if not args.all:
+                            raise ValueError('Unsupported material mapping: ' + item['name'])
+                        item['material_unavailable'] = True
+                        continue
+                    base = {k: v for k, v in PRESETS.get(item['name'], {}).items() if k in CONTROL_SPECS.get(item['name'], {})}
+                    base.update(item.get('overrides', {}))
+                    resolved = materials.resolve(item['name'], base, state)
+                    item['base_params'] = materials.base_controls(item['name'], base)
+                    item['overrides'] = resolved['params']
+                    item['material'] = resolved['material']
+                    item['model_sha256'] = resolved['modelSha256']
+        except (ValueError, TypeError) as exc:
+            parser.error(str(exc))
     args.out.mkdir(parents=True, exist_ok=True, mode=0o700)
-    render_count = sum(item['role'] != 'infrastructure' and bool(item['audio_outputs'] or item['control_outputs'])
+    render_count = sum(not item.get('material_unavailable') and item['role'] != 'infrastructure' and bool(item['audio_outputs'] or item['control_outputs'])
                        and (args.all or item['name'] in selected) for item in catalog)
     required_bytes = max(1024 ** 3, int((render_count + 2) * args.duration * 44100 * 4 * 1.2) + 128 * 1024 ** 2)
     if shutil.disk_usage(args.out).free < required_bytes:
@@ -426,7 +452,10 @@ def main() -> int:
         candidates = []
         for item, record in zip(catalog, public_catalog):
             eligible = item['role'] != 'infrastructure' and (item['audio_outputs'] or item['control_outputs'])
-            if eligible and (args.all or item['name'] in selected):
+            if item.get('material_unavailable'):
+                record['status'] = 'requires_material_mapping'
+                record['reason'] = 'No source-owned material mapping; original native capability remains available without material.'
+            elif eligible and (args.all or item['name'] in selected):
                 record['status'] = 'pending'; candidates.append(item)
             else:
                 record['status'] = 'not_selected' if eligible else 'requires_patch'

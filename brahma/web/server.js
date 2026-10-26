@@ -54,6 +54,10 @@ const paramCache = {};
 const app = express();
 const defaultJson = express.json();
 app.use((req, res, next) => req.path.startsWith("/api/instrument/native/") ? next() : defaultJson(req, res, next));
+app.get("/instrument/material-library.js", (req, res) => {
+    res.type("application/javascript").set("Cache-Control", "no-store").send("window.BrahmaMaterialLibrary = " +
+        JSON.stringify(require("./public/instrument/material-model").payload) + ";\n");
+});
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/golem", express.static(path.join(__dirname, "public", "golem")));
 app.use("/cortex", express.static(path.join(__dirname, "public", "cortex")));

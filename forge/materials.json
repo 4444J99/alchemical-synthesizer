@@ -1,0 +1,418 @@
+{
+  "schema": "brahma.material-library.v1",
+  "version": 1,
+  "interpretation": "Artistic response model; not a physical chemistry simulation.",
+  "materials": {
+    "water": {
+      "name": "Water",
+      "color": "#68d9ed",
+      "properties": {
+        "mobility": 0.65,
+        "cohesion": 0.55,
+        "damping": 0.55,
+        "density": 0.5,
+        "persistence": 0.65
+      }
+    },
+    "silica": {
+      "name": "Silica",
+      "color": "#d7c9fa",
+      "properties": {
+        "mobility": 0.15,
+        "cohesion": 0.9,
+        "damping": 0.2,
+        "density": 0.65,
+        "persistence": 0.9
+      }
+    },
+    "iron": {
+      "name": "Iron",
+      "color": "#e3a57b",
+      "properties": {
+        "mobility": 0.08,
+        "cohesion": 0.95,
+        "damping": 0.35,
+        "density": 0.95,
+        "persistence": 0.95
+      }
+    },
+    "air": {
+      "name": "Air",
+      "color": "#b7e3bd",
+      "properties": {
+        "mobility": 0.95,
+        "cohesion": 0.1,
+        "damping": 0.1,
+        "density": 0.05,
+        "persistence": 0.1
+      }
+    }
+  },
+  "phases": {
+    "solid": {
+      "mobility": -0.4,
+      "cohesion": 0.3,
+      "damping": 0.1,
+      "density": 0.1,
+      "persistence": 0.2
+    },
+    "liquid": {
+      "mobility": 0,
+      "cohesion": 0,
+      "damping": 0,
+      "density": 0,
+      "persistence": 0
+    },
+    "gas": {
+      "mobility": 0.35,
+      "cohesion": -0.35,
+      "damping": -0.2,
+      "density": -0.35,
+      "persistence": -0.35
+    }
+  },
+  "profiles": {
+    "proteus_analyze": {
+      "claim": "Envelope, centroid, noisiness and onset observation; full behavioral emulation remains unverified.",
+      "targets": {
+        "morphLatency": [
+          "damping",
+          0.12
+        ]
+      }
+    },
+    "proteus_render": {
+      "claim": "Feature-driven tonal/noise resynthesis; fidelity is not measured behavioral isomorphism.",
+      "targets": {
+        "fidelity": [
+          "cohesion",
+          0.25
+        ]
+      }
+    },
+    "maw_digest": {
+      "claim": "Spectral extraction and sampled/slewed centroid control.",
+      "targets": {
+        "hunger": [
+          "density",
+          0.7
+        ],
+        "bile": [
+          "damping",
+          0.8
+        ]
+      }
+    },
+    "relinquished_ia": {
+      "claim": "Candidate selection and input conditioning; single-equip requires the complete coordinated patch.",
+      "targets": {
+        "iaHpHz": [
+          "density",
+          100
+        ]
+      }
+    },
+    "relinquished_bc": {
+      "claim": "Donor binding buffer; coordinated equip/eviction and fault/reset remain unverified.",
+      "targets": {
+        "bcLenMs": [
+          "persistence",
+          250
+        ],
+        "bcJitterMs": [
+          "mobility",
+          25
+        ]
+      }
+    },
+    "relinquished_te": {
+      "claim": "Donor-derived VCA, filter, waveshaping and ring modulation; grain and phase/delay operators remain absent.",
+      "targets": {
+        "teDrive": [
+          "density",
+          0.6
+        ],
+        "teChaos": [
+          "mobility",
+          0.6
+        ],
+        "teColor": [
+          "damping",
+          -0.6
+        ]
+      }
+    },
+    "fusion_core_voice": {
+      "claim": "Two-source coupling; full genome capture and reconstruction remain unverified.",
+      "targets": {
+        "bind": [
+          "cohesion",
+          0.7
+        ],
+        "mutation": [
+          "mobility",
+          0.6
+        ],
+        "symmetry": [
+          "density",
+          0.6
+        ]
+      }
+    },
+    "nucleus_freeze": {
+      "claim": "Retained audio buffer; not the complete multi-kernel genome store.",
+      "targets": {
+        "freeze": [
+          "persistence",
+          1
+        ]
+      }
+    },
+    "agent_smith_identity": {
+      "claim": "Eight-voice pulse replication; learned leader-state convergence remains unimplemented.",
+      "targets": {
+        "replicationCount": [
+          "density",
+          6
+        ],
+        "dominance": [
+          "cohesion",
+          0.8
+        ]
+      }
+    },
+    "ditto_morphic_core": {
+      "claim": "Centroid-reactive saw/noise imitation; role inference and retained identity remain unimplemented.",
+      "targets": {
+        "observe": [
+          "mobility",
+          0.8
+        ],
+        "assume": [
+          "cohesion",
+          0.8
+        ],
+        "mutate": [
+          "mobility",
+          0.3
+        ]
+      }
+    },
+    "typhon_layer": {
+      "claim": "Cross-coupled audio layer; persistent independent trait-stack recall requires FSAP/controller verification.",
+      "targets": {
+        "crossCouple": [
+          "mobility",
+          0.8
+        ],
+        "dominance": [
+          "density",
+          0.8
+        ]
+      }
+    },
+    "mnemosyne_voice_stereo": {
+      "claim": "Tape-like age, erosion and stereo drift; contextual archive banks remain unverified.",
+      "targets": {
+        "age": [
+          "mobility",
+          0.6
+        ],
+        "erosion": [
+          "damping",
+          0.8
+        ],
+        "recallOffset": [
+          "mobility",
+          0.02
+        ]
+      }
+    },
+    "protean_hound_stereo": {
+      "claim": "Onset-driven buffer mutation; fragment similarity and aggression behavior remain unverified.",
+      "targets": {
+        "sensitivity": [
+          "density",
+          0.6
+        ],
+        "chaos": [
+          "mobility",
+          0.8
+        ]
+      }
+    },
+    "chrysalid_siren_stereo": {
+      "claim": "Grain density, position blur and grain pitch; independent formant shaping remains unimplemented.",
+      "targets": {
+        "grainDensity": [
+          "density",
+          36
+        ],
+        "identityBlur": [
+          "mobility",
+          0.7
+        ]
+      }
+    },
+    "ossuary_monk_stereo": {
+      "claim": "Impact-excited fixed resonators; captured resonance inheritance and procession patterns remain unverified.",
+      "targets": {
+        "impactThreshold": [
+          "density",
+          0.04
+        ],
+        "relicDecay": [
+          "persistence",
+          1.5
+        ],
+        "gravity": [
+          "cohesion",
+          0.6
+        ]
+      }
+    },
+    "janiform_child_stereo": {
+      "claim": "Forward/reverse buffer symmetry; distinct from Janus paired-world rollback.",
+      "targets": {
+        "symmetry": [
+          "cohesion",
+          0.8
+        ],
+        "causalDrift": [
+          "mobility",
+          0.15
+        ]
+      }
+    },
+    "octahedron_slicer": {
+      "claim": "Selected buffer slice with playback-rate control.",
+      "targets": {
+        "rate": [
+          "mobility",
+          0.7
+        ]
+      }
+    },
+    "octahedron_timestretch": {
+      "claim": "Native time/pitch processing; independence requires probe measurements.",
+      "targets": {
+        "rate": [
+          "mobility",
+          0.7
+        ],
+        "pitch": [
+          "density",
+          0.5
+        ]
+      }
+    },
+    "solve_pitch_shift": {
+      "claim": "Native pitch transposition and wet/dry mix.",
+      "targets": {
+        "semitones": [
+          "density",
+          12
+        ],
+        "mix": [
+          "cohesion",
+          0.6
+        ]
+      }
+    },
+    "solve_spectral_filter": {
+      "claim": "Bounded spectral filtering and wet/dry mix.",
+      "targets": {
+        "lowBin": [
+          "density",
+          0.3
+        ],
+        "highBin": [
+          "damping",
+          -0.3
+        ],
+        "mix": [
+          "cohesion",
+          0.6
+        ]
+      }
+    },
+    "solve_spectral_freeze": {
+      "claim": "Spectral freeze state and wet/dry mix.",
+      "targets": {
+        "mix": [
+          "persistence",
+          0.8
+        ]
+      }
+    },
+    "mnemosyne_voice": {
+      "claim": "Tape-like age, erosion and stereo drift; contextual archive banks remain unverified.",
+      "targets": {
+        "age": [
+          "mobility",
+          0.6
+        ],
+        "erosion": [
+          "damping",
+          0.8
+        ]
+      }
+    },
+    "protean_hound": {
+      "claim": "Onset-driven buffer mutation; fragment similarity and aggression behavior remain unverified.",
+      "targets": {
+        "sensitivity": [
+          "density",
+          0.6
+        ],
+        "chaos": [
+          "mobility",
+          0.8
+        ]
+      }
+    },
+    "chrysalid_siren": {
+      "claim": "Grain density, position blur and grain pitch; independent formant shaping remains unimplemented.",
+      "targets": {
+        "grainDensity": [
+          "density",
+          36
+        ],
+        "identityBlur": [
+          "mobility",
+          0.7
+        ]
+      }
+    },
+    "ossuary_monk": {
+      "claim": "Impact-excited fixed resonators; captured resonance inheritance and procession patterns remain unverified.",
+      "targets": {
+        "impactThreshold": [
+          "density",
+          0.04
+        ],
+        "relicDecay": [
+          "persistence",
+          1.5
+        ],
+        "gravity": [
+          "cohesion",
+          0.6
+        ]
+      }
+    },
+    "janiform_child": {
+      "claim": "Forward/reverse buffer symmetry; distinct from Janus paired-world rollback.",
+      "targets": {
+        "symmetry": [
+          "cohesion",
+          0.8
+        ],
+        "causalDrift": [
+          "mobility",
+          0.15
+        ]
+      }
+    }
+  }
+}

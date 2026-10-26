@@ -5,6 +5,8 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFile } = require("node:child_process");
 const express = require("express");
+const { isDeepStrictEqual } = require("node:util");
+const Material = require("../public/instrument/material-model");
 const ROOT = path.resolve(__dirname, "../../..");
 const SPECS = require(path.join(ROOT, "forge/native-controls.json"));
 const sha = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
@@ -63,7 +65,8 @@ async function runNative(directory, request, donor, onChild) {
   const args = [path.join(ROOT, "forge/assimilate.py"), path.join(directory, "source.wav"),
     "--start", "0", "--duration", String(donor.duration), "--module", request.module,
     "--out", directory, "--deadline", "120"];
-  for (const [key, value] of Object.entries(request.params)) args.push("--param", key + "=" + value);
+  for (const [key, value] of Object.entries(request.baseParams || request.params)) args.push("--param", key + "=" + value);
+  if (request.material) args.push("--material-json", JSON.stringify(request.material));
   const output = await command(args, {}, onChild).catch(error => {
     fs.writeFileSync(path.join(directory, "service-error.txt"), error.message + "\n" + (error.diagnostic || "")); throw error;
   });
@@ -82,7 +85,8 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
   }));
   function view(job) {
     return { id: job.id, state: job.state, module: job.module, params: job.params,
-      sourceSha256: job.sourceSha256, error: job.error || null, result: job.result || null };
+      sourceSha256: job.sourceSha256, baseParams: job.baseParams, material: job.material || null,
+      error: job.error || null, result: job.result || null };
   }
   async function start(body) {
     if (closed) fail("Native service is closed", 503);
@@ -92,7 +96,14 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
     if (jobs.size >= maxJobs) fail("Native session render budget reached; restart the local server for a new session", 429);
     const module = catalog.find(item => item.name === body.module);
     if (!module || module.role === "infrastructure" || !(module.audio_outputs.length || module.control_outputs.length)) fail("Native module requires its owning patch");
-    const params = validateParams(module.name, body.params);
+    let params = validateParams(module.name, body.params);
+    let material = null, baseParams = params;
+    if (body.material !== undefined && body.material !== null) {
+      try {
+        const resolved = Material.resolve(module.name, params, body.material);
+        material = resolved.material; baseParams = Material.baseControls(module.name, params); params = resolved.params;
+      } catch (error) { fail(error.message); }
+    }
     const donor = admitAudio(body.audio);
     fs.mkdirSync(root, { recursive: true, mode: 0o700 });
     const space = fs.statfsSync(root);
@@ -100,8 +111,8 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
     const id = "native_" + crypto.randomBytes(12).toString("hex"), directory = path.join(fs.realpathSync(root), id);
     fs.mkdirSync(directory, { mode: 0o700 });
     fs.writeFileSync(path.join(directory, "source.wav"), donor.bytes, { mode: 0o600 });
-    fs.writeFileSync(path.join(directory, "request.json"), JSON.stringify({ module: module.name, params, sha256: donor.sha256 }), { mode: 0o600 });
-    const job = { id, module: module.name, params, directory, state: "running", sourceSha256: donor.sha256 };
+    fs.writeFileSync(path.join(directory, "request.json"), JSON.stringify({ module: module.name, params, baseParams, material, sha256: donor.sha256 }), { mode: 0o600 });
+    const job = { id, module: module.name, params, baseParams, material, directory, state: "running", sourceSha256: donor.sha256 };
     jobs.set(id, job); active = id;
     job.promise = Promise.resolve().then(() => render(directory, job, donor, child => { job.child = child; if (job.cancelled) child.terminate(); }))
       .then(rendered => {
@@ -110,6 +121,9 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
         const item = manifest.modules.find(item => item.name === job.module);
         if (!item || item.status !== "rendered" || item.render_exit_code !== 0 || manifest.compile_exit_code !== 0 ||
             manifest.donor.sha256 !== donor.sha256 || item.output !== job.module + ".wav") fail("Native result did not pass validation", 500);
+        if (job.material && (!isDeepStrictEqual(item.material, job.material) ||
+            !isDeepStrictEqual(item.base_params, job.baseParams) || item.model_sha256 !== Material.payload.sha256 ||
+            !isDeepStrictEqual(item.overrides, job.params))) fail("Native material receipt mismatch", 500);
         const output = path.join(rendered, item.output), bytes = fs.readFileSync(output);
         if (sha(bytes) !== item.output_sha256) fail("Native result hash mismatch", 500);
         if (sha(fs.readFileSync(path.join(directory, "source.wav"))) !== donor.sha256) fail("Native source changed", 500);
@@ -117,6 +131,7 @@ function createNativeService({ root = path.join(ROOT, "forge/out/instrument"), c
         job.result = { sha256: item.output_sha256, duration: item.duration_seconds,
           definitionSha256: item.definition_sha256, rackSha256: manifest.native_rack_sha256,
           measurement: { peakDbfs: item.peak_dbfs, rmsDbfs: item.rms_dbfs } };
+        if (job.material) job.result.modelSha256 = item.model_sha256;
         job.state = "completed";
       }).catch(error => { if (!job.cancelled) { job.state = "failed"; job.error = error.message; } })
       .finally(() => { job.child = null; if (active === id) active = null; });
