@@ -7,6 +7,8 @@
     const caps = M.limits(window.BRAHMA_SAMPLE_LIMITS);
     let sources = [], trackSources = P.TRACKS.map(() => null), selectedSlice = 0, busy = false;
     let renderer = null;
+    let native = null, revision = 0;
+    function invalidateNative() { revision++; if (native) native.cancel(); }
     const audio = () => renderer || (renderer = bridge.renderer());
     const track = () => Number($("sample-track").value);
     const selectedSource = () => sources.find(s => s.id === trackSources[track()]);
@@ -87,11 +89,14 @@
       const select = $("sample-source"); select.replaceChildren(new Option("Synth voice", ""));
       sources.forEach(source => select.add(new Option(source.name, source.id)));
       select.value = trackSources[track()] || ""; renderEditor();
+      if (native) native.refresh(true);
     }
     P.TRACKS.forEach((name, i) => $("sample-track").add(new Option(name, String(i))));
-    $("sample-track").addEventListener("change", () => { selectedSlice = 0; renderSources(); });
+    $("sample-track").addEventListener("change", () => { invalidateNative(); selectedSlice = 0; renderSources(); });
     $("sample-source").addEventListener("change", () => {
+      invalidateNative();
       trackSources[track()] = $("sample-source").value || null; selectedSlice = 0; renderEditor();
+      if (native) native.refresh(true);
     });
     $("apply-slice").addEventListener("click", () => {
       const source = selectedSource(); if (!source) return;
@@ -104,6 +109,7 @@
     });
     $("audio-file").addEventListener("change", event => {
       const file = event.target.files[0]; if (!file) return;
+      invalidateNative();
       operation("Loading audio...", async () => {
         if (file.size > caps.maxSourceBytes) throw new Error("Audio exceeds the source size limit");
         const bytes = new Uint8Array(await file.arrayBuffer()), engine = audio();
@@ -132,6 +138,7 @@
     }));
     $("open-project").addEventListener("change", event => {
       const file = event.target.files[0]; if (!file) return;
+      invalidateNative();
       operation("Opening project...", async () => {
         if (file.size > caps.maxProjectBytes) throw new Error("Project exceeds file size limit");
         const project = await M.deserialize(await file.text(), caps);
@@ -149,8 +156,34 @@
     }));
     window.addEventListener("resize", drawWaveform);
     renderSources();
+    function nativeContext() {
+      const source = selectedSource(); let parent = source;
+      while (parent && parent.recipe) parent = sources.find(item => item.id === parent.recipe.parentId);
+      return { source, parent, track: track(), revision };
+    }
+    async function replace(target, source, buffer) {
+      if (revision !== target.revision || track() !== target.track || !selectedSource() || selectedSource().id !== target.source.id) throw new Error("Native target changed; current project preserved");
+      const candidate = snapshot(), existing = candidate.sources.find(item => item.id === source.id);
+      if (!existing) candidate.sources.push(source);
+      else if (source.recipe && JSON.stringify(existing.recipe) !== JSON.stringify(source.recipe)) throw new Error("This audio already exists with a different recipe; existing sources preserved");
+      const checked = M.replaceTrackSource(candidate, target.track, target.source.id, source.id, caps);
+      await audio().loadSources(checked.sources, buffer ? new Map([[source.id, buffer]]) : undefined);
+      sources = checked.sources; trackSources = checked.trackSources;
+      bridge.replaceScene(checked.scene); renderSources();
+    }
+    if (window.NativeControls) native = window.NativeControls.attach({
+      context: nativeContext,
+      buffer: id => audio().entries.get(id).buffer,
+      decode: bytes => audio().context.decodeAudioData(bytes.slice().buffer),
+      apply: replace,
+      original: async () => {
+        const target = nativeContext();
+        if (target.source && target.parent && target.source.id !== target.parent.id) await replace(target, target.parent);
+      },
+    });
     return {
       report,
+      cancelNative: invalidateNative,
       cell(trackIndex, base) {
         const sourceId = trackSources[trackIndex];
         if (sourceId) return Object.assign({}, base, { note: 60, sampleId: sourceId,

@@ -207,4 +207,80 @@ describe("local sample instrument", () => {
     assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
     await ctx.page.select("#adapter", "webaudio");
   });
+
+  async function nativeFixture() {
+    const bytes = donorWav();
+    for (let i = 44; i < bytes.length; i += 2) bytes.writeInt16LE(-bytes.readInt16LE(i), i);
+    const hash = crypto.createHash("sha256").update(bytes).digest("hex");
+    ctx.nativeReady = true; ctx.nativeInputHash = null;
+    await ctx.page.setRequestInterception(true);
+    const handler = request => {
+      const suffix = new URL(request.url()).pathname.replace("/api/instrument/native", "");
+      if (!new URL(request.url()).pathname.startsWith("/api/instrument/native/jobs")) return request.continue();
+      if (suffix.endsWith("/audio")) return request.respond({ status: 200, contentType: "audio/wav", body: bytes });
+      if (request.method() === "POST") ctx.nativeInputHash = JSON.parse(request.postData()).audio.sha256;
+      const job = { id: "native_browser_fixture", module: "solve_pitch_shift", params: { semitones: 7, mix: 1 },
+        state: request.method() === "DELETE" ? "cancelled" : request.method() === "POST" || !ctx.nativeReady ? "running" : "completed",
+        sourceSha256: ctx.nativeInputHash, result: { sha256: hash, duration: 2,
+          definitionSha256: "a".repeat(64), rackSha256: "b".repeat(64) } };
+      return request.respond({ status: request.method() === "POST" ? 202 : 200,
+        contentType: "application/json", body: JSON.stringify(job) });
+    };
+    ctx.page.on("request", handler);
+    return async () => { ctx.page.off("request", handler); await ctx.page.setRequestInterception(false); };
+  }
+  async function connectNative() {
+    await ctx.page.evaluate(async () => {
+      const response = await fetch("/api/auth/exchange", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: "sample-browser-fixture-token" }) }); // allow-secret: synthetic test session only
+      if (!response.ok) throw new Error("fixture session exchange failed");
+    });
+    assert.ok(await ctx.page.$("#native-connect"), "the instrument needs native transformation controls");
+    await ctx.page.click("#native-connect");
+    await ctx.page.waitForFunction(() => document.querySelector("#native-module").options.length > 200);
+    await ctx.page.select("#native-module", "solve_pitch_shift");
+    await setInput('#native-params input[data-param="semitones"]', "7");
+  }
+  it("applies native audio while playing and saves its exact recipe and retained original", async t => {
+    if (skip(t)) return;
+    await upload("#open-project", ctx.saved); await status("Opened");
+    const cleanup = await nativeFixture();
+    try {
+      await connectNative();
+      await setInput("#project-name", "Native acceptance");
+      await ctx.page.click("#play");
+      await ctx.page.click("#native-render");
+      await ctx.page.waitForFunction(() => /Applied/.test(document.querySelector("#native-status").textContent));
+      assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+      await ctx.page.click("#stop"); await ctx.page.click("#freeze"); await status("Saved");
+      const filename = path.join(ctx.dir, "Native-acceptance.brahma.json");
+      await until(() => fs.existsSync(filename));
+      const project = JSON.parse(fs.readFileSync(filename));
+      assert.equal(project.sources.length, 2);
+      const output = project.sources.find(source => source.recipe);
+      assert.equal(output.recipe.module, "solve_pitch_shift");
+      assert.equal(output.recipe.params.semitones, 7);
+      assert.equal(output.recipe.parentId, project.sources[0].id);
+      assert.equal(project.scene.grid[0][0].sampleId, output.id);
+      assert.deepEqual(output.slices[2], { start: .5, end: .7 });
+      await upload("#open-project", filename); await status("Opened");
+      assert.equal(await ctx.page.$eval('#native-params input[data-param="semitones"]', el => el.value), "7");
+      await ctx.page.click("#native-original");
+      assert.match(await ctx.page.$eval("#sample-source", el => el.selectedOptions[0].textContent), /donor/);
+    } finally { await cleanup(); }
+  });
+  it("Stop invalidates a pending native result without replacing the current source", async t => {
+    if (skip(t)) return;
+    await upload("#open-project", ctx.saved); await status("Opened");
+    const cleanup = await nativeFixture();
+    try {
+      await connectNative(); ctx.nativeReady = false;
+      await ctx.page.click("#native-render");
+      await ctx.page.waitForFunction(() => /Rendering/.test(document.querySelector("#native-status").textContent));
+      await ctx.page.click("#stop"); ctx.nativeReady = true;
+      await ctx.page.waitForFunction(() => /Cancelled/.test(document.querySelector("#native-status").textContent));
+      assert.equal(await ctx.page.$$eval("#sample-source option", opts => opts.length), 2);
+      assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+    } finally { await cleanup(); }
+  });
 });

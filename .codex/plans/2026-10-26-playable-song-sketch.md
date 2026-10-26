@@ -59,13 +59,13 @@ Files: `forge/assimilate.py`, `forge/native-controls.json`, new
 Files: existing `sample-project.js`, `sample-controls.js`, `instrument.js`,
 `index.html`; new `native-controls.js`; browser/model tests.
 
-- [ ] Add failing save/reopen and browser tests for transformation application,
+- [x] Add failing save/reopen and browser tests for transformation application,
   retained originals, stale responses, and unchanged playing transport.
-- [ ] Add safe recipe/source validation and transformation selection/controls,
+- [x] Add safe recipe/source validation and transformation selection/controls,
   authenticated session handoff, background render status and cancellation.
-- [ ] Apply transformed source to future notes on the selected track; preserve
+- [x] Apply transformed source to future notes on the selected track; preserve
   source chops and unrelated tracks, restore original on request.
-- [ ] Verify playback, Stop, save/reopen, offline export and rejection behavior;
+- [x] Verify playback, Stop, save/reopen, offline export and rejection behavior;
   commit with meaningful browser regression evidence.
 
 ## Task 3: Saved musical sketch and publication

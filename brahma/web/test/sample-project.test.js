@@ -55,6 +55,40 @@ test("source identity deduplicates identical bytes even when filenames differ", 
   assert.equal(a.id, b.id);
 });
 
+test("native transformation recipes retain their source and exact settings after reopen", async () => {
+  const project = await fixture(), M = model(), parent = project.sources[0];
+  const output = await M.createSource(new Uint8Array([4, 5, 6, 7]), {
+    name: "Native pitch.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+  });
+  output.recipe = { schema: "brahma.native-recipe.v1", parentId: parent.id, module: "solve_pitch_shift",
+    params: { semitones: -7, mix: .75 }, inputSha256: "c".repeat(64),
+    definitionSha256: "a".repeat(64), rackSha256: "b".repeat(64) };
+  project.sources.push(output);
+  project.trackSources[0] = output.id;
+  const reopened = await M.deserialize(M.serialize(project));
+  assert.deepEqual(reopened.sources[1].recipe, output.recipe);
+  for (const mutate of [p => { p.sources[1].recipe.parentId = "missing"; },
+    p => { p.sources[1].recipe.params.semitones = Infinity; }, p => { p.sources[1].recipe.parentId = output.id; }]) {
+    const bad = structuredClone(project); mutate(bad); assert.throws(() => M.validateProject(bad), /recipe|parent|control/i);
+  }
+});
+
+test("replacing one track sound changes its future notes and preserves unrelated sources and chops", async () => {
+  const project = await fixture(), M = model(), parent = project.sources[0];
+  assert.equal(typeof M.replaceTrackSource, "function", "track replacement must be transactional");
+  const next = await M.createSource(new Uint8Array([4, 5, 6, 7]), {
+    name: "next.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+  });
+  project.sources.push(next);
+  P.setCell(project.scene, 1, 0, { note: 60, vel: .5, sampleId: parent.id, slice: 3 });
+  const replaced = M.replaceTrackSource(project, 0, parent.id, next.id);
+  assert.equal(replaced.scene.grid[0][0].sampleId, next.id);
+  assert.equal(replaced.scene.grid[0][0].slice, 2);
+  assert.equal(replaced.scene.grid[1][0].sampleId, parent.id);
+  assert.equal(project.scene.grid[0][0].sampleId, parent.id);
+  assert.equal(replaced.sources.length, 2);
+});
+
 test("invalid source references and slice bounds cannot silently fall back to synthesis", async () => {
   const project = await fixture(), M = model();
   for (const mutate of [

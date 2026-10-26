@@ -122,6 +122,7 @@
     timer = setInterval(scheduler, TICK);
   }
   function stop() {
+    if (samples) samples.cancelNative();
     state.playing = false;
     if (timer) { clearInterval(timer); timer = null; }
     if (sampleRenderer) sampleRenderer.stopAll();
@@ -243,6 +244,7 @@
     scene: function () { return scene; },
     transport: function () { return state; },
     stop: stop, local: localEngine,
+    replaceScene: function (next) { scene = next; renderGrid(); updateVersion(); },
     restore: function (project) {
       scene = project.scene; state.tempo = project.tempo; state.phase = project.phase;
       state.cycle = project.cycle; state.step = 0;

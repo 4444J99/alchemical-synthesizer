@@ -417,6 +417,7 @@ server.on("listening", () => {
         console.log(`--- HUMAN ROLE: supplied by environment, not printed ---`);
     } else {
         console.log(`--- WORKBENCH (human): http://${HOST}:${port}/workbench/#t=${auth.humanToken} ---`); // allow-secret
+        console.log(`--- INSTRUMENT (human): http://${HOST}:${port}/instrument/#t=${auth.humanToken} ---`); // allow-secret
         console.log(`--- Open that URL on this machine to claim the human role. ---`);
     }
 });

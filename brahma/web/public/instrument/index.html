@@ -51,6 +51,9 @@
         #chops button[aria-pressed=true] { border-color:var(--warn); color:var(--warn); }
         #sample-status { min-height:1.5em; font-size:12px; overflow-wrap:anywhere; }
         #sample-status.error { color:#ff9b9b; }
+        #native-status.error { color:#ff9b9b; }
+        #native-status { font-size:12px; min-height:1.5em; }
+        #native-params { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
         button:disabled, input:disabled, select:disabled { opacity:0.5; cursor:default; }
         table.grid td.sample { background:#6bd6ff; }
         .samples select { max-width:240px; }
@@ -78,6 +81,19 @@
             <button id="apply-slice" disabled>Apply chop</button>
         </div>
         <p id="sample-status" role="status" aria-live="polite">Audio stays on this device. Select a chop, then place it in the grid.</p>
+        <h2>Native transformations</h2>
+        <div class="controls">
+            <button id="native-connect">Connect native engine</button>
+            <label>Transformation <select id="native-module"><option value="">Connect to load modules</option></select></label>
+            <span id="native-role" class="hint"></span>
+        </div>
+        <div id="native-params"></div>
+        <div class="controls">
+            <button id="native-render" disabled>Render and use on this track</button>
+            <button id="native-original" disabled>Restore original</button>
+            <button id="native-cancel">Cancel render</button>
+        </div>
+        <p id="native-status" role="status" aria-live="polite">Native processing runs on this computer. The loop continues while a new sound renders.</p>
     </section>
 
     <div class="controls">
@@ -144,6 +160,7 @@
 <script src="pattern.js"></script>
 <script src="sample-project.js"></script>
 <script src="sample-audio.js"></script>
+<script src="native-controls.js"></script>
 <script src="sample-controls.js"></script>
 <script src="instrument.js"></script>
 </body>

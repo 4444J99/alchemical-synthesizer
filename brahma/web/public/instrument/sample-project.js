@@ -46,6 +46,22 @@
     number(count, 1, 128, "slice count", true);
     return Array.from({ length: count }, (_, i) => ({ start: duration * i / count, end: duration * (i + 1) / count }));
   }
+  function recipe(value) {
+    if (!value || value.schema !== "brahma.native-recipe.v1" ||
+        typeof value.parentId !== "string" || !/^sha256:[a-f0-9]{64}$/.test(value.parentId) ||
+        typeof value.module !== "string" || !/^[a-z][a-z0-9_]{1,80}$/.test(value.module) ||
+        !value.params || typeof value.params !== "object" || Array.isArray(value.params) || Object.keys(value.params).length > 32) fail("Invalid native recipe");
+    const params = {};
+    for (const [key, v] of Object.entries(value.params)) {
+      if (!/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/.test(key) || !Number.isFinite(v) || Math.abs(v) > 1000000) fail("Invalid recipe control");
+      params[key] = v;
+    }
+    for (const key of ["inputSha256", "definitionSha256", "rackSha256"]) {
+      if (typeof value[key] !== "string" || !/^[a-f0-9]{64}$/.test(value[key])) fail("Invalid recipe hash");
+    }
+    return { schema: value.schema, parentId: value.parentId, module: value.module, params,
+      inputSha256: value.inputSha256, definitionSha256: value.definitionSha256, rackSha256: value.rackSha256 };
+  }
   async function createSource(input, metadata, overrides) {
     const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
     if (!bytes.length || bytes.length > limits(overrides).maxSourceBytes) fail("Audio exceeds the source size limit");
@@ -88,9 +104,18 @@
       const clean = { id: source.id, sha256: source.sha256,
         name: label(source.name, 1024, "source name"), mime: label(source.mime, 128, "source type"),
         data: source.data, duration, sampleRate, channels, slices };
+      if (source.recipe !== undefined) clean.recipe = recipe(source.recipe);
       byId.set(source.id, clean);
       return clean;
     });
+    for (const source of sources) {
+      const visited = new Set([source.id]); let current = source;
+      while (current.recipe) {
+        const parent = byId.get(current.recipe.parentId);
+        if (!parent || visited.has(parent.id)) fail("Invalid native recipe parent or cycle");
+        visited.add(parent.id); current = parent;
+      }
+    }
     const scene = project.scene;
     if (!scene || scene.tracks !== 5 || !Array.isArray(scene.grid) || scene.grid.length !== 5) fail("Invalid scene grid");
     const steps = number(scene.steps, 1, 128, "step count", true);
@@ -126,6 +151,15 @@
     if (new TextEncoder().encode(text).byteLength > limits(overrides).maxProjectBytes) fail("Project exceeds file size limit");
     return text;
   }
+  function replaceTrackSource(project, track, fromId, toId, overrides) {
+    const clean = validateProject(project, overrides);
+    number(track, 0, 4, "track", true);
+    if (!clean.sources.some(source => source.id === toId)) fail("Missing replacement source");
+    clean.trackSources[track] = toId;
+    clean.scene.grid[track] = clean.scene.grid[track].map(cell => cell && cell.sampleId === fromId ?
+      Object.assign({}, cell, { sampleId: toId }) : cell);
+    return validateProject(clean, overrides);
+  }
   async function deserialize(text, overrides) {
     if (typeof text !== "string" || text.length > limits(overrides).maxProjectBytes ||
       new TextEncoder().encode(text).byteLength > limits(overrides).maxProjectBytes) fail("Project exceeds file size limit");
@@ -138,5 +172,5 @@
     return project;
   }
   return { SCHEMA, DEFAULT_LIMITS, limits, createSource, sourceBytes, equalSlices, digest,
-    validateProject, serialize, deserialize };
+    validateProject, serialize, deserialize, replaceTrackSource };
 });
