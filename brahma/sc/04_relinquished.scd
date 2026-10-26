@@ -74,7 +74,9 @@ SynthDef(\relinquished_bc, {
   ph = Phasor.ar(writeOn, 1, 0, bufFrames);
   BufWr.ar(in, buf, ph, loop: 1);
 
-  jitterS = (TExpRand.kr(0.0, bcJitterMs.clip(0,50) / 1000 + 1e-6, equipTrig) - 1e-6);
+  // Exponential random bounds must be positive; zero produced nonfinite read
+  // positions even when jitter was disabled.
+  jitterS = (TExpRand.kr(1e-6, bcJitterMs.clip(0,50) / 1000 + 1e-6, equipTrig) - 1e-6);
   readPosS = (bcReadPos.clip(0,1) * lenS) + jitterS;
   readBaseS = (ph - (readPosS * SampleRate.ir)).wrap(0, bufFrames);
 

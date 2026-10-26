@@ -41,23 +41,23 @@ modules; partial native renders falsely accepted; catalogue coverage gaps.
 ## Task 1: Preserved donor admission
 
 - [x] Resolve the user's recordings and download bounded audio with provenance.
-- [ ] Add failing tests for safe source admission, hashes, unique destinations,
+- [x] Add failing tests for safe source admission, hashes, unique destinations,
   module extraction, and interface classification.
-- [ ] Implement `forge/assimilate.py` donor admission and native catalogue.
-- [ ] Verify originals remain unchanged, normalized files are valid; commit.
+- [x] Implement `forge/assimilate.py` donor admission and native catalogue.
+- [x] Verify originals remain unchanged, normalized files are valid; commit.
 
 ## Task 2: Native module audition
 
-- [ ] Add native regression fixtures for buffer and stream consumers.
-- [ ] Implement native score generation using existing SynthDefs, separate buffers,
+- [x] Add native regression fixtures for buffer and stream consumers.
+- [x] Implement native score generation using existing SynthDefs, separate buffers,
   ordered source/module/master buses, limited output, and bounded render lifecycle.
-- [ ] Generate per-module status and a local audition index; expose failures.
-- [ ] Render the selected donors through native modules and measure outputs.
-- [ ] Run implicated regression suites and review; fix substantive defects.
+- [x] Generate per-module status and a local audition index; expose failures.
+- [x] Render the selected donors through native modules and measure outputs.
+- [x] Run implicated regression suites and review; fix substantive defects.
 
 ## Task 3: Durable handoff
 
-- [ ] Document commands, exact module coverage and remaining live/UI integration.
+- [x] Document commands, exact module coverage and remaining live/UI integration.
 - [ ] Publish code/tests/sanitized evidence as a PR; retain private songs/results.
 - [ ] Verify local/remote head parity and clean tracked state.
 
@@ -65,4 +65,15 @@ modules; partial native renders falsely accepted; catalogue coverage gaps.
 
 All three bounded yt-dlp invocations exited 0 on 2026-10-26. Source IDs:
 USQ697oqkaw, umopTKfas5g, ZSEKX8GAEYY. Private acquisition logs and metadata are
-under `forge/out/song-sources/20261026-selected/`. Processing is not yet verified.
+under `forge/out/song-sources/20261026-selected/`. Final processing results are recorded in `.codex/plans/2026-10-26-song-assimilation-verification.json`.
+
+## Review and validation
+
+Independent review identified stereo input downmixing, donor-independent generator
+outputs, and colliding envelope/event control outputs. All three were accepted and
+fixed with targeted regression coverage. Native integration exercised ten module
+paths, including stereo reconstruction, buffer readers, controls, generators, and
+the repaired spectral filter. Sixteen tests passed; strict smoke passed 86 checks.
+Browser observation verified catalogue/filter behavior, actual WAV playback, and
+single-player exclusivity. Native DSP shutdown and oversized compiler-function
+failures found during development were fixed without disabling installed plugins.

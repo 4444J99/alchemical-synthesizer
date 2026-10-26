@@ -4,9 +4,11 @@ Status: broader integration direction, grounded in the 2026-10-26 system review.
 The user authorized the browser load/save slice on 2026-10-26. That slice now
 implements local import, editable chops, sample sequencing, embedded portable
 projects, and loop WAV export; see the README and sample-load-save plan/evidence.
-Native sample transfer, shared Golem transport, modular processing, and album
-arrangement below remain unfinished. Musical acceptance with the user's songs
-has not been measured.
+Forge now provides [native song assimilation](../../forge/ASSIMILATION.md):
+preserved local/YouTube donors, bounded module auditions, and a listening index.
+Native browser sample transfer, shared Golem transport, live modular routing,
+and album arrangement below remain unfinished. Render validation with selected
+songs does not establish musical acceptance.
 
 ## Intent
 

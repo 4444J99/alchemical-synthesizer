@@ -45,6 +45,8 @@ req_files=(
   "docs/agent-clients.md"
   "brahma/ableton/src/index.js"
   "forge/validate_audio.py"
+  "forge/assimilate.py"
+  "brahma/sc/32_donor_rack.scd"
   "README.md"
 )
 for f in "${req_files[@]}"; do
@@ -92,6 +94,11 @@ fi
 
 echo "=== [4/6] Python audio validator ==="
 if command -v python3 >/dev/null 2>&1; then
+  if python3 -m unittest discover -s tools/tests -p 'test_assimilate.py' >/tmp/brahma_assimilate.log 2>&1; then
+    ok "donor assimilation contracts (native integration separately opt-in)"
+  else
+    bad "donor assimilation contracts"; tail -12 /tmp/brahma_assimilate.log
+  fi
   TONE="$(mktemp -d)/test_tone.wav"
   if python3 tools/gen_test_tone.py "$TONE" >/dev/null 2>&1 \
      && python3 forge/validate_audio.py "$TONE" >/tmp/brahma_validator.log 2>&1; then
@@ -250,7 +257,7 @@ fi
 
 echo "=== [6/6] Forge tools syntax (py_compile + bash -n) ==="
 if command -v python3 >/dev/null 2>&1; then
-  for py in forge/rip.py forge/stemforge.py forge/analyze_audio.py forge/validate_audio.py tools/gen_test_tone.py aether/tools/tune.py aether/tools/cellcycle.py aether/tools/hls_append.py; do
+  for py in forge/assimilate.py forge/rip.py forge/stemforge.py forge/analyze_audio.py forge/validate_audio.py tools/gen_test_tone.py aether/tools/tune.py aether/tools/cellcycle.py aether/tools/hls_append.py; do
     [ -f "$py" ] || continue
     if python3 -m py_compile "$py" >/tmp/brahma_pyc.log 2>&1; then ok "py_compile $py"; else bad "py_compile $py (see /tmp/brahma_pyc.log)"; tail -5 /tmp/brahma_pyc.log; fi
   done

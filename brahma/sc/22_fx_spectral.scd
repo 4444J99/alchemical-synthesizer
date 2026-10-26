@@ -111,8 +111,10 @@ SynthDef(\solve_spectral_filter, {
 
     chain = FFT(LocalBuf(2048), input);
     // Brick-wall filter: pass only bins between low and high
-    chain = PV_BrickWall(chain, highBin.clip(0, 1) * 2 - 1);
-    chain = PV_BrickWall(chain, lowBin.clip(0, 1).neg * 2 + 1);
+    // Negative wipe removes high bins; positive wipe removes low bins. Zero
+    // leaves the spectrum intact, so the default 0..1 range must apply no wipe.
+    chain = PV_BrickWall(chain, highBin.clip(0, 1) - 1);
+    chain = PV_BrickWall(chain, lowBin.clip(0, 1));
     filtered = IFFT(chain);
 
     sig = XFade2.ar(input, filtered, mix.clip(0, 1) * 2 - 1);

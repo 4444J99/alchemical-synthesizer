@@ -132,6 +132,10 @@ Manual fallback: symlink those six files from `brahma/sc/` into `Platform.userEx
 
 ## Sampling a local song
 
+For native rack-wide transformations, see [Song assimilation](forge/ASSIMILATION.md).
+`python3 forge/assimilate.py song.wav --start 30 --duration 8 --all` preserves the
+song and produces a private listening index of measured native module excerpts.
+
 Start Visual Cortex as above, then open `/instrument/`. SuperCollider is not
 required for this browser sample workflow.
 
