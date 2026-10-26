@@ -57,8 +57,12 @@
 - [x] Write failing tests for source/hash mismatches, missing results, silence, bounded waveform comparisons and complete catalogue disposition.
 - [x] Implement bounded serial comparisons, source-bound measurements and listening links; never treat waveform difference as proof of full mimicry.
 - [x] Run native comparisons with synthetic probes and a retained selected-song excerpt; exercise the actual browser, save/reopen and export. Run web/Python suites and implicated native smoke checks.
-- [ ] Obtain one fresh whole-branch review, fix significant findings with regression tests, commit/push the implementation and a reviewable PR stacked on #101. Retain all private sound artifacts.
+- [x] Obtain one fresh whole-branch review, fix significant findings with regression tests, commit/push the implementation and a reviewable PR stacked on #101. Retain all private sound artifacts.
 
 ## Execution record
 
 Existing isolated checkout and clean branch verified; new branch starts at `008209240bb4d97363957f329219b434e74a9562`. `origin/main` is an ancestor. No other checkout holds this branch. Host pressure observation reports swap pressure in advisory/observe mode; native renders and browser verification will run serially with existing deadlines and budgets. No other writer's worktree or process is changed.
+
+Completed implementation and review fixes are published in [PR #102](https://github.com/4444J99/alchemical-synthesizer/pull/102), stacked on #101. Final verification: 174 web tests passed (one opt-in skip), 16 browser tests passed, 26 Python tests passed (one opt-in skip), and 107 strict smoke checks passed. Actual native and browser/SC acceptance were refreshed after the model correction; all three Important review findings have RED-to-GREEN regressions. No Critical or Minor findings remain from that review.
+
+The [verification record](../../docs/verification/material-vessels-20261026.md) records implementation boundaries, preserved silence, measurements and execution decisions. Private audio, projects, screenshots and comparison indexes remain retained under ignored `forge/out/`. The worktree is retained; this publication does not claim merge, production deployment or full original organism acceptance.
