@@ -131,3 +131,36 @@ test("sample references survive ratchets, stutters and every generative phase", 
     assert.ok(hits.every(c => c.sampleId === "donor" && c.slice === 3), phase);
   }
 });
+
+test("per-track vessels survive reopen separately from the compositional arc and retained native material recipe", async () => {
+  const M = model(), project = await fixture();
+  const material = { schema: "brahma.material-state.v1", modelVersion: 1, phase: "solid", amount: .8,
+    composition: [{ id: "water", fraction: .25 }, { id: "iron", fraction: .75 }] };
+  project.vessels = [{ module: "ditto_morphic_core", params: { observe: .4, assume: .6, mutate: .1 }, material }, null, null, null, null];
+  const reopened = await M.deserialize(M.serialize(project));
+  assert.equal(reopened.phase, "manual");
+  assert.equal(reopened.vessels[0].material.phase, "solid");
+  assert.deepEqual(reopened.vessels[0].material.composition, [{ id: "iron", fraction: .75 }, { id: "water", fraction: .25 }]);
+  assert.equal(reopened.vessels[1], null);
+  assert.deepEqual(M.validateProject(await fixture()).vessels, [null, null, null, null, null]);
+  for (const mutate of [p => { p.vessels[0].material.phase = "fire"; },
+    p => { p.vessels[0].material.composition[0].fraction = .8; },
+    p => { p.vessels[0].params.observe = Infinity; }, p => { p.vessels.pop(); }]) {
+    const bad = structuredClone(project); mutate(bad); assert.throws(() => M.validateProject(bad), /phase|fraction|control|vessel/i);
+  }
+});
+
+test("rendered material recipes retain base controls, effective controls and the model identity", async () => {
+  const M = model(), project = await fixture(), parent = project.sources[0];
+  const output = await M.createSource(new Uint8Array([4, 5, 6, 7]), {
+    name: "Material output.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1 });
+  output.recipe = { schema: "brahma.native-recipe.v1", parentId: parent.id, module: "ditto_morphic_core",
+    params: { observe: .9, assume: .26, mutate: .25 }, baseParams: { observe: .5, assume: .5, mutate: .1 },
+    material: { schema: "brahma.material-state.v1", modelVersion: 1, phase: "gas", amount: 1, composition: [{ id: "water", fraction: 1 }] },
+    inputSha256: "c".repeat(64), definitionSha256: "a".repeat(64), rackSha256: "b".repeat(64), modelSha256: "d".repeat(64) };
+  project.sources.push(output);
+  const reopened = await M.deserialize(M.serialize(project));
+  assert.deepEqual(reopened.sources[1].recipe, output.recipe);
+  const bad = structuredClone(project); bad.sources[1].recipe.modelSha256 = "missing";
+  assert.throws(() => M.validateProject(bad), /material|model|hash/i);
+});

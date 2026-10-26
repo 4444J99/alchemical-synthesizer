@@ -6,6 +6,7 @@
   window.SampleControls = { attach(bridge) {
     const caps = M.limits(window.BRAHMA_SAMPLE_LIMITS);
     let sources = [], trackSources = P.TRACKS.map(() => null), selectedSlice = 0, busy = false;
+    let vessels = P.TRACKS.map(() => null);
     let renderer = null;
     let native = null, revision = 0;
     function invalidateNative() { revision++; if (native) native.cancel(); }
@@ -17,10 +18,11 @@
       $("sample-status").className = error ? "error" : "";
     };
     function snapshot() {
+      if (native) native.validate();
       const transport = bridge.transport();
       return M.validateProject({ schema: M.SCHEMA, name: $("project-name").value.trim() || "Brahma session",
         tempo: transport.tempo, phase: transport.phase, cycle: transport.cycle,
-        scene: bridge.scene(), trackSources, sources }, caps);
+        scene: bridge.scene(), trackSources, sources, vessels }, caps);
     }
     function download(bytes, name, type) {
       const url = URL.createObjectURL(new Blob([bytes], { type }));
@@ -36,7 +38,7 @@
       controls.forEach(el => { el.disabled = true; });
       try { await action(); }
       catch (error) { report(error.message || String(error), true); }
-      finally { busy = false; controls.forEach(el => { el.disabled = false; }); renderEditor(); }
+      finally { busy = false; controls.forEach(el => { el.disabled = false; }); renderEditor(); if (native) native.refresh(); }
     }
     function drawWaveform() {
       const canvas = $("waveform"), ctx = canvas.getContext("2d"), source = selectedSource();
@@ -143,7 +145,7 @@
         if (file.size > caps.maxProjectBytes) throw new Error("Project exceeds file size limit");
         const project = await M.deserialize(await file.text(), caps);
         await audio().loadSources(project.sources);
-        bridge.stop(); sources = project.sources; trackSources = project.trackSources;
+        bridge.stop(); sources = project.sources; trackSources = project.trackSources; vessels = project.vessels;
         $("project-name").value = project.name; $("sample-track").value = "0"; selectedSlice = 0;
         bridge.restore(project); renderSources();
         report("Opened " + project.name + ". Ready to play; transport is stopped.");
@@ -159,7 +161,21 @@
     function nativeContext() {
       const source = selectedSource(); let parent = source;
       while (parent && parent.recipe) parent = sources.find(item => item.id === parent.recipe.parentId);
-      return { source, parent, track: track(), revision };
+      return { source, parent, track: track(), revision, vessel: vessels[track()] };
+    }
+    function selectTrack(index) {
+      invalidateNative(); $("sample-track").value = String(index); selectedSlice = 0; renderSources();
+    }
+    async function audition(original) {
+      const target = nativeContext(), source = original ? target.parent : target.source;
+      if (!source) throw new Error("Select a sample source to compare");
+      bridge.stop();
+      const engine = audio(), generation = engine.generation;
+      await engine.context.resume();
+      if (engine.generation !== generation) return;
+      const slice = Math.min(selectedSlice, source.slices.length - 1);
+      bridge.local(); engine.trigger(target.track, { sampleId: source.id, slice, note: 60, gain: .8,
+        dur: source.slices[slice].end - source.slices[slice].start, t: 0 }, engine.context.currentTime);
     }
     async function replace(target, source, buffer) {
       if (revision !== target.revision || track() !== target.track || !selectedSource() || selectedSource().id !== target.source.id) throw new Error("Native target changed; current project preserved");
@@ -173,6 +189,11 @@
     }
     if (window.NativeControls) native = window.NativeControls.attach({
       context: nativeContext,
+      setVessel(value) { vessels[track()] = M.vessel(value); revision++; },
+      selectTrack,
+      tracks: () => P.TRACKS.map((name, index) => ({ name, vessel: vessels[index], source: sources.find(s => s.id === trackSources[index]) })),
+      level: index => renderer ? renderer.level(index) : { rms: 0, peak: 0, wave: null },
+      audition,
       buffer: id => audio().entries.get(id).buffer,
       decode: bytes => audio().context.decodeAudioData(bytes.slice().buffer),
       apply: replace,
@@ -191,7 +212,7 @@
           slice: trackIndex === track() ? selectedSlice : 0 });
         return base;
       },
-      selectTrack(index) { $("sample-track").value = String(index); selectedSlice = 0; renderSources(); },
+      selectTrack,
     };
   } };
 })();

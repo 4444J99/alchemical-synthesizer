@@ -58,6 +58,7 @@
         table.grid td.sample { background:#6bd6ff; }
         .samples select { max-width:240px; }
     </style>
+<link rel="stylesheet" href="material-vessels.css">
 </head>
 <body>
 <div class="wrap">
@@ -87,11 +88,33 @@
             <label>Transformation <select id="native-module"><option value="">Connect to load modules</option></select></label>
             <span id="native-role" class="hint"></span>
         </div>
-        <div id="native-params"></div>
+        <div id="material-vessels" class="vessel-strip" aria-label="Track vessels"></div>
+        <div class="matter-workspace">
+            <div>
+                <p class="matter-heading">Contents of this vessel</p>
+                <div class="matter-controls">
+                    <label><input type="checkbox" id="material-enable"> Use material</label>
+                    <label>Phase <select id="material-phase"><option value="solid">Solid</option><option value="liquid" selected>Liquid</option><option value="gas">Gas</option></select></label>
+                    <label>Influence <input type="range" id="material-amount" min="0" max="1" step="0.01" value="1"><span id="material-amount-value">100%</span></label>
+                </div>
+                <div id="material-composition" class="matter-palette"></div>
+                <p id="material-error" role="status"></p>
+                <p class="matter-caption">Mix to 100%. These are artistic material responses. The waveform and motion follow actual track audio.</p>
+            </div>
+            <div>
+                <p class="matter-heading">Organism response</p>
+                <div id="native-params"></div>
+                <output id="material-effective" aria-label="Effective organism controls"></output>
+            </div>
+        </div>
+        <p id="material-applied"></p>
+        <p id="native-claim"></p>
         <div class="controls">
             <button id="native-render" disabled>Render and use on this track</button>
             <button id="native-original" disabled>Restore original</button>
             <button id="native-cancel">Cancel render</button>
+            <button id="native-audition-original">Audition original chop</button>
+            <button id="native-audition-current">Audition current chop</button>
         </div>
         <p id="native-status" role="status" aria-live="polite">Native processing runs on this computer. The loop continues while a new sound renders.</p>
     </section>
@@ -158,8 +181,11 @@
 
 <!-- brain first (pure logic, also node-tested), then the browser body. -->
 <script src="pattern.js"></script>
+<script src="material-library.js"></script>
+<script src="material-model.js"></script>
 <script src="sample-project.js"></script>
 <script src="sample-audio.js"></script>
+<script src="material-controls.js"></script>
 <script src="native-controls.js"></script>
 <script src="sample-controls.js"></script>
 <script src="instrument.js"></script>

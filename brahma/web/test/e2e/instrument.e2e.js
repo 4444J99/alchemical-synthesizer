@@ -218,11 +218,17 @@ describe("local sample instrument", () => {
       const suffix = new URL(request.url()).pathname.replace("/api/instrument/native", "");
       if (!new URL(request.url()).pathname.startsWith("/api/instrument/native/jobs")) return request.continue();
       if (suffix.endsWith("/audio")) return request.respond({ status: 200, contentType: "audio/wav", body: bytes });
-      if (request.method() === "POST") ctx.nativeInputHash = JSON.parse(request.postData()).audio.sha256;
+      if (request.method() === "POST") { ctx.nativeRequest = JSON.parse(request.postData()); ctx.nativeInputHash = ctx.nativeRequest.audio.sha256; }
+      const resolved = ctx.nativeRequest && ctx.nativeRequest.material ? require("../../public/instrument/material-model").resolve(
+        ctx.nativeRequest.module, ctx.nativeRequest.params, ctx.nativeRequest.material) : null;
       const job = { id: "native_browser_fixture", module: "solve_pitch_shift", params: { semitones: 7, mix: 1 },
         state: request.method() === "DELETE" ? "cancelled" : request.method() === "POST" || !ctx.nativeReady ? "running" : "completed",
         sourceSha256: ctx.nativeInputHash, result: { sha256: hash, duration: 2,
           definitionSha256: "a".repeat(64), rackSha256: "b".repeat(64) } };
+      if (resolved) {
+        job.params = resolved.params; job.material = resolved.material; job.baseParams = ctx.nativeRequest.params;
+        job.result.modelSha256 = resolved.modelSha256;
+      }
       return request.respond({ status: request.method() === "POST" ? 202 : 200,
         contentType: "application/json", body: JSON.stringify(job) });
     };
@@ -281,6 +287,89 @@ describe("local sample instrument", () => {
       await ctx.page.waitForFunction(() => /Cancelled/.test(document.querySelector("#native-status").textContent));
       assert.equal(await ctx.page.$$eval("#sample-source option", opts => opts.length), 2);
       assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+    } finally { await cleanup(); }
+  });
+
+  it("vessel meters follow actual per-track audio and clear immediately on Stop", async t => {
+    if (skip(t)) return;
+    const project = JSON.parse(fs.readFileSync(ctx.saved));
+    const measured = await ctx.page.evaluate(async project => {
+      const context = new AudioContext(); await context.resume();
+      const renderer = new SampleAudio.Renderer(context, context.destination);
+      if (typeof renderer.level !== "function") { await context.close(); return { available: false }; }
+      await renderer.loadSources(project.sources);
+      renderer.trigger(0, { sampleId: project.sources[0].id, slice: 2, note: 60, gain: .8, dur: .2, t: 0 }, context.currentTime);
+      await new Promise(resolve => setTimeout(resolve, 80));
+      const playing = renderer.level(0).rms, unrelated = renderer.level(1).rms;
+      renderer.stopAll(); const stopped = renderer.level(0).rms;
+      await context.close(); return { available: true, playing, unrelated, stopped };
+    }, project);
+    assert.equal(measured.available, true, "renderer must expose real audio activity");
+    assert.ok(measured.playing > .01); assert.equal(measured.unrelated, 0); assert.equal(measured.stopped, 0);
+  });
+  it("material vessels preview distinct controls, save per track and fence edits made during a render", async t => {
+    if (skip(t)) return;
+    await upload("#open-project", ctx.saved); await status("Opened");
+    await connectNative();
+    assert.ok(await ctx.page.$("#material-enable"), "material controls must be present in the instrument");
+    await ctx.page.click("#material-enable");
+    await ctx.page.select("#material-phase", "gas");
+    const gas = await ctx.page.$eval("#material-effective", el => el.textContent);
+    await ctx.page.select("#material-phase", "solid");
+    const solid = await ctx.page.$eval("#material-effective", el => el.textContent);
+    assert.notEqual(gas, solid);
+    await setInput("#project-name", "Vessel persistence");
+    await ctx.page.click("#freeze"); await status("Saved");
+    const filename = path.join(ctx.dir, "Vessel-persistence.brahma.json");
+    const project = await until(() => {
+      try { return JSON.parse(fs.readFileSync(filename)); } catch (_) { return null; }
+    });
+    assert.equal(project.phase, "manual");
+    assert.equal(project.vessels[0].material.phase, "solid");
+    await ctx.page.reload(); await upload("#open-project", filename); await status("Opened");
+    await connectNative();
+    assert.equal(await ctx.page.$eval("#material-phase", el => el.value), "solid");
+    await ctx.page.select("#sample-track", "1");
+    assert.equal(await ctx.page.$eval("#material-enable", el => el.checked), false);
+    await ctx.page.select("#sample-track", "0");
+    assert.equal(await ctx.page.$eval("#material-phase", el => el.value), "solid");
+    const cleanup = await nativeFixture();
+    try {
+      ctx.nativeReady = false; await ctx.page.click("#native-render");
+      await ctx.page.waitForFunction(() => /Rendering/.test(document.querySelector("#native-status").textContent));
+      await ctx.page.select("#material-phase", "gas"); ctx.nativeReady = true;
+      await ctx.page.waitForFunction(() => /Cancelled/.test(document.querySelector("#native-status").textContent));
+      assert.equal(await ctx.page.$$eval("#sample-source option", opts => opts.length), 2);
+      assert.deepEqual(ctx.errors, []);
+    } finally { await cleanup(); }
+  });
+
+  it("applied material controls and retained original survive a complete browser save/reopen", async t => {
+    if (skip(t)) return;
+    await upload("#open-project", ctx.saved); await status("Opened"); await connectNative();
+    const cleanup = await nativeFixture();
+    try {
+      await ctx.page.click("#material-enable"); await ctx.page.select("#material-phase", "gas");
+      await ctx.page.click("#play"); await ctx.page.click("#native-render");
+      await ctx.page.waitForFunction(() => /Applied|receipt mismatch/.test(document.querySelector("#native-status").textContent));
+      assert.match(await ctx.page.$eval("#native-status", el => el.textContent), /^Applied/);
+      assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+      assert.equal(ctx.nativeRequest.material.phase, "gas");
+      await ctx.page.click("#stop"); await setInput("#project-name", "Applied matter");
+      await ctx.page.click("#freeze"); await status("Saved");
+      const filename = path.join(ctx.dir, "Applied-matter.brahma.json");
+      const saved = await until(() => { try { return JSON.parse(fs.readFileSync(filename)); } catch (_) { return null; } });
+      const output = saved.sources.find(source => source.recipe);
+      assert.equal(output.recipe.material.phase, "gas"); assert.equal(output.recipe.baseParams.semitones, 7);
+      assert.equal(output.recipe.params.semitones, 3); assert.equal(output.recipe.params.mix, .82);
+      assert.ok(saved.sources.some(source => source.id === output.recipe.parentId));
+      await ctx.page.reload(); await upload("#open-project", filename); await status("Opened");
+      await ctx.page.waitForFunction(() => document.querySelector("#native-module").options.length > 200);
+      assert.equal(await ctx.page.$eval("#material-phase", el => el.value), "gas");
+      assert.equal(await ctx.page.$eval('.vessel-card[data-track="0"]', el => el.dataset.phase), "gas");
+      assert.equal(await ctx.page.$eval('#native-params input[data-param="semitones"]', el => el.value), "7");
+      if (process.env.BRAHMA_MATERIAL_SCREENSHOT) await ctx.page.screenshot({ path: process.env.BRAHMA_MATERIAL_SCREENSHOT, fullPage: true });
+      assert.deepEqual(ctx.errors, []);
     } finally { await cleanup(); }
   });
 });

@@ -1,8 +1,8 @@
 /* Portable, local-only sample projects. No DOM, audio device, or server state. */
 (function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.SampleProject = factory();
-})(typeof self !== "undefined" ? self : this, function () {
+  if (typeof module === "object" && module.exports) module.exports = factory(require("./material-model.js"));
+  else root.SampleProject = factory(root.MaterialModel);
+})(typeof self !== "undefined" ? self : this, function (Material) {
   "use strict";
   const SCHEMA = "brahma.sample-project.v1";
   const DEFAULT_LIMITS = Object.freeze({ maxSourceBytes: 64 * 1024 * 1024,
@@ -59,8 +59,23 @@
     for (const key of ["inputSha256", "definitionSha256", "rackSha256"]) {
       if (typeof value[key] !== "string" || !/^[a-f0-9]{64}$/.test(value[key])) fail("Invalid recipe hash");
     }
-    return { schema: value.schema, parentId: value.parentId, module: value.module, params,
+    const clean = { schema: value.schema, parentId: value.parentId, module: value.module, params,
       inputSha256: value.inputSha256, definitionSha256: value.definitionSha256, rackSha256: value.rackSha256 };
+    if (value.material !== undefined) {
+      clean.material = Material.validate(value.material);
+      if (!value.baseParams || !/^[a-f0-9]{64}$/.test(value.modelSha256 || "")) fail("Invalid material model receipt");
+      clean.baseParams = Material.baseControls(value.module, value.baseParams);
+      clean.modelSha256 = value.modelSha256;
+    } else if (value.baseParams !== undefined || value.modelSha256 !== undefined) fail("Missing recipe material state");
+    return clean;
+  }
+  function vessel(value) {
+    if (value === null) return null;
+    if (!value || typeof value.module !== "string" || !/^[a-z][a-z0-9_]{1,80}$/.test(value.module)) fail("Invalid vessel module");
+    const params = Material.baseControls(value.module, value.params);
+    const material = value.material == null ? null : Material.validate(value.material);
+    if (material && !Material.describe(value.module).supported) fail("Unsupported vessel material mapping");
+    return { module: value.module, params, material };
   }
   async function createSource(input, metadata, overrides) {
     const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
@@ -143,7 +158,10 @@
       if (id !== null && !byId.has(id)) fail("Missing track sample source");
       return id;
     });
-    return { schema: SCHEMA, name, tempo, phase: project.phase, cycle,
+    const settings = project.vessels === undefined ? [null, null, null, null, null] : project.vessels;
+    if (!Array.isArray(settings) || settings.length !== 5) fail("Invalid project vessels");
+    const vessels = settings.map(vessel);
+    return { schema: SCHEMA, name, tempo, phase: project.phase, cycle, vessels,
       scene: { steps, tracks: 5, grid, tempo, phase: project.phase }, trackSources, sources };
   }
   function serialize(project, overrides) {
@@ -172,5 +190,5 @@
     return project;
   }
   return { SCHEMA, DEFAULT_LIMITS, limits, createSource, sourceBytes, equalSlices, digest,
-    validateProject, serialize, deserialize, replaceTrackSource };
+    validateProject, serialize, deserialize, replaceTrackSource, vessel };
 });

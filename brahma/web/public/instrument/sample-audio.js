@@ -17,6 +17,23 @@
     constructor(context, destination, overrides) {
       this.context = context; this.destination = destination; this.limits = M.limits(overrides);
       this.entries = new Map(); this.voices = new Set(); this.generation = 0;
+      this.meters = new Map();
+    }
+    trackBus(track) {
+      if (!this.meters.has(track)) {
+        const analyser = this.context.createAnalyser(); analyser.fftSize = 512;
+        analyser.connect(this.destination);
+        this.meters.set(track, { analyser, wave: new Float32Array(512) });
+      }
+      return this.meters.get(track).analyser;
+    }
+    level(track) {
+      const meter = this.meters.get(track);
+      if (!meter || !Array.from(this.voices).some(voice => voice.track === track)) return { rms: 0, peak: 0, wave: null };
+      meter.analyser.getFloatTimeDomainData(meter.wave);
+      let sum = 0, peak = 0;
+      for (const value of meter.wave) { sum += value * value; peak = Math.max(peak, Math.abs(value)); }
+      return { rms: Math.sqrt(sum / meter.wave.length), peak, wave: meter.wave };
     }
     async loadSources(sources, decoded) {
       if (sources.length > this.limits.maxSources) throw new Error("Source count exceeds project limit");
@@ -61,8 +78,8 @@
       envelope.gain.linearRampToValueAtTime(gain, t + fade);
       envelope.gain.setValueAtTime(gain, t + duration - fade);
       envelope.gain.linearRampToValueAtTime(0, t + duration);
-      source.connect(filter); filter.connect(envelope); envelope.connect(this.destination);
-      const voice = { source, filter, envelope };
+      source.connect(filter); filter.connect(envelope); envelope.connect(this.trackBus(track));
+      const voice = { source, filter, envelope, track };
       const release = () => {
         source.disconnect(); filter.disconnect(); envelope.disconnect(); this.voices.delete(voice);
       };
