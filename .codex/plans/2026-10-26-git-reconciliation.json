@@ -1,0 +1,322 @@
+{
+  "observed_at": "2026-10-26T12:03:56.199044+00:00",
+  "origin_main": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+  "branches": [
+    {
+      "name": "backup/recovery-20261025-pre-reset",
+      "head": "a1ca265879543081a3bb37922be85a3373760ebf",
+      "upstream": "",
+      "same_named_remote_head": null,
+      "exact_remote_parity": false,
+      "reachable_from_remote_refs": [
+        "origin/fix/supercollider-recovery-resolved"
+      ],
+      "exact_head_merged_prs": [
+        87
+      ]
+    },
+    {
+      "name": "closeout/session-2026-10-24-final",
+      "head": "d113f0143bbf7f270082e3f4391fec2b4e8868c7",
+      "upstream": "origin/closeout/session-2026-10-24-final",
+      "same_named_remote_head": "d113f0143bbf7f270082e3f4391fec2b4e8868c7",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/closeout/session-2026-10-24-final"
+      ],
+      "exact_head_merged_prs": [
+        77
+      ]
+    },
+    {
+      "name": "docs/brahma-closeout-plans-2026-10-24",
+      "head": "d91b587b006c6a1bdf581ed653b4dbc2a50d2fdf",
+      "upstream": "origin/docs/brahma-closeout-plans-2026-10-24",
+      "same_named_remote_head": "d91b587b006c6a1bdf581ed653b4dbc2a50d2fdf",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/docs/brahma-closeout-plans-2026-10-24"
+      ],
+      "exact_head_merged_prs": [
+        58
+      ]
+    },
+    {
+      "name": "docs/closeout-brahma-followups-2026-10-24",
+      "head": "504fc7f6e1bd91a0079440e5e137d68612f6546e",
+      "upstream": "origin/docs/closeout-brahma-followups-2026-10-24",
+      "same_named_remote_head": "504fc7f6e1bd91a0079440e5e137d68612f6546e",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/docs/closeout-brahma-followups-2026-10-24"
+      ],
+      "exact_head_merged_prs": [
+        59
+      ]
+    },
+    {
+      "name": "docs/sampling-system-review-20261026",
+      "head": "65fb3e28af5ed6d53fb31600a65498be3824d3b8",
+      "upstream": "origin/docs/sampling-system-review-20261026",
+      "same_named_remote_head": "65fb3e28af5ed6d53fb31600a65498be3824d3b8",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/docs/sampling-system-review-20261026"
+      ],
+      "exact_head_merged_prs": []
+    },
+    {
+      "name": "docs/trait-map-viz-adamkadmon-contracts",
+      "head": "2d0f571547166ed4c796bb65355859a74794337d",
+      "upstream": "",
+      "same_named_remote_head": "2d0f571547166ed4c796bb65355859a74794337d",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/docs/trait-map-viz-adamkadmon-contracts"
+      ],
+      "exact_head_merged_prs": [
+        81
+      ]
+    },
+    {
+      "name": "feat/brahma-gemini-provider",
+      "head": "74a95ebad39a3c47d4e7becac6d68602f3b69ea8",
+      "upstream": "origin/feat/brahma-gemini-provider",
+      "same_named_remote_head": "74a95ebad39a3c47d4e7becac6d68602f3b69ea8",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/feat/brahma-gemini-provider"
+      ],
+      "exact_head_merged_prs": [
+        74
+      ]
+    },
+    {
+      "name": "feat/brahma-vector1-real-measurement",
+      "head": "cd70c7d09f57dde5c74717fe43ffa52db1ba204a",
+      "upstream": "origin/feat/brahma-vector1-real-measurement",
+      "same_named_remote_head": "cd70c7d09f57dde5c74717fe43ffa52db1ba204a",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/feat/brahma-vector1-real-measurement"
+      ],
+      "exact_head_merged_prs": [
+        75
+      ]
+    },
+    {
+      "name": "feat/launch-readiness-measurement-foundation",
+      "head": "dff22d51eedaca21504bcf3ad4a340d4c1049b6c",
+      "upstream": "",
+      "same_named_remote_head": "dff22d51eedaca21504bcf3ad4a340d4c1049b6c",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/feat/launch-readiness-measurement-foundation"
+      ],
+      "exact_head_merged_prs": [
+        82
+      ]
+    },
+    {
+      "name": "feat/sonicpi-osc-reachability",
+      "head": "67a1f29acc5d74d5a068ad6a399c5121e32046a9",
+      "upstream": "origin/feat/sonicpi-osc-reachability",
+      "same_named_remote_head": "67a1f29acc5d74d5a068ad6a399c5121e32046a9",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/feat/sonicpi-osc-reachability"
+      ],
+      "exact_head_merged_prs": [
+        69
+      ]
+    },
+    {
+      "name": "feat/tidal-sonicpi-real-availability",
+      "head": "86cc7a4e4e52da2bff58d841e9fbeb6ae26f4936",
+      "upstream": "origin/feat/tidal-sonicpi-real-availability",
+      "same_named_remote_head": "86cc7a4e4e52da2bff58d841e9fbeb6ae26f4936",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/feat/tidal-sonicpi-real-availability",
+        "origin/fix/source-json-commit-sha"
+      ],
+      "exact_head_merged_prs": [
+        66
+      ]
+    },
+    {
+      "name": "fix/smoke-python-operators",
+      "head": "617b7f824f69b588b6f04312638827bdd81a6f0c",
+      "upstream": "origin/fix/smoke-python-operators",
+      "same_named_remote_head": "617b7f824f69b588b6f04312638827bdd81a6f0c",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/fix/smoke-python-operators"
+      ],
+      "exact_head_merged_prs": [
+        90
+      ]
+    },
+    {
+      "name": "fix/substrate-contracts-and-native-tests",
+      "head": "a233999c59abb09649293128b9e86e0af346c062",
+      "upstream": "origin/main",
+      "same_named_remote_head": null,
+      "exact_remote_parity": false,
+      "reachable_from_remote_refs": [
+        "origin",
+        "origin/docs/sampling-system-review-20261026",
+        "origin/fix/release-artifact-workbench-bundle",
+        "origin/fix/smoke-boot-evidence",
+        "origin/fix/smoke-python-operators",
+        "origin/fix/verification-closeout-20261025",
+        "origin/fix/visual-cortex-ws-frames",
+        "origin/main"
+      ],
+      "exact_head_merged_prs": []
+    },
+    {
+      "name": "fix/supercollider-recovery-resolved",
+      "head": "a1ca265879543081a3bb37922be85a3373760ebf",
+      "upstream": "",
+      "same_named_remote_head": "a1ca265879543081a3bb37922be85a3373760ebf",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/fix/supercollider-recovery-resolved"
+      ],
+      "exact_head_merged_prs": [
+        87
+      ]
+    },
+    {
+      "name": "fix/verification-closeout-20261025",
+      "head": "f9075851d5a24056bb4884bc346ca2acee369df4",
+      "upstream": "origin/fix/verification-closeout-20261025",
+      "same_named_remote_head": "f9075851d5a24056bb4884bc346ca2acee369df4",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/fix/verification-closeout-20261025"
+      ],
+      "exact_head_merged_prs": [
+        94
+      ]
+    },
+    {
+      "name": "fix/visual-cortex-ws-frames",
+      "head": "d0fb7e730e420839e776ded9a46c434095d1fa97",
+      "upstream": "origin/fix/visual-cortex-ws-frames",
+      "same_named_remote_head": "d0fb7e730e420839e776ded9a46c434095d1fa97",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/fix/visual-cortex-ws-frames"
+      ],
+      "exact_head_merged_prs": [
+        89
+      ]
+    },
+    {
+      "name": "main",
+      "head": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "upstream": "origin/main",
+      "same_named_remote_head": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin",
+        "origin/docs/sampling-system-review-20261026",
+        "origin/main"
+      ],
+      "exact_head_merged_prs": []
+    },
+    {
+      "name": "merge-pr47-resolved",
+      "head": "69a7fb32b8b53f197346189b935565f3e6f63530",
+      "upstream": "origin/merge-pr47-resolved",
+      "same_named_remote_head": "69a7fb32b8b53f197346189b935565f3e6f63530",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/merge-pr47-resolved"
+      ],
+      "exact_head_merged_prs": []
+    },
+    {
+      "name": "pr/80-fix",
+      "head": "2118e0b7c11893cd84ddd63f176a94185b55fab5",
+      "upstream": "",
+      "same_named_remote_head": null,
+      "exact_remote_parity": false,
+      "reachable_from_remote_refs": [
+        "origin/docs/closeout-live-reconciliation-01a16f80"
+      ],
+      "exact_head_merged_prs": [
+        80
+      ]
+    },
+    {
+      "name": "pr47-final",
+      "head": "b2a3e0f03da8ff635ff5db7f6e3b115fa6ee46af",
+      "upstream": "origin/pr47-final",
+      "same_named_remote_head": "01e39c02bfb099b59d7c9b80b2196f0c5bf46212",
+      "exact_remote_parity": false,
+      "reachable_from_remote_refs": [
+        "origin/pr47-final"
+      ],
+      "exact_head_merged_prs": [
+        73
+      ]
+    },
+    {
+      "name": "refactor/aether-consolidate",
+      "head": "4b77c5ffe57d4bd8f4688a72234156fb41b1f253",
+      "upstream": "origin/refactor/aether-consolidate",
+      "same_named_remote_head": "4b77c5ffe57d4bd8f4688a72234156fb41b1f253",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/refactor/aether-consolidate"
+      ],
+      "exact_head_merged_prs": [
+        76
+      ]
+    },
+    {
+      "name": "review-pr47",
+      "head": "bc1dea8247c7bae8e4e560b453ba764ef88d173c",
+      "upstream": "origin/review-pr47",
+      "same_named_remote_head": "bc1dea8247c7bae8e4e560b453ba764ef88d173c",
+      "exact_remote_parity": true,
+      "reachable_from_remote_refs": [
+        "origin/fix/security-findings-20260916",
+        "origin/merge-pr47-resolved",
+        "origin/review-pr47"
+      ],
+      "exact_head_merged_prs": []
+    }
+  ],
+  "worktrees": [
+    {
+      "directory": "alchemical-synthesizer",
+      "head": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+      "branch": "refs/heads/main",
+      "tracked_and_untracked_changes": "",
+      "disposition": "retained; original owner lifecycle and ignored/private-state custody not established"
+    },
+    {
+      "directory": "alchemical-sampling-review-20261026",
+      "head": "65fb3e28af5ed6d53fb31600a65498be3824d3b8",
+      "branch": "refs/heads/docs/sampling-system-review-20261026",
+      "tracked_and_untracked_changes": "?? .codex/plans/2026-10-26-forge-verification.json\n?? .codex/plans/2026-10-26-system-verification.json",
+      "disposition": "owned review checkout; retained for review"
+    },
+    {
+      "directory": "alchemical-verify-repair-20261025",
+      "head": "f9075851d5a24056bb4884bc346ca2acee369df4",
+      "branch": "refs/heads/fix/verification-closeout-20261025",
+      "tracked_and_untracked_changes": "",
+      "disposition": "retained; original owner lifecycle and ignored/private-state custody not established"
+    }
+  ],
+  "stash": "a1361314ec4f7b4870c919a8535cca1cf7d7ba86 On fix/supercollider-recovery-resolved: superseded SC rewrites (main now has #88 fixes)",
+  "unpublished_branch_commits": "",
+  "stale_remote_tracking_refs": "",
+  "remote_branch_count": 46,
+  "disposition": "No branches, worktrees, stash, or media deleted. All pre-existing branch commits reachable from fetched remote refs. Squash merge alone does not prove ignored-state custody or release."
+}
