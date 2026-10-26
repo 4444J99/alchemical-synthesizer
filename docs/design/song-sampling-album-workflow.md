@@ -1,7 +1,12 @@
 # Song sampling in the existing Alchemical Synthesizer
 
-Status: proposed integration direction, grounded in the 2026-10-26 system review.
-This document does not claim a newly implemented sampler or an accepted UI design.
+Status: broader integration direction, grounded in the 2026-10-26 system review.
+The user authorized the browser load/save slice on 2026-10-26. That slice now
+implements local import, editable chops, sample sequencing, embedded portable
+projects, and loop WAV export; see the README and sample-load-save plan/evidence.
+Native sample transfer, shared Golem transport, modular processing, and album
+arrangement below remain unfinished. Musical acceptance with the user's songs
+has not been measured.
 
 ## Intent
 
@@ -78,8 +83,9 @@ intensity does not establish a publication status.
 | Build a separate sampler application | Independent interface | Duplicates the existing transport, session, and engine integrations |
 
 Recommendation: the first approach, with Forge as its file-processing backend.
-This is a proposed direction, not a recorded user selection. Do not create a
-second parallel sampler engine or make AETHER a prerequisite.
+The browser load/save milestone extends the existing instrument with a shared
+live/offline WebAudio renderer; it does not yet connect the native sample engine.
+Do not create a second sampler application or make AETHER a prerequisite.
 
 ## First acceptance slice
 

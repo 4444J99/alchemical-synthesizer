@@ -137,6 +137,6 @@
     }
     return project;
   }
-  return { SCHEMA, DEFAULT_LIMITS, limits, createSource, sourceBytes, equalSlices,
+  return { SCHEMA, DEFAULT_LIMITS, limits, createSource, sourceBytes, equalSlices, digest,
     validateProject, serialize, deserialize };
 });

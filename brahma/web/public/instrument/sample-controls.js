@@ -72,8 +72,11 @@
         button.addEventListener("click", async () => {
           selectedSlice = i; renderEditor();
           try {
-            const engine = audio(); await engine.context.resume(); bridge.local();
-            engine.trigger(track(), { sampleId: source.id, slice: i, note: 60, gain: 0.8, dur: slice.end - slice.start, t: 0 }, engine.context.currentTime);
+            const engine = audio(), generation = engine.generation, trackIndex = track();
+            await engine.context.resume();
+            if (engine.generation !== generation) return;
+            bridge.local();
+            engine.trigger(trackIndex, { sampleId: source.id, slice: i, note: 60, gain: 0.8, dur: slice.end - slice.start, t: 0 }, engine.context.currentTime);
           } catch (e) { report(e.message, true); }
         });
         chops.appendChild(button);
@@ -104,13 +107,16 @@
       operation("Loading audio...", async () => {
         if (file.size > caps.maxSourceBytes) throw new Error("Audio exceeds the source size limit");
         const bytes = new Uint8Array(await file.arrayBuffer()), engine = audio();
-        let buffer;
-        try { buffer = await engine.context.decodeAudioData(bytes.slice().buffer); }
-        catch (_) { throw new Error("Cannot decode this audio file. Try WAV, MP3, or another browser-supported format."); }
-        if (buffer.length * buffer.numberOfChannels * 4 > caps.maxDecodedBytes) throw new Error("Decoded audio exceeds memory budget");
-        const source = await M.createSource(bytes, { name: file.name, mime: file.type || "application/octet-stream",
-          duration: buffer.duration, sampleRate: buffer.sampleRate, channels: buffer.numberOfChannels }, caps);
-        const existing = sources.find(s => s.id === source.id), candidate = snapshot();
+        const hash = await M.digest(bytes), existing = sources.find(s => s.sha256 === hash);
+        let buffer, source = existing;
+        if (!existing) {
+          try { buffer = await engine.context.decodeAudioData(bytes.slice().buffer); }
+          catch (_) { throw new Error("Cannot decode this audio file. Try WAV, MP3, or another browser-supported format."); }
+          if (buffer.length * buffer.numberOfChannels * 4 > caps.maxDecodedBytes) throw new Error("Decoded audio exceeds memory budget");
+          source = await M.createSource(bytes, { name: file.name, mime: file.type || "application/octet-stream",
+            duration: buffer.duration, sampleRate: buffer.sampleRate, channels: buffer.numberOfChannels }, caps);
+        }
+        const candidate = snapshot();
         if (!existing) candidate.sources.push(source);
         candidate.trackSources[track()] = source.id;
         const checked = M.validateProject(candidate, caps);

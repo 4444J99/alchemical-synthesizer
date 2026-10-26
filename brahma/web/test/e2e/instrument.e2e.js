@@ -107,6 +107,8 @@ describe("local sample instrument", () => {
     assert.equal(rendered.toString("ascii", 0, 4), "RIFF");
     assert.equal(rendered.readUInt16LE(22), 2);
     const sr = rendered.readUInt32LE(24), channels = rendered.readUInt16LE(22);
+    assert.equal(rendered.readUInt32LE(40) / (channels * 2), Math.round(16 * 60 / 104 / 4 * sr),
+      "loop WAV must have exactly one musical cycle, without trailing padding");
     let crossings = 0, peak = 0, previous = 0;
     for (let i = Math.ceil(sr * 0.025); i < Math.floor(sr * 0.1); i++) {
       const sample = rendered.readInt16LE(44 + i * channels * 2);
@@ -116,6 +118,8 @@ describe("local sample instrument", () => {
     assert.ok(peak > 500, "export must contain the uploaded sound");
     const hz = crossings / 0.075;
     assert.ok(hz > 420 && hz < 470, `expected the 440 Hz chop, got ${hz} Hz`);
+    if (process.env.BRAHMA_INSTRUMENT_SCREENSHOT) await ctx.page.screenshot({
+      path: process.env.BRAHMA_INSTRUMENT_SCREENSHOT, fullPage: true });
     assert.deepEqual(ctx.errors, []);
   });
 
@@ -151,5 +155,56 @@ describe("local sample instrument", () => {
     }, project);
     assert.equal(measured.peak, 0, "stop must cancel future as well as current voices");
     assert.match(measured.missing, /missing|unavailable/i);
+  });
+
+  it("duplicate imports reuse the decoded buffer and preserve edited chops", async t => {
+    if (skip(t)) return;
+    await ctx.page.evaluate(() => {
+      window.decodeCount = 0;
+      window.originalDecode = AudioContext.prototype.decodeAudioData;
+      AudioContext.prototype.decodeAudioData = function (...args) {
+        window.decodeCount++; return window.originalDecode.apply(this, args);
+      };
+    });
+    try {
+      await upload("#audio-file", ctx.donor); await status("Loaded existing source");
+      assert.equal(await ctx.page.evaluate(() => window.decodeCount), 0);
+      assert.equal(await ctx.page.$$eval("#sample-source option", opts => opts.length), 2);
+      await ctx.page.click('#chops button[data-slice="2"]');
+      assert.equal(await ctx.page.$eval("#slice-end", el => el.value), "0.700");
+    } finally {
+      await ctx.page.evaluate(() => { AudioContext.prototype.decodeAudioData = window.originalDecode; });
+    }
+  });
+
+  it("Stop cancels an audition waiting for the audio context to resume", async t => {
+    if (skip(t)) return;
+    const triggers = await ctx.page.evaluate(async () => {
+      const originalResume = AudioContext.prototype.resume, originalTrigger = SampleAudio.Renderer.prototype.trigger;
+      let resolveResume, count = 0;
+      AudioContext.prototype.resume = () => new Promise(resolve => { resolveResume = resolve; });
+      SampleAudio.Renderer.prototype.trigger = function (...args) { count++; return originalTrigger.apply(this, args); };
+      try {
+        document.querySelector('#chops button[data-slice="2"]').click();
+        document.querySelector("#stop").click();
+        resolveResume(); await Promise.resolve(); await Promise.resolve();
+        return count;
+      } finally {
+        document.querySelector("#stop").click();
+        AudioContext.prototype.resume = originalResume; SampleAudio.Renderer.prototype.trigger = originalTrigger;
+      }
+    });
+    assert.equal(triggers, 0, "Stop must invalidate pending auditions as well as existing voices");
+  });
+
+  it("changing engines stops playback and cannot send sample notes over OSC", async t => {
+    if (skip(t)) return;
+    await ctx.page.click("#play");
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+    await ctx.page.select("#adapter", "osc");
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+    await ctx.page.click("#play"); await status("Imported samples play in WebAudio");
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+    await ctx.page.select("#adapter", "webaudio");
   });
 });

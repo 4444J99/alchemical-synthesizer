@@ -16,7 +16,7 @@
   class Renderer {
     constructor(context, destination, overrides) {
       this.context = context; this.destination = destination; this.limits = M.limits(overrides);
-      this.entries = new Map(); this.voices = new Set();
+      this.entries = new Map(); this.voices = new Set(); this.generation = 0;
     }
     async loadSources(sources, decoded) {
       if (sources.length > this.limits.maxSources) throw new Error("Source count exceeds project limit");
@@ -73,6 +73,7 @@
       return voice;
     }
     stopAll() {
+      this.generation++;
       for (const voice of this.voices) {
         try { voice.source.stop(this.context.currentTime); } catch (_) { /* already ended */ }
         voice.source.disconnect(); voice.filter.disconnect(); voice.envelope.disconnect();
@@ -83,7 +84,9 @@
   async function renderLoop(project, overrides) {
     const clean = M.validateProject(project, overrides), rate = 44100;
     const stepDur = 60 / clean.tempo / 4, duration = clean.scene.steps * stepDur;
-    const context = new OfflineAudioContext(2, Math.ceil((duration + 0.03) * rate), rate);
+    // Export exactly one cycle. Voices and effect tails crossing its end are cut
+    // at the musical boundary, rather than adding time that drifts on repetition.
+    const context = new OfflineAudioContext(2, Math.round(duration * rate), rate);
     const renderer = new Renderer(context, outputGraph(context, context.destination), overrides);
     await renderer.loadSources(clean.sources);
     for (let step = 0; step < clean.scene.steps; step++) {

@@ -63,6 +63,7 @@
     },
     connected: function () { return this.ready; },
     trigger: function (track, ev /*, when */) {
+      if (ev.sampleId != null) throw new Error("Imported samples play in WebAudio (local). Select that engine to hear this pattern.");
       if (!this.ready) return;
       // Control message; the SC rack renders. Namespace is bridge-allowed (/brahma/).
       this.ws.send(JSON.stringify({
@@ -221,6 +222,7 @@
   $("tempo").addEventListener("input", function (e) { state.tempo = +e.target.value; $("tempoval").textContent = state.tempo; });
   $("cmd").addEventListener("change", function (e) { state.currentCmd = e.target.value; });
   $("adapter").addEventListener("change", function (e) {
+    stop();
     state.adapterName = e.target.value;
     $("s-adapter").textContent = adapter().name;
     if (state.adapterName === "osc") { OscAdapter.connect(); } else { setOscStatus(""); }

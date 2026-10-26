@@ -122,12 +122,46 @@ Manual fallback: symlink those six files from `brahma/sc/` into `Platform.userEx
     - `http://localhost:3000` — **Etz Chaim**: the recursive Tree of Life, and a *universal* synthesizer. Organisms emanate down the Lightning Flash into the ten Sephirot; an Ouroboros coils the cosmos and every illumined vessel contains the Tree again (fractal). **Retune it across four substrates** — `1` Sound · `2` Idea · `3` Product · `4` Cosmos (`T` to cycle) — the one engine re-expressing timbre, thought, value, and worlds through the same vessels (see [`docs/the-universal-synthesizer.md`](docs/the-universal-synthesizer.md)). Self-emanates a demo stream when SuperCollider is silent. Keys: `SPACE` flash · `+/-` recursion depth · `O` ouroboros · `M` multiverse · `D` demo · `H` help.
     - `http://localhost:3000/cortex` — Canvas web patching UI (module browser, drag-drop, cable routing)
     - `http://localhost:3000/golem` — Golem percussion web UI (sequencer, mixer, patchbay)
+    - `http://localhost:3000/instrument/` — Local audio sampler, editable chops, step sequencer, portable projects, and loop WAV export (see below)
     - `http://localhost:3000/workbench` — Browser live-coding workbench (multi-buffer CodeMirror + Strudel patterns against Brahma; human/agent approval for AI composition)
 3.  Launch **Pure Data** (optional):
     - `brahma/pd/main.pd` — master control surface with OSC bridge
     - `brahma/pd/canvas/brahma_canvas.pd` — Pd-native visual patching via GOP abstractions
 
 ---
+
+## Sampling a local song
+
+Start Visual Cortex as above, then open `/instrument/`. SuperCollider is not
+required for this browser sample workflow.
+
+1. Choose a track and load a local audio file (WAV, MP3, or a format your browser
+   can decode). The source stays in the browser; it is not uploaded.
+2. Click one of eight chop pads to audition it. Edit Start/End in seconds and
+   apply the boundaries. Click grid cells to place the selected chop. Existing
+   notes retain their source; changing the track's source affects new notes.
+3. Press Play. Grid notes are gated to the step/command duration; pads audition
+   the whole chop. Choose Synth voice to add the existing browser tones.
+4. Save Project downloads a `.brahma.json` containing original audio bytes,
+   SHA-256 identities, chops, pattern, tempo, phase, and cycle. Open Project
+   validates and restores it stopped. Keep that file: browser reload alone does
+   not preserve a session. A failed open leaves the current session intact.
+5. Export Loop downloads a stereo 44.1 kHz PCM16 WAV of the current pattern and
+   cycle. Its duration is exactly one cycle (rounded to the nearest frame);
+   overlap and effect tails are cut at that boundary. Auto-phase evolution
+   across later cycles is not an arrangement export.
+
+Stop cancels sounding and scheduled browser voices, including pending pad
+auditions. Switching engines stops transport. Imported samples require WebAudio;
+native SC sample transfer, modular routing, shared Golem transport, and album
+arrangement remain tracked in [#95](https://github.com/4444J99/alchemical-synthesizer/issues/95).
+
+Default project limits are 64 MiB of total original audio, 90 MiB of project JSON,
+256 MiB of retained decoded audio, and 64 sources. Embedding base64 increases file
+size. These are validation budgets, not a browser process memory cap: decoding
+and transactional replacement can temporarily use more memory. Hosts can set
+`window.BRAHMA_SAMPLE_LIMITS` before the instrument scripts load; keys are
+`maxSourceBytes`, `maxProjectBytes`, `maxDecodedBytes`, and `maxSources`.
 
 ## System Overview
 
