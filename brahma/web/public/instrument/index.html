@@ -41,14 +41,44 @@
         .hint { color:var(--dim); font-size:11px; margin-top:14px; line-height:1.6; }
         code { color:var(--warn); }
         .provisional { color:var(--warn); font-size:11px; margin-top:8px; }
+        .samples { border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:16px; margin-bottom:16px; }
+        .samples h2 { font-size:14px; margin:0 0 12px; }
+        input[type=number], input[type=text] { background:#0a0f22; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:7px; }
+        input[type=number] { width:95px; }
+        input[type=file] { max-width:260px; font-size:12px; color:var(--ink); }
+        #waveform { width:100%; height:100px; background:#020510; border-radius:8px; display:block; margin:12px 0; }
+        #chops { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+        #chops button[aria-pressed=true] { border-color:var(--warn); color:var(--warn); }
+        #sample-status { min-height:1.5em; font-size:12px; overflow-wrap:anywhere; }
+        #sample-status.error { color:#ff9b9b; }
+        button:disabled, input:disabled, select:disabled { opacity:0.5; cursor:default; }
+        table.grid td.sample { background:#6bd6ff; }
+        .samples select { max-width:240px; }
     </style>
 </head>
 <body>
 <div class="wrap">
     <h1>BRAHMA · INSTRUMENT</h1>
-    <p class="sub">tracker-brained, Ableton-bodied — play the sampler-organism live. Click cells; pick a per-cell command; let the arc redistribute.</p>
+    <p class="sub">Load a song, find its fragments, and play them into a pattern.</p>
 
     <canvas class="orb" id="orb"></canvas>
+
+    <section class="samples" aria-labelledby="sample-heading">
+        <h2 id="sample-heading">Your samples</h2>
+        <div class="controls">
+            <label>Add audio <input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg,.aif,.aiff"></label>
+            <label>Track <select id="sample-track"></select></label>
+            <label>Sound for new notes <select id="sample-source"><option value="">Synth voice</option></select></label>
+        </div>
+        <canvas id="waveform" aria-label="Selected source waveform and chop boundaries"></canvas>
+        <div id="chops" aria-label="Audition and select a chop"></div>
+        <div class="controls">
+            <label>Start (seconds) <input id="slice-start" type="number" min="0" step="0.001" disabled></label>
+            <label>End (seconds) <input id="slice-end" type="number" min="0" step="0.001" disabled></label>
+            <button id="apply-slice" disabled>Apply chop</button>
+        </div>
+        <p id="sample-status" role="status" aria-live="polite">Audio stays on this device. Select a chop, then place it in the grid.</p>
+    </section>
 
     <div class="controls">
         <button class="primary" id="play">▶ play</button>
@@ -79,11 +109,17 @@
                 <option value="osc">OSC → SuperCollider</option>
             </select>
         </label>
-        <button id="freeze">❄ freeze specimen</button>
         <button id="clear">clear</button>
     </div>
 
     <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+
+    <div class="controls" style="margin-top:16px">
+        <label>Project <input id="project-name" type="text" value="Brahma session" maxlength="1024"></label>
+        <button id="freeze">Save project</button>
+        <label>Open project <input id="open-project" type="file" accept=".json,.brahma.json,application/json"></label>
+        <button id="export-loop">Export loop WAV</button>
+    </div>
 
     <div class="status">
         <span>phase <span class="badge phase-readable" id="s-phase">manual</span></span>
@@ -92,19 +128,23 @@
         <span id="s-osc"></span>
     </div>
 
-    <p class="provisional">Frozen specimens snapshot an <b>immutable scene_version</b> — a shareable identity for an otherwise mutable, living scene.</p>
+    <p class="provisional">Save project includes the original audio, chops, pattern, and tempo. Reopening restores the session stopped. Export loop WAV records one pass of the current grid.</p>
     <p class="hint">
         Per-cell commands (AETHER §4): <code>RT</code> ratchet · <code>ST</code> stutter (decaying roll) ·
         <code>OV</code> overlap (legato) · <code>HU</code> humanize · <code>DN</code> density gate.
         The <b>arc</b> (READABLE → CLUSTER → DISPERSAL) is the same metabolism the live broadcast runs
-        (<code>tools/cellcycle.py</code>); "auto" walks it. The <b>OSC</b> engine drives the live
-        SuperCollider rack through the Visual Cortex bridge (control only — capturing its audio back
-        needs a virtual audio device, which stays gated).
+        (<code>aether/tools/cellcycle.py</code>); "auto" walks it. Imported samples play in
+        <b>WebAudio (local)</b>. The legacy OSC adapter does not transfer sample audio;
+        native SuperCollider sample control is a separate integration. Existing synth notes
+        remain available alongside sample notes. Numbered blue cells play chops.
     </p>
 </div>
 
 <!-- brain first (pure logic, also node-tested), then the browser body. -->
 <script src="pattern.js"></script>
+<script src="sample-project.js"></script>
+<script src="sample-audio.js"></script>
+<script src="sample-controls.js"></script>
 <script src="instrument.js"></script>
 </body>
 </html>

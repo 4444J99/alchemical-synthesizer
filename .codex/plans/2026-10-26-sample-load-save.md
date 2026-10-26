@@ -59,13 +59,13 @@ Files: `public/instrument/sample-audio.js`, `instrument.js`, `index.html`,
 Interfaces: renderer loads source bytes into AudioBuffers, triggers bounded slice
 voices, cancels active voices, and renders an offline loop through the same path.
 
-- [ ] Add browser regressions for importing a synthetic WAV, editing a chop,
+- [x] Add browser regressions for importing a synthetic WAV, editing a chop,
   sequencing it, saving, reopening, corrupt-project rollback, and audible WAV export.
-- [ ] Run against the old UI and record expected failures before implementation.
-- [ ] Implement source/track selection, waveform/chop controls, audition, save/open,
+- [x] Run against the old UI and record expected failures before implementation.
+- [x] Implement source/track selection, waveform/chop controls, audition, save/open,
   status/error feedback, transactional restore, and loop WAV export.
-- [ ] Verify real rendered sample signal, not oscillator fallback; verify stop.
-- [ ] Run browser tests, web suite, pattern self-test, and strict smoke; commit.
+- [x] Verify real rendered sample signal, not oscillator fallback; verify stop.
+- [x] Run browser tests, web suite, pattern self-test, and strict smoke; commit.
 
 ## Task 3: Review and publication
 
@@ -84,3 +84,9 @@ voices, cancels active voices, and renders an offline loop through the same path
 - Task 1: seven regressions failed before implementation. Project and pattern
   contracts now pass; full web suite 158/158. Fixture hash corrected against
   independent Python hashlib output (last character was transcribed incorrectly).
+- Task 2: browser acceptance failed on the old UI's missing audio input, then
+  passed on real local audio import, edited chops, byte-exact save/reopen,
+  measured 440 Hz chop export, corrupt-project rollback, and cancellation of
+  future sample voices. Final gates: web 158/158, browser 7/7, strict smoke 82/0/0.
+  Added portable-project regressions to smoke and sample browser acceptance to CI.
+  Evidence: `2026-10-26-sample-load-save-verification.json`.

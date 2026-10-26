@@ -1,0 +1,99 @@
+{
+  "base": "9e4a82bdc283bfe268f35985f1a4126b50f620ee",
+  "implementation": "working tree, sample load/save",
+  "gates": [
+    {
+      "gate": "web",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 6.37,
+      "output_tail": [
+        "\u2714 workbench licence: every shipped source carries an AGPL SPDX header (1.089667ms)",
+        "\u2714 workbench licence: the page offers its source and imports only its own bundle (0.082625ms)",
+        "\u2714 GET /workbench/source.json names the licence, repository and dependencies (16.08675ms)",
+        "\u2714 GET /workbench/ serves the page (2.127042ms)",
+        "\u2714 event-map: note control becomes a Brahma event (0.403958ms)",
+        "\u2714 event-map: a sound matching a real module selects that engine (0.0825ms)",
+        "\u2714 event-map: note names become MIDI, since Strudel passes strings (0.138875ms)",
+        "\u2714 event-map: pitch comes from note, freq, or nothing (0.099708ms)",
+        "\u2714 event-map: velocity, duration and params are clamped and filtered (0.320584ms)",
+        "[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)",
+        "\u2139 tests 158",
+        "\u2139 suites 0",
+        "\u2139 pass 158",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 6289.797959"
+      ]
+    },
+    {
+      "gate": "browser",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/e2e/instrument.e2e.js",
+        "test/e2e/workbench.e2e.js"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.75,
+      "output_tail": [
+        "  \u2714 imports real audio, edits chops, saves bytes, reopens and exports the chosen sample (328.311542ms)",
+        "  \u2714 failed project restore preserves the currently playable source and pattern (30.055958ms)",
+        "  \u2714 real renderer cancels scheduled sample voices and refuses missing samples (15.601875ms)",
+        "\u2714 local sample instrument (1281.703709ms)",
+        "\u25b6 workbench E2E",
+        "  \u2714 Tier 1 \u2014 UI: the page serves, claims the human role, and strips the token from the URL (1.696459ms)",
+        "  \u2714 Tier 2 \u2014 protocol: server frames are typed JSON and `run` is acknowledged (130.367333ms)",
+        "  \u2714 Tier 3 \u2014 engine: a scheduled hap reaches the engine socket as a typed play packet (0.415333ms)",
+        "  \u2714 Tier 4 \u2014 panic: the panic control reaches the panic address (3.434459ms)",
+        "\u2714 workbench E2E (1232.37475ms)",
+        "\u2139 tests 7",
+        "\u2139 suites 2",
+        "\u2139 pass 7",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 2712.435542"
+      ]
+    },
+    {
+      "gate": "strict_smoke",
+      "command": [
+        "bash",
+        "tools/smoke.sh",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 5.78,
+      "output_tail": [
+        "  PASS  bash -n aether/deploy/entrypoint.sh",
+        "  PASS  bash -n tools/smoke.sh",
+        "  PASS  rebroadcast.json valid (targets + video + audio)",
+        "  PASS  rebroadcast.sh --dry-run encodes a FLV (audio->visualizer->flv)",
+        "  PASS  aether/deploy/wrangler.toml valid (name + containers + r2_buckets)",
+        "  PASS  aether/deploy/Dockerfile has FROM + ENTRYPOINT",
+        "  PASS  AETHER Dockerfile COPY sources exist in the declared build context",
+        "  PASS  exists: aether/deploy/README.md",
+        "  PASS  exists: brahma/sc/13_nrt_renderer.scd",
+        "  PASS  exists: brahma/sc/14_stem_voices.scd",
+        "  PASS  exists: brahma/web/public/tree/video.js",
+        "  PASS  exists: aether/web/listener/index.html",
+        "  PASS  exists: aether/web/listener/aether.js",
+        "  PASS  exists: brahma/web/public/instrument/index.html",
+        "  PASS  Ouroboros: submission absorbed + lineage recorded",
+        "",
+        "=== Summary: 82 passed, 0 failed, 0 skipped ===",
+        "SMOKE: PASS"
+      ]
+    }
+  ]
+}

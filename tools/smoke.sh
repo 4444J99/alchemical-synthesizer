@@ -39,6 +39,9 @@ req_files=(
   "brahma/web/bin/brahma-mcp.js"
   "brahma/web/lib/mcp/server.js"
   "brahma/web/lib/mcp/client.js"
+  "brahma/web/public/instrument/sample-project.js"
+  "brahma/web/public/instrument/sample-audio.js"
+  "brahma/web/public/instrument/sample-controls.js"
   "docs/agent-clients.md"
   "brahma/ableton/src/index.js"
   "forge/validate_audio.py"
@@ -68,6 +71,8 @@ if command -v node >/dev/null 2>&1; then
             brahma/web/public/sketch.js \
             brahma/web/public/tree/video.js aether/web/listener/aether.js \
             brahma/web/public/instrument/pattern.js brahma/web/public/instrument/instrument.js \
+            brahma/web/public/instrument/sample-project.js brahma/web/public/instrument/sample-audio.js \
+            brahma/web/public/instrument/sample-controls.js \
             aether/deploy/serve.js aether/deploy/worker.mjs forge/render_video.mjs; do
     [ -f "$js" ] || continue
     if node --check "$js" >/dev/null 2>&1; then ok "node --check $js"; else bad "node --check $js"; fi
@@ -75,6 +80,11 @@ if command -v node >/dev/null 2>&1; then
   # The tracker/sampler instrument's brain (pattern.js) is pure + node-testable.
   if [ -f brahma/web/public/instrument/pattern.js ]; then
     if node brahma/web/public/instrument/pattern.js --self-test >/tmp/brahma_pattern.log 2>&1; then ok "instrument pattern.js --self-test"; else bad "instrument pattern.js --self-test"; tail -8 /tmp/brahma_pattern.log; fi
+  fi
+  if node --test brahma/web/test/sample-project.test.js >/tmp/brahma_sample_project.log 2>&1; then
+    ok "sample project contracts (audio integrity, bounds, pattern references)"
+  else
+    bad "sample project contracts (see /tmp/brahma_sample_project.log)"; tail -12 /tmp/brahma_sample_project.log
   fi
 else
   skip "node not installed — JS syntax"
