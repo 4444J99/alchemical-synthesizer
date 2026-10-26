@@ -58,8 +58,8 @@ modules; partial native renders falsely accepted; catalogue coverage gaps.
 ## Task 3: Durable handoff
 
 - [x] Document commands, exact module coverage and remaining live/UI integration.
-- [ ] Publish code/tests/sanitized evidence as a PR; retain private songs/results.
-- [ ] Verify local/remote head parity and clean tracked state.
+- [x] Publish code/tests/sanitized evidence as a PR; retain private songs/results.
+- [x] Verify local/remote head parity and clean tracked state.
 
 ## Acquisition evidence
 
@@ -77,3 +77,12 @@ the repaired spectral filter. Sixteen tests passed; strict smoke passed 86 check
 Browser observation verified catalogue/filter behavior, actual WAV playback, and
 single-player exclusivity. Native DSP shutdown and oversized compiler-function
 failures found during development were fixed without disabling installed plugins.
+
+## Publication receipt
+
+Implementation commit `e51c559ccee25e5d73df0077805533c980f9991a` was pushed and
+read back from the remote with clean tracked state. PR #99 is open, stacked on
+#98: https://github.com/4444J99/alchemical-synthesizer/pull/99. No merge or live
+deployment is claimed. All three final runs exited 0 with 224 rendered and 21
+requires_patch entries each. Original and 672 output hashes were verified.
+The retained private listening entry is `forge/out/assimilation/selected-20261026.html`.
