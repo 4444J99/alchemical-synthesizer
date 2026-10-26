@@ -14,6 +14,13 @@ Real-time SC buffer transfer, the separate live Golem sequencer, live modular
 routing, and album arrangement below remain unfinished. Render validation with
 selected songs does not establish musical acceptance.
 
+The [original-organism and material reconciliation](mimicry-material-universe.md)
+connects this workflow to the original ChatGPT designs, the Claude drum machine,
+Universal Node Network, and related musical/visual sources. It defines the shared
+transparent-vessel/material direction, preserves each organism's distinct mimicry,
+and separates audible module auditions from behavioral verification. Material
+processing and full organism acceptance remain implementation work.
+
 ## Intent
 
 Use selected songs as sample material for an album. Import audio, choose useful

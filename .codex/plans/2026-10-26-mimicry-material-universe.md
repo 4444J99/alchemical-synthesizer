@@ -31,16 +31,18 @@ session-owned isolated checkout; other repositories are read-only sources.
 
 ## Steps
 
-- [ ] Inventory and read existing original design transcripts and Claude drum
-  machine artifacts; locate additional provider originals where retrievable.
-- [ ] Inspect Universal Node Network and related music/visual repositories at
+- [x] Inventory the nine checked-in original design conversations, review their
+  requirements and the Claude prose/final React artifact. Provider-complete history
+  and earlier Claude code regression remain explicit gaps in the source inventory.
+- [x] Inspect Universal Node Network and related music/visual repositories at
   explicit revisions, reconciling ownership and archived/consolidated sources.
-- [ ] Trace the organism designs to current native/browser modules and identify
+- [x] Trace the organism designs to current native/browser modules and identify
   concrete behavior gaps and source-completeness gaps.
-- [ ] Extend the existing design documentation with a cited universe map, common
+- [x] Extend the existing design documentation with a cited universe map, common
   material/vessel contract, distinct mimicry behaviors and verification criteria.
-- [ ] Validate source links and coverage; commit/push a reviewable continuation
-  with named remaining work in its existing owner.
+- [x] Validate source links and coverage; prepare a reviewable continuation with
+  named remaining work in its existing owner. Publication is recorded by the PR
+  from this branch, stacked on the playable-sketch branch.
 
 ## Initial evidence
 
@@ -49,3 +51,17 @@ The checkout contains nine original Q/A design files under `docs/design/`, a
 `docs/absorb-alchemize/`. Universal Node Network is currently reachable remotely
 under organvm-iv-taxis. Registry descriptions and consolidation notes are source
 hypotheses until current repository evidence is read.
+
+## Validation and remaining work
+
+- Verified all 11 inventoried local file hashes, byte/line counts and source IDs.
+- Verified 30 authored relative links and four remote source/revision bindings.
+- Recomputed the native catalogue: 245 definitions. Standalone audition
+  eligibility also checks output routing; excluding infrastructure alone is not
+  the correct denominator.
+- `git diff --check` passed. This continuation changes documentation only;
+  no audio, provider-history completeness, material implementation or performance
+  acceptance result is claimed.
+- Issue #95 and `docs/design/mimicry-material-universe.md` retain the next work:
+  authoritative provider coverage, earlier-artifact reconciliation, behavioral
+  verification of every module, shared material mappings and integrated acceptance.

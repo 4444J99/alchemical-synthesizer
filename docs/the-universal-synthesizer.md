@@ -82,6 +82,12 @@ itself a world that can be absorbed, transmuted, and re-expressed. On and on.
 
 ## Where this is going
 
+For the sound substrate, the [original-organism and material reconciliation](design/mimicry-material-universe.md)
+binds the inherited mimicry/absorption designs to the shared transparent-vessel
+direction and related music repositories. Its implementation findings and source
+coverage limits qualify the next-version design; visual substrate switching alone
+does not establish those audio behaviors.
+
 The web layer demonstrates the substrate generalization today. The SuperCollider
 engine is the natural home for it to become *real*:
 
