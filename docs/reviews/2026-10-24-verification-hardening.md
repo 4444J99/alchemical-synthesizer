@@ -13,7 +13,8 @@ system with an incomplete measured absorption workflow and a commerce scaffold.
 Focused local tests do not establish full-rack hardware operation, perceptual
 fidelity, production billing or an operational cloud radio.
 
-Work is prepared on `fix/verified-hardening-2026-10-24` for a draft review PR.
+Work is published on `fix/verified-hardening-2026-10-24` as
+[draft PR103](https://github.com/4444J99/alchemical-synthesizer/pull/103).
 No merge, deployment, release publication, paid provider call, account purchase,
 repository split, visibility change, or destructive cleanup was performed.
 Publication and hosted-check status belong to the final PR/handoff record; they
@@ -309,13 +310,15 @@ The exact commands and source fingerprints are recorded in
 | Strict repository smoke | 75 passed | Repository integration and bounded media paths |
 | Foundry smoke | 21 passed | Local surface integration and actual fixture audio serving |
 | Full npm audits, both packages | 0 findings | Advisory inventory at the time of the check |
+| Actual committed-source distribution | Passed | 421 files, TAR/ZIP integrity, clean dependency install, seven HTTP endpoints and exact served bundle |
 
 The Linux web run explicitly skipped two macOS/Seatbelt-only assertions. All
 other listed final runs completed without skips; the required real browser and
 both native opt-ins ran. No macOS sandbox acceptance is inferred from Linux. Counts describe
 different levels of grouping and overlap, so they should not be added into a claim
-of independent coverage. A packaged archive launch/checksum check is recorded in the
-handoff after building the committed source.
+of independent coverage. The committed-source archive passed extraction, dependency
+installation, checksums and seven HTTP checks. The public-head rebuild and hosted
+status are recorded in the final handoff.
 
 Independent review found and then reverified the AETHER, workflow, browser, legacy
 payment, concurrent-buffer and normalization fixes. The root independently inspected

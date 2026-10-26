@@ -3,7 +3,7 @@
     "2026-10-24",
     "2026-10-26"
   ],
-  "recorded_at_utc": "2026-10-26T18:03:45.839328+00:00",
+  "recorded_at_utc": "2026-10-26T20:25:00.810125+00:00",
   "repository": "4444J99/alchemical-synthesizer",
   "branch": "fix/verified-hardening-2026-10-24",
   "initial_revision": "bf6c8257ac976efaf526ae1b612bb7371f96f64a",
@@ -597,8 +597,8 @@
       "exit_code": 0,
       "passed": 19,
       "skipped": 0,
-      "log_name": "alchemical-final-tools.log",
-      "log_sha256": "68b096488f14feb0eed43111e63abebda66df93adce09814e304cf412464a6f8"
+      "log_name": "alchemical-final-tools-complete.log",
+      "log_sha256": "1cd67510440d05612a5d67c16011a343b05216b8394e441c6e1f9a755260370e"
     },
     {
       "gate": "smoke",
@@ -669,8 +669,39 @@
   },
   "review_status": "Separate read-only agent reviews and root verification completed for changed slices; four explicitly separate open-stack findings remain in 2026-10-26-open-stack-review.md.",
   "logs_note": "Full local logs are not committed because normal test server output can contain ephemeral local capabilities. Hashes identify the recorded runs; these records are not signed attestations.",
-  "artifact_status": "Actual committed-source archive check is recorded in the publication handoff.",
-  "publication_status": "Prepared for draft PR; exact remote head and observed hosted checks belong to the final handoff.",
+  "artifact_status": {
+    "result": "passed",
+    "build_commit": "a65864ca3214594ea1218753b90d8009042306d4",
+    "source_state": "clean",
+    "source_tree": "0bea2f6f786cd2fc2344bbe4d25329c20558863c",
+    "files": 421,
+    "http_checks": 7,
+    "archive_sha256": {
+      "tar.gz": "25e53f8c25537db4e45fc1280630c02817cbb7441880c91ac2c7ee522cbb1983",
+      "zip": "78d8f45e68744b0517ff9ff082777226eeace591a54d3ce10a076926dc0d3ba2"
+    },
+    "checks": [
+      "SHA256SUMS for archives and metadata",
+      "TAR extraction and ZIP structure",
+      "Clean locked dependency installation",
+      "Seven HTTP endpoints",
+      "Served bundle equals packaged bytes",
+      "Source offer matches manifest commit"
+    ],
+    "log_sha256": "5b222b7104fb39518a9459b4c8d668642465703f00343ec0fac87be0fd85c69b",
+    "note": "This was the preserved local commit with the identical tree published initially as2eb21e1. Final public-head build/hosted status is recorded in the handoff."
+  },
+  "publication_status": {
+    "pr": 103,
+    "url": "https://github.com/4444J99/alchemical-synthesizer/pull/103",
+    "draft": true,
+    "initial_remote_head": "2eb21e1a0622570d442798ee87dbe8c967feb5c4",
+    "observed_initial_checks": {
+      "CI": "in_progress",
+      "CI Minimal": "success"
+    },
+    "final_head_checks": "recorded in final handoff; not inferred from local gates"
+  },
   "unverified": [
     "Two macOS Seatbelt checks skipped on Linux",
     "Full rack routing/shutdown with physical audio/MIDI/Pd/Ableton",

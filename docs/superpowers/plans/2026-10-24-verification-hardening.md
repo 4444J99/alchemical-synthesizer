@@ -80,7 +80,7 @@ loading/call sites. Scope follows native reproduction, not speculative rewriting
 - [x] Verify the complete change independently; fix concrete important findings.
 - [x] Run integrated checks and bind their results to the final revision.
 - [x] Write the review/evolution report with exact links and residual acceptance work.
-- [ ] Publish the prepared branch/PR and observe hosted checks; final handoff records
+- [x] Publish the prepared branch/PR and observe hosted checks; final handoff records
       publication separately from integration. No merge or deployment is authorized.
 
 ## Progress and rulings
@@ -137,3 +137,8 @@ publication evidence are recorded in the final handoff, not inferred from these 
 Current combined checks: web 177 passed / 2 macOS-only skips, Foundry 57, Chrome 10,
 AETHER + engine-path 10, native 8, Forge 11, tool regressions 19, release fixtures 2,
 strict smoke 75, Foundry smoke 21. Both full npm audits report zero findings.
+
+Publication: draft PR103 is open. Initial remote head 2eb21e1 has full CI running
+and CI Minimal successful; final public-head results belong to the final handoff.
+The actual committed-source archive passed checksums, clean install and seven HTTP
+checks. Main remains e27f020 and has not been merged by this pass.
