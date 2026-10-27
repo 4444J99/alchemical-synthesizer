@@ -302,6 +302,9 @@ def module_args(module: dict) -> dict:
     control_outputs = sorted(module['control_outputs'], key=lambda name: (name not in ('out', 'outBus'), name))
     for index, name in enumerate(control_outputs):
         args[name] = 16 + index
+    if module['role'] in ('sound_generator', 'wavetable_generator') and 'gate' in module['params']:
+        # Keep an ADSR voice alive across donor pauses; the master applies the donor envelope.
+        args['gate'] = 1
     args.update({key: value for key, value in PRESETS.get(module['name'], {}).items() if key in module['params']})
     if module.get('overrides'):
         args.update(validate_controls(module['name'], module['overrides']))
@@ -317,7 +320,7 @@ def module_maps(module: dict) -> dict:
             maps[name] = 3
         if module['role'] in ('sound_generator', 'wavetable_generator') and name in ('freq', 'frequency'):
             maps[name] = 4
-        if module['role'] in ('sound_generator', 'wavetable_generator', 'control_utility') and name == 'gate':
+        if module['role'] == 'control_utility' and name == 'gate':
             maps[name] = 6
     return maps
 

@@ -194,6 +194,39 @@ class DonorContracts(unittest.TestCase):
                 self.assertFalse(destination.exists())
 
     @unittest.skipUnless(os.environ.get('RUN_NATIVE_DONOR_TESTS') == '1', 'set RUN_NATIVE_DONOR_TESTS=1 for installed SC integration')
+    def test_generators_resume_after_a_long_donor_silence(self):
+        with tempfile.TemporaryDirectory(prefix='donor-gap-') as directory:
+            root = pathlib.Path(directory)
+            source = root / 'gap.wav'
+            samples = array.array('h')
+            for i in range(4 * 44100):
+                t = i / 44100
+                amplitude = 0 if 0.8 <= t < 2.4 else 12000
+                samples.extend(int(amplitude * math.sin(2 * math.pi * freq * t)) for freq in (220, 330))
+            if sys.byteorder != 'little':
+                samples.byteswap()
+            with wave.open(str(source), 'wb') as wav:
+                wav.setparams((2, 2, 44100, 0, 'NONE', 'not compressed'))
+                wav.writeframes(samples.tobytes())
+            result = subprocess.run([sys.executable, str(ROOT / 'forge/assimilate.py'), str(source),
+                                     '--start', '0', '--duration', '4', '--out', str(root / 'results'),
+                                     '--module', 'prima_materia', '--module', 'ouroboros'],
+                                    capture_output=True, text=True, timeout=150)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            manifest_path = next((root / 'results').glob('*/manifest.json'))
+            manifest = json.loads(manifest_path.read_text())
+            for name in ('prima_materia', 'ouroboros'):
+                item = next(item for item in manifest['modules'] if item['name'] == name)
+                with wave.open(str(manifest_path.parent / item['output']), 'rb') as wav:
+                    wav.setpos(int(1.8 * 44100)); quiet = array.array('h', wav.readframes(int(.3 * 44100)))
+                    wav.setpos(int(3.0 * 44100)); values = array.array('h', wav.readframes(int(.5 * 44100)))
+                if sys.byteorder != 'little': quiet.byteswap(); values.byteswap()
+                rms = math.sqrt(sum(value * value for value in values) / len(values)) / 32768
+                quiet_rms = math.sqrt(sum(value * value for value in quiet) / len(quiet)) / 32768
+                self.assertGreater(rms, .001, f'{name} did not recover after donor silence')
+                self.assertLess(quiet_rms, rms * .05, f'{name} did not follow donor silence')
+
+    @unittest.skipUnless(os.environ.get('RUN_NATIVE_DONOR_TESTS') == '1', 'set RUN_NATIVE_DONOR_TESTS=1 for installed SC integration')
     def test_native_stream_buffer_generator_control_and_spectral_paths(self):
         with tempfile.TemporaryDirectory(prefix='donor-native-') as directory:
             root = pathlib.Path(directory)

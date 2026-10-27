@@ -29,7 +29,7 @@
             var env = EnvGen.kr(Env.linen(0.01, (duration - 0.03).max(0.01), 0.02));
             // Even generators without amp/freq controls inherit donor dynamics.
             // This is explicit source-envelope resynthesis, not an audio insert.
-            if(mode == 1) { sig = sig * In.kr(0) };
+            if([1, 3].includes(mode)) { sig = sig * In.kr(0) };
             if(channels == 1) { sig = sig ! 2 };
             ReplaceOut.ar(0, Limiter.ar(LeakDC.ar(sig), 0.9, 0.005) * env);
         });
