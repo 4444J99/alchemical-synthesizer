@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -43,15 +43,22 @@ jobs:
 
       - name: Resolve version
         id: ver
+        env:
+          REQUESTED_VERSION: ${{ github.event.inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="$REQUESTED_VERSION"
           else
-            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            VERSION="$GITHUB_REF_NAME"
           fi
+          [[ ${#VERSION} -le 100 && "$VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]] || { echo 'Invalid version label'; exit 2; }
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build artifacts
-        run: bash tools/build_release.sh "${{ steps.ver.outputs.version }}"
+        env:
+          RELEASE_VERSION: ${{ steps.ver.outputs.version }}
+        run: bash tools/build_release.sh "$RELEASE_VERSION"
 
       - name: Verify unpacked release before upload
         run: |
@@ -72,4 +79,6 @@ jobs:
             dist/*.tar.gz
             dist/*.zip
             dist/SHA256SUMS.txt
+            dist/*.spdx
+            dist/PROVENANCE.json
           fail_on_unmatched_files: true

@@ -53,6 +53,18 @@ test("lib/auth.js: parseCookies extracts cookie attributes", () => {
   assert.deepStrictEqual(parseCookies(""), {});
 });
 
+test("lib/auth.js: malformed cookie encoding is ignored without granting a role", () => {
+  for (const malformed of ["%", "%GG", "%E0%A4%A"]) {
+    assert.deepEqual(parseCookies(`brahma_human=${malformed}; note=hello%20world`), { note: "hello world" });
+    const req = { socket: { remoteAddress: "127.0.0.1" }, headers: { cookie: `brahma_human=${malformed}` } };
+    assert.equal(auth.roleOf(req), null);
+  }
+  assert.equal(auth.roleOf({
+    socket: { remoteAddress: "127.0.0.1" },
+    headers: { cookie: `unrelated=%; brahma_human=${auth.humanToken}` }
+  }), "human", "a malformed unrelated cookie must not break valid authentication");
+});
+
 test("lib/auth.js: createAuth resolves human vs agent roles and prevents cross-spoofing", () => {
   const testAuth = createAuth({
     getPort: () => 3000,
@@ -196,6 +208,14 @@ test("Gateway Integration: /api/auth/status reflects session role", async () => 
   assert.strictEqual(dataAgent.ok, true);
   assert.strictEqual(dataAgent.role, "agent");
   assert.strictEqual(dataAgent.authenticated, true);
+});
+
+test("Gateway Integration: malformed cookie returns unauthenticated status", async () => {
+  const res = await fetch(`http://127.0.0.1:${server.address().port}/api/auth/status`, {
+    headers: { cookie: "brahma_human=%" }
+  });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).authenticated, false);
 });
 
 test("Gateway Integration: WebSocket verifyClient enforces 403 on untrusted Origin", async () => {

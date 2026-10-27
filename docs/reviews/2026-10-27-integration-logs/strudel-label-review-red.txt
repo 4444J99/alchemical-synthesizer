@@ -1,0 +1,32 @@
+▶ workbench E2E
+  ✖ a cancelled labelled evaluation cannot register notes in its pending successor (279.623125ms)
+✖ workbench E2E (2079.040666ms)
+ℹ tests 1
+ℹ suites 1
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2350.05825
+
+✖ failing tests:
+
+test at test/e2e/workbench.e2e.js:415:3
+✖ a cancelled labelled evaluation cannot register notes in its pending successor (279.623125ms)
+  AssertionError [ERR_ASSERTION]: only the successor may register its notes
+  
+  60 !== 62
+  
+      at TestContext.<anonymous> (/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/test/e2e/workbench.e2e.js:434:16)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Promise.all (index 10)
+      at async Suite.run (node:internal/test_runner/test:1905:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 60,
+    expected: 62,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

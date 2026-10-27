@@ -31,13 +31,8 @@ const app = express();
 // --- Stripe webhook needs the raw body; mount BEFORE any json parser. ---
 app.post("/api/v1/billing/webhook/stripe", express.raw({ type: "application/json" }), (req, res) => {
   try {
-    const evt = JSON.parse(req.body.toString("utf8"));
-    if (evt.type === "checkout.session.completed") {
-      const orderId = evt.data?.object?.metadata?.orderId;
-      if (orderId) billing.fulfil(orderId);
-    }
-    res.json({ received: true });
-  } catch (e) { res.status(400).json({ error: e.message }); }
+    res.json(billing.handleStripeWebhook(req.body, req.headers["stripe-signature"]));
+  } catch (e) { res.status(e.status || 400).json({ error: e.message }); }
 });
 
 // CORS — open for agent surfaces (API/MCP/ACP are key-gated, not origin-gated).
@@ -109,7 +104,7 @@ server.listen(PORT, () => {
   console.log(`  MCP server        : http://localhost:${PORT}/mcp`);
   console.log(`  ACP (comm/client) : http://localhost:${PORT}/acp`);
   console.log(`  Engine            : ${engine.isOnline() ? "live" : "simulation (no SC detected yet)"}`);
-  console.log(`  Billing           : ${billing.stripeReady() ? "Stripe" : "stub checkout"}\n`);
+  console.log(`  Billing           : ${billing.status().mode}\n`);
 });
 
 module.exports = { app, server };

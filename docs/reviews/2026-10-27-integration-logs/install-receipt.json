@@ -1,0 +1,32 @@
+[
+  {
+    "gate": "web-install",
+    "command": [
+      "npm",
+      "ci",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "cwd": "brahma/web",
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 2.772,
+    "log": "docs/reviews/2026-10-27-integration-logs/web-install.txt"
+  },
+  {
+    "gate": "foundry-install",
+    "command": [
+      "npm",
+      "ci",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "cwd": "product",
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 1.459,
+    "log": "docs/reviews/2026-10-27-integration-logs/foundry-install.txt"
+  }
+]

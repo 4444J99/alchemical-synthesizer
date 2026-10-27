@@ -1,0 +1,96 @@
+test_native_renders_accept_literal_unusual_paths (__main__.ForgeNativeTests.test_native_renders_accept_literal_unusual_paths) ... 
+  test_native_renders_accept_literal_unusual_paths (__main__.ForgeNativeTests.test_native_renders_accept_literal_unusual_paths) (wrapper='bounce.sh') ... FAIL
+  test_native_renders_accept_literal_unusual_paths (__main__.ForgeNativeTests.test_native_renders_accept_literal_unusual_paths) (wrapper='render-pattern.sh') ... FAIL
+test_native_server_failure_propagates_callback_status (__main__.ForgeNativeTests.test_native_server_failure_propagates_callback_status) ... 
+  test_native_server_failure_propagates_callback_status (__main__.ForgeNativeTests.test_native_server_failure_propagates_callback_status) (wrapper='bounce.sh') ... FAIL
+  test_native_server_failure_propagates_callback_status (__main__.ForgeNativeTests.test_native_server_failure_propagates_callback_status) (wrapper='render-pattern.sh') ... FAIL
+test_default_duration_uses_audio_frames_or_pattern_end (__main__.ForgeWrapperTests.test_default_duration_uses_audio_frames_or_pattern_end) ... ok
+test_failed_process_does_not_accept_or_replace_existing_output (__main__.ForgeWrapperTests.test_failed_process_does_not_accept_or_replace_existing_output) ... ok
+test_invalid_duration_is_rejected_before_render (__main__.ForgeWrapperTests.test_invalid_duration_is_rejected_before_render) ... ok
+test_invalid_pattern_numbers_and_incomplete_rows_are_rejected (__main__.ForgeWrapperTests.test_invalid_pattern_numbers_and_incomplete_rows_are_rejected) ... ok
+test_only_valid_expected_wav_is_published (__main__.ForgeWrapperTests.test_only_valid_expected_wav_is_published) ... ok
+test_success_replaces_output_and_supports_fractional_duration (__main__.ForgeWrapperTests.test_success_replaces_output_and_supports_fractional_duration) ... ok
+test_supervised_render_keeps_foreground_timeout (__main__.ForgeWrapperTests.test_supervised_render_keeps_foreground_timeout) ... ok
+test_timeout_exit_is_not_masked (__main__.ForgeWrapperTests.test_timeout_exit_is_not_masked) ... ok
+test_without_coreutils_timeout_success_and_failure_remain_checked (__main__.ForgeWrapperTests.test_without_coreutils_timeout_success_and_failure_remain_checked) ... ok
+
+======================================================================
+FAIL: test_native_renders_accept_literal_unusual_paths (__main__.ForgeNativeTests.test_native_renders_accept_literal_unusual_paths) (wrapper='bounce.sh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/test_forge.py", line 300, in test_native_renders_accept_literal_unusual_paths
+    self.assertEqual(result.returncode, 0, result.stdout)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 134 != 0 : bounce: sclang=/var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-kf4ptylx/bin 'quote" $(touch BIN_EXECUTED)/sclang
+bounce: rendering 0.75s  /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-kf4ptylx/literal 'quote" $(touch PATH_EXECUTED) `touch PATH_EXECUTED` \ path/input 'sound".wav -> /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-kf4ptylx/literal 'quote" $(touch PATH_EXECUTED) `touch PATH_EXECUTED` \ path/bounce.sh 'output".wav
+compiling class library...
+qt.qpa.plugin: Could not find the Qt platform plugin "offscreen" in ""
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: cocoa.
+
+/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/forge/bounce.sh: line 149: 31255 Abort trap: 6              "$timeout_bin" "${timeout_args[@]}" "$limit" "$SCLANG" -D -u 0 "$driver"
+bounce: FAILED — renderer exited with status 134
+
+
+======================================================================
+FAIL: test_native_renders_accept_literal_unusual_paths (__main__.ForgeNativeTests.test_native_renders_accept_literal_unusual_paths) (wrapper='render-pattern.sh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/test_forge.py", line 300, in test_native_renders_accept_literal_unusual_paths
+    self.assertEqual(result.returncode, 0, result.stdout)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 134 != 0 : render-pattern: sclang=/var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-kf4ptylx/bin 'quote" $(touch BIN_EXECUTED)/sclang
+render-pattern: 1 events, rendering 0.75s -> /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-kf4ptylx/literal 'quote" $(touch PATH_EXECUTED) `touch PATH_EXECUTED` \ path/render-pattern.sh 'output".wav
+compiling class library...
+qt.qpa.plugin: Could not find the Qt platform plugin "offscreen" in ""
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: cocoa.
+
+/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/forge/render-pattern.sh: line 194: 31304 Abort trap: 6              "$timeout_bin" "${timeout_args[@]}" "$limit" "$SCLANG" -D -u 0 "$driver"
+render-pattern: FAILED — renderer exited with status 134
+
+
+======================================================================
+FAIL: test_native_server_failure_propagates_callback_status (__main__.ForgeNativeTests.test_native_server_failure_propagates_callback_status) (wrapper='bounce.sh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/test_forge.py", line 312, in test_native_server_failure_propagates_callback_status
+    self.assertEqual(result.returncode, 19, result.stdout)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 134 != 19 : bounce: sclang=/var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-4x0fp_1l/bin/sclang
+bounce: rendering 1s  /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-4x0fp_1l/food.wav -> /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-4x0fp_1l/published/result.wav
+compiling class library...
+qt.qpa.plugin: Could not find the Qt platform plugin "offscreen" in ""
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: cocoa.
+
+/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/forge/bounce.sh: line 149: 31347 Abort trap: 6              "$timeout_bin" "${timeout_args[@]}" "$limit" "$SCLANG" -D -u 0 "$driver"
+bounce: FAILED — renderer exited with status 134
+
+
+======================================================================
+FAIL: test_native_server_failure_propagates_callback_status (__main__.ForgeNativeTests.test_native_server_failure_propagates_callback_status) (wrapper='render-pattern.sh')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/test_forge.py", line 312, in test_native_server_failure_propagates_callback_status
+    self.assertEqual(result.returncode, 19, result.stdout)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 134 != 19 : render-pattern: sclang=/var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-4x0fp_1l/bin/sclang
+render-pattern: 1 events, rendering 1s -> /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-forge-4x0fp_1l/published/result.wav
+compiling class library...
+qt.qpa.plugin: Could not find the Qt platform plugin "offscreen" in ""
+This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+Available platform plugins are: cocoa.
+
+/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/forge/render-pattern.sh: line 194: 31452 Abort trap: 6              "$timeout_bin" "${timeout_args[@]}" "$limit" "$SCLANG" -D -u 0 "$driver"
+render-pattern: FAILED — renderer exited with status 134
+
+
+----------------------------------------------------------------------
+Ran 11 tests in 6.089s
+
+FAILED (failures=4)

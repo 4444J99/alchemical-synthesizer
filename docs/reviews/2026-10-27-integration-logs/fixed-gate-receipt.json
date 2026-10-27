@@ -1,0 +1,57 @@
+[
+  {
+    "gate": "browser-tests-fixed",
+    "command": [
+      "npm",
+      "run",
+      "test:e2e",
+      "--",
+      "--test-concurrency=1"
+    ],
+    "cwd": "brahma/web",
+    "environment": {
+      "BRAHMA_REQUIRE_BROWSER": "1"
+    },
+    "deadline_seconds": 150,
+    "exit_code": 1,
+    "seconds": 6.092,
+    "log": "docs/reviews/2026-10-27-integration-logs/browser-tests-fixed.txt"
+  },
+  {
+    "gate": "python-tests-fixed",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "cwd": ".",
+    "environment": {
+      "RUN_NATIVE_DONOR_TESTS": "1"
+    },
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 8.043,
+    "log": "docs/reviews/2026-10-27-integration-logs/python-tests-fixed.txt"
+  },
+  {
+    "gate": "native-forge-fixed",
+    "command": [
+      "python3",
+      "tools/test_forge.py"
+    ],
+    "cwd": ".",
+    "environment": {
+      "BRAHMA_FORGE_NATIVE": "1"
+    },
+    "deadline_seconds": 120,
+    "exit_code": 0,
+    "seconds": 9.28,
+    "log": "docs/reviews/2026-10-27-integration-logs/native-forge-fixed.txt"
+  }
+]

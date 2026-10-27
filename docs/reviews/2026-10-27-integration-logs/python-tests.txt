@@ -1,0 +1,62 @@
+test_admission_preserves_source_even_with_output_like_basename (test_assimilate.DonorContracts.test_admission_preserves_source_even_with_output_like_basename) ... ok
+test_buffer_readers_and_non_audio_utilities_have_distinct_roles (test_assimilate.DonorContracts.test_buffer_readers_and_non_audio_utilities_have_distinct_roles) ... ok
+test_catalogue_batch_does_not_compile_one_oversized_native_function (test_assimilate.DonorContracts.test_catalogue_batch_does_not_compile_one_oversized_native_function) ... ok
+test_catalogue_includes_every_literal_synthdef_once_per_source (test_assimilate.DonorContracts.test_catalogue_includes_every_literal_synthdef_once_per_source) ... ok
+test_cli_rejects_nonfinite_and_excessive_budgets_before_creating_output (test_assimilate.DonorContracts.test_cli_rejects_nonfinite_and_excessive_budgets_before_creating_output) ... ok
+test_control_outputs_never_alias_event_pulses_and_envelope (test_assimilate.DonorContracts.test_control_outputs_never_alias_event_pulses_and_envelope) ... ok
+test_expired_deadline_never_starts_a_child (test_assimilate.DonorContracts.test_expired_deadline_never_starts_a_child) ... ok
+test_extract_ignores_comments_and_preserves_nested_native_definition (test_assimilate.DonorContracts.test_extract_ignores_comments_and_preserves_nested_native_definition) ... ok
+test_generators_resume_after_a_long_donor_silence (test_assimilate.DonorContracts.test_generators_resume_after_a_long_donor_silence) ... ok
+test_html_escapes_metadata_and_does_not_offer_failed_audio (test_assimilate.DonorContracts.test_html_escapes_metadata_and_does_not_offer_failed_audio) ... ok
+test_interrupted_runner_reaps_its_real_child (test_assimilate.DonorContracts.test_interrupted_runner_reaps_its_real_child) ... ok
+test_measurement_rejects_silence_and_truncated_duration (test_assimilate.DonorContracts.test_measurement_rejects_silence_and_truncated_duration) ... ok
+test_native_controls_accept_finite_musical_values_but_never_routing (test_assimilate.DonorContracts.test_native_controls_accept_finite_musical_values_but_never_routing) ... ok
+test_native_paths_are_string_literals_not_interpolated_source (test_assimilate.DonorContracts.test_native_paths_are_string_literals_not_interpolated_source) ... ok
+test_native_stream_buffer_generator_control_and_spectral_paths (test_assimilate.DonorContracts.test_native_stream_buffer_generator_control_and_spectral_paths) ... ok
+test_requested_parameters_survive_score_generation_and_override_presets (test_assimilate.DonorContracts.test_requested_parameters_survive_score_generation_and_override_presets) ... ok
+test_source_controls_feed_closed_gates_and_pitch_following_generators (test_assimilate.DonorContracts.test_source_controls_feed_closed_gates_and_pitch_following_generators) ... ok
+test_stereo_and_mid_side_inputs_use_the_corresponding_source_channels (test_assimilate.DonorContracts.test_stereo_and_mid_side_inputs_use_the_corresponding_source_channels) ... ok
+test_stereo_buffers_without_defaults_both_receive_private_bindings (test_assimilate.DonorContracts.test_stereo_buffers_without_defaults_both_receive_private_bindings) ... ok
+test_youtube_admission_accepts_one_video_and_rejects_other_hosts (test_assimilate.DonorContracts.test_youtube_admission_accepts_one_video_and_rejects_other_hosts) ... ok
+test_failed_build_never_launches_a_server (test_launch.LaunchTests.test_failed_build_never_launches_a_server) ... ok
+test_foreign_http_listener_cannot_mask_our_server_failure (test_launch.LaunchTests.test_foreign_http_listener_cannot_mask_our_server_failure) ... ok
+test_invalid_port_is_rejected_before_startup (test_launch.LaunchTests.test_invalid_port_is_rejected_before_startup) ... ok
+test_missing_bundle_is_built_and_shutdown_stops_descendants (test_launch.LaunchTests.test_missing_bundle_is_built_and_shutdown_stops_descendants) ... ok
+test_comparison_rejects_a_different_or_unidentified_renderer (test_material_comparison.MaterialComparisonTest.test_comparison_rejects_a_different_or_unidentified_renderer) ... ok
+test_ledger_preserves_every_native_role_and_never_claims_original_behavior_from_audio (test_material_comparison.MaterialComparisonTest.test_ledger_preserves_every_native_role_and_never_claims_original_behavior_from_audio) ... ok
+test_legacy_silent_audio_is_preserved_and_measured_without_becoming_a_pass (test_material_comparison.MaterialComparisonTest.test_legacy_silent_audio_is_preserved_and_measured_without_becoming_a_pass) ... ok
+test_manifest_integrity_rejects_changed_or_missing_outputs_and_wrong_donor (test_material_comparison.MaterialComparisonTest.test_manifest_integrity_rejects_changed_or_missing_outputs_and_wrong_donor) ... ok
+test_reused_native_stage_cannot_mislabel_material_renders_or_missing_selected_results (test_material_comparison.MaterialComparisonTest.test_reused_native_stage_cannot_mislabel_material_renders_or_missing_selected_results) ... ok
+test_waveform_measurement_distinguishes_silence_gain_and_actual_shape (test_material_comparison.MaterialComparisonTest.test_waveform_measurement_distinguishes_silence_gain_and_actual_shape) ... ok
+test_native_catalogue_keeps_every_definition_and_declares_material_support (test_materials.MaterialsTest.test_native_catalogue_keeps_every_definition_and_declares_material_support) ... ok
+test_native_material_bounds_and_unsupported_mapping (test_materials.MaterialsTest.test_native_material_bounds_and_unsupported_mapping) ... ok
+test_complete_archives_pass_structure_check (test_release_artifact_check.ArtifactCheckTests.test_complete_archives_pass_structure_check) ... ok
+test_missing_bundle_fails (test_release_artifact_check.ArtifactCheckTests.test_missing_bundle_fails) ... ok
+test_private_state_path_is_rejected (test_release_artifact_check.ArtifactCheckTests.test_private_state_path_is_rejected) ... ok
+test_traversal_and_links_are_rejected (test_release_artifact_check.ArtifactCheckTests.test_traversal_and_links_are_rejected) ... ok
+test_archives_include_runtime_assets_but_not_private_working_state (test_release_packaging.ReleasePackagingTests.test_archives_include_runtime_assets_but_not_private_working_state) ... ok
+test_failed_or_empty_build_preserves_existing_dist (test_release_packaging.ReleasePackagingTests.test_failed_or_empty_build_preserves_existing_dist) ... ok
+test_symlinked_source_or_ancestor_cannot_leak_outside_files (test_release_packaging.ReleasePackagingTests.test_symlinked_source_or_ancestor_cannot_leak_outside_files) ... ok
+test_foreign_class_in_linked_directory_prevents_all_mutation (test_sc_install.ClassInstallation.test_foreign_class_in_linked_directory_prevents_all_mutation) ... ok
+test_foreign_class_prevents_all_mutation (test_sc_install.ClassInstallation.test_foreign_class_prevents_all_mutation) ... ok
+test_only_owned_legacy_links_are_removed_after_preflight (test_sc_install.ClassInstallation.test_only_owned_legacy_links_are_removed_after_preflight) ... ok
+test_preview_leaves_legacy_links_and_destination_untouched (test_sc_install.ClassInstallation.test_preview_leaves_legacy_links_and_destination_untouched) ... ok
+test_recursive_directory_install_is_idempotent (test_sc_install.ClassInstallation.test_recursive_directory_install_is_idempotent) ... FAIL
+test_shell_entrypoint_verifies_a_file_driver_with_supported_flags (test_sc_install.ClassInstallation.test_shell_entrypoint_verifies_a_file_driver_with_supported_flags) ... ok
+test_deadline_covers_process_that_closes_stdout_and_keeps_running (test_sc_runner.RunnerBounds.test_deadline_covers_process_that_closes_stdout_and_keeps_running) ... ok
+test_output_flood_is_stopped_before_it_can_report_success (test_sc_runner.RunnerBounds.test_output_flood_is_stopped_before_it_can_report_success) ... ok
+test_sketch_embeds_original_native_palette_and_real_drum_files (test_sketch.SketchContracts.test_sketch_embeds_original_native_palette_and_real_drum_files) ... ok
+
+======================================================================
+FAIL: test_recursive_directory_install_is_idempotent (test_sc_install.ClassInstallation.test_recursive_directory_install_is_idempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/tests/test_sc_install.py", line 34, in test_recursive_directory_install_is_idempotent
+    self.assertEqual(link.resolve(), self.source)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: PosixPath('/private/var/folders/l9/zn9x070d4xqb1qb5wf[30 chars]rce') != PosixPath('/var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr00[22 chars]rce')
+
+----------------------------------------------------------------------
+Ran 48 tests in 8.751s
+
+FAILED (failures=1)

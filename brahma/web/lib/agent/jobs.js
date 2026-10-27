@@ -27,7 +27,7 @@ function createJobRunner({ execute, now = () => Date.now(), maxQueued = 16, idFa
   const queue = [];
   const waiters = [];
   let running = null;
-  const stopFns = new Map(); // job id -> stop() for the currently running process
+  let activeController = null;
 
   const newId = idFactory || (() => "job_" + crypto.randomBytes(6).toString("hex"));
 
@@ -49,45 +49,55 @@ function createJobRunner({ execute, now = () => Date.now(), maxQueued = 16, idFa
 
     const job = jobs.get(id);
     running = id;
+    const controller = new AbortController();
+    activeController = controller;
     job.state = STATES.RUNNING;
     job.startedAt = new Date(now()).toISOString();
 
     Promise.resolve()
-      .then(() => execute(job))
+      .then(() => {
+        // stopAll may run in the same turn as enqueue, before execution begins.
+        controller.signal.throwIfAborted();
+        return execute(job, { signal: controller.signal });
+      })
       .then((result) => {
+        if (job.state !== STATES.RUNNING) return;
         job.state = STATES.COMPLETED;
         job.result = result === undefined ? null : result;
       })
       .catch((err) => {
+        if (job.state !== STATES.RUNNING) return;
         job.state = STATES.FAILED;
         job.error = err && err.message ? err.message : String(err);
       })
       .then(() => {
-        job.finishedAt = new Date(now()).toISOString();
-        stopFns.delete(id);
+        if (!job.finishedAt) job.finishedAt = new Date(now()).toISOString();
+        activeController = null;
         running = null;
         // Yield so the completion is observable before the next job starts.
         setImmediate(tick);
       });
   }
 
-  /** Kill the currently running render process and mark its job failed. Human-only. */
-  function stop(id) {
-    const job = jobs.get(id);
-    if (!job) return { ok: false, code: "unknown_job", message: `No job ${id}` };
-    if (job.state !== STATES.RUNNING) {
-      return { ok: false, code: "not_running", message: `Job ${id} is ${job.state}, not running` };
+  /** The agent layer checks authority before cancelling active and queued work. */
+  function stopAll() {
+    const stopped = [];
+    for (const id of [running, ...queue]) {
+      const job = jobs.get(id);
+      if (!job || (job.state !== STATES.RUNNING && job.state !== STATES.QUEUED)) continue;
+      job.state = STATES.FAILED;
+      job.error = "stopped by human";
+      job.finishedAt = new Date(now()).toISOString();
+      stopped.push(view(job));
     }
-    const stop = stopFns.get(id);
-    if (!stop) return { ok: false, code: "unstoppable", message: `Job ${id} has no stoppable process` };
-    try { stop(); } catch (_) { /* already gone */ }
-    job.state = STATES.FAILED;
-    job.error = "stopped by human";
-    job.finishedAt = new Date(now()).toISOString();
-    stopFns.delete(id);
-    running = null;
-    setImmediate(tick);
-    return { ok: true, job: view(job) };
+    queue.length = 0;
+    if (activeController && !activeController.signal.aborted) {
+      activeController.abort(new Error("stopped by human"));
+    }
+    // Keep the execution slot until the aborted process settles. A new human
+    // run must not overlap a process that is still shutting down.
+    if (!running) settle();
+    return { ok: true, jobs: stopped };
   }
 
   /** Queue work. Returns immediately; the job's state is polled via get(). */
@@ -132,7 +142,7 @@ function createJobRunner({ execute, now = () => Date.now(), maxQueued = 16, idFa
     return new Promise((resolve) => waiters.push(resolve));
   }
 
-  return { enqueue, get, list, drain, STATES, get pending() { return queue.length; }, get active() { return running; } };
+  return { enqueue, get, list, drain, stopAll, STATES, get pending() { return queue.length; }, get active() { return running; } };
 }
 
 module.exports = { createJobRunner, STATES };

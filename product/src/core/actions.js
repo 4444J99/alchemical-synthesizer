@@ -45,7 +45,7 @@ const ACTIONS = {
   },
 
   render_specimen: {
-    description: "Render an audio specimen from a module. Metered. Returns a specimen record (audio URL when the engine is live; simulated otherwise).",
+    description: "Create a simulated specimen record from a module. Metered. Audio rendering and artifact completion are not connected; audioUrl is null.",
     cost: 1,
     schema: { type: "object", required: ["module"], properties: {
       module: { type: "string", description: "Source module name" },
@@ -53,7 +53,7 @@ const ACTIONS = {
       creator: { type: "string", description: "Creator handle/email" },
       durationSec: { type: "number", description: "Specimen length in seconds (default 4)" }
     } },
-    handler: (args = {}) => engine.renderSpecimen(args)
+    handler: (args = {}, context = {}) => engine.renderSpecimen(args, { ownerEmail: context.ownerEmail || null })
   },
 
   list_specimens: {
@@ -75,10 +75,10 @@ function listActions() {
 function getAction(name) { return ACTIONS[name] || null; }
 
 /** Invoke a capability by name. Throws on unknown action / handler error. */
-function invoke(name, args) {
+function invoke(name, args, context = {}) {
   const a = ACTIONS[name];
   if (!a) throw Object.assign(new Error(`unknown action: ${name}`), { code: "unknown_action" });
-  return a.handler(args || {});
+  return a.handler(args || {}, context);
 }
 
 module.exports = { ACTIONS, listActions, getAction, invoke };

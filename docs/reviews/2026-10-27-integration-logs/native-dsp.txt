@@ -1,0 +1,13 @@
+test_all_repository_scd_files_compile (__main__.NativeDSPTests.test_all_repository_scd_files_compile) ... ok
+test_buffer_adapter_and_live_voice_lifecycle_on_dummy_server (__main__.NativeDSPTests.test_buffer_adapter_and_live_voice_lifecycle_on_dummy_server) ... skipped 'set BRAHMA_DSP_DUMMY_AUDIO=1 for Linux dummy-JACK integration'
+test_governor_bounds_both_outputs_and_quarantines_runaway (__main__.NativeDSPTests.test_governor_bounds_both_outputs_and_quarantines_runaway) ... ok
+test_metrics_distinguish_signal_and_unavailable_input (__main__.NativeDSPTests.test_metrics_distinguish_signal_and_unavailable_input) ... ok
+test_telemetry_does_not_publish_uncaptured_measurements (__main__.NativeDSPTests.test_telemetry_does_not_publish_uncaptured_measurements) ... ok
+test_trait_contracts_load_validate_and_normalize (__main__.NativeDSPTests.test_trait_contracts_load_validate_and_normalize) ... ok
+test_upstream_measured_traits_and_fsap_acceptance (__main__.NativeDSPTests.test_upstream_measured_traits_and_fsap_acceptance) ... ok
+test_upstream_provenance_transmutation_and_bridge_lifecycle (__main__.NativeDSPTests.test_upstream_provenance_transmutation_and_bridge_lifecycle) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 3.010s
+
+OK (skipped=1)

@@ -1,0 +1,7 @@
+test_trait_contracts_load_validate_and_normalize (tools.dsp.test_dsp.NativeDSPTests.test_trait_contracts_load_validate_and_normalize) ... ok
+test_all_repository_scd_files_compile (tools.dsp.test_dsp.NativeDSPTests.test_all_repository_scd_files_compile) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.520s
+
+OK

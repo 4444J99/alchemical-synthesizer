@@ -6,14 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The **Alchemical Synthesizer** (Brahma Meta-Rack) is a modular synthesis organism that absorbs, mutates, and re-expresses sonic identities from other systems. It is a parasitic-symbiotic apparatus—not a fixed instrument—whose identity is contingent on contact.
 
-This repo hosts **two products**: **Brahma** (the audio synthesizer + the `product/` Foundry surface) and **AETHER** (the 24/7 living-radio streaming service). AETHER is a distinct modular product co-located here; its boundary and extraction recipe are declared in [`aether/`](aether/README.md) and mapped in [`aether/MANIFEST.md`](aether/MANIFEST.md). Treat broadcast tooling (`tools/broadcast.sh`, `tools/rebroadcast.sh`, `forge/tune.py`, `tools/ingest_queue.py`, `deploy/aether/`, `brahma/web/public/aether/`) as AETHER's, not the engine's.
+The implementation lanes are **Brahma** (`brahma/`, engine and interfaces), **Forge** (`forge/`, rendering and export), and **AETHER** (`aether/`, capture and broadcast). The Foundry in `product/` supplies accounts, metering, protocol adapters and simulated specimen records; it has no completed-audio ingestion contract. AETHER source consolidation is complete: its tools, listener and deploy candidate live in `aether/tools/`, `aether/web/listener/` and `aether/deploy/`. Station capture is `aether/tools/tune.py`. See [`ORGANS.md`](ORGANS.md) and [`aether/MANIFEST.md`](aether/MANIFEST.md) for current boundaries. The current AETHER container copies only AETHER source and uses donor/tone rendering; it does not contain SuperCollider or Forge.
 
 ## Technology Stack
 
-- **SuperCollider** (`brahma/sc/`): DSP engine, trait registries, state machines (~20,000 LOC across 60+ files, 6 classes)
+- **SuperCollider** (`brahma/sc/`): DSP engine, trait registries, state machines (~20,000 LOC across 72 scripts, 9 classes)
 - **Pure Data** (`brahma/pd/`): Performance UI, faceplate abstractions, OSC control surface, visual patching canvas (12 patches: 8 core + 4 canvas/)
-- **Node.js + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI (`/cortex`), Golem percussion UI (`/golem`)
-- **Python** (`tools/`): Audio specimen validation utilities
+- **Node.js 24 + p5.js** (`brahma/web/`): Visual Cortex organism viz, Canvas patching UI (`/cortex`), Golem percussion UI (`/golem`), live workbench (`/workbench`)
+- **Python** (`forge/`, `tools/`): Audio analysis/validation and shared verification utilities
 - **Ableton Extension** (`brahma/ableton/`): Node.js/JavaScript Live Extension (Extensions SDK, Live 12.4.5+) that absorbs a Live Set into the rack over OSC
 - **OSC**: Bidirectional glue between all layers
 
@@ -21,17 +21,20 @@ This repo hosts **two products**: **Brahma** (the audio synthesizer + the `produ
 
 The system uses a **three-port OSC topology** for inter-layer communication:
 
-- **Port 57120**: SuperCollider → Pure Data (send commands, state updates)
+- **Port 57120**: SuperCollider language receives commands from Pd and the web gateway
 - **Port 57121**: Pure Data receive (listens for SC broadcasts)
 - **Port 57122**: SuperCollider → Node.js (organism state for web visualization)
 
 All organism state updates follow the format: `/brahma/organism/update [entityId:int] [type:symbol] [coherence:float] [entropy:float]`
 
-Example: `/brahma/organism/update 1001 "Relinquished" 0.65 2.3`
+Illustrative packet: `/brahma/organism/update 1001 "Relinquished" 0.65 2.3`.
+The current controller has no live organism-audio capture. It reports
+`/brahma/organism/measurement/status` with `unavailable` / `no_audio_capture`;
+numeric synthetic organism updates require explicit `demoMode` and a `DEMO` label.
 
 ### Web Visualization Flow
 
-1. SuperCollider broadcasts via `NetAddr("127.0.0.1", 57122)` at 10Hz (0.1s intervals)
+1. SuperCollider broadcasts track/transport state via `NetAddr("127.0.0.1", 57122)` at 10Hz; this does not establish measured organism traits
 2. Node.js UDP listener (port 57122) parses OSC and converts to JSON
 3. WebSocket server broadcasts JSON to all connected browser clients
 4. p5.js sketch renders organism state with:
@@ -49,6 +52,12 @@ Example: `/brahma/organism/update 1001 "Relinquished" 0.65 2.3`
 ## Running the System
 
 ### SuperCollider (primary engine)
+
+Install the `.sc` class files and recompile the class library first (instructions
+below). `loader.scd` loads `.scd` scripts after server boot; it does not install or
+compile classes. Full-loader boot still depends on platform audio/MIDI support;
+the headless Linux attempt was blocked by unavailable ALSA MIDI sequencing.
+
 ```bash
 # Open brahma/sc/loader.scd in SuperCollider IDE
 # Evaluate it (Cmd+Return or Ctrl+Return)
@@ -69,7 +78,8 @@ Server configuration: 2048 audio buses, 8192 control buses, expanded memory (819
 ### Visual Cortex (web visualization)
 ```bash
 cd brahma/web
-npm install
+npm ci
+npm run build:workbench
 npm start
 # Serves on http://localhost:3000
 # OSC receive: 57122, OSC send: 57120
@@ -81,7 +91,9 @@ python3 forge/validate_audio.py path/to/specimen.wav
 ```
 
 ### SuperCollider Class Installation
-The `.sc` class files (`AdamKadmon.sc`, `BridgeRouter.sc`, `FSAP.sc`, `BrahmaScale.sc`, `BrahmaMPE.sc`, `BrahmaModBus.sc`) must be accessible to the SC class compiler. Either:
+All nine recursive `.sc` classes must be accessible to the SC class compiler.
+Run `make install` to link the complete class directory and verify compilation; the
+installer refuses foreign class collisions. Manual alternatives:
 - Symlink `brahma/sc/*.sc` into your SC Extensions directory (`Platform.userExtensionDir` in SC)
 - Or add the `brahma/sc/` directory to your SC include paths
 
@@ -90,7 +102,7 @@ After installing, recompile the class library (Cmd+Shift+L in SC IDE).
 ### Dependencies
 - **SuperCollider** v3.13+ (core)
 - **Pure Data** Vanilla v0.54+ (UI layer, optional)
-- **Node.js** v18+ (Visual Cortex, optional)
+- **Node.js** 24 (web gateway, workbench, Foundry and browser tests)
 - **sc3-plugins**: Not strictly required. The `\homunculus` physical modeling engine uses a CombL fallback instead of DWGBowed.
 
 ## Architecture
@@ -140,12 +152,17 @@ The SC group hierarchy mirrors this: `root → ia → bc → ae → te → pr �
 ### Core Infrastructure Classes
 
 #### AdamKadmon.sc — Ontological Registry
-- **validateTraitMap(map)**: Checks for required keys `[spectral_profile, temporal_topology, modulation_graph, performance_response]`
-- **normalize(map)**: Coerces all trait values to [0.0, 1.0] ranges
-- **checkPermission(entityId, mode)**: Access control for read/write/infect operations
-- **issueCapabilityToken(action)**: Signs capability tokens for entity actions
 
-Strictness threshold: 0.85. All trait dimensions must exist and be normalized.
+- **loadContract(path)** / **contractNames()**: Load named JSON contracts and list them.
+- **validateTraitMap(map, contractName)**: Check required dictionary dimensions and contract-scoped numeric ranges, including dotted paths.
+- **normalize(map, contractName)**: Copy the map and clamp declared ranges; preserve categorical metadata. The canonical contract bounds spectral-profile values to [0,1].
+- **checkPermission(srcId, dstId, mode)**: Existing permissive placeholder; it is not an authorization boundary.
+- **issueCapabilityToken(entityId, capability)**: Throws because capability signing is unavailable; no signed token is issued.
+
+`strictness` in schema data is metadata. `BrahmaContracts` checks shape, types,
+ranges and the selected `provenance_min_confidence` when evidence is supplied.
+`BrahmaMetrics` owns the shared sample algorithm and coalesced Buffer acquisition.
+Structurally valid caller-supplied evidence is not authenticated capture proof.
 
 #### BridgeRouter.sc — Inter-Domain Backplane
 - **emitLinkSet(src, dst, mode, ttl)**: Creates inter-domain links with TTL-based expiry
@@ -167,34 +184,41 @@ State machine for cumulative identity integration with four phases:
 
 ### Global State
 
-- `~BRAHMA_REGISTRY` — Entity IDs, trait maps, lineage graph (managed by Adam Kadmon)
-- `~BRIDGE` — I2C-style bus state with domain dictionary and active link tracking
-- `~SC_GRP` — Group hierarchy for signal ordering (root, ia, bc, ae, te, pr, rr)
-- `~SC_BUS` — Dynamic bus allocation dictionary
-- `~VISUAL_CORTEX` — OSC broadcast interface and demo stream control
-- `~METRIC_COLLECTOR` — Language-side metrics Event (coherence, fidelity, stress, entropy)
-- `~BRAHMA_TUNING` — Global tuning state, scale library, BrahmaScale instance
-- `~BRAHMA_MIDI` — MIDI/MPE state, voice allocation, learn routes, clock
-- `~PATCH_BAY` — BrahmaModBus instance for universal CV routing (256-bus pool)
-- `~CHRONOS` — Master sequencer state (transport, tracks, scenes, undo/redo, song mode)
-- `~NRT_RENDERER` — Non-real-time rendering interface
-- `~GOLEM` / `~GOLEM_SEQ` — Golem percussion organism and sequencer state
-- `~PD_BRIDGE` — Pure Data OSC bridge state (NetAddr, responders)
-- `~MODULE_REGISTRY` — Dynamic SynthDef registration with OSC-addressable lifecycle
-- `~DEMO_PATCH` — Auto-playing demo patch state (Prima Materia + MOIRAI + Euclidean + Lorenz + reverb)
-- `~MOIRAI` — Generative melody/sequence system
-- `~GENESIS` — System initialization and boot orchestration state
+- `~brahma_registry` — Entity IDs, trait maps, lineage graph (managed by Adam Kadmon)
+- `~bridge` — I2C-style bus state with domain dictionary and active link tracking
+- `~sc_grp` — Group hierarchy for signal ordering (root, ia, bc, ae, te, pr, rr)
+- `~sc_bus` — Dynamic bus allocation dictionary
+- `~visual_cortex` — OSC broadcast interface and demo stream control
+- `~metric_collector` — Language-side metrics Event (coherence, fidelity, stress, entropy)
+- `~brahma_tuning` — Global tuning state, scale library, BrahmaScale instance
+- `~brahma_midi` — MIDI/MPE state, voice allocation, learn routes, clock
+- `~patch_bay` — BrahmaModBus instance for universal CV routing (256-bus pool)
+- `~chronos` — Master sequencer state (transport, tracks, scenes, undo/redo, song mode)
+- `~nrt_renderer` — Non-real-time rendering interface
+- `~golem` / `~golem_seq` — Golem percussion organism and sequencer state
+- `~pd_bridge` — Pure Data OSC bridge state (NetAddr, responders)
+- `~module_registry` — Dynamic SynthDef registration with OSC-addressable lifecycle
+- `~demo_patch` — Auto-playing demo patch state (Prima Materia + MOIRAI + Euclidean + Lorenz + reverb)
+- `~moirai` — Generative melody/sequence system
+- `~genesis` — System initialization and boot orchestration state
 
 ### Validation & Metrics Infrastructure
 
-#### Measurement System (~METRIC_COLLECTOR)
-Language-side Event (not a class — SC's class compiler only processes `.sc` files). Four-dimensional quantification:
-- **Coherence**: Spectral stability via RMS variance across 8 windows, normalized to [0,1]; real time-domain implementation (FluidBufSpectralShape noted for future spectral-centroid refinement)
-- **Fidelity**: Pearson cross-correlation between input and output buffers; real implementation
-- **Stress**: System CPU load via `Server.local.avgCPU` (real)
-- **Entropy**: Shannon entropy of sample-magnitude distribution, clipped to [0,12]; real implementation
+#### Measurement System (~metric_collector)
 
-Methods: `measureCoherence`, `measureFidelity`, `measureStress`, `measureEntropy`, `logMetric`, `exportReport`.
+Language-side Event using SuperCollider core FFT analysis; FluidBuf is not required.
+
+- **Coherence**: `1 - stddev(spectral power centroid) / mean(centroid)`, clipped to [0,1]; a centroid-stability measure.
+- **Fidelity**: Absolute zero-lag Pearson correlation of aligned sample arrays. Gain, DC offset and polarity are ignored; latency is not corrected.
+- **Stress**: `Server.local.avgCPU` when the server is running; otherwise unavailable.
+- **Entropy**: Mean Shannon entropy of one-sided spectral power in bits, using mean-centered, Hann-windowed samples.
+
+`analyzeSamples` and `analyzeFile` return status and measurements;
+`measureBuffer(buffer, action)` acquires samples asynchronously with a timeout.
+Missing, invalid, short or silent input is unavailable with nil values, never a
+fabricated zero. Scalar helpers are `measureCoherence`, `measureFidelity`,
+`measureStress` and `measureEntropy`. These definitions do not establish perceptual
+fidelity or a live capture-to-trait pipeline.
 
 #### A/B Test Bench
 - **runComparison(synth1, synth2)**: Sequentially runs two SynthDefs on same input with metrics
@@ -330,16 +354,21 @@ cd brahma/web && npm start
 1. Create file with prefix `0X_module_name.scd` (insert in sequence 01-15)
 2. Implement all 7 stages: IA → EG → BC → AE → TE → PR → RR
 3. Define SynthDef with `outBus` and `inBus` arguments
-4. Register entity in `~BRAHMA_REGISTRY` with trait map via AdamKadmon
+4. Register entity in `~brahma_registry` with trait map via AdamKadmon
 5. Test with validation/metrics infrastructure (brahma/sc/10_*, 11_*, 12_*)
 6. Add entry to loader.scd load sequence
 
 ### Validate Trait Map Integrity
 ```supercollider
 // In SC
-~trait_map = (spectral_profile: [...], temporal_topology: [...], modulation_graph: [...], performance_response: [...]);
-AdamKadmon.validateTraitMap(~trait_map);  // Returns true if valid
-~normalized = AdamKadmon.normalize(~trait_map);  // Ensures [0.0, 1.0] ranges
+~trait_map = (
+    spectral_profile: (centroid: 0.5, flatness: 0.2),
+    temporal_topology: (attack: 0.1),
+    modulation_graph: (source: \lfo),
+    performance_response: (velocity: 0.8)
+);
+AdamKadmon.validateTraitMap(~trait_map);  // true for this canonical dictionary shape
+~normalized = AdamKadmon.normalize(~trait_map);  // clamps only declared ranges
 ```
 
 ### Monitor Visualization
@@ -350,7 +379,7 @@ While SuperCollider and Node.js are running:
 
 ### Run Offline Specimen Processing
 ```supercollider
-~NRT_RENDERER.renderSpecimen(
+~nrt_renderer.renderSpecimen(
     "/path/to/input.wav",
     "/path/to/output.wav"
 );
@@ -358,12 +387,15 @@ While SuperCollider and Node.js are running:
 
 ## Performance Tuning
 
-- **SuperCollider bus allocation**: `~SC_BUS` tracks dynamic allocation; audit if exceeding 512 control buses
+- **SuperCollider bus allocation**: `~sc_bus` tracks dynamic allocation; audit if exceeding 512 control buses
 - **WebSocket latency**: 10Hz organism updates; increase frequency if visualization feels sluggish
 - **Pure Data CPU**: Reduce metro frequency if `dsp load` approaches 80%
 - **Node.js buffering**: Monitor WebSocket client count; may need per-domain load balancing at scale
 
 ## References
+
+- **Current acceptance and next milestones**: [ROADMAP.md](ROADMAP.md#current-acceptance--2026-10-25); local checks are not remote CI or full-rack acceptance.
+- **Provider configuration and human stop**: [docs/agent-clients.md](docs/agent-clients.md#composition-providers). Mock is deterministic; Claude/Gemini require explicit models; Tidal/Sonic Pi adapters remain unavailable.
 
 - **SuperCollider OSC**: `NetAddr` class sends via UDP; use `metadata: true` in UDPPort for type info
 - **Pure Data OSC**: `oscparse` converts binary to Pd messages; `route` filters by address

@@ -15,8 +15,9 @@
 //              at the directory root.
 //    /healthz  liveness for the container platform.
 //
-//  Env: PORT (default 8080), AETHER_LIVE_DIR (default /live),
-//       AETHER_STATIC_DIR (default the bundled player).
+//  Env: PORT (default 8080), AETHER_LIVE_DIR (default workspace out/live),
+//       AETHER_STATIC_DIR (default the bundled player), AETHER_SUBMIT_TOKEN
+//       (operator-only intake; disabled when unset). The container sets /live.
 // ============================================================================
 "use strict";
 
@@ -24,17 +25,42 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { execFile } = require("child_process");
+const { timingSafeEqual } = require("crypto");
 
 const PORT = Number(process.env.PORT || 8080);
-const LIVE_DIR = process.env.AETHER_LIVE_DIR || "/live";
-const STATIC_DIR = process.env.AETHER_STATIC_DIR || path.join(__dirname, "player");
-// Ω submission intake: POST /submit enqueues a viewer's stream URL through the
+const AETHER_ROOT = path.resolve(__dirname, "..");
+const WORKSPACE = fs.existsSync(path.join(AETHER_ROOT, "..", "brahma")) ? path.dirname(AETHER_ROOT) : AETHER_ROOT;
+const LIVE_DIR = process.env.AETHER_LIVE_DIR || path.join(WORKSPACE, "out", "live");
+const STATIC_DIR = process.env.AETHER_STATIC_DIR ||
+  (fs.existsSync(path.join(__dirname, "player")) ? path.join(__dirname, "player") : path.join(__dirname, "..", "web", "listener"));
+// Ω submission intake: POST /submit enqueues a trusted operator's stream URL through the
 // single queue authority (tools/ingest_queue.py), which tools/broadcast.sh pops
 // so a creature eats it live. Tools dir defaults to the container layout (/app),
 // overridable for local dev.
 const QUEUE_DIR = path.join(LIVE_DIR, "queue");
 const TOOLS_DIR = process.env.AETHER_TOOLS_DIR ||
-  (fs.existsSync("/app/tools/ingest_queue.py") ? "/app/tools" : path.join(__dirname, "..", "..", "tools"));
+  (fs.existsSync(path.join(__dirname, "tools", "ingest_queue.py")) ? path.join(__dirname, "tools") : path.join(__dirname, "..", "tools"));
+const SUBMIT_TOKEN = String(process.env.AETHER_SUBMIT_TOKEN || "").trim();
+let submitBusy = false;
+
+function json(res, code, value) {
+  if (!res.destroyed && !res.writableEnded) res.writeHead(code, { "Content-Type": "application/json" }).end(JSON.stringify(value));
+}
+
+function authorized(req) {
+  const expected = Buffer.from(`Bearer ${SUBMIT_TOKEN}`);
+  const provided = Buffer.from(req.headers.authorization || "");
+  return provided.length === expected.length && timingSafeEqual(provided, expected);
+}
+
+// Publish only transport artifacts. Queue records and private generator state
+// share the live directory but are never part of the listener surface.
+function publicLiveKey(urlPath) {
+  try {
+    const key = decodeURIComponent(urlPath.slice("/live/".length));
+    return /^(?:stream\.m3u8|seg_\d+\.ts|telemetry\.json|lineage\.json)$/.test(key) ? key : null;
+  } catch { return null; }
+}
 
 const MIME = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
@@ -84,40 +110,60 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify({ ok: true, uptime: process.uptime() }));
   }
 
-  // Ω: a viewer feeds the organism. POST /submit { url, license?, attribution? }
-  // -> enqueue via the single queue authority; broadcast.sh pops it, a creature
-  // eats it live. Rights posture stays human-gated (license recorded, not cleared).
+  // Remote URLs are fetched by ffmpeg on the broadcaster's network. Until that
+  // worker has isolated egress, admission is for trusted operators only.
   if (urlPath === "/submit" && req.method === "POST") {
+    if (!SUBMIT_TOKEN) return json(res, 503, { ok: false, error: "operator intake is not configured" });
+    if (!authorized(req)) return json(res, 401, { ok: false, error: "operator authorization required" });
     let body = "";
-    req.on("data", (c) => { body += c; if (body.length > 4096) req.destroy(); });
+    let bytes = 0;
+    req.on("data", (c) => {
+      bytes += c.length;
+      if (bytes > 4096) { json(res, 413, { ok: false, error: "submission too large" }); return; }
+      body += c;
+    });
     req.on("end", () => {
+      if (bytes > 4096) return;
       let payload;
       try { payload = JSON.parse(body || "{}"); } catch { payload = {}; }
-      const url = String(payload.url || "").trim();
-      if (!/^https?:\/\//i.test(url)) {
-        res.writeHead(400, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ ok: false, error: "a http(s) stream URL is required" }));
-      }
-      const args = [path.join(TOOLS_DIR, "ingest_queue.py"), "add", "--url", url,
-        "--license", String(payload.license || "unknown"), "--dir", QUEUE_DIR];
-      if (payload.attribution) args.push("--attribution", String(payload.attribution));
-      execFile("python3", args, { timeout: 5000 }, (err, stdout) => {
-        if (err) {
-          res.writeHead(503, { "Content-Type": "application/json" });
-          return res.end(JSON.stringify({ ok: false, error: "queue unavailable" }));
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) payload = {};
+      for (const key of ["url", "license", "attribution"]) {
+        if ((payload[key] !== undefined && typeof payload[key] !== "string") ||
+            (typeof payload[key] === "string" && /[\x00-\x1f\x7f]/.test(payload[key]))) {
+          return json(res, 400, { ok: false, error: "submission fields must be strings without control characters" });
         }
-        let rec = {};
-        try { rec = JSON.parse(stdout); } catch { /* ignore */ }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ ok: true, id: rec.id || null, note: "queued — a creature will eat it live." }));
-      });
+      }
+      let url;
+      try {
+        url = new URL((payload.url || "").trim());
+        if (!["http:", "https:"].includes(url.protocol) || !url.hostname || url.username || url.password) throw new Error("invalid URL");
+      } catch { return json(res, 400, { ok: false, error: "an http(s) stream URL without credentials is required" }); }
+      if (submitBusy) return json(res, 429, { ok: false, error: "queue busy; retry shortly" });
+      const args = [path.join(TOOLS_DIR, "ingest_queue.py"), "add", "--url", url.href,
+        "--license", payload.license || "unknown", "--dir", QUEUE_DIR];
+      if (payload.attribution) args.push("--attribution", payload.attribution);
+      submitBusy = true;
+      try {
+        execFile("python3", args, { timeout: 5000, maxBuffer: 64 * 1024 }, (err, stdout) => {
+          submitBusy = false;
+          if (err) return json(res, 503, { ok: false, error: "queue unavailable" });
+          let rec;
+          try { rec = JSON.parse(stdout); } catch { return json(res, 503, { ok: false, error: "invalid queue response" }); }
+          if (!rec || typeof rec.id !== "string") return json(res, 503, { ok: false, error: "invalid queue response" });
+          json(res, 200, { ok: true, id: rec.id, note: "queued for the next available segment" });
+        });
+      } catch {
+        submitBusy = false;
+        json(res, 503, { ok: false, error: "queue unavailable" });
+      }
     });
     return;
   }
 
   // Live stream: served from LIVE_DIR. Playlists/telemetry must not be cached.
   if (urlPath.startsWith("/live/")) {
-    const file = safeResolve(LIVE_DIR, urlPath.slice("/live".length));
+    const key = publicLiveKey(urlPath);
+    const file = key && safeResolve(LIVE_DIR, key);
     if (!file) { res.writeHead(404).end("no stream yet"); return; }
     const noCache = file.endsWith(".m3u8") || file.endsWith(".json");
     return sendFile(res, file, noCache ? { "Cache-Control": "no-cache, no-store, must-revalidate" } : undefined);
@@ -138,4 +184,4 @@ if (require.main === module) {
   for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => { server.close(() => process.exit(0)); });
 }
 
-module.exports = { server, safeResolve };
+module.exports = { server, safeResolve, publicLiveKey };

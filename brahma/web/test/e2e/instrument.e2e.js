@@ -34,9 +34,13 @@ async function until(fn, ms = 10000) {
 describe("local sample instrument", () => {
   const ctx = {};
   before(async () => {
-    const chrome = ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "/Applications/Chromium.app/Contents/MacOS/Chromium", "/usr/bin/google-chrome", "/usr/bin/chromium"].find(fs.existsSync);
-    if (!chrome) { ctx.skip = "Chrome unavailable; sample browser acceptance unmeasured"; return; }
+    const chrome = [process.env.BRAHMA_CHROME_PATH, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "/Applications/Chromium.app/Contents/MacOS/Chromium", "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser"].filter(Boolean).find(fs.existsSync);
+    if (!chrome) {
+      if (process.env.BRAHMA_REQUIRE_BROWSER === "1") throw new Error("Chrome is required; set BRAHMA_CHROME_PATH to an installed test browser");
+      ctx.skip = "Chrome unavailable; sample browser acceptance unmeasured"; return;
+    }
     ctx.dir = fs.mkdtempSync(path.join(os.tmpdir(), "brahma-sample-e2e-"));
     ctx.donor = path.join(ctx.dir, 'donor "one".wav'); fs.writeFileSync(ctx.donor, donorWav());
     const webDir = path.resolve(__dirname, "../..");
@@ -49,7 +53,8 @@ describe("local sample instrument", () => {
     const match = await until(() => /VISUAL CORTEX ONLINE: http:\/\/127\.0\.0\.1:(\d+)/.exec(output));
     ctx.url = `http://127.0.0.1:${match[1]}/instrument/`;
     ctx.browser = await require("puppeteer-core").launch({ executablePath: chrome, headless: true,
-      args: ["--no-first-run", "--no-default-browser-check", "--autoplay-policy=no-user-gesture-required"] });
+      args: ["--no-first-run", "--no-default-browser-check", "--autoplay-policy=no-user-gesture-required",
+        ...(process.env.BRAHMA_BROWSER_NO_SANDBOX === "1" ? ["--no-sandbox"] : [])] });
     ctx.page = await ctx.browser.newPage();
     ctx.errors = []; ctx.page.on("pageerror", e => ctx.errors.push(e.message));
     const cdp = await ctx.page.createCDPSession();
@@ -308,8 +313,9 @@ describe("local sample instrument", () => {
       assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
       await ctx.page.click("#stop"); await ctx.page.click("#freeze"); await status("Saved");
       const filename = path.join(ctx.dir, "Native-acceptance.brahma.json");
-      await until(() => fs.existsSync(filename));
-      const project = JSON.parse(fs.readFileSync(filename));
+      const project = await until(() => {
+        try { return JSON.parse(fs.readFileSync(filename)); } catch (_) { return null; }
+      });
       assert.equal(project.sources.length, 2);
       const output = project.sources.find(source => source.recipe);
       assert.equal(output.recipe.module, "solve_pitch_shift");

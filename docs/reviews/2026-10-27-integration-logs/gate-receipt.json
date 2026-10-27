@@ -1,0 +1,203 @@
+[
+  {
+    "gate": "web-tests",
+    "command": [
+      "npm",
+      "test",
+      "--",
+      "--test-concurrency=1"
+    ],
+    "cwd": "brahma/web",
+    "environment": {},
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 3.053,
+    "log": "docs/reviews/2026-10-27-integration-logs/web-tests.txt"
+  },
+  {
+    "gate": "foundry-tests",
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "src/**/*.test.js",
+      "public/**/*.test.js"
+    ],
+    "cwd": "product",
+    "environment": {},
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 3.735,
+    "log": "docs/reviews/2026-10-27-integration-logs/foundry-tests.txt"
+  },
+  {
+    "gate": "aether-tests",
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "aether/deploy/serve.test.js",
+      "aether/deploy/integration.test.js",
+      "aether/deploy/worker.test.js",
+      "aether/web/listener/aether.test.js",
+      "docs/absorb-alchemize/engine-path.test.cjs"
+    ],
+    "cwd": ".",
+    "environment": {},
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 1.761,
+    "log": "docs/reviews/2026-10-27-integration-logs/aether-tests.txt"
+  },
+  {
+    "gate": "web-build",
+    "command": [
+      "npm",
+      "run",
+      "build:workbench"
+    ],
+    "cwd": "brahma/web",
+    "environment": {},
+    "deadline_seconds": 120,
+    "exit_code": 0,
+    "seconds": 0.717,
+    "log": "docs/reviews/2026-10-27-integration-logs/web-build.txt"
+  },
+  {
+    "gate": "browser-tests",
+    "command": [
+      "npm",
+      "run",
+      "test:e2e",
+      "--",
+      "--test-concurrency=1"
+    ],
+    "cwd": "brahma/web",
+    "environment": {
+      "BRAHMA_REQUIRE_BROWSER": "1"
+    },
+    "deadline_seconds": 240,
+    "exit_code": 1,
+    "seconds": 47.636,
+    "log": "docs/reviews/2026-10-27-integration-logs/browser-tests.txt"
+  },
+  {
+    "gate": "python-tests",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-p",
+      "test_*.py",
+      "-v"
+    ],
+    "cwd": ".",
+    "environment": {
+      "RUN_NATIVE_DONOR_TESTS": "1"
+    },
+    "deadline_seconds": 240,
+    "exit_code": 1,
+    "seconds": 8.851,
+    "log": "docs/reviews/2026-10-27-integration-logs/python-tests.txt"
+  },
+  {
+    "gate": "native-dsp",
+    "command": [
+      "python3",
+      "tools/dsp/test_dsp.py"
+    ],
+    "cwd": ".",
+    "environment": {},
+    "deadline_seconds": 360,
+    "exit_code": 0,
+    "seconds": 3.062,
+    "log": "docs/reviews/2026-10-27-integration-logs/native-dsp.txt"
+  },
+  {
+    "gate": "native-forge",
+    "command": [
+      "python3",
+      "tools/test_forge.py"
+    ],
+    "cwd": ".",
+    "environment": {
+      "BRAHMA_FORGE_NATIVE": "1"
+    },
+    "deadline_seconds": 180,
+    "exit_code": 1,
+    "seconds": 6.142,
+    "log": "docs/reviews/2026-10-27-integration-logs/native-forge.txt"
+  },
+  {
+    "gate": "release-isolation",
+    "command": [
+      "python3",
+      "tools/test_release.py"
+    ],
+    "cwd": ".",
+    "environment": {},
+    "deadline_seconds": 120,
+    "exit_code": 0,
+    "seconds": 0.58,
+    "log": "docs/reviews/2026-10-27-integration-logs/release-isolation.txt"
+  },
+  {
+    "gate": "strict-smoke",
+    "command": [
+      "bash",
+      "tools/smoke.sh",
+      "--strict"
+    ],
+    "cwd": ".",
+    "environment": {},
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 9.666,
+    "log": "docs/reviews/2026-10-27-integration-logs/strict-smoke.txt"
+  },
+  {
+    "gate": "foundry-smoke",
+    "command": [
+      "npm",
+      "run",
+      "smoke"
+    ],
+    "cwd": "product",
+    "environment": {},
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 0.718,
+    "log": "docs/reviews/2026-10-27-integration-logs/foundry-smoke.txt"
+  },
+  {
+    "gate": "web-audit",
+    "command": [
+      "npm",
+      "audit",
+      "--json"
+    ],
+    "cwd": "brahma/web",
+    "environment": {},
+    "deadline_seconds": 120,
+    "exit_code": 0,
+    "seconds": 0.772,
+    "log": "docs/reviews/2026-10-27-integration-logs/web-audit.txt"
+  },
+  {
+    "gate": "foundry-audit",
+    "command": [
+      "npm",
+      "audit",
+      "--json"
+    ],
+    "cwd": "product",
+    "environment": {},
+    "deadline_seconds": 120,
+    "exit_code": 0,
+    "seconds": 0.605,
+    "log": "docs/reviews/2026-10-27-integration-logs/foundry-audit.txt"
+  }
+]

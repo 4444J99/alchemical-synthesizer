@@ -1,0 +1,87 @@
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57136 -> SC 57996 ---
+OSC Listener Ready on port 0
+OSC Sender Ready -> port 57996
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:51352 ---
+--- GOLEM UI: http://127.0.0.1:51352/golem ---
+--- CORTEX UI: http://127.0.0.1:51352/cortex ---
+--- MCP (agent): http://127.0.0.1:51352/mcp ---
+--- AGENT TOKEN FILE: /Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/.runtime/agent-token-51352 (0600, local MCP bridges) ---
+--- HUMAN ROLE: supplied by environment, not printed ---
+✔ Dirt conformance: a captured /dirt/play packet decodes to the documented fields (0.977667ms)
+✔ Dirt conformance: /dirt/panic forwards as the engine's panic address (0.149958ms)
+✔ Dirt conformance: /play2 aliases (sound, midinote, velocity) are honoured (0.074333ms)
+✔ Dirt conformance: every fixture packet is well-formed (no truncated hex) (0.243459ms)
+✔ Dirt conformance: an unsupported address is ignored, not guessed at (0.200375ms)
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+✔ runtimes: unimplemented adapters remain unavailable regardless of installation (132.588958ms)
+✔ sclang gate: anonymous callers are refused before anything else (7.2425ms)
+✔ sclang gate: the human role alone is not enough without the opt-in env var (3.129708ms)
+✔ sclang gate: with the opt-in set, request validation runs (the gate really opened) (0.982ms)
+✔ sclang gate: the outcome matches the probe, so a green probe cannot hide a broken eval (736.090458ms)
+▶ Live Bridge — SuperCollider File & Schema Integrity
+  ✔ 31_live_gateway.scd exists and defines required OSCdefs (0.874375ms)
+  ✔ loader.scd loads 31_live_gateway.scd inside doWhenBooted (0.470625ms)
+  ✔ IMMUNE Safety Governor Preservation Invariant (0.170542ms)
+  ✔ /brahma/live/play auto-release duration contract (0.086458ms)
+✔ Live Bridge — SuperCollider File & Schema Integrity (2.375167ms)
+✔ Live Bridge — Gateway Server Namespace Whitelist (0.414208ms)
+✔ Live Bridge — OSC sockets bind loopback only (0.088583ms)
+✔ ratelimit: bucket drains, refuses, then refills (0.511084ms)
+✔ ratelimit: rejects nonsense configuration (0.103167ms)
+✔ session: human token yields human role (0.416708ms)
+✔ session: agent token yields agent role, never human (0.079625ms)
+✔ session: bad token is rejected with a typed error (0.065667ms)
+✔ session: malformed frames produce typed errors, never throw (0.054333ms)
+✔ session: run registers a pattern and pings the engine (0.685459ms)
+✔ session: run rejects duplicate ids and bad ids (0.090958ms)
+✔ session: agent cannot run (0.077042ms)
+✔ session: unauthenticated cannot run (0.074791ms)
+✔ session: event maps to /brahma/live/play with clamped arguments (0.126416ms)
+✔ session: event rejects non-numeric note/vel/dur (0.0515ms)
+✔ session: event is rate limited without dropping the connection (0.070667ms)
+✔ session: stop releases that instance's voices only (0.098958ms)
+✔ session: stop of an unknown pattern is a typed error (0.034417ms)
+✔ session: stop_all panics the engine and clears the registry (0.088292ms)
+✔ session: stop_all is human-only (0.031167ms)
+✔ session: status reports no_pong_yet before the engine answers (0.065166ms)
+✔ session: status is fresh after a pong and stale after the window (0.048875ms)
+✔ session: agent may read status but not control (0.026583ms)
+✔ session: unauthenticated status is forbidden (0.038625ms)
+✔ session: legacy OSC inside the allowlist still forwards for humans (0.104417ms)
+✔ session: legacy OSC outside the allowlist is refused (0.029917ms)
+✔ session: legacy OSC is human-only (0.02175ms)
+✔ session: legacy OSC is rate limited too (0.024833ms)
+✔ oscArgs: types integers, floats and strings for metadata mode (0.0525ms)
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57131 -> SC 57999 ---
+OSC Listener Ready on port 0
+OSC Sender Ready -> port 57999
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:51358 ---
+--- GOLEM UI: http://127.0.0.1:51358/golem ---
+--- CORTEX UI: http://127.0.0.1:51358/cortex ---
+--- MCP (agent): http://127.0.0.1:51358/mcp ---
+--- AGENT TOKEN FILE: /Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/.runtime/agent-token-51358 (0600, local MCP bridges) ---
+--- WORKBENCH (human): http://127.0.0.1:51358/workbench/#t=[REDACTED] ---
+--- INSTRUMENT (human): http://127.0.0.1:51358/instrument/#t=[REDACTED] ---
+--- Open that URL on this machine to claim the human role. ---
+✔ workbench licence: full AGPL text ships (1.045417ms)
+✔ workbench licence: NOTICE lists the bundled dependencies (0.813542ms)
+✔ workbench licence: every shipped source carries an AGPL SPDX header (4.700625ms)
+✔ workbench licence: the page offers its source and imports only its own bundle (0.105834ms)
+✔ GET /workbench/source.json names the licence, repository and dependencies (29.285292ms)
+✔ GET /workbench/ serves the page (3.437709ms)
+✔ event-map: note control becomes a Brahma event (0.460875ms)
+✔ event-map: a sound matching a real module selects that engine (0.097042ms)
+✔ event-map: note names become MIDI, since Strudel passes strings (0.259791ms)
+✔ event-map: pitch comes from note, freq, or nothing (0.202083ms)
+✔ event-map: velocity, duration and params are clamped and filtered (0.383125ms)
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+ℹ tests 54
+ℹ suites 0
+ℹ pass 54
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1533.613875

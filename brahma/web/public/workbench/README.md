@@ -42,3 +42,23 @@ gateway maps that to `/brahma/live/play`. Brahma supplies the sound.
 
 This is engineering diligence, not legal advice. Hosting this page as part of a paid
 commercial service needs a licence review first.
+
+
+## Playback ownership and verification
+
+Each Run receives a distinct gateway registration and scheduler. Editing keeps the
+previous performance stoppable; Run applies the visible document. Stop abandons a
+pending evaluation, and a late continuation retains its own Strudel helper bindings.
+Labels and direct pattern registration use the evaluation's captured `p` method;
+pattern `cpm` calls also retain their own scheduler binding. The source-owned
+adapter rewrites those method calls after upstream transpilation. The upstream
+dependency remains unchanged, and ordinary JavaScript method receivers are preserved.
+This controls playback ownership; it is not a JavaScript sandbox. Explicit global
+mutations, arbitrary asynchronous side effects and a synchronous infinite loop are
+not cancelled by Stop. Pattern code is trusted local user code.
+
+Use Node 24 and `npm --prefix brahma/web run test:e2e` with an installed Chrome.
+`BRAHMA_CHROME_PATH` selects a test executable and `BRAHMA_REQUIRE_BROWSER=1`
+turns a missing browser into a failure. CI uses the revision declared by the locked
+Puppeteer package. Browser tests use a real gateway and a UDP engine fixture;
+physical audio and listening acceptance are separate.

@@ -1,0 +1,52 @@
+
+> brahma-visual-cortex@1.0.0 test:e2e
+> node --test 'test/e2e/*.e2e.js' --test-concurrency=1
+
+▶ local sample instrument
+  ✔ meters the real synth-only track without creating audio while idle (944.725042ms)
+  ✔ imports real audio, edits chops, saves bytes, reopens and exports the chosen sample (295.309833ms)
+  ✔ failed project restore preserves the currently playable source and pattern (32.899709ms)
+  ✔ real renderer cancels scheduled sample voices and refuses missing samples (14.03525ms)
+  ✔ duplicate imports reuse the decoded buffer and preserve edited chops (18.406292ms)
+  ✔ Stop cancels an audition waiting for the audio context to resume (0.7625ms)
+  ✔ changing engines stops playback and cannot send sample notes over OSC (34.213292ms)
+  ✔ auditioning a chop stops OSC transport before switching to local audio (64.633708ms)
+  ✔ auditioning a chop keeps an already local loop playing (182.319042ms)
+  ✖ applies native audio while playing and saves its exact recipe and retained original (588.303625ms)
+  ✔ auditions the same edited chop range for original and transformed audio without changing the original (522.366458ms)
+  ✔ Stop invalidates a pending native result without replacing the current source (158.041875ms)
+  ✔ vessel meters follow actual per-track audio and clear immediately on Stop (94.067417ms)
+  ✔ material vessels preview distinct controls, save per track and fence edits made during a render (306.457709ms)
+  ✔ applied material controls and retained original survive a complete browser save/reopen (571.05375ms)
+  ✔ reopens and resaves fractional mixtures without rounding or rejecting canonical material state (50.067417ms)
+✖ local sample instrument (5630.029834ms)
+▶ workbench E2E
+  ✔ Tier 1 — UI: the page serves, claims the human role, and strips the token from the URL (5.864041ms)
+  ✔ Tier 2 — protocol: server frames are typed JSON and `run` is acknowledged (72.238584ms)
+  ✔ Tier 3 — engine: a scheduled hap reaches the engine socket as a typed play packet (103.191583ms)
+  ✔ Tier 4 — panic: the panic control reaches the panic address (33.050458ms)
+  ✔ edited active buffer is the source that actually plays (150.7855ms)
+  ✔ Stop releases the same instance as the scheduled events (137.6425ms)
+  ✔ editing a playing buffer preserves Stop authority (167.40275ms)
+  ✔ Run applies an edited draft and leaves one registered performance (316.828583ms)
+  ✔ rapid Run–Stop–Run retains authority over the newest performance (249.425708ms)
+  ✔ Stop abandons a pending evaluation and late completion cannot replace or stop its successor (2166.510166ms)
+✔ workbench E2E (4911.944834ms)
+ℹ tests 26
+ℹ suites 2
+ℹ pass 25
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5770.23175
+
+✖ failing tests:
+
+test at test/e2e/instrument.e2e.js:298:3
+✖ applies native audio while playing and saves its exact recipe and retained original (588.303625ms)
+  SyntaxError [Error]: Unexpected end of JSON input
+      at JSON.parse (<anonymous>)
+      at TestContext.<anonymous> (/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/test/e2e/instrument.e2e.js:312:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7)

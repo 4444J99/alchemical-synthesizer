@@ -59,15 +59,17 @@ function handleOne(msg, req) {
       if (!action) return rpcError(id, -32602, `Unknown tool: ${name}`);
 
       // Meter cost against the API key.
+      let auth = {};
       if (action.cost > 0) {
         const key = extractKey(req);
         if (!key) return rpcError(id, -32001, "Missing API key for metered tool", { hint: "Set Authorization: Bearer <key>" });
         const charge = chargeKey(key, action.cost);
         if (!charge.ok) return rpcError(id, -32002, charge.error, charge);
+        auth = charge.auth;
       }
 
       try {
-        const out = action.handler(args);
+        const out = actions.invoke(name, args, auth);
         return rpcResult(id, {
           content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
           structuredContent: out,

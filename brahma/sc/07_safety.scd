@@ -28,7 +28,9 @@ SynthDef(\immune_governor, {
     // Hard Limiter
     sig = Limiter.ar(sig, threshold, 0.01);
     
-    Out.ar(outBus, sig);
+    // The loader installs this in place on each hardware output. Out would
+    // add a limited copy while leaving the unsafe dry signal on the bus.
+    ReplaceOut.ar(outBus, sig);
 }).add;
 
 // ------------------------------------------------------------

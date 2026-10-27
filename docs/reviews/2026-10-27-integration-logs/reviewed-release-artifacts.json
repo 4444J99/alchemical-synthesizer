@@ -1,0 +1,54 @@
+{
+  "source_commit": "1d9fa17576c9b6e24a308ebd7219569f592a742c",
+  "source_state": "clean",
+  "artifacts": [
+    {
+      "path": "dist/PROVENANCE.json",
+      "size": 868,
+      "sha256": "5039993de68b87ad99011d0c094d68ae3d95bcf9266a43b2ba9f5b5fb4254c62"
+    },
+    {
+      "path": "dist/SHA256SUMS.txt",
+      "size": 479,
+      "sha256": "7a3e045ba73a728cc61a4f5e8414d68c662e37bb89c1e857098c2d3f8dede95a"
+    },
+    {
+      "path": "dist/alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.spdx",
+      "size": 1300,
+      "sha256": "dadc0dc8b2767702711fedf315d69686832149fda2a3a045e3dfa7a43528fd07"
+    },
+    {
+      "path": "dist/alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.tar.gz",
+      "size": 1528131,
+      "sha256": "5caa6f7a67730cfb165850af23d33aee773f4ea45c6a8917c42736aad0cd0e07"
+    },
+    {
+      "path": "dist/alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.zip",
+      "size": 1821924,
+      "sha256": "441841a2073825b1cadc25d34282a9dd3ed372031dce274e64e9d3e6e64a5d84"
+    }
+  ],
+  "retained_previous_release": {
+    "source_commit": "1d9fa17576c9b6e24a308ebd7219569f592a742c",
+    "previous_dist": "/Users/4jp/Workspace/limen/.limen-private/custody-staging/alchemical-release-reviewed-20261027-sk4ki21e/previous-dist",
+    "previous_artifacts_sha256": {
+      "alchemical-synthesizer-integration-20261027-2409fde.tar.gz": "0cc902a1cc4126bc70b9e9b58b115189d00bcb9f0a566c7891eafc186b3c2898",
+      "PROVENANCE.json": "e57883cf080f1df370da6778b3d72d7bf3eb1c94fe84e6f4917f758764e7c1a2",
+      "alchemical-synthesizer-integration-20261027-2409fde.zip": "0516cfc9f1340c93613c57ec5a2d2c125bb1c5194420d95f8f6de6abeb3c0039",
+      "SHA256SUMS.txt": "2e51089c52585200aef8007e8b3398b4e973955def512a2c9ffdf17df71ed784",
+      "alchemical-synthesizer-integration-20261027-2409fde.spdx": "b6dea78a365e9e23fd1363d8761604e55c8a2992e68f3f7a540aafd4e657c103"
+    },
+    "retention": "Moved unchanged existing dist directory before rebuilding; verified every file hash",
+    "disk_free_bytes_before_build": 35411513344
+  },
+  "archive_checks": {
+    "regular_files": 515,
+    "bundle_bytes": 957695,
+    "bundle_sha256": "5e69fff713cd2642a5af1a0bf1a585aede762aec22027f92ad790f73aa2feb6b",
+    "tar_runtime_http_checks": 7,
+    "zip_structure": "passed",
+    "earlier_artifacts_match_historical_receipt": true
+  },
+  "release_status": "Locally built and inspected; no public release or deployment",
+  "evidence_commit_scope": "Receipt/report additions only after building from the clean source_commit"
+}

@@ -36,7 +36,7 @@ dist:
 	bash tools/build_release.sh
 
 serve:
-	cd brahma/web && npm install && npm start
+	cd brahma/web && npm ci && npm run build:workbench && npm start
 
 validate:
 	@test -n "$(FILE)" || { echo "usage: make validate FILE=path/to.wav"; exit 1; }
@@ -45,16 +45,16 @@ validate:
 clean:
 	rm -rf dist brahma/web/node_modules
 
-# install: symlink the six Brahma .sc classes into SC Extensions and recompile.
+# install: expose all recursive Brahma .sc classes and verify native compilation.
 install:
 	bash tools/install-brahma.sh
 
 # start: layered start of the rack (SC engine -> Visual Cortex -> Pure Data).
 #   make start                # all tiers
-#   make start --no-pd        # skip Pure Data
+#   make start START_ARGS="--no-sc --no-pd"  # web only
 #   make start PORT=4000      # custom web port
 start:
-	bash tools/start-brahma.sh $(if $(PORT),--port $(PORT),)
+	bash tools/start-brahma.sh $(if $(PORT),--port "$(PORT)",) $(START_ARGS)
 
 # ---- The Forge: sample -> track pipeline ----
 

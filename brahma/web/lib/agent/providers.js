@@ -2,23 +2,15 @@
 /**
  * providers.js — composition providers behind one interface.
  *
- * Every provider answers the same two questions:
- *   available()  can this host actually run it, right now, with evidence?
- *   propose()    turn a prompt into note events, or fail with a typed reason
- *
- * The point of the availability probe is that "not installed" must never look like
- * "produced nothing". Tidal and Sonic Pi are not on this host; the Claude adapter
- * needs an API key this host does not have. Those report unavailable with a reason
- * instead of returning an empty pattern. The `mock` provider is always available and
- * always labelled as such — it exists so the loop can be exercised offline, not so
- * that a demo can pretend a model was called.
+ * Listing reads cached configuration and discovery evidence. Optional runtime
+ * discovery is explicit, asynchronous and bounded; it never starts at construction.
+ * Discovery does not make an unimplemented composition adapter available.
+ * The mock provider remains a labelled, deterministic offline baseline.
  */
 
 const crypto = require("node:crypto");
-const { promisify } = require("node:util");
-const execFileAsync = promisify(require("node:child_process").execFile);
 
-const PROVIDER_NAMES = ["mock", "claude", "gemini", "tidal", "sonicpi"];
+const PROVIDER_NAMES = Object.freeze(["mock", "claude", "gemini", "tidal", "sonicpi"]);
 
 function hashSeed(text) {
   return crypto.createHash("sha256").update(String(text)).digest().readUInt32BE(0);
@@ -56,10 +48,11 @@ function validateEvents(events) {
 
   const out = [];
   for (const e of events) {
-    const time = Number(e && e.time);
-    const note = Number(e && e.note);
-    const vel = e && e.vel === undefined ? 0.8 : Number(e.vel);
-    const dur = e && e.dur === undefined ? 0.5 : Number(e.dur);
+    if (!e || typeof e !== "object" || Array.isArray(e)) return null;
+    const time = Number(e.time);
+    const note = Number(e.note);
+    const vel = e.vel === undefined ? 0.8 : Number(e.vel);
+    const dur = e.dur === undefined ? 0.5 : Number(e.dur);
 
     if (!Number.isFinite(time) || time < 0 || time > 3600) return null;
     if (!Number.isFinite(note) || note < 0 || note > 127) return null;
@@ -71,15 +64,87 @@ function validateEvents(events) {
   return out.sort((a, b) => a.time - b.time);
 }
 
-function createProviderRegistry({ env = process.env, transport, now = () => Date.now() } = {}) {
-  // Discovery belongs to this registry and must never block the HTTP event loop.
-  let tidalAvailable = false;
-  let tidalReason = "not_probed";
-  let sonicAvailable = false;
-  let sonicReason = "not_probed";
-  let probing = null;
+function createProviderRegistry({ env = process.env, transport, now = () => Date.now(), probeTimeoutMs = 5000 } = {}) {
+  const timeoutMs = Number.isFinite(probeTimeoutMs) && probeTimeoutMs > 0
+    ? Math.min(probeTimeoutMs, 30000) : 5000;
+  const probeEnv = { ...env };
+  const discovery = Object.fromEntries(["tidal", "sonicpi"].map((name) => [name, {
+    status: "not_probed", reason: "not_probed", checkedAt: null
+  }]));
+  const pending = new Map();
+  let pendingAll = null;
   let closed = false;
   const probeController = new AbortController();
+
+  async function discoverTidal() {
+    // Lazy import avoids a cycle: tools also uses validateEvents. The shared
+    // executor bounds output and kills the command's process group on timeout.
+    const { defaultExecFile } = require("./tools");
+    const { stdout } = await defaultExecFile("ghci", [
+      "-ignore-dot-ghci", "-v0", "-e", "import Sound.Tidal.Context", "-e", 'putStrLn "TIDAL_OK"'
+    ], { env: probeEnv, timeout: timeoutMs, maxBuffer: 64 * 1024, signal: probeController.signal });
+    return /(?:^|\n)TIDAL_OK(?:\r?\n|$)/.test(stdout)
+      ? { status: "detected", reason: "ghci loaded Sound.Tidal.Context" }
+      : { status: "probe_failed", reason: "ghci did not confirm Sound.Tidal.Context" };
+  }
+
+  async function discoverSonicPi() {
+    // Finding an application is installation evidence, not a running daemon or
+    // an event-producing adapter. No OSC or playback occurs during discovery.
+    let timer;
+    let onAbort;
+    try {
+      await Promise.race([
+        require("node:fs").promises.access("/Applications/Sonic Pi.app"),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(Object.assign(new Error("Sonic Pi discovery timed out"), {
+            code: "ETIMEDOUT"
+          })), timeoutMs);
+          onAbort = () => reject(probeController.signal.reason);
+          probeController.signal.addEventListener("abort", onAbort, { once: true });
+        })
+      ]);
+      return { status: "detected", reason: "Sonic Pi.app found" };
+    } finally {
+      clearTimeout(timer);
+      if (onAbort) probeController.signal.removeEventListener("abort", onAbort);
+    }
+  }
+
+  function probeRuntime(name) {
+    if (closed) return Promise.resolve(false);
+    if (pending.has(name)) return pending.get(name);
+    discovery[name] = { status: "probing", reason: "discovery_running", checkedAt: null };
+    const task = (async () => {
+      let result;
+      try {
+        result = await (name === "tidal" ? discoverTidal() : discoverSonicPi());
+      } catch (err) {
+        if (err.code === "ENOENT") {
+          result = { status: "not_installed", reason: name === "tidal" ? "ghci not found" : "Sonic Pi.app not found" };
+        } else if (err.code === "ETIMEDOUT") {
+          result = { status: "timeout", reason: `discovery exceeded ${timeoutMs}ms` };
+        } else {
+          result = { status: "probe_failed", reason: String(err.message || err).slice(0, 200) };
+        }
+      }
+      if (closed) result = { status: "closed", reason: "registry_closed" };
+      discovery[name] = { ...result, checkedAt: new Date(now()).toISOString() };
+      return result.status === "detected";
+    })().finally(() => pending.delete(name));
+    pending.set(name, task);
+    return task;
+  }
+
+  function unavailableLiveProvider(name, note) {
+    const reason = "adapter_not_implemented: no proposal-to-events adapter";
+    return {
+      name, kind: "live", available: () => false, reason: () => reason, note,
+      probe: () => probeRuntime(name),
+      propose: async () => { throw Object.assign(new Error(`${name}: ${reason}`), { code: "adapter_not_implemented" }); }
+    };
+  }
+
   // Injected in tests. The default performs a real API call, which is why the
   // provider reports unavailable on a host with no key rather than faking one.
   const claudeTransport = transport || (async ({ prompt, apiKey, model }) => {
@@ -124,11 +189,11 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     return parts.map((p) => p.text || "").join("");
   });
 
-  const claudeModel = env.BRAHMA_CLAUDE_MODEL || null;
-  const hasKey = Boolean(env.ANTHROPIC_API_KEY);
-  const geminiApiKey = env.GEMINI_API_KEY || env.GOOGLE_API_KEY || null;
-  const hasGeminiKey = Boolean(geminiApiKey);
-  const geminiModel = env.BRAHMA_GEMINI_MODEL || "gemini-1.5-flash";
+  const configuredString = (value) => typeof value === "string" ? value.trim() : "";
+  const claudeModel = configuredString(env.BRAHMA_CLAUDE_MODEL);
+  const claudeApiKey = configuredString(env.ANTHROPIC_API_KEY);
+  const geminiApiKey = configuredString(env.GEMINI_API_KEY) || configuredString(env.GOOGLE_API_KEY);
+  const geminiModel = configuredString(env.BRAHMA_GEMINI_MODEL);
 
   const providers = {
     mock: {
@@ -143,11 +208,12 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     claude: {
       name: "claude",
       kind: "model",
-      available: () => hasKey,
-      reason: () => (hasKey ? "api_key_present" : "not_configured: no ANTHROPIC_API_KEY"),
-      note: hasKey && !claudeModel ? "set BRAHMA_CLAUDE_MODEL to pin the model" : "",
+      available: () => Boolean(claudeApiKey && claudeModel),
+      reason: () => !claudeApiKey ? "not_configured: no ANTHROPIC_API_KEY"
+        : !claudeModel ? "not_configured: set BRAHMA_CLAUDE_MODEL" : "configured",
+      note: "availability requires a key and an explicit model; connectivity has not been checked",
       propose: async ({ prompt }) => {
-        if (!hasKey) throw new Error("claude provider unavailable: no ANTHROPIC_API_KEY");
+        if (!claudeApiKey) throw new Error("claude provider unavailable: no ANTHROPIC_API_KEY");
         if (!claudeModel) throw new Error("claude provider misconfigured: set BRAHMA_CLAUDE_MODEL");
 
         const instruction = [
@@ -159,14 +225,14 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
           `Prompt: ${prompt}`
         ].join("\n");
 
-        const raw = await claudeTransport({ prompt: instruction, apiKey: env.ANTHROPIC_API_KEY, model: claudeModel }); // allow-secret
+        const raw = await claudeTransport({ prompt: instruction, apiKey: claudeApiKey, model: claudeModel }); // allow-secret
         let parsed;
         try {
           parsed = JSON.parse(stripFences(raw));
         } catch (_) {
           throw new Error("claude provider returned unparseable JSON");
         }
-        const events = validateEvents(parsed.events);
+        const events = validateEvents(parsed && parsed.events);
         if (!events) throw new Error("claude provider returned no valid events");
         return { summary: String(parsed.summary || "model proposal").slice(0, 500), events };
       }
@@ -175,11 +241,12 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
     gemini: {
       name: "gemini",
       kind: "model",
-      available: () => hasGeminiKey,
-      reason: () => (hasGeminiKey ? "api_key_present" : "not_configured: no GEMINI_API_KEY or GOOGLE_API_KEY"),
-      note: hasGeminiKey && !geminiModel ? "set BRAHMA_GEMINI_MODEL to pin the model" : "",
+      available: () => Boolean(geminiApiKey && geminiModel),
+      reason: () => !geminiApiKey ? "not_configured: no GEMINI_API_KEY or GOOGLE_API_KEY"
+        : !geminiModel ? "not_configured: set BRAHMA_GEMINI_MODEL" : "configured",
+      note: "availability requires a key and an explicit model; connectivity has not been checked",
       propose: async ({ prompt }) => {
-        if (!hasGeminiKey) throw new Error("gemini provider unavailable: no GEMINI_API_KEY or GOOGLE_API_KEY");
+        if (!geminiApiKey) throw new Error("gemini provider unavailable: no GEMINI_API_KEY or GOOGLE_API_KEY");
         if (!geminiModel) throw new Error("gemini provider misconfigured: set BRAHMA_GEMINI_MODEL");
 
         const instruction = [
@@ -198,191 +265,14 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
         } catch (_) {
           throw new Error("gemini provider returned unparseable JSON");
         }
-        const events = validateEvents(parsed.events);
+        const events = validateEvents(parsed && parsed.events);
         if (!events) throw new Error("gemini provider returned no valid events");
         return { summary: String(parsed.summary || "model proposal").slice(0, 500), events };
       }
     },
 
-    tidal: {
-      name: "tidal",
-      kind: "live",
-      available: () => tidalAvailable,
-      reason: () => (tidalAvailable ? "ghc+tidal_module_present" : tidalReason),
-      note: "live pattern engine; adapter invokes ghci to evaluate Tidal code",
-      probe: async () => {
-        // Real probe: ghci must exist and be able to load Sound.Tidal.Context.
-        if (closed) return false;
-        tidalAvailable = false;
-        tidalReason = "not_probed: discovery in progress";
-        try {
-          const { stdout } = await execFileAsync("ghci", ["-e", "import Sound.Tidal.Context", "-e", "putStrLn \"TIDAL_OK\""], {
-            env,
-            signal: probeController.signal,
-            timeout: 30000,
-            killSignal: "SIGKILL",
-            maxBuffer: 64 * 1024,
-            encoding: "utf8"
-          });
-          tidalAvailable = /TIDAL_OK/.test(stdout);
-          if (!tidalAvailable) tidalReason = "not_installed: Sound.Tidal.Context failed to load";
-        } catch (err) {
-          tidalAvailable = false;
-          tidalReason = `not_installed: probe_failed: ${String(err.message || err).slice(0, 200)}`;
-        }
-        return tidalAvailable;
-      },
-      propose: async ({ prompt }) => {
-        if (!tidalAvailable) throw new Error("tidal provider unavailable: " + (tidalReason || "not installed"));
-        const { execFileSync } = require("node:child_process");
-        const fs = require("node:fs");
-        const os = require("node:os");
-        const path = require("node:path");
-        const hs = [
-          "import Sound.Tidal.Context",
-          "main = putStrLn \"TIDAL_EVENTS:[(0.0,60,0.8,0.25),(0.25,64,0.7,0.25),(0.5,67,0.7,0.25)]\""
-        ].join("\n");
-        const tmpFile = path.join(os.tmpdir(), "brahma-tidal-" + Date.now() + ".hs");
-        fs.writeFileSync(tmpFile, hs);
-        let out;
-        try {
-          out = execFileSync("runghc", [tmpFile], {
-            stdio: ["ignore", "pipe", "pipe"],
-            timeout: 60000,
-            encoding: "utf8"
-          });
-        } catch (err) {
-          try { fs.unlinkSync(tmpFile); } catch (_) {}
-          throw new Error("tidal adapter failed: " + String(err.message || err).slice(0, 300));
-        }
-        try { fs.unlinkSync(tmpFile); } catch (_) {}
-        const m = /TIDAL_EVENTS:(.+)/.exec(out);
-        if (!m) throw new Error("tidal adapter produced no events");
-        const tuples = m[1].match(/\(([-\d.]+),([-\d.]+),([-\d.]+),([-\d.]+)\)/g) || [];
-        const events = tuples.map((t) => {
-          const mm = /\(([-\d.]+),([-\d.]+),([-\d.]+),([-\d.]+)\)/.exec(t);
-          return { time: Number(mm[1]), note: Number(mm[2]), vel: Number(mm[3]), dur: Number(mm[4]) };
-        });
-        const validated = validateEvents(events);
-        if (!validated) throw new Error("tidal adapter returned no valid events");
-        return { summary: `tidal pattern (${validated.length} events)`, events: validated };
-      }
-    },
-
-    sonicpi: {
-      name: "sonicpi",
-      kind: "live",
-      available: () => sonicAvailable,
-      reason: () => (sonicAvailable ? "sonic_pi_app_present" : (sonicReason || "not_installed: no Sonic Pi on this host")),
-      note: "live pattern engine; adapter sends OSC to a running Sonic Pi instance",
-      probe: async () => {
-        if (closed) return false;
-        const fs = require("node:fs");
-        const appPath = "/Applications/Sonic Pi.app";
-        if (!fs.existsSync(appPath)) {
-          sonicAvailable = false;
-          sonicReason = "not_installed: Sonic Pi.app missing";
-          return false;
-        }
-        let running = false;
-        try {
-          const { stdout } = await execFileAsync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
-            env,
-            signal: probeController.signal,
-            timeout: 5000,
-            killSignal: "SIGKILL",
-            maxBuffer: 64 * 1024,
-            encoding: "utf8"
-          });
-          running = Boolean(stdout.trim());
-        } catch (_) {
-          running = false;
-        }
-        sonicAvailable = true;
-        sonicReason = running
-          ? "app_present; daemon running"
-          : "app_present; daemon not running (launch Sonic Pi to enable invocation)";
-        return true;
-      },
-      propose: async ({ prompt }) => {
-        if (!sonicAvailable) throw new Error("sonicpi provider unavailable: " + (sonicReason || "not installed"));
-        const { execFileSync } = require("node:child_process");
-        // Check daemon running
-        let running = false;
-        try {
-          const out = execFileSync("pgrep", ["-f", "Sonic Pi.app/Contents/Resources/app/server"], {
-            stdio: ["ignore", "pipe", "pipe"],
-            timeout: 5000,
-            encoding: "utf8"
-          });
-          running = Boolean(out.trim());
-        } catch (_) {
-          running = false;
-        }
-        if (!running) {
-          throw new Error("sonicpi adapter: Sonic Pi daemon not running; launch the app first");
-        }
-        // Attempt real OSC send to Sonic Pi's external OSC server (port 4560).
-        // Sonic Pi must have "Enable external OSC" in preferences; otherwise
-        // the port is closed and we surface a typed error.
-        const net = require("node:net");
-        // Quick reachability check: Sonic Pi's external OSC server must be
-        // listening. Try TCP connect first (some versions expose TCP).
-        const tcpOk = await new Promise((resolve) => {
-          const sock = net.createConnection(4560, "127.0.0.1");
-          sock.setTimeout(1000);
-          sock.on("connect", () => { sock.destroy(); resolve(true); });
-          sock.on("error", () => resolve(false));
-          sock.on("timeout", () => { sock.destroy(); resolve(false); });
-        });
-        if (!tcpOk) {
-          throw new Error("sonicpi adapter: external OSC server not reachable on port 4560 (enable 'Enable external OSC' in Sonic Pi preferences and restart)");
-        }
-        const osc = require("osc");
-        const udpPort = new osc.UDPPort({ localAddress: "0.0.0.0", localPort: 0, remoteAddress: "127.0.0.1", remotePort: 4560 });
-        return new Promise((resolve, reject) => {
-          let settled = false;
-          const timer = setTimeout(() => {
-            if (settled) return;
-            settled = true;
-            try { udpPort.close(); } catch (_) {}
-            reject(new Error("sonicpi adapter: OSC send timed out (port 4560 not responding; enable external OSC in Sonic Pi preferences)"));
-          }, 5000);
-          udpPort.on("ready", () => {
-            try {
-              udpPort.send({ address: "/run-code", args: [{ type: "s", value: "play :c4\nsleep 0.25\nplay :e4" }] }, "127.0.0.1", 4560);
-              // Sonic Pi does not ack; resolve after a short delay.
-              setTimeout(() => {
-                if (settled) return;
-                settled = true;
-                clearTimeout(timer);
-                try { udpPort.close(); } catch (_) {}
-                resolve({ summary: "sonicpi pattern (OSC sent)", events: [{ time: 0, note: 60, vel: 0.8, dur: 0.25 }, { time: 0.25, note: 64, vel: 0.7, dur: 0.25 }] });
-              }, 500);
-            } catch (err) {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timer);
-              try { udpPort.close(); } catch (_) {}
-              reject(new Error("sonicpi adapter: OSC send failed: " + String(err.message || err).slice(0, 200)));
-            }
-          });
-          udpPort.on("error", (err) => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-            try { udpPort.close(); } catch (_) {}
-            reject(new Error("sonicpi adapter: OSC port unreachable: " + String(err.message || err).slice(0, 200)));
-          });
-          try { udpPort.open(); } catch (err) {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-            reject(new Error("sonicpi adapter: failed to open OSC port: " + String(err.message || err).slice(0, 200)));
-          }
-        });
-      }
-    }
+    tidal: unavailableLiveProvider("tidal", "GHCi/Tidal discovery is optional; composition adapter is not implemented"),
+    sonicpi: unavailableLiveProvider("sonicpi", "Sonic Pi discovery is optional; composition adapter is not implemented")
   };
 
   function list() {
@@ -396,7 +286,11 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
       } catch (err) {
         reason = `probe_failed: ${err.message}`;
       }
-      return { name: p.name, kind: p.kind, available, reason, note: p.note, checkedAt: new Date(now()).toISOString() };
+      return {
+        name: p.name, kind: p.kind, available, reason, note: p.note,
+        checkedAt: new Date(now()).toISOString(),
+        ...(discovery[name] ? { discovery: { ...discovery[name] } } : {})
+      };
     });
   }
 
@@ -426,25 +320,22 @@ function createProviderRegistry({ env = process.env, transport, now = () => Date
 
   function probeAll() {
     if (closed) return Promise.resolve({ tidal: false, sonicpi: false });
-    if (probing) return probing;
-    probing = (async () => {
-      const out = {};
-      for (const n of ["tidal", "sonicpi"]) {
-        try { out[n] = await providers[n].probe(); } catch (_) { out[n] = false; }
-      }
-      return out;
-    })().finally(() => { probing = null; });
-    return probing;
+    if (pendingAll) return pendingAll;
+    pendingAll = Promise.all([probeRuntime("tidal"), probeRuntime("sonicpi")])
+      .then(([tidal, sonicpi]) => ({ tidal, sonicpi }))
+      .finally(() => { pendingAll = null; });
+    return pendingAll;
   }
 
   function close() {
+    if (closed) return;
     closed = true;
-    tidalAvailable = false;
-    sonicAvailable = false;
-    probeController.abort();
+    probeController.abort(new Error("provider registry closed"));
+    for (const name of Object.keys(discovery)) {
+      discovery[name] = { status: "closed", reason: "registry_closed", checkedAt: new Date(now()).toISOString() };
+    }
   }
 
-  void probeAll();
   return { list, get, propose, names: () => [...PROVIDER_NAMES], probe: probeAll, close };
 }
 

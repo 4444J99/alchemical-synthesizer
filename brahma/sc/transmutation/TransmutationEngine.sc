@@ -3,8 +3,8 @@
   
   Operator algebra: absorb(donor) → traits → transmute(targetSubstrate) → re-express
   
-  Works with proxy traits until FluidBufSpectralShape (Flucoma) is installed,
-  at which point the same operators accept measured traits. Operators are
+  Each substrate contract determines whether measured evidence is required.
+  Installing FluCoMa does not upgrade proxy traits into measurements. Operators are
   substrate-specific: spectral→harmonic, envelope→rhythm, modulation→edge,
   response→shift.
 */
@@ -36,9 +36,9 @@ TransmutationEngine {
     *absorb { |traitMap, fromSubstrate|
         // Validate against the source substrate's contract
         var normalized;
-        var valid = AdamKadmon.validateTraitMapWithProvenance(
-            traitMap, fromSubstrate, \proxy, 0.7
-        );
+        var valid;
+        if(traitMap.isKindOf(Dictionary).not) { ^nil };
+        valid = AdamKadmon.validateTraitMapWithProvenance(traitMap, fromSubstrate);
         if (valid.not) {
             ("Transmutation: Absorb rejected — trait map failed validation for %".format(fromSubstrate)).warn;
             ^nil;
@@ -51,26 +51,26 @@ TransmutationEngine {
     // --- Transmute absorbed traits into a target substrate ---
     *transmute { |normalizedTraits, fromSubstrate, toSubstrate, operatorName|
         var op, result, resultValid;
+        if(normalizedTraits.isKindOf(Dictionary).not) { ^nil };
         operatorName = if (operatorName.notNil) { operatorName } { \default };
         op = operators.at(operatorName);
         if (op.isNil) {
-            ("Transmutation: Unknown operator % — using identity".format(operatorName)).warn;
-            op = { |t, f, t2| t.copy };
+            ("Transmutation: Unknown operator % — rejecting request".format(operatorName)).warn;
+            ^nil;
         };
         
         result = op.value(normalizedTraits.deepCopy, fromSubstrate, toSubstrate);
         if(result.isKindOf(Dictionary).not) { ^nil };
         if((fromSubstrate != toSubstrate) or: { result != normalizedTraits }) {
-            // A changed identity must be remeasured; donor evidence does not
-            // attest to transformed output. FSAP must not accept stale proof.
-            result = result.copy.put(\provenance, \proxy).put(\confidence, 0.7);
-            result.removeAt(\measurements);
+            // Donor evidence does not attest to changed output. Contracts that
+            // permit unmeasured traits may accept this structural proxy; measured
+            // targets and FSAP still require new evidence from the output.
+            result = result.copy.put(\provenance, \proxy);
+            result.removeAt(\confidence); result.removeAt(\measurements);
         };
         
         // Validate the result against the target substrate's contract
-        resultValid = AdamKadmon.validateTraitMapWithProvenance(
-            result, toSubstrate, \proxy, 0.7
-        );
+        resultValid = AdamKadmon.validateTraitMapWithProvenance(result, toSubstrate);
         if (resultValid.not) {
             ("Transmutation: Result failed validation for % — rejecting invalid output".format(toSubstrate)).warn;
             ^nil;

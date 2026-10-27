@@ -19,11 +19,15 @@ The loop is three separate acts: **propose**, **accept**, **run**.
 | Role | Tools exposed | Can it make sound? |
 |---|---|---|
 | `agent` (default) | `brahma_provider_status`, `brahma_propose_pattern`, `brahma_approvals`, `brahma_job`, `brahma_engine_status` | No. Accept/run are not in the list at all. |
-| `human` (opt-in) | the same, plus `brahma_accept`, `brahma_reject`, `brahma_run` | Only when a human runs it. Accepting still does not run. |
+| `human` (opt-in) | the same, plus `brahma_accept`, `brahma_reject`, `brahma_run`, `brahma_stop` | Only when a human runs it. Accepting still does not run. |
 
 `brahma_run` queues a render and returns a job id immediately. `brahma_job` polls for
 the measured summary. **Measured is not heard:** an audio analysis ran, nobody listened.
 The tool descriptions say so, and `initialize.instructions` repeats it to the model.
+
+Human-only `brahma_stop {}` cancels active and queued renders, terminates the active
+render process group, and records `stopped by human` on the affected jobs/approvals.
+Queued work does not start after the stop. Poll `brahma_job` for the resulting state.
 
 The workbench at `/workbench/` remains the canonical human gate. The human-role MCP
 server exists for a human who wants to decide from their own client; do not put the
@@ -31,11 +35,14 @@ human token in an agent's environment.
 
 ## Prerequisites
 
-Start the gateway once. It writes the agent token to
+Use Node.js 24. Install/build the web dependencies, then start the gateway once.
+It writes the agent token to
 `brahma/web/.runtime/agent-token-<port>` (0600), so the clients need no pasted secret:
 
 ```bash
 cd brahma/web
+npm ci
+npm run build:workbench
 npm start
 # → VISUAL CORTEX ONLINE: http://127.0.0.1:3000
 # → MCP (agent): http://127.0.0.1:3000/mcp
@@ -51,6 +58,25 @@ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
 A `serverInfo` line on stdout means the bridge found the token and the gateway. If it
 prints `no agent token`, the gateway is not running (or it is on another port — set
 `BRAHMA_GATEWAY_URL`).
+
+## Composition providers
+
+Call `brahma_provider_status` before proposing. Availability describes configured
+capability; it does not verify a remote model service or create an approval.
+
+| Provider | Configuration and behavior |
+|---|---|
+| `mock` | Always available; deterministic labelled motif, no model call. |
+| `claude` | Requires nonblank `ANTHROPIC_API_KEY` and explicit `BRAHMA_CLAUDE_MODEL`. |
+| `gemini` | Requires nonblank `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) and explicit `BRAHMA_GEMINI_MODEL`; no fallback model. |
+| `tidal`, `sonicpi` | Unavailable with `adapter_not_implemented`, including on hosts where the runtime is installed. |
+
+Construction and status listing do not launch optional runtimes. Explicit registry
+discovery is asynchronous, bounded and cached per registry; its `discovery` evidence
+is separate from adapter availability. Installing a runtime does not implement an
+adapter. Supplied `events` bypass composition; malformed supplied events fail with
+`bad_events` and cannot fall through to a paid provider. Configured model proposals
+may make paid calls; their resulting audio still requires human accept and run.
 
 ## Claude Code
 
@@ -191,7 +217,9 @@ Agent: brahma_job { jobId: "job_…", waitMs: 20000 }
 | `401 auth_required` from `/mcp` | Missing/incorrect bearer token | Use the token file for the matching port, or set `BRAHMA_AGENT_TOKEN` |
 | `unknown_tool: brahma_accept` | Agent-role server, as designed | Accept in the workbench, or start a human-role server |
 | `human_role_required` | A human tool reached the gateway with an agent token | Same as above |
-| `provider_unavailable` | Provider is honestly absent (`not_installed`, `not_configured`) | Use `mock`, or install/configure the provider |
+| `provider_unavailable` with `not_configured` | Missing or blank model key/model configuration | Use `mock`, or configure both the key and explicit model |
+| `provider_unavailable` with `adapter_not_implemented` | Tidal/Sonic Pi has no proposal adapter | Use `mock`, supplied events, or a configured model; installation alone will not enable it |
+| `bad_events` | Supplied event data failed validation | Correct the events; no provider call was made |
 
 ## Why this is a second MCP surface
 

@@ -1,0 +1,87 @@
+
+> brahma-visual-cortex@1.0.0 test:e2e
+> node --test 'test/e2e/*.e2e.js' --test-concurrency=1
+
+▶ local sample instrument
+  ✔ meters the real synth-only track without creating audio while idle (1496.4785ms)
+  ✔ imports real audio, edits chops, saves bytes, reopens and exports the chosen sample (493.981583ms)
+  ✔ failed project restore preserves the currently playable source and pattern (78.178167ms)
+  ✔ real renderer cancels scheduled sample voices and refuses missing samples (10.22ms)
+  ✔ duplicate imports reuse the decoded buffer and preserve edited chops (52.471042ms)
+  ✔ Stop cancels an audition waiting for the audio context to resume (1.351959ms)
+  ✔ changing engines stops playback and cannot send sample notes over OSC (86.249625ms)
+  ✔ auditioning a chop stops OSC transport before switching to local audio (115.002291ms)
+  ✔ auditioning a chop keeps an already local loop playing (267.514792ms)
+  ✔ applies native audio while playing and saves its exact recipe and retained original (1117.78925ms)
+  ✔ auditions the same edited chop range for original and transformed audio without changing the original (685.980792ms)
+  ✔ Stop invalidates a pending native result without replacing the current source (263.709958ms)
+  ✔ vessel meters follow actual per-track audio and clear immediately on Stop (87.453542ms)
+  ✔ material vessels preview distinct controls, save per track and fence edits made during a render (530.479416ms)
+  ✔ applied material controls and retained original survive a complete browser save/reopen (595.628667ms)
+  ✔ reopens and resaves fractional mixtures without rounding or rejecting canonical material state (132.74475ms)
+✔ local sample instrument (9009.999833ms)
+▶ workbench E2E
+  ✔ Tier 1 — UI: the page serves, claims the human role, and strips the token from the URL (3.6015ms)
+  ✔ Tier 2 — protocol: server frames are typed JSON and `run` is acknowledged (287.438583ms)
+  ✔ Tier 3 — engine: a scheduled hap reaches the engine socket as a typed play packet (67.687417ms)
+  ✔ Tier 4 — panic: the panic control reaches the panic address (41.877084ms)
+  ✖ edited active buffer is the source that actually plays (267.76875ms)
+  ✔ Stop releases the same instance as the scheduled events (196.045125ms)
+  ✔ editing a playing buffer preserves Stop authority (217.594625ms)
+  ✖ Run applies an edited draft and leaves one registered performance (3018.757041ms)
+  ✖ rapid Run–Stop–Run retains authority over the newest performance (3042.002958ms)
+  ✖ Stop abandons a pending evaluation and late completion cannot replace or stop its successor (30027.929709ms)
+✖ workbench E2E (40055.3135ms)
+ℹ tests 26
+ℹ suites 2
+ℹ pass 22
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47393.384625
+
+✖ failing tests:
+
+test at test/e2e/workbench.e2e.js:302:3
+✖ edited active buffer is the source that actually plays (267.76875ms)
+  AssertionError [ERR_ASSERTION]: Run must use the current visible document
+  
+  48 !== 69
+  
+      at TestContext.<anonymous> (/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/test/e2e/workbench.e2e.js:309:14)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 48,
+    expected: 69,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/e2e/workbench.e2e.js:336:3
+✖ Run applies an edited draft and leaves one registered performance (3018.757041ms)
+  Error: timed out waiting for OSC first draft; saw: /brahma/live/ping, /brahma/engine/freeAll
+      at Timeout._onTimeout (/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/test/e2e/workbench.e2e.js:68:14)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at test/e2e/workbench.e2e.js:368:3
+✖ rapid Run–Stop–Run retains authority over the newest performance (3042.002958ms)
+  Error: timed out waiting for OSC rapid replacement; saw: /brahma/live/ping, /brahma/engine/freeAll, /brahma/live/ping, /brahma/engine/freeAll
+      at Timeout._onTimeout (/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/test/e2e/workbench.e2e.js:68:14)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at test/e2e/workbench.e2e.js:386:3
+✖ Stop abandons a pending evaluation and late completion cannot replace or stop its successor (30027.929709ms)
+  TimeoutError: Waiting failed: 30000ms exceeded
+      at new WaitTask (file:///Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/node_modules/puppeteer-core/lib/puppeteer/common/WaitTask.js:46:34)
+      at IsolatedWorld.waitForFunction (file:///Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/node_modules/puppeteer-core/lib/puppeteer/api/Realm.js:49:26)
+      at CdpFrame.waitForFunction (file:///Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/node_modules/puppeteer-core/lib/puppeteer/api/Frame.js:585:43)
+      at CdpFrame.<anonymous> (file:///Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/node_modules/puppeteer-core/lib/puppeteer/util/decorators.js:101:27)
+      at CdpPage.waitForFunction (file:///Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/node_modules/puppeteer-core/lib/puppeteer/api/Page.js:1542:37)
+      at TestContext.<anonymous> (/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/test/e2e/workbench.e2e.js:390:20)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7)

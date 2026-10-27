@@ -18,6 +18,9 @@ Bundled into the workbench bundle (brahma/web/public/workbench/vendor/workbench.
   codemirror           6.0.2   MIT                https://codemirror.net
   @codemirror/state    6.x     MIT                https://codemirror.net
   @codemirror/lang-javascript   6.x   MIT         https://codemirror.net
+  acorn                8.19.0  MIT                https://github.com/acornjs/acorn
+  escodegen            2.1.0   BSD-2-Clause       https://github.com/estools/escodegen
+  estree-walker        3.0.3   MIT                https://github.com/Rich-Harris/estree-walker
 
 Build-time and test-time only (not distributed to browsers):
 

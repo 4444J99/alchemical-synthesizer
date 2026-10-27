@@ -28,10 +28,11 @@ test("slow provider discovery returns immediately and reports pending honestly",
   assert.ok(performance.now() - start < 300, "registry construction must not wait for ghci");
   const tidal = registry.list().find((p) => p.name === "tidal");
   assert.equal(tidal.available, false, "an installed executable is not a successful module probe");
-  assert.match(tidal.reason, /not_probed|probing/);
+  assert.match(tidal.discovery.status, /not_probed|probing/);
   const result = await registry.probe();
   assert.equal(result.tidal, true);
-  assert.equal(registry.list().find((p) => p.name === "tidal").reason, "ghc+tidal_module_present");
+  assert.equal(registry.list().find((p) => p.name === "tidal").discovery.status, "detected");
+  assert.equal(registry.list().find((p) => p.name === "tidal").available, false);
 });
 
 test("a failed probe cannot inherit availability from another registry", async (t) => {
@@ -43,8 +44,9 @@ test("a failed probe cannot inherit availability from another registry", async (
   assert.equal((await second.probe()).tidal, false);
   const tidal = second.list().find((p) => p.name === "tidal");
   assert.equal(tidal.available, false);
-  assert.match(tidal.reason, /probe_failed|not_installed/);
-  assert.equal(first.list().find((p) => p.name === "tidal").available, true);
+  assert.match(tidal.discovery.status, /probe_failed|not_installed/);
+  assert.equal(first.list().find((p) => p.name === "tidal").discovery.status, "detected");
+  assert.equal(first.list().find((p) => p.name === "tidal").available, false);
 });
 
 test("overlapping capability refreshes share a bounded subprocess", async (t) => {
@@ -58,7 +60,7 @@ test("overlapping capability refreshes share a bounded subprocess", async (t) =>
 
 test("HTTP binds and serves provider status while ghci is still pending", async (t) => {
   const dir = fakeGhci(t, 'while [ ! -f "$0.release" ]; do sleep 0.05; done\nprintf "TIDAL_OK\\n"');
-  const child = spawn(process.execPath, ["server.js"], {
+  const child = spawn(process.execPath, ["-e", "const gateway = require('./server'); void gateway.agent.providers.probe();"], {
     cwd: path.resolve(__dirname, ".."),
     env: {
       ...process.env, PORT: "0", HOST: "127.0.0.1", BRAHMA_OSC_LISTEN_PORT: "0",
@@ -88,12 +90,13 @@ test("HTTP binds and serves provider status while ghci is still pending", async 
     assert.equal(response.status, 200);
     const tidal = (await response.json()).providers.find((p) => p.name === "tidal");
     assert.equal(tidal.available, false);
-    assert.match(tidal.reason, /not_probed|probing/);
+    assert.match(tidal.discovery.status, /not_probed|probing/);
     child.kill("SIGTERM");
     await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error("shutdown must cancel the pending provider probe")), 1000);
       exit.then(() => { clearTimeout(timer); resolve(); }, reject);
     });
+    assert.equal(child.exitCode, 0, output);
   } finally {
     // This process group is created by this test; no unrelated server is touched.
     try { process.kill(-child.pid, "SIGKILL"); } catch (error) {

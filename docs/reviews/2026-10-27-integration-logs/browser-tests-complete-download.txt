@@ -1,0 +1,42 @@
+
+> brahma-visual-cortex@1.0.0 test:e2e
+> node --test 'test/e2e/*.e2e.js' --test-concurrency=1
+
+▶ local sample instrument
+  ✔ meters the real synth-only track without creating audio while idle (1026.450042ms)
+  ✔ imports real audio, edits chops, saves bytes, reopens and exports the chosen sample (434.310625ms)
+  ✔ failed project restore preserves the currently playable source and pattern (64.679291ms)
+  ✔ real renderer cancels scheduled sample voices and refuses missing samples (12.547125ms)
+  ✔ duplicate imports reuse the decoded buffer and preserve edited chops (18.411125ms)
+  ✔ Stop cancels an audition waiting for the audio context to resume (0.830125ms)
+  ✔ changing engines stops playback and cannot send sample notes over OSC (37.843584ms)
+  ✔ auditioning a chop stops OSC transport before switching to local audio (100.76175ms)
+  ✔ auditioning a chop keeps an already local loop playing (262.98175ms)
+  ✔ applies native audio while playing and saves its exact recipe and retained original (679.976959ms)
+  ✔ auditions the same edited chop range for original and transformed audio without changing the original (588.597334ms)
+  ✔ Stop invalidates a pending native result without replacing the current source (179.282ms)
+  ✔ vessel meters follow actual per-track audio and clear immediately on Stop (92.56925ms)
+  ✔ material vessels preview distinct controls, save per track and fence edits made during a render (289.744959ms)
+  ✔ applied material controls and retained original survive a complete browser save/reopen (554.807ms)
+  ✔ reopens and resaves fractional mixtures without rounding or rejecting canonical material state (109.106459ms)
+✔ local sample instrument (7202.52925ms)
+▶ workbench E2E
+  ✔ Tier 1 — UI: the page serves, claims the human role, and strips the token from the URL (5.533666ms)
+  ✔ Tier 2 — protocol: server frames are typed JSON and `run` is acknowledged (500.561ms)
+  ✔ Tier 3 — engine: a scheduled hap reaches the engine socket as a typed play packet (8.871833ms)
+  ✔ Tier 4 — panic: the panic control reaches the panic address (6.608958ms)
+  ✔ edited active buffer is the source that actually plays (165.864583ms)
+  ✔ Stop releases the same instance as the scheduled events (170.60975ms)
+  ✔ editing a playing buffer preserves Stop authority (221.614958ms)
+  ✔ Run applies an edited draft and leaves one registered performance (348.264959ms)
+  ✔ rapid Run–Stop–Run retains authority over the newest performance (236.547208ms)
+  ✔ Stop abandons a pending evaluation and late completion cannot replace or stop its successor (2176.390708ms)
+✔ workbench E2E (6591.775583ms)
+ℹ tests 26
+ℹ suites 2
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7388.898291

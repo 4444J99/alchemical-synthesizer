@@ -103,8 +103,9 @@ def run_bounded(command, cwd, env, timeout):
         stop_process_group(process)
 
 
-def verify_http(base, root):
-    for endpoint in ("/", "/workbench/", "/workbench/source.json", "/workbench/vendor/workbench.js"):
+def verify_http(base, root, commit):
+    for endpoint in ("/", "/workbench/", "/workbench/source.json", "/workbench/vendor/workbench.js",
+                     "/api/modules", "/api/substrates/sound.json", "/aether/"):
         with urllib.request.urlopen(base + endpoint, timeout=5) as response:
             if response.status != 200:
                 raise RuntimeError(f"{endpoint}: HTTP {response.status}")
@@ -116,12 +117,20 @@ def verify_http(base, root):
             if hashlib.sha256(body).digest() != expected:
                 raise RuntimeError("served bundle differs from the packaged bundle")
         if endpoint.endswith("source.json"):
-            if json.loads(body).get("bundle") != "/workbench/vendor/workbench.js":
+            source = json.loads(body)
+            if source.get("bundle") != "/workbench/vendor/workbench.js":
                 raise RuntimeError("source offer does not name the shipped bundle")
+            if source.get("commit") != commit:
+                raise RuntimeError("archive source offer does not match the build manifest")
         print(f"HTTP PASS: {endpoint} -> 200 ({len(body)} bytes)")
 
 
 def verify_runtime(root, scratch):
+    manifest = (root / "BUILD_MANIFEST.txt").read_text()
+    recorded = re.search(r"^commit:\s+([0-9a-f]{40})\s*$", manifest, re.MULTILINE)
+    if not recorded:
+        raise RuntimeError("build manifest must identify its source commit")
+    commit = recorded.group(1)
     env = {k: v for k, v in os.environ.items()
            if not k.startswith("BRAHMA_") and k not in
            {"ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "NODE_OPTIONS"}}
@@ -129,6 +138,7 @@ def verify_runtime(root, scratch):
         sock.bind(("127.0.0.1", 0))
         dirt_port = sock.getsockname()[1]
     env.update(PORT="0", HOST="127.0.0.1", BRAHMA_OSC_LISTEN_PORT="0",
+               BRAHMA_COMMIT_SHA=commit,
                BRAHMA_OSC_SEND_PORT="9", BRAHMA_DIRT_PORT=str(dirt_port),
                BRAHMA_RUNTIME_DIR=str(scratch / "runtime"),
                BRAHMA_AGENT_TOKEN="artifact-check-agent-token",
@@ -146,7 +156,7 @@ def verify_runtime(root, scratch):
                 output = log_path.read_text(errors="replace")
                 match = re.search(r"VISUAL CORTEX ONLINE: (http://127\.0\.0\.1:\d+)", output)
                 if match:
-                    verify_http(match.group(1), root)
+                    verify_http(match.group(1), root, commit)
                     return
                 if process.poll() is not None:
                     raise RuntimeError(f"release server exited {process.returncode}: {output[-2000:]}")

@@ -1,0 +1,14 @@
+workbench bundle -> public/workbench/vendor/workbench.js
+=== Building alchemical-synthesizer-integration-20261027-2409fde ===
+=== Artifacts ===
+-rw-r--r--@ 1 4jp  staff   832B Oct 27 11:08 PROVENANCE.json
+-rw-r--r--@ 1 4jp  staff   452B Oct 27 11:08 SHA256SUMS.txt
+-rw-r--r--@ 1 4jp  staff   1.2K Oct 27 11:08 alchemical-synthesizer-integration-20261027-2409fde.spdx
+-rw-r--r--@ 1 4jp  staff   1.4M Oct 27 11:08 alchemical-synthesizer-integration-20261027-2409fde.tar.gz
+-rw-r--r--@ 1 4jp  staff   1.7M Oct 27 11:08 alchemical-synthesizer-integration-20261027-2409fde.zip
+
+0cc902a1cc4126bc70b9e9b58b115189d00bcb9f0a566c7891eafc186b3c2898  alchemical-synthesizer-integration-20261027-2409fde.tar.gz
+0516cfc9f1340c93613c57ec5a2d2c125bb1c5194420d95f8f6de6abeb3c0039  alchemical-synthesizer-integration-20261027-2409fde.zip
+b6dea78a365e9e23fd1363d8761604e55c8a2992e68f3f7a540aafd4e657c103  alchemical-synthesizer-integration-20261027-2409fde.spdx
+e57883cf080f1df370da6778b3d72d7bf3eb1c94fe84e6f4917f758764e7c1a2  PROVENANCE.json
+=== Done: dist/alchemical-synthesizer-integration-20261027-2409fde.{tar.gz,zip} ===

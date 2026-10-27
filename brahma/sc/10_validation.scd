@@ -26,7 +26,8 @@
     // ==========================================
     // GOLEM ANALYSIS
     // ==========================================
-    // Per-track spectral analysis against factory preset reference vectors
+    // Per-track audition and reference report. This path does not capture
+    // audio; use analyzeFile or the asynchronous measureBuffer for metrics.
     analyzeGolem: { |self|
         "--- GOLEM: Per-Track Spectral Analysis ---".postln;
         {
@@ -45,9 +46,9 @@
                 var name = track[\name].asSymbol;
                 var ref = refVectors[name];
 
-                // Trigger the voice and capture spectral metrics
+                // Audition the voice. No analysis buffer is allocated here.
                 if(track[\audioBus].notNil) {
-                    var bus, syn, coherence, entropy;
+                    var bus, syn;
                     bus = track[\audioBus];
 
                     "  Track %: % (%)".format(i, name, track[\synthDef]).postln;
@@ -60,18 +61,10 @@
 
                     0.3.wait;
 
-                    // Measure coherence and entropy
-                    coherence = ~metric_collector.measureCoherence(nil);
-                    entropy = ~metric_collector.measureEntropy(nil);
-
-                    "    Coherence: %, Entropy: %".format(
-                        coherence.round(0.01), entropy.round(0.01)
-                    ).postln;
+                    "    Spectral measurement unavailable: this audition has no captured audio.".postln;
 
                     if(ref.notNil) {
-                        "    Ref centroid: %, measured centroid: ~%".format(
-                            ref[\centroid], coherence.round(0.01)
-                        ).postln;
+                        "    Reference centroid (normalized): %".format(ref[\centroid]).postln;
                     };
 
                     0.3.wait;
