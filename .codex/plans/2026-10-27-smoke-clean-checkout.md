@@ -26,3 +26,23 @@ Scope: `tools/smoke.sh` dependency ordering and invocation-owned npm diagnostics
 - Main installs dependencies in section 5, after section 3 already requires them.
   Both the proposed early install and existing late install use the shared fixed
   `/tmp/brahma_npm.log`, which can mix diagnostics across invocations.
+
+## Verification
+
+- Reused PR #104 with `git cherry-pick -x`; commit `6e530ea` retains the original
+  author and records the source SHA. The peer remote branch was not changed.
+- The npm diagnostic file is allocated once using `mktemp`, shared by early and
+  fallback installs and boot diagnostics, and removed by the final EXIT trap.
+  Failed dependency installation now emits its diagnostic tail before that cleanup.
+- `bash -n tools/smoke.sh` and `git diff --check` passed.
+- The full `bash tools/smoke.sh --strict` run started without `node_modules` and
+  installed dependencies in section 3: **107 passed, 0 failed, 0 skipped**, exit 0
+  in 9.602 seconds under a 300-second process-group deadline and nice level 10.
+  Smoke's component suites retain their own separately opt-in native-render tests;
+  the aggregate count does not claim those native renders were executed.
+- A shell trace verified exactly one npm-log allocation and absence of that owned
+  file after exit. The legacy shared log was absent before and after the run.
+  Port 3939 was free before and after; no existing listener was interrupted.
+- Full smoke output and the machine-readable receipt are adjacent to this plan.
+  The receipt binds the tested `tools/smoke.sh` bytes by SHA-256. No product code
+  or private musical source material changed.
