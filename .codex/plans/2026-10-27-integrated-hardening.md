@@ -49,3 +49,13 @@ passed all 8 tests, including the initially skipped native pipeline test. No tes
 process remains running. The full evidence report is
 `docs/reviews/2026-10-27-integrated-hardening.md`; original failures are retained.
 The branch is ready for parent independent review after publication.
+
+## Independent review follow-up
+
+The parent assigned this checkout and branch to the independent reviewer as sole
+writer for two accepted findings. Required native trait dimensions again reject
+empty, nonfinite and nonnumeric structure while preserving finite metadata counts.
+Actual native regressions failed before the fix; the scoped contract and source
+compilation tests passed afterward. Keep this fix atomic. A second atomic change
+will isolate labelled Strudel evaluation state during cancellation and replacement;
+the parent will independently inspect both fixes before its exact-head PR.

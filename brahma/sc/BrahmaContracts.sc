@@ -95,6 +95,10 @@ BrahmaContracts {
                 if(kind == "number") { this.finiteNumber(map[key]) } {
                     (dimensions.includes(key) or: { kind == "object" }).not or: { map[key].isKindOf(Dictionary) }
                 }
+            } and: {
+                // Required traits need actual finite numeric structure even
+                // without a declared range. Metadata counts may exceed one.
+                this.validValue(map[key], checkBounds: false)
             }
         };
     }
@@ -102,11 +106,11 @@ BrahmaContracts {
     *validValue { |value, lo=0.0, hi=1.0, checkBounds=true|
         if(this.finiteNumber(value)) { ^checkBounds.not or: { value >= lo and: { value <= hi } } };
         if(value.isKindOf(Dictionary)) {
-            ^value.keys.every { |key|
+            ^value.notEmpty and: { value.keys.every { |key|
                 if(key == \type and: { value[key].isKindOf(Symbol) or: { value[key].isKindOf(String) } }) {
                     true // descriptive categorical metadata is not a numeric leaf
                 } { this.validValue(value[key], lo, hi, checkBounds) }
-            };
+            } };
         };
         ^false;
     }

@@ -17,6 +17,22 @@ original = (
     performance_response: (velocity: 0.8)
 );
 check.(AdamKadmon.validateTraitMap(original), "canonical traits accept existing categorical metadata");
+[\spectral_profile, \temporal_topology, \modulation_graph, \performance_response].do { |dimension|
+    bad = original.deepCopy; bad[dimension] = Dictionary.new;
+    check.(AdamKadmon.validateTraitMap(bad).not,
+        "canonical required dimension rejects empty object: " ++ dimension);
+    check.(AdamKadmon.normalize(bad).isNil,
+        "normalization rejects empty required dimension: " ++ dimension);
+    [inf, inf.neg, 0.0/0.0, \garbage].do { |value, index|
+        bad = original.deepCopy; bad[dimension] = (value: value);
+        check.(AdamKadmon.validateTraitMap(bad).not,
+            "canonical required dimension rejects invalid leaf: " ++ dimension ++ " case " ++ index);
+        check.(AdamKadmon.normalize(bad).isNil,
+            "normalization rejects invalid required leaf: " ++ dimension ++ " case " ++ index);
+    };
+};
+check.(AdamKadmon.normalize(original)[\modulation_graph][\sources] == 24,
+    "structural validation preserves unbounded finite metadata counts");
 check.(AdamKadmon.validateTraitMap(nil).not, "nil traits fail cleanly");
 check.(AdamKadmon.validateTraitMap((spectral_profile: (centroid: 0.5))).not,
     "missing canonical dimensions fail");

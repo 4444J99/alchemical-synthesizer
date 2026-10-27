@@ -63,3 +63,20 @@ Linux dummy-JACK acceptance remains configured in CI and was not run on this
 macOS host. Hosted CI, independent review, PR creation and repository merge belong
 to the parent task. Full-rack device audio/MIDI/Pd/Ableton, artistic acceptance,
 actual radio hosting and production billing/storage remain separate acceptance.
+
+## Independent review: required trait structure
+
+The final review reproduced a regression in the canonical native trait validator:
+empty required objects, and nonfinite/nonnumeric leaves outside a declared range,
+were accepted. Required dimensions now receive recursive structural validation
+before range checks. Numeric metadata such as `sources: 24` remains unbounded
+when its contract has no range; categorical `type` metadata is preserved.
+
+The native regression checks every canonical dimension for an empty object,
+positive/negative infinity, NaN and a nonnumeric leaf, both during validation and
+normalization. It failed before the repair. The scoped native contract test and
+all repository SC source compilation passed after the repair (2 tests). Logs are
+`contracts-review-red.txt` and `contracts-review-green.txt` in the existing log
+directory. These scoped results supplement, rather than replace, the earlier
+full integration observations. A separate labelled-Strudel cancellation finding
+remains under repair and is not covered by the native contract checks.

@@ -1,0 +1,35 @@
+{
+  "base_commit": "b99c6e4910fcee211f76055d06c7f85050791252",
+  "scope": "Required native trait structure; native contract and SC source compilation only",
+  "red": {
+    "command": [
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "tools.dsp.test_dsp.NativeDSPTests.test_trait_contracts_load_validate_and_normalize",
+      "-v"
+    ],
+    "deadline_seconds": 55,
+    "exit_code": 1,
+    "log": "docs/reviews/2026-10-27-integration-logs/contracts-review-red.txt"
+  },
+  "green": {
+    "command": [
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "tools.dsp.test_dsp.NativeDSPTests.test_trait_contracts_load_validate_and_normalize",
+      "tools.dsp.test_dsp.NativeDSPTests.test_all_repository_scd_files_compile",
+      "-v"
+    ],
+    "deadline_seconds": 95,
+    "exit_code": 0,
+    "log": "docs/reviews/2026-10-27-integration-logs/contracts-review-green.txt"
+  },
+  "source_sha256": {
+    "brahma/sc/BrahmaContracts.sc": "cd443e1322867854653e907e0d32eb13f33ffdef8d1a8ee3e2949cf796f7408b",
+    "tools/dsp/contracts.scd": "9a9238a0db32297aaf56f4a7a05dc2caeba45707ca2c5e8bf9c159dac639fb5f"
+  }
+}

@@ -1,0 +1,126 @@
+test_trait_contracts_load_validate_and_normalize (tools.dsp.test_dsp.NativeDSPTests.test_trait_contracts_load_validate_and_normalize) ... FAIL
+
+======================================================================
+FAIL: test_trait_contracts_load_validate_and_normalize (tools.dsp.test_dsp.NativeDSPTests.test_trait_contracts_load_validate_and_normalize)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/dsp/test_dsp.py", line 137, in test_trait_contracts_load_validate_and_normalize
+    self.run_sc("contracts.scd")
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/tools/dsp/test_dsp.py", line 123, in run_sc
+    self.assertEqual(process.returncode, 0, f"{script} failed:\n{output}")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : contracts.scd failed:
+compiling class library...
+	Found 872 primitives.
+	Compiling directory '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/SCClassLibrary'
+	Compiling directory '/Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/sc'
+	numentries = 853640 / 12966324 = 0.066
+	5682 method selectors, 2282 classes
+	method table size 13644184 bytes, big table size 103730592
+	Number of Symbols 12830
+	Byte Code Size 398965
+	compiled 339 files in 0.42 seconds
+compile done
+localhost : setting clientID to 0.
+internal : setting clientID to 0.
+TransmutationEngine: initialized with 5 operators
+Class tree inited in 0.06 seconds
+
+
+*** Welcome to SuperCollider 3.14.1. *** For help type cmd-d.
+PASS canonical traits accept existing categorical metadata
+FAIL canonical required dimension rejects empty object: spectral_profile
+FAIL normalization rejects empty required dimension: spectral_profile
+PASS canonical required dimension rejects invalid leaf: spectral_profile case 0
+PASS normalization rejects invalid required leaf: spectral_profile case 0
+PASS canonical required dimension rejects invalid leaf: spectral_profile case 1
+PASS normalization rejects invalid required leaf: spectral_profile case 1
+PASS canonical required dimension rejects invalid leaf: spectral_profile case 2
+PASS normalization rejects invalid required leaf: spectral_profile case 2
+PASS canonical required dimension rejects invalid leaf: spectral_profile case 3
+PASS normalization rejects invalid required leaf: spectral_profile case 3
+FAIL canonical required dimension rejects empty object: temporal_topology
+FAIL normalization rejects empty required dimension: temporal_topology
+FAIL canonical required dimension rejects invalid leaf: temporal_topology case 0
+FAIL normalization rejects invalid required leaf: temporal_topology case 0
+FAIL canonical required dimension rejects invalid leaf: temporal_topology case 1
+FAIL normalization rejects invalid required leaf: temporal_topology case 1
+FAIL canonical required dimension rejects invalid leaf: temporal_topology case 2
+FAIL normalization rejects invalid required leaf: temporal_topology case 2
+FAIL canonical required dimension rejects invalid leaf: temporal_topology case 3
+FAIL normalization rejects invalid required leaf: temporal_topology case 3
+FAIL canonical required dimension rejects empty object: modulation_graph
+FAIL normalization rejects empty required dimension: modulation_graph
+FAIL canonical required dimension rejects invalid leaf: modulation_graph case 0
+FAIL normalization rejects invalid required leaf: modulation_graph case 0
+FAIL canonical required dimension rejects invalid leaf: modulation_graph case 1
+FAIL normalization rejects invalid required leaf: modulation_graph case 1
+FAIL canonical required dimension rejects invalid leaf: modulation_graph case 2
+FAIL normalization rejects invalid required leaf: modulation_graph case 2
+FAIL canonical required dimension rejects invalid leaf: modulation_graph case 3
+FAIL normalization rejects invalid required leaf: modulation_graph case 3
+FAIL canonical required dimension rejects empty object: performance_response
+FAIL normalization rejects empty required dimension: performance_response
+FAIL canonical required dimension rejects invalid leaf: performance_response case 0
+FAIL normalization rejects invalid required leaf: performance_response case 0
+FAIL canonical required dimension rejects invalid leaf: performance_response case 1
+FAIL normalization rejects invalid required leaf: performance_response case 1
+FAIL canonical required dimension rejects invalid leaf: performance_response case 2
+FAIL normalization rejects invalid required leaf: performance_response case 2
+FAIL canonical required dimension rejects invalid leaf: performance_response case 3
+FAIL normalization rejects invalid required leaf: performance_response case 3
+PASS structural validation preserves unbounded finite metadata counts
+PASS nil traits fail cleanly
+PASS missing canonical dimensions fail
+PASS canonical dimension types are checked
+PASS canonical spectral range is enforced
+PASS canonical normalization clamps numeric values
+PASS normalization preserves donor map
+PASS normalization preserves categorical metadata
+AdamKadmon: Loaded contract 'test_contract' from /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-dsp-cl_urz9q/contract.json
+PASS JSON contract loads using the stock SC decoder
+PASS named contract is discoverable
+PASS string-valued JSON numeric metadata is validated and converted
+PASS named scalar and dotted ranges validate
+PASS dotted range violations fail
+PASS nonnumeric ranged traits fail
+PASS named required keys are enforced
+PASS named normalization uses contract ranges
+PASS named normalization preserves donor
+PASS unknown contract cannot silently fall back
+PASS unknown normalization fails cleanly
+AdamKadmon: Loaded contract 'conflicting' from /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-dsp-cl_urz9q/conflicting.json
+PASS normalization never returns a map that violates overlapping ranges
+PASS missing contract file fails cleanly
+WARNING: ERROR: Primitive '_String_ParseYAMLFile' failed.
+caught exception 'yaml-cpp: error at line 1, column 1: end of map flow not found' in primitive in method String:parseYAMLFile
+PASS malformed contract fails cleanly
+PASS invalid numeric schema is not coerced to zero
+PASS reversed schema ranges are rejected
+PASS failed loads do not mutate contract registry
+PASS malformed range shape fails without throwing
+PASS unsigned hashes cannot masquerade as AdamKadmon capabilities
+PASS unsigned hashes cannot masquerade as bridge capabilities
+AdamKadmon: Loaded contract 'typed_ranges' from /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-dsp-cl_urz9q/typed-ranges.json
+PASS optional scalar range rejects a dictionary
+PASS normalization enforces optional range type
+PASS dotted scalar range rejects a dictionary
+PASS normalization enforces dotted range type
+AdamKadmon: Loaded contract 'threshold' from /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-dsp-cl_urz9q/threshold.json
+PASS selected confidence threshold validates schema
+PASS provenance uses the same selected confidence threshold
+PASS measurement admission honors selected contract
+PASS unknown measurement contract cannot silently use default policy
+FSAP: Observed 1
+FSAP: Absorbed target
+FSAP: Integrated with fidelity 1.0
+FSAP: Accumulated. Stack depth: 1
+PASS FSAP forwards the selected contract's measurement threshold
+cleaning up OSC
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.839s
+
+FAILED (failures=1)
