@@ -1,0 +1,19 @@
+{
+  "command": [
+    "bash",
+    "tools/smoke.sh",
+    "--strict"
+  ],
+  "cwd": "repository root",
+  "deadline_seconds": 300,
+  "node_modules_present_before": false,
+  "legacy_npm_log_sha256_before": null,
+  "smoke_source_sha256": "9663e245eae77954d19916f6b171fdc8be8e431f1c60656db076de320560b72d",
+  "exit_code": 0,
+  "elapsed_seconds": 9.602,
+  "npm_log_assignments": 1,
+  "npm_log_removed_after_exit": true,
+  "legacy_npm_log_sha256_after": null,
+  "early_install_observed": true,
+  "legacy_npm_log_untouched": true
+}

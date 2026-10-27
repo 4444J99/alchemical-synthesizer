@@ -32,6 +32,10 @@ ok()   { echo "  PASS  $1"; PASS=$((PASS+1)); }
 bad()  { echo "  FAIL  $1"; FAIL=$((FAIL+1)); }
 skip() { echo "  SKIP  $1"; SKIP=$((SKIP+1)); }
 
+# Share this invocation's install output with boot diagnostics, never another run.
+NPM_LOG="$(mktemp "${TMPDIR:-/tmp}/brahma-npm.XXXXXX")" || exit 1
+trap 'rm -f -- "$NPM_LOG"' EXIT
+
 echo "=== [1/6] Structure ==="
 req_files=(
   "brahma/sc/loader.scd"
@@ -79,6 +83,15 @@ fi
 
 echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
+  # Native sample service tests require brahma/web deps (express), but [5/6]
+  # installs them only after this section runs, so on a clean checkout the
+  # [3/6] gate fails with MODULE_NOT_FOUND before it ever reaches [5/6].
+  # Install here first; [5/6] skips reinstall when node_modules already exists.
+  if [ ! -d brahma/web/node_modules ]; then
+    echo "  ... installing web deps early for [3/6] (npm ci/install)"
+    ( cd brahma/web && { npm ci --no-audit --no-fund >"$NPM_LOG" 2>&1 \
+        || npm install --no-audit --no-fund >"$NPM_LOG" 2>&1; } )
+  fi
   for js in brahma/web/server.js brahma/web/bin/brahma-mcp.js \
             brahma/web/lib/mcp/server.js brahma/web/lib/mcp/client.js \
             brahma/web/public/sketch.js \
@@ -163,8 +176,8 @@ web_ok=0
 if command -v node >/dev/null 2>&1; then
   if [ ! -d brahma/web/node_modules ]; then
     echo "  ... installing web deps (npm ci/install)"
-    ( cd brahma/web && { npm ci --no-audit --no-fund >/tmp/brahma_npm.log 2>&1 \
-        || npm install --no-audit --no-fund >/tmp/brahma_npm.log 2>&1; } )
+    ( cd brahma/web && { npm ci --no-audit --no-fund >"$NPM_LOG" 2>&1 \
+        || npm install --no-audit --no-fund >"$NPM_LOG" 2>&1; } )
   fi
   if [ -d brahma/web/node_modules ]; then
     # The workbench bundle is a build artefact (gitignored). Boot without it and the
@@ -239,7 +252,7 @@ if command -v node >/dev/null 2>&1; then
       echo "node: $(node -v 2>&1)"
       echo "web modules: $(ls brahma/web/node_modules 2>/dev/null | wc -l | tr -d ' ')"
       echo "require osc: $( ( cd brahma/web && node -e 'require("osc"); console.log("ok")' ) 2>&1 | tail -2 | tr '\n' ' ')"
-      tail -3 /tmp/brahma_npm.log 2>/dev/null | sed 's/^/npm: /'
+      tail -3 "$NPM_LOG" 2>/dev/null | sed 's/^/npm: /'
       echo "=== end diagnostics ==="
     fi
     if [ "$wb" = "200" ] && [ "$wbsrc" = "200" ]; then
@@ -278,6 +291,7 @@ if command -v node >/dev/null 2>&1; then
     kill "$WEB_PID" >/dev/null 2>&1; wait "$WEB_PID" 2>/dev/null
   else
     if [ "$STRICT" = "1" ]; then bad "could not install web deps (offline?)"; else skip "web deps unavailable (offline) — endpoint boot"; fi
+    tail -8 "$NPM_LOG" 2>/dev/null | sed 's/^/npm: /'
   fi
 else
   skip "node not installed — web endpoint"
