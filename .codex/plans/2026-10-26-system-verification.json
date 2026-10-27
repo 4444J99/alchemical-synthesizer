@@ -1,0 +1,345 @@
+{
+  "tested_head": "65fb3e28af5ed6d53fb31600a65498be3824d3b8",
+  "implementation_base": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+  "gates": [
+    {
+      "gate": "web_dependencies",
+      "command": [
+        "npm",
+        "ci",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "brahma/web",
+      "deadline_seconds": 120,
+      "exit_code": 0,
+      "elapsed_seconds": 1.56,
+      "output_tail": [
+        "",
+        "added 155 packages in 1s",
+        "npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:",
+        "npm warn install-scripts   @serialport/bindings-cpp@12.0.1 (install: node-gyp-build)",
+        "npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)",
+        "npm warn install-scripts",
+        "npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow."
+      ]
+    },
+    {
+      "gate": "product_dependencies",
+      "command": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "product",
+      "deadline_seconds": 120,
+      "exit_code": 0,
+      "elapsed_seconds": 0.59,
+      "output_tail": [
+        "",
+        "added 104 packages in 535ms"
+      ]
+    },
+    {
+      "gate": "web",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/"
+      ],
+      "cwd": "brahma/web",
+      "deadline_seconds": 90,
+      "exit_code": 0,
+      "elapsed_seconds": 5.03,
+      "output_tail": [
+        "\u2714 GET /workbench/source.json names the licence, repository and dependencies (18.434167ms)",
+        "\u2714 GET /workbench/ serves the page (2.549833ms)",
+        "\u2714 event-map: note control becomes a Brahma event (0.419542ms)",
+        "\u2714 event-map: a sound matching a real module selects that engine (0.083458ms)",
+        "\u2714 event-map: note names become MIDI, since Strudel passes strings (0.162041ms)",
+        "\u2714 event-map: pitch comes from note, freq, or nothing (0.082458ms)",
+        "\u2714 event-map: velocity, duration and params are clamped and filtered (0.32275ms)",
+        "[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)",
+        "\u2139 tests 151",
+        "\u2139 suites 0",
+        "\u2139 pass 151",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 4987.857208"
+      ]
+    },
+    {
+      "gate": "security",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "product/src/api/account-security.test.js",
+        "product/src/api/acp.test.js",
+        "product/src/auth/rate-limit.test.js",
+        "product/public/dashboard/session.test.js",
+        "docs/absorb-alchemize/engine-path.test.cjs"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 90,
+      "exit_code": 0,
+      "elapsed_seconds": 0.52,
+      "output_tail": [
+        "\u2714 key identity and revocation stay bound to the authenticated account (51.289333ms)",
+        "\u2714 ACP keeps structured directives and command precedence (1.03175ms)",
+        "\u2714 repeated command words and absent suffixes finish within a bounded process (71.367ms)",
+        "\u2714 limits one peer, ignores spoofed forwarding, and recovers after expiry (0.443584ms)",
+        "\u2714 bounded peer table refuses new identities without evicting live budgets (0.07475ms)",
+        "\u2714 bounded peer table removes entries that expire before the scheduled sweep (0.064666ms)",
+        "\u2714 invalid limits fail at initialization (0.16075ms)",
+        "\u2714 REST admission covers both account routes and audio before expensive work (78.819333ms)",
+        "\u2139 tests 12",
+        "\u2139 suites 0",
+        "\u2139 pass 12",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 479.574416"
+      ]
+    },
+    {
+      "gate": "product_smoke",
+      "command": [
+        "node",
+        "bin/smoke.js"
+      ],
+      "cwd": "product",
+      "deadline_seconds": 60,
+      "exit_code": 0,
+      "elapsed_seconds": 0.32,
+      "output_tail": [
+        "  \u2713 MCP tools/call list_modules works",
+        "  \u2713 MCP costed tool without key \u2192 JSON-RPC error",
+        "  \u2713 ACP GET /agents lists brahma",
+        "  \u2713 ACP POST /runs completes",
+        "  \u2713 ACP jsonrpc session/prompt works",
+        "  \u2713 GET /plans returns tiers",
+        "  \u2713 checkout returns a url (stub or stripe)",
+        "  \u2713 POST /waitlist joins",
+        "  \u2713 GET / serves the AETHER radio home",
+        "  \u2713 GET /specimens/:id/audio streams the real file (200)",
+        "  \u2713 audio endpoint advertises Range support",
+        "  \u2713 audio Range request \u2192 206 partial content",
+        "  \u2713 simulated specimen audio \u2192 409",
+        "  \u2713 real specimen, missing file \u2192 404",
+        "",
+        "Smoke: 21 passed, 0 failed"
+      ]
+    },
+    {
+      "gate": "aether_server",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "aether/deploy/serve.test.js"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 60,
+      "exit_code": 0,
+      "elapsed_seconds": 0.14,
+      "output_tail": [
+        "\u2714 static resolution rejects malformed URLs, traversal and escaped symlinks (2.4305ms)",
+        "\u2714 malformed HTTP paths fail without losing server liveness (25.111209ms)",
+        "\u2139 tests 2",
+        "\u2139 suites 0",
+        "\u2139 pass 2",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 95.539208"
+      ]
+    },
+    {
+      "gate": "python_tools",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-v"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 90,
+      "exit_code": 0,
+      "elapsed_seconds": 1.03,
+      "output_tail": [
+        "test_complete_archives_pass_structure_check (test_release_artifact_check.ArtifactCheckTests.test_complete_archives_pass_structure_check) ... ok",
+        "test_missing_bundle_fails (test_release_artifact_check.ArtifactCheckTests.test_missing_bundle_fails) ... ok",
+        "test_private_state_path_is_rejected (test_release_artifact_check.ArtifactCheckTests.test_private_state_path_is_rejected) ... ok",
+        "test_traversal_and_links_are_rejected (test_release_artifact_check.ArtifactCheckTests.test_traversal_and_links_are_rejected) ... ok",
+        "test_archives_include_runtime_assets_but_not_private_working_state (test_release_packaging.ReleasePackagingTests.test_archives_include_runtime_assets_but_not_private_working_state) ... ok",
+        "test_missing_or_empty_bundle_fails_before_touching_existing_dist (test_release_packaging.ReleasePackagingTests.test_missing_or_empty_bundle_fails_before_touching_existing_dist) ... ok",
+        "test_output_flood_is_stopped_before_it_can_report_success (test_sc_runner.RunnerBounds.test_output_flood_is_stopped_before_it_can_report_success) ... ok",
+        "",
+        "----------------------------------------------------------------------",
+        "Ran 7 tests in 0.980s",
+        "",
+        "OK"
+      ]
+    },
+    {
+      "gate": "native_phase_a",
+      "command": [
+        "python3",
+        "tools/test-supercollider.py",
+        "brahma/sc/tests/phase_a.scd"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 40,
+      "exit_code": 0,
+      "elapsed_seconds": 0.39,
+      "output_tail": [
+        "PASS: scalar substrate axes reject dictionaries",
+        "PASS: non-audio substrate validates",
+        "PASS: nested normalization preserves dimensions",
+        "FSAP: Observed 1",
+        "FSAP: Absorbed target",
+        "WARNING: FSAP Error: TraitMap failed AdamKadmon validation",
+        "PASS: FSAP blocks low-confidence accumulation",
+        "PASS: provenance requires actual metric evidence",
+        "FSAP: Observed 1",
+        "FSAP: Absorbed target",
+        "FSAP: Integrated with fidelity 1.0",
+        "FSAP: Accumulated. Stack depth: 1",
+        "PASS: FSAP accepts measured high-confidence traits",
+        "BRAHMA_TEST_PASS",
+        "cleaning up OSC",
+        ""
+      ]
+    },
+    {
+      "gate": "native_class_runtime",
+      "command": [
+        "python3",
+        "tools/test-supercollider.py",
+        "brahma/sc/tests/class_runtime.scd"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 40,
+      "exit_code": 0,
+      "elapsed_seconds": 0.34,
+      "output_tail": [
+        "PASS: transformed output cannot reuse donor measurement proof",
+        "PASS: operators handle nested measured dimensions",
+        "Transmutation: sound \u2192 sound via default",
+        "PASS: unchanged identity retains valid measurement proof",
+        "Transmutation: Registered operator default",
+        "WARNING: Transmutation: Result failed validation for sound \u2014 rejecting invalid output",
+        "PASS: custom default cannot retain stale measurement proof",
+        "PASS: custom operators cannot mutate donor proof",
+        "BRIDGE: Peer registered test.local:57230 (clock offset 0 ms)",
+        "PASS: peer heartbeat and status use class state",
+        "BRIDGE: Link Set 1 -> 2 (Mode: read, TTL: -1, path #1)",
+        "BRIDGE: Heartbeat cycle (1d peers, 1d link keys)",
+        "PASS: bridge tick expires links in both registries",
+        "BRAHMA_TEST_PASS",
+        "cleaning up OSC",
+        ""
+      ]
+    },
+    {
+      "gate": "native_flucoma_buffer",
+      "command": [
+        "python3",
+        "tools/test-supercollider.py",
+        "brahma/sc/tests/flucoma_buffer.scd"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 40,
+      "exit_code": 0,
+      "elapsed_seconds": 2.43,
+      "output_tail": [
+        "Requested notification messages from server 'brahmaMetricTest'",
+        "brahmaMetricTest: server process's maxLogins (1) matches with my options.",
+        "brahmaMetricTest: keeping clientID (0) as confirmed by server process.",
+        "Shared memory server interface initialized",
+        "Fluid Corpus Manipulation Toolkit: version 1.0.10+sha.c1ca9ec.core.sha.f1551f70",
+        "PASS: real FluCoMa server plugin processes audio buffer",
+        "[coherence, 1.0]",
+        "PASS: async FluCoMa coherence",
+        "PASS: async spectral entropy",
+        "PASS: async Buffer fidelity",
+        "PASS: stereo reads are capped at 8192 frames",
+        "server 'brahmaMetricTest' disconnected shared memory interface",
+        "'/quit' message sent to server 'brahmaMetricTest'.",
+        "BRAHMA_TEST_PASS",
+        "cleaning up OSC",
+        ""
+      ]
+    },
+    {
+      "gate": "strict_smoke",
+      "command": [
+        "bash",
+        "tools/smoke.sh",
+        "--strict"
+      ],
+      "cwd": ".",
+      "deadline_seconds": 120,
+      "exit_code": 0,
+      "elapsed_seconds": 4.42,
+      "output_tail": [
+        "  PASS  rebroadcast.json valid (targets + video + audio)",
+        "  PASS  rebroadcast.sh --dry-run encodes a FLV (audio->visualizer->flv)",
+        "  PASS  aether/deploy/wrangler.toml valid (name + containers + r2_buckets)",
+        "  PASS  aether/deploy/Dockerfile has FROM + ENTRYPOINT",
+        "  PASS  AETHER Dockerfile COPY sources exist in the declared build context",
+        "  PASS  exists: aether/deploy/README.md",
+        "  PASS  exists: brahma/sc/13_nrt_renderer.scd",
+        "  PASS  exists: brahma/sc/14_stem_voices.scd",
+        "  PASS  exists: brahma/web/public/tree/video.js",
+        "  PASS  exists: aether/web/listener/index.html",
+        "  PASS  exists: aether/web/listener/aether.js",
+        "  PASS  exists: brahma/web/public/instrument/index.html",
+        "  PASS  Ouroboros: submission absorbed + lineage recorded",
+        "",
+        "=== Summary: 75 passed, 0 failed, 0 skipped ===",
+        "SMOKE: PASS"
+      ]
+    },
+    {
+      "gate": "browser_workbench",
+      "cwd": "brahma/web",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "test/e2e/workbench.e2e.js"
+      ],
+      "exit_code": 0,
+      "deadline_seconds": 90,
+      "engine_scope": "real browser and gateway; test UDP receiver substitutes for SuperCollider",
+      "output_tail": [
+        "\u25b6 workbench E2E",
+        "  \u2714 Tier 1 \u2014 UI: the page serves, claims the human role, and strips the token from the URL (2.541ms)",
+        "  \u2714 Tier 2 \u2014 protocol: server frames are typed JSON and `run` is acknowledged (36.552292ms)",
+        "  \u2714 Tier 3 \u2014 engine: a scheduled hap reaches the engine socket as a typed play packet (97.8255ms)",
+        "  \u2714 Tier 4 \u2014 panic: the panic control reaches the panic address (12.673208ms)",
+        "\u2714 workbench E2E (2071.954ms)",
+        "\u2139 tests 4",
+        "\u2139 suites 1",
+        "\u2139 pass 4",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 2211.777208"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-26",
+  "scope": "Native offline audition, 30s start / 8s excerpt, all eligible literal SynthDefs",
+  "catalogue_definitions": 245,
+  "runs": [
+    {
+      "selection": "backstreets",
+      "run": "20261026-091303-57ac1b5f",
+      "source_preserved": true,
+      "results": {
+        "rendered": 224,
+        "requires_patch": 21
+      },
+      "roles": {
+        "sound_generator": 34,
+        "control_utility": 59,
+        "audio_processor": 112,
+        "buffer_processor": 18,
+        "wavetable_generator": 1
+      },
+      "manifest_sha256": "b18ed91ef79b03b6edc4105336487220c2933fd09bfffb60f445b7c0320c5edc",
+      "implementation_sha256": "32d86847e709d1cbd8c31c340cd7c1af1dd5911af1e620e68949f02884aafb04",
+      "native_rack_sha256": "5e9663cf7f3ea4babcce45fcf0e1733dbd22507f760f98910dd201bef684140d"
+    },
+    {
+      "selection": "blood-sugar-sex-magik",
+      "run": "20261026-091404-dbe4d39a",
+      "source_preserved": true,
+      "results": {
+        "rendered": 224,
+        "requires_patch": 21
+      },
+      "roles": {
+        "sound_generator": 34,
+        "control_utility": 59,
+        "audio_processor": 112,
+        "buffer_processor": 18,
+        "wavetable_generator": 1
+      },
+      "manifest_sha256": "43d8ec18e411e6f65bc4efc562ee8b7572ba52447a64a660b25cefc3ecd5ed38",
+      "implementation_sha256": "32d86847e709d1cbd8c31c340cd7c1af1dd5911af1e620e68949f02884aafb04",
+      "native_rack_sha256": "5e9663cf7f3ea4babcce45fcf0e1733dbd22507f760f98910dd201bef684140d"
+    },
+    {
+      "selection": "son-of-a-preacher-man",
+      "run": "20261026-091505-45f19f6e",
+      "source_preserved": true,
+      "results": {
+        "rendered": 224,
+        "requires_patch": 21
+      },
+      "roles": {
+        "sound_generator": 34,
+        "control_utility": 59,
+        "audio_processor": 112,
+        "buffer_processor": 18,
+        "wavetable_generator": 1
+      },
+      "manifest_sha256": "0dea9f4c0b13c55510e4ba791cb1b001e224a7c352a5501adbbbaf2842bdee38",
+      "implementation_sha256": "32d86847e709d1cbd8c31c340cd7c1af1dd5911af1e620e68949f02884aafb04",
+      "native_rack_sha256": "5e9663cf7f3ea4babcce45fcf0e1733dbd22507f760f98910dd201bef684140d"
+    }
+  ],
+  "tests": {
+    "unittest": {
+      "passed": 16,
+      "native_paths": 10
+    },
+    "smoke": {
+      "passed": 86,
+      "failed": 0
+    },
+    "browser": {
+      "catalogue_cards": 245,
+      "playable_renders": 224,
+      "filter_passed": true,
+      "wav_loaded_and_played": true,
+      "single_player_exclusivity": true
+    }
+  },
+  "limitations": [
+    "21 infrastructure/non-routable definitions require their owning lifecycle",
+    "Language-side and dynamically generated modules are outside literal SynthDef catalogue",
+    "Render validation is not musical acceptance",
+    "Live browser-to-native transfer, shared Golem transport, and album arrangement remain in issue95",
+    "Native stochastic modules do not promise bit-identical rerenders"
+  ],
+  "private_artifacts": "forge/out/assimilation/selected-20261026.html; source media and rendered audio excluded from Git"
+}

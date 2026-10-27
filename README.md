@@ -122,12 +122,92 @@ Manual fallback: symlink those six files from `brahma/sc/` into `Platform.userEx
     - `http://localhost:3000` — **Etz Chaim**: the recursive Tree of Life, and a *universal* synthesizer. Organisms emanate down the Lightning Flash into the ten Sephirot; an Ouroboros coils the cosmos and every illumined vessel contains the Tree again (fractal). **Retune it across four substrates** — `1` Sound · `2` Idea · `3` Product · `4` Cosmos (`T` to cycle) — the one engine re-expressing timbre, thought, value, and worlds through the same vessels (see [`docs/the-universal-synthesizer.md`](docs/the-universal-synthesizer.md)). Self-emanates a demo stream when SuperCollider is silent. Keys: `SPACE` flash · `+/-` recursion depth · `O` ouroboros · `M` multiverse · `D` demo · `H` help.
     - `http://localhost:3000/cortex` — Canvas web patching UI (module browser, drag-drop, cable routing)
     - `http://localhost:3000/golem` — Golem percussion web UI (sequencer, mixer, patchbay)
+    - `http://localhost:3000/instrument/` — Local audio sampler, editable chops, step sequencer, portable projects, and loop WAV export (see below)
     - `http://localhost:3000/workbench` — Browser live-coding workbench (multi-buffer CodeMirror + Strudel patterns against Brahma; human/agent approval for AI composition)
 3.  Launch **Pure Data** (optional):
     - `brahma/pd/main.pd` — master control surface with OSC bridge
     - `brahma/pd/canvas/brahma_canvas.pd` — Pd-native visual patching via GOP abstractions
 
 ---
+
+## Sampling a local song
+
+For native rack-wide transformations, see [Song assimilation](forge/ASSIMILATION.md).
+`python3 forge/assimilate.py song.wav --start 30 --duration 8 --all` preserves the
+song and produces a private listening index of measured native module excerpts.
+
+Start Visual Cortex as above, then open `/instrument/`. SuperCollider is not
+required for this browser sample workflow.
+
+1. Choose a track and load a local audio file (WAV, MP3, or a format your browser
+   can decode). The source stays in the browser; it is not uploaded.
+2. Click one of eight chop pads to audition it. Edit Start/End in seconds and
+   apply the boundaries. Click grid cells to place the selected chop. Existing
+   notes retain their source; changing the track's source affects new notes.
+3. Press Play. Grid notes are gated to the step/command duration; pads audition
+   the whole chop. Choose Synth voice to add the existing browser tones.
+4. Save Project downloads a `.brahma.json` containing original audio bytes,
+   SHA-256 identities, chops, pattern, tempo, phase, and cycle. Open Project
+   validates and restores it stopped. Keep that file: browser reload alone does
+   not preserve a session. A failed open leaves the current session intact.
+5. Export Loop downloads a stereo 44.1 kHz PCM16 WAV of the current pattern and
+   cycle. Its duration is exactly one cycle (rounded to the nearest frame);
+   overlap and effect tails are cut at that boundary. Auto-phase evolution
+   across later cycles is not an arrangement export.
+
+Stop cancels sounding and scheduled browser voices, including pending pad
+auditions. Switching engines stops transport. Imported samples require WebAudio;
+real-time SC sample transfer, live modular routing, shared live Golem transport, and album
+arrangement remain tracked in [#95](https://github.com/4444J99/alchemical-synthesizer/issues/95).
+
+Default project limits are 64 MiB of total original audio, 90 MiB of project JSON,
+256 MiB of retained decoded audio, and 64 sources. Embedding base64 increases file
+size. These are validation budgets, not a browser process memory cap: decoding
+and transactional replacement can temporarily use more memory. Hosts can set
+`window.BRAHMA_SAMPLE_LIMITS` before the instrument scripts load; keys are
+`maxSourceBytes`, `maxProjectBytes`, `maxDecodedBytes`, and `maxSources`.
+
+Native transformations are available in the same instrument. Start the local
+server and open its printed **INSTRUMENT (human)** link, then connect the native
+engine. Select a source of 1-30 seconds, choose a module and its musical controls,
+and press **Render and use on this track**. The loop continues during rendering;
+future notes on that track use the result. **Restore original** changes them back.
+Stop, opening a project, or changing sources cancels a pending application. Saving
+includes the original excerpt, transformed sound, exact recipe, and source hashes.
+Processing runs on the local server and is never sent to a remote provider.
+Each track has a transparent vessel. Enable **Use material**, mix water, silica,
+iron and air to 100%, choose solid/liquid/gas, and set its influence. The displayed
+base-to-effective control changes describe the actual native render. Edits remain
+a draft until **Render and use on this track** finishes. Vessel motion and waveform
+follow actual per-track audio and stop with playback. **Audition original chop**
+and **Audition current chop** provide an immediate comparison.
+
+Material settings are local to each track and survive project save/reopen along
+with base controls, effective controls, model version and retained originals.
+There are 26 explicit material mappings; the complete 245-definition catalogue
+shows unmapped modules and the 21 definitions needing coordinated patches.
+These artistic material responses change existing DSP controls. They do not
+implement every original organism's proposed memory or mimicry behavior; see
+[the design and acceptance contract](docs/design/mimicry-material-universe.md).
+For a source-bound listening comparison, run `python3 forge/compare.py song.wav`;
+[comparison instructions](forge/ASSIMILATION.md#material-vessels-and-comparisons)
+explain the native/neutral/repeated/phase measurements.
+
+Repeated browser WAV exports preserve the project exactly but can differ by one
+PCM quantization step because of floating-point rendering; native random DSP also
+remains stochastic. The verification record reports these distinctions.
+
+Build a portable starter sketch from a validated Forge audition:
+
+```sh
+python3 forge/sketch.py forge/out/assimilation/RUN/manifest.json
+```
+
+Open the printed `.brahma.json` in the instrument. It contains eight donor chops,
+a small native palette, actual Golem kick/snare/hi-hat renders, and an editable
+32-step groove. Rendered drums use the existing Golem factory presets and source
+SynthDefs. Playback and WAV export share the browser transport; this does not
+start Golem's separate live SC sequencer.
 
 ## System Overview
 

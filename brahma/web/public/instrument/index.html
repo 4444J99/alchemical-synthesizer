@@ -28,7 +28,7 @@
         .grid-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:10px; }
         table.grid { border-collapse:collapse; }
         table.grid td { width:26px; height:26px; border:1px solid #0e1430; text-align:center; font-size:10px; cursor:pointer; user-select:none; color:var(--dim); }
-        table.grid td.trk { width:120px; text-align:left; padding-left:8px; color:var(--accent); cursor:default; font-size:12px; }
+        table.grid td.trk { min-width:150px; max-width:220px; overflow-wrap:anywhere; text-align:left; padding:6px; color:var(--accent); cursor:default; font-size:12px; }
         table.grid td.beat { border-left:1px solid #223; }
         table.grid td.on { background:var(--hit); color:#04122e; font-weight:bold; }
         table.grid td.playhead { box-shadow: inset 0 0 0 2px var(--warn); }
@@ -41,14 +41,88 @@
         .hint { color:var(--dim); font-size:11px; margin-top:14px; line-height:1.6; }
         code { color:var(--warn); }
         .provisional { color:var(--warn); font-size:11px; margin-top:8px; }
+        .samples { border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:16px; margin-bottom:16px; }
+        .samples h2 { font-size:14px; margin:0 0 12px; }
+        input[type=number], input[type=text] { background:#0a0f22; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:7px; }
+        input[type=number] { width:95px; }
+        input[type=file] { max-width:260px; font-size:12px; color:var(--ink); }
+        #waveform { width:100%; height:100px; background:#020510; border-radius:8px; display:block; margin:12px 0; }
+        #chops { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+        #chops button[aria-pressed=true] { border-color:var(--warn); color:var(--warn); }
+        #sample-status { min-height:1.5em; font-size:12px; overflow-wrap:anywhere; }
+        #sample-status.error { color:#ff9b9b; }
+        #native-status.error { color:#ff9b9b; }
+        #native-status { font-size:12px; min-height:1.5em; }
+        #native-params { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+        button:disabled, input:disabled, select:disabled { opacity:0.5; cursor:default; }
+        table.grid td.sample { background:#6bd6ff; }
+        .samples select { max-width:240px; }
     </style>
+<link rel="stylesheet" href="material-vessels.css">
 </head>
 <body>
 <div class="wrap">
     <h1>BRAHMA · INSTRUMENT</h1>
-    <p class="sub">tracker-brained, Ableton-bodied — play the sampler-organism live. Click cells; pick a per-cell command; let the arc redistribute.</p>
+    <p class="sub">Load a song, find its fragments, and play them into a pattern.</p>
 
     <canvas class="orb" id="orb"></canvas>
+
+    <section class="samples" aria-labelledby="sample-heading">
+        <h2 id="sample-heading">Your samples</h2>
+        <div class="controls">
+            <label>Add audio <input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg,.aif,.aiff"></label>
+            <label>Track <select id="sample-track"></select></label>
+            <label>Sound for new notes <select id="sample-source"><option value="">Synth voice</option></select></label>
+        </div>
+        <canvas id="waveform" aria-label="Selected source waveform and chop boundaries"></canvas>
+        <div id="chops" aria-label="Audition and select a chop"></div>
+        <div class="controls">
+            <label>Start (seconds) <input id="slice-start" type="number" min="0" step="0.001" disabled></label>
+            <label>End (seconds) <input id="slice-end" type="number" min="0" step="0.001" disabled></label>
+            <button id="apply-slice" disabled>Apply chop</button>
+        </div>
+        <p id="sample-status" role="status" aria-live="polite">Audio stays on this device. Select a chop, then place it in the grid.</p>
+        <h2>Native transformations</h2>
+        <div class="controls">
+            <button id="native-connect">Connect native engine</button>
+            <label>Transformation <select id="native-module"><option value="">Connect to load modules</option></select></label>
+            <span id="native-role" class="hint"></span>
+        </div>
+        <div id="material-vessels" class="vessel-strip" aria-label="Track vessels"></div>
+        <div class="matter-workspace">
+            <div>
+                <p class="matter-heading">Contents of this vessel</p>
+                <div class="matter-controls">
+                    <label><input type="checkbox" id="material-enable"> Use material</label>
+                    <label>Phase <select id="material-phase"><option value="solid">Solid</option><option value="liquid" selected>Liquid</option><option value="gas">Gas</option></select></label>
+                    <label>Influence <input type="range" id="material-amount" min="0" max="1" step="any" value="1"><span id="material-amount-value">100%</span></label>
+                </div>
+                <div id="material-composition" class="matter-palette"></div>
+                <p id="material-error" role="status"></p>
+                <p class="matter-caption">Mix to 100%. These are artistic material responses. The waveform and motion follow actual track audio.</p>
+            </div>
+            <div>
+                <p class="matter-heading">Organism response</p>
+                <div id="native-params"></div>
+                <output id="material-effective" aria-label="Effective organism controls"></output>
+            </div>
+        </div>
+        <p id="material-applied"></p>
+        <p id="native-claim"></p>
+        <div class="controls">
+            <button id="native-render" disabled>Render and use on this track</button>
+            <button id="native-original" disabled>Restore original</button>
+            <button id="native-cancel">Cancel render</button>
+            <button id="native-audition-original">Audition original chop</button>
+            <button id="native-audition-current">Audition current chop</button>
+        </div>
+        <p id="native-status" role="status" aria-live="polite">Native processing runs on this computer. The loop continues while a new sound renders.</p>
+        <details class="module-ledger">
+            <summary id="module-count">All native modules and material responses</summary>
+            <label>Find a module <input id="module-filter" type="search" placeholder="Name or role"></label>
+            <div class="table-scroll"><table><thead><tr><th>Module</th><th>Role</th><th>Material response and behavior</th></tr></thead><tbody id="module-ledger"></tbody></table></div>
+        </details>
+    </section>
 
     <div class="controls">
         <button class="primary" id="play">▶ play</button>
@@ -79,11 +153,17 @@
                 <option value="osc">OSC → SuperCollider</option>
             </select>
         </label>
-        <button id="freeze">❄ freeze specimen</button>
         <button id="clear">clear</button>
     </div>
 
     <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+
+    <div class="controls" style="margin-top:16px">
+        <label>Project <input id="project-name" type="text" value="Brahma session" maxlength="1024"></label>
+        <button id="freeze">Save project</button>
+        <label>Open project <input id="open-project" type="file" accept=".json,.brahma.json,application/json"></label>
+        <button id="export-loop">Export loop WAV</button>
+    </div>
 
     <div class="status">
         <span>phase <span class="badge phase-readable" id="s-phase">manual</span></span>
@@ -92,19 +172,27 @@
         <span id="s-osc"></span>
     </div>
 
-    <p class="provisional">Frozen specimens snapshot an <b>immutable scene_version</b> — a shareable identity for an otherwise mutable, living scene.</p>
+    <p class="provisional">Save project includes the original audio, chops, pattern, and tempo. Reopening restores the session stopped. Export loop WAV records one pass of the current grid.</p>
     <p class="hint">
         Per-cell commands (AETHER §4): <code>RT</code> ratchet · <code>ST</code> stutter (decaying roll) ·
         <code>OV</code> overlap (legato) · <code>HU</code> humanize · <code>DN</code> density gate.
         The <b>arc</b> (READABLE → CLUSTER → DISPERSAL) is the same metabolism the live broadcast runs
-        (<code>tools/cellcycle.py</code>); "auto" walks it. The <b>OSC</b> engine drives the live
-        SuperCollider rack through the Visual Cortex bridge (control only — capturing its audio back
-        needs a virtual audio device, which stays gated).
+        (<code>aether/tools/cellcycle.py</code>); "auto" walks it. Imported samples play in
+        <b>WebAudio (local)</b>. The legacy OSC adapter does not transfer sample audio;
+        native transformations render in the background and become playable samples. Existing synth notes
+        remain available alongside sample notes. Numbered blue cells play chops.
     </p>
 </div>
 
 <!-- brain first (pure logic, also node-tested), then the browser body. -->
 <script src="pattern.js"></script>
+<script src="material-library.js"></script>
+<script src="material-model.js"></script>
+<script src="sample-project.js"></script>
+<script src="sample-audio.js"></script>
+<script src="material-controls.js"></script>
+<script src="native-controls.js"></script>
+<script src="sample-controls.js"></script>
 <script src="instrument.js"></script>
 </body>
 </html>

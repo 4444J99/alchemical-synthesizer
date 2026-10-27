@@ -1,0 +1,214 @@
+{
+  "fixture": "four-second synthetic stereo donor, distinct 220/330 Hz tones and 85 Hz decaying pulses; no user media",
+  "fixture_generation": {
+    "cwd": ".",
+    "command": ["python3", "-c", "import pathlib,math,wave,struct,sys\nsource=pathlib.Path(sys.argv[1])\nsource.parent.mkdir(parents=True,exist_ok=True)\nwith source.open('xb') as raw, wave.open(raw,'wb') as w:\n w.setparams((2,2,44100,0,'NONE','not compressed'))\n frames=bytearray()\n for i in range(44100*4):\n  t=i/44100\n  hit=0.18*math.exp(-35*(t%0.5))*math.sin(2*math.pi*85*t)\n  l=0.17*math.sin(2*math.pi*220*t)+hit\n  r=0.17*math.sin(2*math.pi*330*t)+hit\n  frames.extend(struct.pack('<hh',int(32767*l),int(32767*r)))\n w.writeframes(frames)", "out/sampling-review-20261026/synthetic-donor.wav"],
+    "provenance": "Reconstructed from the original session's recorded producer; verified byte-identical against the retained fixture. Use a new output path to preserve the original."
+  },
+  "gates": [
+    {
+      "gate": "ingest",
+      "command": [
+        "bash",
+        "forge/ingest.sh",
+        "out/sampling-review-20261026/synthetic-donor.wav",
+        "out/sampling-review-20261026/ingest"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.16,
+      "output_tail": [
+        "ingest: out/sampling-review-20261026/synthetic-donor.wav -> out/sampling-review-20261026/ingest/synthetic-donor.wav (+ mono)",
+        "out/sampling-review-20261026/ingest/synthetic-donor.wav"
+      ]
+    },
+    {
+      "gate": "approximate_stems",
+      "command": [
+        "python3",
+        "forge/rip.py",
+        "out/sampling-review-20261026/synthetic-donor.wav",
+        "--engine",
+        "ffmpeg",
+        "--out",
+        "out/sampling-review-20261026/stems",
+        "--name",
+        "fixture"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.24,
+      "output_tail": [
+        "rip: engine=ffmpeg fallback \u2014 APPROXIMATE stems (install demucs for true drum/melody theft: forge/setup-demucs.sh)",
+        "rip: 5 stems -> out/sampling-review-20261026/stems/fixture  [tier 3 / approx]",
+        "  instrumental instrumental.wav   ffmpeg:L-R center cancel (karaoke)",
+        "  vocals       vocals.wav         ffmpeg:center extract, band-limited",
+        "  bass         bass.wav           ffmpeg:low band < 150 Hz",
+        "  drums        drums.wav          ffmpeg:mid transient band of instrumental",
+        "  other        other.wav          ffmpeg:high band of instrumental (melody/harmony)",
+        "  manifest     out/sampling-review-20261026/stems/fixture/manifest.json"
+      ]
+    },
+    {
+      "gate": "recipe",
+      "command": [
+        "bash",
+        "forge/forge.sh",
+        "--name",
+        "fixture",
+        "--out",
+        "out/sampling-review-20261026/recipes",
+        "--drums",
+        "out/sampling-review-20261026/stems/fixture/drums.wav",
+        "--melody",
+        "out/sampling-review-20261026/stems/fixture/other.wav",
+        "--bass",
+        "out/sampling-review-20261026/stems/fixture/bass.wav",
+        "--vocals",
+        "out/sampling-review-20261026/stems/fixture/vocals.wav",
+        "--mix"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.27,
+      "output_tail": [
+        "forge: premix -> out/sampling-review-20261026/recipes/fixture/premix.wav",
+        "forge: recipe 'fixture' -> out/sampling-review-20261026/recipes/fixture",
+        "  parts: vocals bass drums other",
+        "  premix: out/sampling-review-20261026/recipes/fixture/premix.wav (feed to forge/bounce.sh)",
+        "  recipe: out/sampling-review-20261026/recipes/fixture/recipe.json"
+      ]
+    },
+    {
+      "gate": "single_voice_render",
+      "command": [
+        "bash",
+        "forge/bounce.sh",
+        "out/sampling-review-20261026/synthetic-donor.wav",
+        "out/sampling-review-20261026/single.wav",
+        "4"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.39,
+      "output_tail": [
+        "localhost : setting clientID to 0.",
+        "internal : setting clientID to 0.",
+        "TransmutationEngine: initialized with 5 operators",
+        "Class tree inited in 0.04 seconds",
+        "",
+        "",
+        "*** Welcome to SuperCollider 3.14.1. *** For help type cmd-d.",
+        "--- BRAHMA: NRT Renderer Loaded (headless bounce ready) ---",
+        "NRT render: /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/tmp.8D4AlbZgTY/food.wav -> out/sampling-review-20261026/single.wav (4.0s)",
+        "start time 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 4.5",
+        "nextOSCPacket 4.6",
+        "NRT render complete -> out/sampling-review-20261026/single.wav",
+        "cleaning up OSC",
+        "bounce: OK -> out/sampling-review-20261026/single.wav (4.600454s)"
+      ]
+    },
+    {
+      "gate": "per_stem_render",
+      "command": [
+        "python3",
+        "forge/stemforge.py",
+        "out/sampling-review-20261026/recipes/fixture/recipe.json",
+        "--out",
+        "out/sampling-review-20261026/stems.wav",
+        "--dur",
+        "4"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.79,
+      "output_tail": [
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 0",
+        "nextOSCPacket 4.5",
+        "nextOSCPacket 4.6",
+        "NRT stem render complete -> out/sampling-review-20261026/stems.wav",
+        "cleaning up OSC",
+        "stemforge: OK -> out/sampling-review-20261026/stems.wav (4.60s)",
+        "stemforge: manifest -> out/sampling-review-20261026/stems.wav.manifest.json"
+      ]
+    },
+    {
+      "gate": "single_measurement",
+      "command": [
+        "python3",
+        "forge/analyze_audio.py",
+        "out/sampling-review-20261026/single.wav",
+        "--summary-json",
+        "out/sampling-review-20261026/single-summary.json"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.07,
+      "output_tail": [
+        "analyze_audio: out/sampling-review-20261026/single.wav -> out/sampling-review-20261026/single-summary.json (non_silent, peak -2.33 dBFS, rms -12.64 dBFS, silence 0.1398)"
+      ]
+    },
+    {
+      "gate": "stems_measurement",
+      "command": [
+        "python3",
+        "forge/analyze_audio.py",
+        "out/sampling-review-20261026/stems.wav",
+        "--summary-json",
+        "out/sampling-review-20261026/stems-summary.json"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.07,
+      "output_tail": [
+        "analyze_audio: out/sampling-review-20261026/stems.wav -> out/sampling-review-20261026/stems-summary.json (non_silent, peak -6.49 dBFS, rms -22.48 dBFS, silence 0.1398)"
+      ]
+    }
+  ],
+  "single_measurement": {
+    "version": 1,
+    "analysis_sr": 22050,
+    "duration_s": 4.6,
+    "peak_linear": 0.764421,
+    "peak_dbfs": -2.33,
+    "rms_linear": 0.233246,
+    "rms_dbfs": -12.64,
+    "clipped_samples": 0,
+    "clipped_ratio": 0.0,
+    "zero_crossing_rate": 0.025533,
+    "window_s": 0.05,
+    "silence_floor_dbfs": -50.0,
+    "windows": 93,
+    "active_windows": 80,
+    "silence_ratio": 0.1398,
+    "non_silent_seconds": 4.0,
+    "verdict": "non_silent"
+  },
+  "stems_measurement": {
+    "version": 1,
+    "analysis_sr": 22050,
+    "duration_s": 4.6,
+    "peak_linear": 0.473549,
+    "peak_dbfs": -6.49,
+    "rms_linear": 0.075172,
+    "rms_dbfs": -22.48,
+    "clipped_samples": 0,
+    "clipped_ratio": 0.0,
+    "zero_crossing_rate": 0.018257,
+    "window_s": 0.05,
+    "silence_floor_dbfs": -50.0,
+    "windows": 93,
+    "active_windows": 80,
+    "silence_ratio": 0.1398,
+    "non_silent_seconds": 4.0,
+    "verdict": "non_silent"
+  }
+}

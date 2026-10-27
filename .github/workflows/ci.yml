@@ -47,6 +47,11 @@ jobs:
         working-directory: brahma/web
         run: node --test --test-concurrency=1 test/provider-probes.test.js
 
+      - name: Sample instrument browser regression tests
+        working-directory: brahma/web
+        timeout-minutes: 3
+        run: node --test --test-concurrency=1 test/e2e/instrument.e2e.js
+
       - name: Release packaging regression tests
         run: python3 -m unittest discover -s tools/tests -p 'test_release*.py' -v
 

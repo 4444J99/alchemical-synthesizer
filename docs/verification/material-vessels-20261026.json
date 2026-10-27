@@ -1,0 +1,6447 @@
+{
+  "schema": "brahma.material-verification.v1",
+  "observed_date": "2026-10-26",
+  "synthetic": {
+    "ledger_sha256": "a75e51bacb603e2efde9622ffe610ff4e4e7f19b8725be2fa6c8d93caaf01c05",
+    "source_sha256": "fb90c62d175d7f06d208a84781409cefa150aff9e73a08387fa2b680986d5de8",
+    "model_sha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
+    "catalogue_count": 245,
+    "stages_complete": true,
+    "signal_counts": {
+      "rendered": 220,
+      "requires_patch": 21,
+      "silent": 4
+    },
+    "stage_counts": {
+      "native": {
+        "rendered": 220,
+        "requires_patch": 21,
+        "silent": 4
+      },
+      "baseline": {
+        "not_selected": 198,
+        "requires_patch": 21,
+        "rendered": 26
+      },
+      "repeat": {
+        "not_selected": 198,
+        "requires_patch": 21,
+        "rendered": 26
+      },
+      "solid": {
+        "not_selected": 198,
+        "requires_patch": 21,
+        "rendered": 26
+      },
+      "liquid": {
+        "not_selected": 198,
+        "requires_patch": 21,
+        "rendered": 26
+      },
+      "gas": {
+        "not_selected": 198,
+        "requires_patch": 21,
+        "rendered": 25,
+        "silent": 1
+      }
+    },
+    "compared_modules": [
+      {
+        "name": "proteus_analyze",
+        "definition_sha256": "1b6b1577ef5455477e9cf1bd3ba8ed6ad8e343cce0df44831a20b4ba1cfb6f0f",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.0905723026467521,
+            "second_rms": 0.0905723026467521,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.0905723026467521,
+            "second_rms": 0.0905723026467521,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0007218769215060168,
+            "shape_delta": 0.0079669433541967,
+            "first_rms": 0.0905723026467521,
+            "second_rms": 0.09054867976555935,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.00029024140246024406,
+            "shape_delta": 0.0032043385256131265,
+            "first_rms": 0.0905723026467521,
+            "second_rms": 0.09057502085435035,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0017656451655242438,
+            "shape_delta": 0.01931234601406802,
+            "first_rms": 0.0905723026467521,
+            "second_rms": 0.09031413527059917,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBusEnv": 16,
+              "outBusNoise": 17,
+              "outBusTone": 18,
+              "outBusTrans": 19
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "morphLatency": 0.035
+            },
+            "params": {
+              "inBus": 4,
+              "outBusEnv": 16,
+              "outBusNoise": 17,
+              "outBusTone": 18,
+              "outBusTrans": 19,
+              "morphLatency": 0.035
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "morphLatency": 0.035
+            },
+            "params": {
+              "inBus": 4,
+              "outBusEnv": 16,
+              "outBusNoise": 17,
+              "outBusTone": 18,
+              "outBusTrans": 19,
+              "morphLatency": 0.035
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "morphLatency": 0.035
+            },
+            "params": {
+              "inBus": 4,
+              "outBusEnv": 16,
+              "outBusNoise": 17,
+              "outBusTone": 18,
+              "outBusTrans": 19,
+              "morphLatency": 0.053
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "morphLatency": 0.035
+            },
+            "params": {
+              "inBus": 4,
+              "outBusEnv": 16,
+              "outBusNoise": 17,
+              "outBusTone": 18,
+              "outBusTrans": 19,
+              "morphLatency": 0.041
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "morphLatency": 0.035
+            },
+            "params": {
+              "inBus": 4,
+              "outBusEnv": 16,
+              "outBusNoise": 17,
+              "outBusTone": 18,
+              "outBusTrans": 19,
+              "morphLatency": 0.017
+            }
+          }
+        ]
+      },
+      {
+        "name": "proteus_render",
+        "definition_sha256": "f219c732e68a9818d1ba34e84953a69e894aa50e4faf17db3c8131515a29712c",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 7.805232968649392e-05,
+            "shape_delta": 0.00034850543253977514,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22376821207774567,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 7.500939880818733e-05,
+            "shape_delta": 0.0003345303907070776,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22376668292642135,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.016456998473360983,
+            "shape_delta": 0.07344174665758983,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22422398700311422,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.014146515796868863,
+            "shape_delta": 0.06323198667363103,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22366365832708335,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.012502473992750203,
+            "shape_delta": 0.05580798644981954,
+            "first_rms": 0.22377145330915632,
+            "second_rms": 0.22411384646179625,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusEnv": 0,
+              "inBusNoise": 2,
+              "inBusTone": 1,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "fidelity": 0.92
+            },
+            "params": {
+              "inBusEnv": 0,
+              "inBusNoise": 2,
+              "inBusTone": 1,
+              "outBus": 8,
+              "fidelity": 0.92
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "fidelity": 0.92
+            },
+            "params": {
+              "inBusEnv": 0,
+              "inBusNoise": 2,
+              "inBusTone": 1,
+              "outBus": 8,
+              "fidelity": 0.92
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "fidelity": 0.92
+            },
+            "params": {
+              "inBusEnv": 0,
+              "inBusNoise": 2,
+              "inBusTone": 1,
+              "outBus": 8,
+              "fidelity": 1.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "fidelity": 0.92
+            },
+            "params": {
+              "inBusEnv": 0,
+              "inBusNoise": 2,
+              "inBusTone": 1,
+              "outBus": 8,
+              "fidelity": 0.9325
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "fidelity": 0.92
+            },
+            "params": {
+              "inBusEnv": 0,
+              "inBusNoise": 2,
+              "inBusTone": 1,
+              "outBus": 8,
+              "fidelity": 0.845
+            }
+          }
+        ]
+      },
+      {
+        "name": "maw_digest",
+        "definition_sha256": "eb759d3de6b4e3a9649e69fa96c5788c646f9d5f5d5a644c074997da30ba31ce",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10265141937923983,
+            "second_rms": 0.10265141937923983,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10265141937923983,
+            "second_rms": 0.10265141937923983,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0012796879202195983,
+            "shape_delta": 0.012465986070878092,
+            "first_rms": 0.10265141937923983,
+            "second_rms": 0.10263088590393897,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10265141937923983,
+            "second_rms": 0.10265141937923983,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.004783792027967956,
+            "shape_delta": 0.04622601210958917,
+            "first_rms": 0.10265141937923983,
+            "second_rms": 0.1031582641938761,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBusAudio": 16,
+              "outBusCvStart": 16
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "hunger": 0.5,
+              "bile": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBusAudio": 16,
+              "outBusCvStart": 16,
+              "hunger": 0.5,
+              "bile": 0.2
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "hunger": 0.5,
+              "bile": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBusAudio": 16,
+              "outBusCvStart": 16,
+              "hunger": 0.5,
+              "bile": 0.2
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "hunger": 0.5,
+              "bile": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBusAudio": 16,
+              "outBusCvStart": 16,
+              "hunger": 0.57,
+              "bile": 0.32
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "hunger": 0.5,
+              "bile": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBusAudio": 16,
+              "outBusCvStart": 16,
+              "hunger": 0.5,
+              "bile": 0.24
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "hunger": 0.5,
+              "bile": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBusAudio": 16,
+              "outBusCvStart": 16,
+              "hunger": 0.255,
+              "bile": 0.08
+            }
+          }
+        ]
+      },
+      {
+        "name": "fusion_core_voice",
+        "definition_sha256": "f7adeb8ede8f73ab69e10fcde960d1fc8c077d6a1895aa16ff7254c3ae056114",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.00679141024882908,
+            "shape_delta": 0.023789933301649913,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.2849110552441365,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.017429405932123315,
+            "shape_delta": 0.06112678072617358,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.28463579744570683,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.02657499214491677,
+            "shape_delta": 0.08910719886719695,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.29196647401258186,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.020443989971075938,
+            "shape_delta": 0.07041098058420037,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.2884327330819723,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0549337255604217,
+            "shape_delta": 0.17363148148593063,
+            "first_rms": 0.28526432737908314,
+            "second_rms": 0.2568209909060484,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "bind": 0.745,
+              "dominance": 0,
+              "symmetry": 0.56,
+              "mutation": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "bind": 0.535,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.19
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bind": 0.5,
+              "dominance": 0,
+              "symmetry": 0.5,
+              "mutation": 0.1
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "bind": 0.29,
+              "dominance": 0,
+              "symmetry": 0.29,
+              "mutation": 0.4
+            }
+          }
+        ]
+      },
+      {
+        "name": "nucleus_freeze",
+        "definition_sha256": "a53145353878b925dcec4a5bfea94bb0b10e48669fe0335ea9b9d2702ff539ee",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10434711909435941,
+            "second_rms": 0.10434711909435941,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10434711909435941,
+            "second_rms": 0.10434711909435941,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10434711909435941,
+            "second_rms": 0.10434711909435941,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10434711909435941,
+            "second_rms": 0.10434711909435941,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "silence_transition",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.10434711909435941,
+            "shape_delta": null,
+            "first_rms": 0.10434711909435941,
+            "second_rms": 0.0,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "freeze": 1
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "freeze": 1
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "freeze": 1
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "freeze": 1
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "freeze": 1
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "freeze": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "relinquished_ia",
+        "definition_sha256": "f72290cb0198060673200c6d42f37424f6bae8b9dc77ddfd51b0cc2bc47c45e4",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10268009182344798,
+            "second_rms": 0.10268009182344798,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10268009182344798,
+            "second_rms": 0.10268009182344798,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.005671358687645887,
+            "shape_delta": 0.05523610628966059,
+            "first_rms": 0.10268009182344798,
+            "second_rms": 0.10266922264218871,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10268009182344798,
+            "second_rms": 0.10268009182344798,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.005634401412999497,
+            "shape_delta": 0.05487229285573288,
+            "first_rms": 0.10268009182344798,
+            "second_rms": 0.10268402716924654,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "iaClipBus": 16
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "iaHpHz": 20
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "iaClipBus": 16,
+              "iaHpHz": 20
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "iaHpHz": 20
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "iaClipBus": 16,
+              "iaHpHz": 20
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "iaHpHz": 20
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "iaClipBus": 16,
+              "iaHpHz": 30
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "iaHpHz": 20
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "iaClipBus": 16,
+              "iaHpHz": 20
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "iaHpHz": 20
+            },
+            "params": {
+              "inBusA": 4,
+              "inBusB": 4,
+              "outBus": 8,
+              "iaClipBus": 16,
+              "iaHpHz": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "relinquished_bc",
+        "definition_sha256": "fed5e6b05b1ca493701d0cf312789b82a16864bf37ea1717eb6c8098e3114fad",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10222333969297642,
+            "second_rms": 0.10222333969297642,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10222333969297642,
+            "second_rms": 0.10222333969297642,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.11807918560428889,
+            "shape_delta": 1.1649972259966497,
+            "first_rms": 0.10222333969297642,
+            "second_rms": 0.10047348426818324,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.14443280490674984,
+            "shape_delta": 1.4181372466319226,
+            "first_rms": 0.10222333969297642,
+            "second_rms": 0.10146896964362088,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.11905572185971533,
+            "shape_delta": 1.1590646949712056,
+            "first_rms": 0.10222333969297642,
+            "second_rms": 0.10320613852016698,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "bcValidBus": 16,
+              "equipState": 1,
+              "equipTrig": 1
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bcLenMs": 120,
+              "bcJitterMs": 0
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "bcValidBus": 16,
+              "equipState": 1,
+              "equipTrig": 1,
+              "bcLenMs": 120,
+              "bcJitterMs": 0.0
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bcLenMs": 120,
+              "bcJitterMs": 0
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "bcValidBus": 16,
+              "equipState": 1,
+              "equipTrig": 1,
+              "bcLenMs": 120,
+              "bcJitterMs": 0.0
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bcLenMs": 120,
+              "bcJitterMs": 0
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "bcValidBus": 16,
+              "equipState": 1,
+              "equipTrig": 1,
+              "bcLenMs": 208,
+              "bcJitterMs": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bcLenMs": 120,
+              "bcJitterMs": 0
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "bcValidBus": 16,
+              "equipState": 1,
+              "equipTrig": 1,
+              "bcLenMs": 158,
+              "bcJitterMs": 3.75
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "bcLenMs": 120,
+              "bcJitterMs": 0
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "bcValidBus": 16,
+              "equipState": 1,
+              "equipTrig": 1,
+              "bcLenMs": 70,
+              "bcJitterMs": 12.5
+            }
+          }
+        ]
+      },
+      {
+        "name": "relinquished_te",
+        "definition_sha256": "099f02a311a363d72b54e984d62aa8bb360776f9dda731caa10169a0d8cd7a53",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.06325915924933231,
+            "second_rms": 0.06325915924933231,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.06325915924933231,
+            "second_rms": 0.06325915924933231,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.007890481749425691,
+            "shape_delta": 0.022748789994461314,
+            "first_rms": 0.06325915924933231,
+            "second_rms": 0.07100095090279314,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0006610849266230426,
+            "shape_delta": 0.007974681384094328,
+            "first_rms": 0.06325915924933231,
+            "second_rms": 0.06282989408768036,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.020049326472630205,
+            "shape_delta": 0.19299708064689516,
+            "first_rms": 0.06325915924933231,
+            "second_rms": 0.04613399083674914,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.41,
+              "teColor": 0.41,
+              "teChaos": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.35,
+              "teColor": 0.47,
+              "teChaos": 0.24
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.14,
+              "teColor": 0.59,
+              "teChaos": 0.45
+            }
+          }
+        ]
+      },
+      {
+        "name": "agent_smith_identity",
+        "definition_sha256": "ec8d3138b02371c02982d61357d9389d6bade788917b70550d10ff9a69a69bb8",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.26221588937097395,
+            "shape_delta": 0.16966320218402958,
+            "first_rms": 0.2832943906518586,
+            "second_rms": 0.02141165955792581,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.2832943906518586,
+            "second_rms": 0.2832943906518586,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.06952812745403354,
+            "shape_delta": 0.1304694034716951,
+            "first_rms": 0.2832943906518586,
+            "second_rms": 0.3398225267482574,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.015396826003769072,
+            "shape_delta": 0.027105201091814503,
+            "first_rms": 0.2832943906518586,
+            "second_rms": 0.2965361041127917,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.2158060292417154,
+            "shape_delta": 0.12415436421269502,
+            "first_rms": 0.2832943906518586,
+            "second_rms": 0.068179263400905,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 4,
+              "dominance": 0.3
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 4,
+              "dominance": 0.3
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 5,
+              "dominance": 0.58
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 4,
+              "dominance": 0.34
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 2,
+              "dominance": 0.06
+            }
+          }
+        ]
+      },
+      {
+        "name": "ditto_morphic_core",
+        "definition_sha256": "daabaa55dbc4b511c7a7b0f458763cfb17011fa74bf819452f8c9d0c87edb73c",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.04766965487199003,
+            "shape_delta": 0.5860414859775117,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.0811525275600348,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.047324322271701094,
+            "shape_delta": 0.5813993650332097,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.08126583627194348,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.300787758149515,
+            "shape_delta": 1.3191179465941452,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.30031774023822494,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.05736285243688762,
+            "shape_delta": 0.695003456702386,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.08346296191718551,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.04683298246743127,
+            "shape_delta": 0.4841546703556922,
+            "first_rms": 0.08152644789297327,
+            "second_rms": 0.09892751150698384,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.3,
+              "assume": 0.78,
+              "mutate": 0.025
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.62,
+              "assume": 0.54,
+              "mutate": 0.145
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.9,
+              "assume": 0.26,
+              "mutate": 0.25
+            }
+          }
+        ]
+      },
+      {
+        "name": "mnemosyne_voice",
+        "definition_sha256": "e8bcd7b76611875014daa109d0d410c3a81c8967370a606ea61a2517909740bf",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.16109893198959926,
+            "shape_delta": 1.3490252013675934,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.10270718631204173,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.18847504487612612,
+            "shape_delta": 1.4076976077138605,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.1340696212549312,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.16834647780076947,
+            "shape_delta": 1.2918903737092624,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.12678401542911946,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1952251753329256,
+            "shape_delta": 1.4311436223320257,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.13906599713283302,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.20801721492550923,
+            "shape_delta": 1.4764114272931248,
+            "first_rms": 0.1337078739522498,
+            "second_rms": 0.14778591478817854,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "buf": 1,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5
+            },
+            "params": {
+              "buf": 1,
+              "outBus": 8,
+              "age": 0.65,
+              "erosion": 0.5
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5
+            },
+            "params": {
+              "buf": 1,
+              "outBus": 8,
+              "age": 0.65,
+              "erosion": 0.5
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5
+            },
+            "params": {
+              "buf": 1,
+              "outBus": 8,
+              "age": 0.5,
+              "erosion": 0.62
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5
+            },
+            "params": {
+              "buf": 1,
+              "outBus": 8,
+              "age": 0.74,
+              "erosion": 0.54
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5
+            },
+            "params": {
+              "buf": 1,
+              "outBus": 8,
+              "age": 0.95,
+              "erosion": 0.38
+            }
+          }
+        ]
+      },
+      {
+        "name": "protean_hound",
+        "definition_sha256": "e05c65faadde918eea8266dc80fad0cad2fa2b5a482a2274b2d0935966cf0542",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.10791757073111903,
+            "shape_delta": 1.0049646593064638,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.10426962521214997,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.09848527442731192,
+            "shape_delta": 0.9103348121027373,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.10595582015946003,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.11614872878579277,
+            "shape_delta": 1.099718645918763,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.1004563281532801,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.11943594571196955,
+            "shape_delta": 1.114067876759507,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.10395612587038876,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1372002236701397,
+            "shape_delta": 1.3209797825192928,
+            "first_rms": 0.11025241268735422,
+            "second_rms": 0.09691877750290386,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "sensitivity": 0.36,
+              "chaos": 0.5,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.82,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "sensitivity": 0.09,
+              "chaos": 1.0,
+              "aggression": 0.7
+            }
+          }
+        ]
+      },
+      {
+        "name": "chrysalid_siren",
+        "definition_sha256": "9fe113cb0b1bcebd4624ab4d0a5df2b01980f67c085953b52f3f52d3a46ad4a6",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.06995490393818625,
+            "shape_delta": 1.4184921676763647,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.05146578274100186,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.06634283098453594,
+            "shape_delta": 1.3955613010801968,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.048001931791381236,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0682936447709659,
+            "shape_delta": 1.416355856827202,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.04933901224046336,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.06621807798792534,
+            "shape_delta": 1.340254788744172,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.051615649465195056,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.06833388639672636,
+            "shape_delta": 1.479580977076063,
+            "first_rms": 0.047070170821465716,
+            "second_rms": 0.045284797098436365,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "grainDensity": 32,
+              "identityBlur": 0.075,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.355,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "grainDensity": 15,
+              "identityBlur": 0.6,
+              "formantShift": -5
+            }
+          }
+        ]
+      },
+      {
+        "name": "ossuary_monk",
+        "definition_sha256": "a5fbc0846cac6f7b3de860882e06c8cd1c8007c785c90f12dac9fd3219f52f4f",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5768975384490392,
+            "shape_delta": 1.4017207884506362,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.40522064782592326,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5589521244490445,
+            "shape_delta": 1.3550718205324874,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.4070885259993987,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5829039338378859,
+            "shape_delta": 1.4054414570193414,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.411665275531565,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5843087291088666,
+            "shape_delta": 1.404322528173427,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.41434276342491705,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5915978389758423,
+            "shape_delta": 1.421510597384048,
+            "first_rms": 0.41780727375753646,
+            "second_rms": 0.4145373720225444,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "impactThreshold": 0.024,
+              "relicDecay": 1.225,
+              "gravity": 0.41
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.925,
+              "gravity": 0.23
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "impactThreshold": 0.006,
+              "relicDecay": 0.4,
+              "gravity": 0.02
+            }
+          }
+        ]
+      },
+      {
+        "name": "janiform_child",
+        "definition_sha256": "806279fd186db09f872ed6db1a853a2d5f952d015de39240f9caaac78641926d",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.11855887041824956,
+            "shape_delta": 1.3316989158595713,
+            "first_rms": 0.10406804152967616,
+            "second_rms": 0.06979878962403431,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10406804152967616,
+            "second_rms": 0.10406804152967616,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.15594916214045973,
+            "shape_delta": 1.4995729053613538,
+            "first_rms": 0.10406804152967616,
+            "second_rms": 0.10392335681812749,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1405634264194664,
+            "shape_delta": 1.2997444487624832,
+            "first_rms": 0.10406804152967616,
+            "second_rms": 0.1120255906103194,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.16059394351759704,
+            "shape_delta": 1.5719945650506326,
+            "first_rms": 0.10406804152967616,
+            "second_rms": 0.10022833685228592,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "symmetry": 1.0,
+              "causalDrift": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "symmetry": 0.89,
+              "causalDrift": 0.0525
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBus": 4,
+              "buf": 1,
+              "outBus": 8,
+              "symmetry": 0.61,
+              "causalDrift": 0.105
+            }
+          }
+        ]
+      },
+      {
+        "name": "mnemosyne_voice_stereo",
+        "definition_sha256": "9851f784ed8b4065caa5eb7f3529f11f807221948f56f51c19121d688fe18213",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.24797556704134954,
+            "shape_delta": 1.3239790332050854,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.18728475250486473,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.24985119325837546,
+            "shape_delta": 1.3353139830569607,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.1869140060422052,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.23790443701016503,
+            "shape_delta": 1.3017609338261522,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.1780454337580214,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.2496818777548522,
+            "shape_delta": 1.3065881937644717,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.1947842076781111,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.2961865659225702,
+            "shape_delta": 1.4996276303685299,
+            "first_rms": 0.18730662738887294,
+            "second_rms": 0.20731219276944957,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            },
+            "params": {
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            },
+            "params": {
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            },
+            "params": {
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "age": 0.5,
+              "erosion": 0.62,
+              "recallOffset": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            },
+            "params": {
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "age": 0.74,
+              "erosion": 0.54,
+              "recallOffset": 0.005
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "age": 0.65,
+              "erosion": 0.5,
+              "recallOffset": 0.002
+            },
+            "params": {
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "age": 0.95,
+              "erosion": 0.38,
+              "recallOffset": 0.012
+            }
+          }
+        ]
+      },
+      {
+        "name": "protean_hound_stereo",
+        "definition_sha256": "e97d927accb82615ce4c127c6d4490385fbd36961d74ba107a1d8e6552d97e99",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.18478198364491924,
+            "shape_delta": 1.2689482141537882,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.14936487107121202,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.18536604298063625,
+            "shape_delta": 1.260236007210283,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15217202657218734,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.16143446647444978,
+            "shape_delta": 1.1027852072987,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15073544897360636,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.20863626213883274,
+            "shape_delta": 1.424352222696877,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15108778878968415,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.20283489695952567,
+            "shape_delta": 1.3888451064864284,
+            "first_rms": 0.14172272947818262,
+            "second_rms": 0.15023550418330894,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "sensitivity": 0.36,
+              "chaos": 0.5,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "sensitivity": 0.3,
+              "chaos": 0.82,
+              "aggression": 0.7
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "sensitivity": 0.3,
+              "chaos": 0.7,
+              "aggression": 0.7
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "sensitivity": 0.09,
+              "chaos": 1.0,
+              "aggression": 0.7
+            }
+          }
+        ]
+      },
+      {
+        "name": "chrysalid_siren_stereo",
+        "definition_sha256": "194fbd444f82ecc90df54912478b90f46186ae5245eb47e8eade5039a09d7cd2",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1433403371271801,
+            "shape_delta": 1.4302612803792885,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.10101393751175428,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1338143484864962,
+            "shape_delta": 1.3353669001714963,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.10098883800621672,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.14290645047283,
+            "shape_delta": 1.4470489064664274,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.09809089128977415,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.13730800926948952,
+            "shape_delta": 1.391986820030796,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.09785753416987938,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1308786962013882,
+            "shape_delta": 1.3491652395747762,
+            "first_rms": 0.09941937581909517,
+            "second_rms": 0.09452088978265981,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "grainDensity": 32,
+              "identityBlur": 0.075,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "grainDensity": 28,
+              "identityBlur": 0.355,
+              "formantShift": -5
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "grainDensity": 28,
+              "identityBlur": 0.25,
+              "formantShift": -5
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "grainDensity": 15,
+              "identityBlur": 0.6,
+              "formantShift": -5
+            }
+          }
+        ]
+      },
+      {
+        "name": "ossuary_monk_stereo",
+        "definition_sha256": "2030db61750d44a2801d93db0e1630e7a285387c24c0cd277f7859379802d1e4",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5679411610072816,
+            "shape_delta": 1.3965576510289444,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.4076278365117327,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.571628763101018,
+            "shape_delta": 1.3928382488904092,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.41504095882141406,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5986098288565229,
+            "shape_delta": 1.4351078099944674,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.4282360713813102,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5730314549509707,
+            "shape_delta": 1.386373991981964,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.42079915671097484,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.5673178775288757,
+            "shape_delta": 1.4118714780043495,
+            "first_rms": 0.40571418140099735,
+            "second_rms": 0.39788699446431836,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "outBus": 8,
+              "impactThreshold": 0.024,
+              "relicDecay": 1.225,
+              "gravity": 0.41
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "outBus": 8,
+              "impactThreshold": 0.02,
+              "relicDecay": 0.925,
+              "gravity": 0.23
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "impactThreshold": 0.02,
+              "relicDecay": 0.7,
+              "gravity": 0.2
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "outBus": 8,
+              "impactThreshold": 0.006,
+              "relicDecay": 0.4,
+              "gravity": 0.02
+            }
+          }
+        ]
+      },
+      {
+        "name": "janiform_child_stereo",
+        "definition_sha256": "68858f672d3cd2a71fda21f702a7d09e0b9b20843dde6d91c140df5ade50e32e",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.1626730997112733,
+            "second_rms": 0.1626730997112733,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.1626730997112733,
+            "second_rms": 0.1626730997112733,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.29229565954815756,
+            "shape_delta": 1.8876440384453326,
+            "first_rms": 0.1626730997112733,
+            "second_rms": 0.1469717255589678,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.13368938480870327,
+            "shape_delta": 0.8473796919094108,
+            "first_rms": 0.1626730997112733,
+            "second_rms": 0.1520434627423694,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1744128209743131,
+            "shape_delta": 1.1246734365274609,
+            "first_rms": 0.1626730997112733,
+            "second_rms": 0.14658006367304335,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "symmetry": 1.0,
+              "causalDrift": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "symmetry": 0.89,
+              "causalDrift": 0.0525
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "symmetry": 0.85,
+              "causalDrift": 0.03
+            },
+            "params": {
+              "inBusL": 2,
+              "inBusR": 3,
+              "bufL": 2,
+              "bufR": 3,
+              "outBus": 8,
+              "symmetry": 0.61,
+              "causalDrift": 0.105
+            }
+          }
+        ]
+      },
+      {
+        "name": "typhon_layer",
+        "definition_sha256": "84dd1020f35e926c23d5c1fb07745da6e2cad9ad9a2ec6cfb7294cd6b60dfa5d",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.012154255343286343,
+            "shape_delta": 0.05702789474950113,
+            "first_rms": 0.11383766789139939,
+            "second_rms": 0.10337563532556038,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.11383766789139939,
+            "second_rms": 0.11383766789139939,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.00901263537353898,
+            "shape_delta": 0.03257610934225734,
+            "first_rms": 0.11383766789139939,
+            "second_rms": 0.12199183184662134,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0022250132136684775,
+            "shape_delta": 0.019502322594402283,
+            "first_rms": 0.11383766789139939,
+            "second_rms": 0.11396539549879602,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.029239569407199687,
+            "shape_delta": 0.06477303115325331,
+            "first_rms": 0.11383766789139939,
+            "second_rms": 0.08530329181355915,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.15,
+              "dominance": 0.18
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.47,
+              "dominance": 0.1
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.75,
+              "dominance": -0.18
+            }
+          }
+        ]
+      },
+      {
+        "name": "solve_spectral_freeze",
+        "definition_sha256": "522f81419aed8bcfc3c5793146b8570297ec6df6068df67cb57be3a503d2dfa4",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.07330940353594914,
+            "shape_delta": 1.170275153344774,
+            "first_rms": 0.006617764715794352,
+            "second_rms": 0.07512599590824588,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.006617764715794352,
+            "second_rms": 0.006617764715794352,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.006617764715794352,
+            "second_rms": 0.006617764715794352,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.006617764715794352,
+            "second_rms": 0.006617764715794352,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.025922095605907955,
+            "shape_delta": 1.0366514069369215,
+            "first_rms": 0.006617764715794352,
+            "second_rms": 0.028311350090962393,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "freeze": 1
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "freeze": 1,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "freeze": 1,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "freeze": 1,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "freeze": 1,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "freeze": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "freeze": 1,
+              "mix": 0.84
+            }
+          }
+        ]
+      },
+      {
+        "name": "solve_pitch_shift",
+        "definition_sha256": "f32c560342e69d46f375183135192448b2f7bfc4663e1d3c94970de2231ca477",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.08840752184471705,
+            "shape_delta": 1.5371965380606685,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.06428040640443924,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.07337296156296357,
+            "shape_delta": 1.3270153620818093,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.05989481588537078,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.07642375249999916,
+            "shape_delta": 1.3515168021513035,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.06218703378979513,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.07686742935028912,
+            "shape_delta": 1.4202686305449481,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.05783414449018829,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.08522485024587945,
+            "shape_delta": 1.4395687200723142,
+            "first_rms": 0.05014024231009873,
+            "second_rms": 0.067124510731675,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "semitones": -7
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "semitones": -7,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "semitones": -7,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "semitones": -7,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "semitones": -7,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "semitones": -7,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "semitones": -6,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "semitones": -7,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "semitones": -7,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "semitones": -7,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "semitones": -11,
+              "mix": 0.82
+            }
+          }
+        ]
+      },
+      {
+        "name": "solve_spectral_filter",
+        "definition_sha256": "b853e3824f7725481df6e72469dc6626d44eb2a1286ebde9cee18224384d0055",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10217089630118321,
+            "second_rms": 0.10217089630118321,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10217089630118321,
+            "second_rms": 0.10217089630118321,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.10216863718485437,
+            "shape_delta": 1.4094904388841358,
+            "first_rms": 0.10217089630118321,
+            "second_rms": 0.0006307298824738709,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 4.883510935225429e-06,
+            "shape_delta": 4.77974401317823e-05,
+            "first_rms": 0.10217089630118321,
+            "second_rms": 0.10217090214493307,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.026757324954958396,
+            "shape_delta": 0.19116378297277253,
+            "first_rms": 0.10217089630118321,
+            "second_rms": 0.11868787332873093,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "lowBin": 0,
+              "highBin": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "lowBin": 0.0,
+              "highBin": 1.0,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "lowBin": 0,
+              "highBin": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "lowBin": 0.0,
+              "highBin": 1.0,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "lowBin": 0,
+              "highBin": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "lowBin": 0.03,
+              "highBin": 0.955,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "lowBin": 0,
+              "highBin": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "lowBin": 0.0,
+              "highBin": 0.985,
+              "mix": 1.0
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "lowBin": 0,
+              "highBin": 1,
+              "mix": 1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "lowBin": 0.0,
+              "highBin": 1.0,
+              "mix": 0.82
+            }
+          }
+        ]
+      },
+      {
+        "name": "octahedron_timestretch",
+        "definition_sha256": "559a8da4722a7a37f2c5b3eefc6cbf851d6e43d6cec735b0ca01b1876a5564c7",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.025632696884311093,
+            "second_rms": 0.025632696884311093,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.025632696884311093,
+            "second_rms": 0.025632696884311093,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.10116957960535466,
+            "shape_delta": 1.435381283261124,
+            "first_rms": 0.025632696884311093,
+            "second_rms": 0.0970985060107525,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.055559241122232816,
+            "shape_delta": 1.4093574604094135,
+            "first_rms": 0.025632696884311093,
+            "second_rms": 0.04946898716701447,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.09480685073320497,
+            "shape_delta": 1.4127572096244467,
+            "first_rms": 0.025632696884311093,
+            "second_rms": 0.09132875702142991,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "rate": 0.5,
+              "pitch": 1.3
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "rate": 0.5,
+              "pitch": 1.3
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "rate": 0.5,
+              "pitch": 1.3
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "rate": 0.5,
+              "pitch": 1.3
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "rate": 0.5,
+              "pitch": 1.3
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "rate": 0.5,
+              "pitch": 1.3
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "rate": 0.325,
+              "pitch": 1.35
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "rate": 0.5,
+              "pitch": 1.3
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "rate": 0.605,
+              "pitch": 1.3
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "rate": 0.5,
+              "pitch": 1.3
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "rate": 0.85,
+              "pitch": 1.125
+            }
+          }
+        ]
+      },
+      {
+        "name": "octahedron_slicer",
+        "definition_sha256": "b088c1ae01c1c2d67d60c2802c5c6f0d4cbe9e68209ca49d8aa96f479c5711c4",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10141483700581207,
+            "second_rms": 0.10141483700581207,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10141483700581207,
+            "second_rms": 0.10141483700581207,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.13890117671431076,
+            "shape_delta": 1.419324593051871,
+            "first_rms": 0.10141483700581207,
+            "second_rms": 0.09418195576943847,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.1386504327155733,
+            "shape_delta": 1.412407490775526,
+            "first_rms": 0.10141483700581207,
+            "second_rms": 0.09480536371657287,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.132112302427034,
+            "shape_delta": 1.4241576618761607,
+            "first_rms": 0.10141483700581207,
+            "second_rms": 0.0832490008857385,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.625
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.905
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 0.8
+            },
+            "params": {
+              "bufnum": 1,
+              "outBus": 8,
+              "numSlices": 8,
+              "sliceIndex": 2,
+              "rate": 1.15
+            }
+          }
+        ]
+      }
+    ],
+    "original_behavior_acceptance": "not_measured"
+  },
+  "retained_song": {
+    "ledger_sha256": "e4d63808d90bf85161e12356b5b0ea8bb8d3a69c906a6b7eddc2898972f93e14",
+    "source_sha256": "d8166bed01fd564bda29c24f7c83325b13697abadc90b3453bb54aabf8f6ee14",
+    "model_sha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
+    "catalogue_count": 245,
+    "stages_complete": true,
+    "signal_counts": {
+      "not_selected": 220,
+      "requires_patch": 21,
+      "rendered": 4
+    },
+    "stage_counts": {
+      "native": {
+        "not_selected": 220,
+        "requires_patch": 21,
+        "rendered": 4
+      },
+      "baseline": {
+        "not_selected": 220,
+        "requires_patch": 21,
+        "rendered": 4
+      },
+      "repeat": {
+        "not_selected": 220,
+        "requires_patch": 21,
+        "rendered": 4
+      },
+      "solid": {
+        "not_selected": 220,
+        "requires_patch": 21,
+        "rendered": 4
+      },
+      "liquid": {
+        "not_selected": 220,
+        "requires_patch": 21,
+        "rendered": 4
+      },
+      "gas": {
+        "not_selected": 220,
+        "requires_patch": 21,
+        "rendered": 4
+      }
+    },
+    "compared_modules": [
+      {
+        "name": "relinquished_te",
+        "definition_sha256": "099f02a311a363d72b54e984d62aa8bb360776f9dda731caa10169a0d8cd7a53",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.06601964280919592,
+            "second_rms": 0.06601964280919592,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.06601964280919592,
+            "second_rms": 0.06601964280919592,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.01376150226948537,
+            "shape_delta": 0.13512430054753338,
+            "first_rms": 0.06601964280919592,
+            "second_rms": 0.07591266761125594,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.002991030385309488,
+            "shape_delta": 0.04525997008546481,
+            "first_rms": 0.06601964280919592,
+            "second_rms": 0.06610172282409,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.025033305860100954,
+            "shape_delta": 0.22286346591963468,
+            "first_rms": 0.06601964280919592,
+            "second_rms": 0.04406087144758029,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.41,
+              "teColor": 0.41,
+              "teChaos": 0.0
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.35,
+              "teColor": 0.47,
+              "teChaos": 0.24
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "teDrive": 0.35,
+              "teColor": 0.5,
+              "teChaos": 0.15
+            },
+            "params": {
+              "inBus": 4,
+              "cvEnvBus": 0,
+              "cvNoiseBus": 2,
+              "cvToneBus": 1,
+              "outBus": 8,
+              "teSatBus": 16,
+              "teDrive": 0.14,
+              "teColor": 0.59,
+              "teChaos": 0.45
+            }
+          }
+        ]
+      },
+      {
+        "name": "agent_smith_identity",
+        "definition_sha256": "ec8d3138b02371c02982d61357d9389d6bade788917b70550d10ff9a69a69bb8",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.27222290436414837,
+            "shape_delta": 0.36106246034748135,
+            "first_rms": 0.2929418430937075,
+            "second_rms": 0.02228673754707454,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.2929418430937075,
+            "second_rms": 0.2929418430937075,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.10479068979119739,
+            "shape_delta": 0.17666826789765078,
+            "first_rms": 0.2929418430937075,
+            "second_rms": 0.3796037895469542,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.02015467494341654,
+            "shape_delta": 0.03038607434923345,
+            "first_rms": 0.2929418430937075,
+            "second_rms": 0.3108896112592565,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.2249976174819291,
+            "shape_delta": 0.2690585577518099,
+            "first_rms": 0.2929418430937075,
+            "second_rms": 0.07133133119201185,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 4,
+              "dominance": 0.3
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 4,
+              "dominance": 0.3
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 5,
+              "dominance": 0.58
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 4,
+              "dominance": 0.34
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "replicationCount": 4,
+              "dominance": 0.3
+            },
+            "params": {
+              "outBus": 8,
+              "replicationCount": 2,
+              "dominance": 0.06
+            }
+          }
+        ]
+      },
+      {
+        "name": "ditto_morphic_core",
+        "definition_sha256": "daabaa55dbc4b511c7a7b0f458763cfb17011fa74bf819452f8c9d0c87edb73c",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.04837140335198124,
+            "shape_delta": 0.6387363318209243,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.07537117421768906,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.047770265976998745,
+            "shape_delta": 0.6296259695627257,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.07566249944025492,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.30343665360090616,
+            "shape_delta": 1.3443557277904097,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.3011671608427126,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.05757556652003308,
+            "shape_delta": 0.7439954343876204,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.07857406883954542,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.046336956394622694,
+            "shape_delta": 0.5269948889609383,
+            "first_rms": 0.0760741517484175,
+            "second_rms": 0.09103375702480768,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.3,
+              "assume": 0.78,
+              "mutate": 0.025
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.62,
+              "assume": 0.54,
+              "mutate": 0.145
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "observe": 0.5,
+              "assume": 0.5,
+              "mutate": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "outBus": 8,
+              "observe": 0.9,
+              "assume": 0.26,
+              "mutate": 0.25
+            }
+          }
+        ]
+      },
+      {
+        "name": "typhon_layer",
+        "definition_sha256": "84dd1020f35e926c23d5c1fb07745da6e2cad9ad9a2ec6cfb7294cd6b60dfa5d",
+        "comparisons": {
+          "native": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.011386723132543472,
+            "shape_delta": 0.06397365939247437,
+            "first_rms": 0.10510335188000607,
+            "second_rms": 0.0956962364975336,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "repeat": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0,
+            "shape_delta": 0.0,
+            "first_rms": 0.10510335188000607,
+            "second_rms": 0.10510335188000607,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "solid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.008657730606455688,
+            "shape_delta": 0.03658607741402899,
+            "first_rms": 0.10510335188000607,
+            "second_rms": 0.11279024890882655,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "liquid": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.0023078619605632665,
+            "shape_delta": 0.021949566383547673,
+            "first_rms": 0.10510335188000607,
+            "second_rms": 0.10514690597127717,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          },
+          "gas": {
+            "status": "compared",
+            "frames_compared": 88256,
+            "sample_rate": 44100,
+            "channels": 2,
+            "rms_delta": 0.02731707314844764,
+            "shape_delta": 0.07300035260284427,
+            "first_rms": 0.10510335188000607,
+            "second_rms": 0.07860436914396994,
+            "normalization": "raw PCM delta; shape delta independently removes each signal's RMS gain"
+          }
+        },
+        "controls": [
+          {
+            "label": "native",
+            "material": null,
+            "base_params": null,
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8
+            }
+          },
+          {
+            "label": "baseline",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            }
+          },
+          {
+            "label": "repeat",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 0,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            }
+          },
+          {
+            "label": "solid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "solid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.15,
+              "dominance": 0.18
+            }
+          },
+          {
+            "label": "liquid",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "liquid",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.47,
+              "dominance": 0.1
+            }
+          },
+          {
+            "label": "gas",
+            "material": {
+              "schema": "brahma.material-state.v1",
+              "modelVersion": 1,
+              "phase": "gas",
+              "amount": 1,
+              "composition": [
+                {
+                  "id": "water",
+                  "fraction": 1
+                }
+              ]
+            },
+            "base_params": {
+              "crossCouple": 0.35,
+              "dominance": 0.1
+            },
+            "params": {
+              "inBus": 4,
+              "modBusIn": 4,
+              "modBusOut": 16,
+              "outBus": 8,
+              "crossCouple": 0.75,
+              "dominance": -0.18
+            }
+          }
+        ]
+      }
+    ],
+    "original_behavior_acceptance": "not_measured"
+  },
+  "browser": {
+    "schema": "brahma.material-browser-acceptance.v1",
+    "inputProjectSha256": "2ce47fcf00f81ae9df61ce1243411edb726c1a2f9c90cce5f9183e05087bd8d9",
+    "checks": {
+      "originalPreserved": true,
+      "nativePhaseOutputsDiffer": true,
+      "appliedWhilePlaying": true,
+      "saveReopenMaterialExact": true,
+      "exportedAudioMeasured": true,
+      "restoreOriginal": true,
+      "mobileOverflowAbsent": true
+    },
+    "phases": [
+      {
+        "phase": "solid",
+        "milliseconds": 2217,
+        "outputSha256": "d9b860666b40b655a20bc71035caebdef07024a1fb5377ea6d885eb0e7b1d6bc",
+        "effectiveParams": {
+          "observe": 0.1,
+          "assume": 0.9,
+          "mutate": 0
+        },
+        "baseParams": {
+          "observe": 0.5,
+          "assume": 0.5,
+          "mutate": 0.1
+        },
+        "modelSha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
+        "exported": {
+          "sha256": "4ae22a2c1639d59899344c315fcb7b9c6d9c7684bd7a46975e18579b82bab9cf",
+          "frames": 230087,
+          "peakDbfs": -6.218459839197548,
+          "rmsDbfs": -19.599129493378218
+        }
+      },
+      {
+        "phase": "liquid",
+        "milliseconds": 2031,
+        "outputSha256": "7becf3cac5e43fc2880ac175aaae59c7a37cd54b8f9ae563970e8a763fe72597",
+        "effectiveParams": {
+          "observe": 0.42,
+          "assume": 0.68,
+          "mutate": 0.07
+        },
+        "baseParams": {
+          "observe": 0.5,
+          "assume": 0.5,
+          "mutate": 0.1
+        },
+        "modelSha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
+        "exported": {
+          "sha256": "0bbd0840c29467ab22e8a29f92192ab512ecb2f2ae221b1d4255f4c9bb1ef61b",
+          "frames": 230087,
+          "peakDbfs": -9.151114304703754,
+          "rmsDbfs": -26.029670213105028
+        }
+      },
+      {
+        "phase": "gas",
+        "milliseconds": 2151,
+        "outputSha256": "1a8001cb180e640b5278d2382db222d091fd255fda807edbcfc105230232db1b",
+        "effectiveParams": {
+          "observe": 0.7,
+          "assume": 0.4,
+          "mutate": 0.175
+        },
+        "baseParams": {
+          "observe": 0.5,
+          "assume": 0.5,
+          "mutate": 0.1
+        },
+        "modelSha256": "45522976ad4e2c1938d34b68f83794fde090b3c0fb8c5ce6f61610f1500788a3",
+        "exported": {
+          "sha256": "73ee51d6645ec9139b11e985cb5061619bad624901e519d1791aae505ebc7e8d",
+          "frames": 230087,
+          "peakDbfs": -9.749781503485407,
+          "rmsDbfs": -26.79552325488503
+        }
+      }
+    ]
+  }
+}

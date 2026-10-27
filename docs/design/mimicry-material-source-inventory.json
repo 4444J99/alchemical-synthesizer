@@ -1,0 +1,202 @@
+{
+  "schema": "brahma.design-source-reconciliation.v1",
+  "review_date": "2026-10-26",
+  "implementation_reference": "3b971f8e849a8e0ca7d4687f299d8575b8241f0d",
+  "owner": "https://github.com/4444J99/alchemical-synthesizer/issues/95",
+  "report": "docs/design/mimicry-material-universe.md",
+  "provider_history_complete": false,
+  "local_sources": [
+    {
+      "id": "S01",
+      "path": "docs/design/alchemical-synthesis-Digital-Clones-Design-Guide.md",
+      "sha256": "3ed40216b7b59c9447fc93641e204a6f94dcae9780e1d492400bc941dbc18365",
+      "bytes": 15509,
+      "lines": 271,
+      "user_turn_markers": 2,
+      "assistant_turn_markers": 2,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S02",
+      "path": "docs/design/alchemical-synthesis-Modular-Synthesizer-Design.md",
+      "sha256": "d0671e1177ceace925ecf5d6a696b8f5d488103294b090fc4c4986414c8f17b0",
+      "bytes": 4646,
+      "lines": 64,
+      "user_turn_markers": 1,
+      "assistant_turn_markers": 1,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S03",
+      "path": "docs/design/alchemical-synthesis-Fidelity-Stacking-Synth-Design.md",
+      "sha256": "a4d8116a0a6b73e55b046dded3fd1dc65362d39340342fcf157d05d5245f8326",
+      "bytes": 33913,
+      "lines": 418,
+      "user_turn_markers": 5,
+      "assistant_turn_markers": 5,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S04",
+      "path": "docs/design/alchemical-synthesis-Absorption-Fusion-Synth-Design.md",
+      "sha256": "c0973b6f49a3911a18fabcc1e26c5b4068ced1fc5096642cd999e0f612733421",
+      "bytes": 10613,
+      "lines": 357,
+      "user_turn_markers": 1,
+      "assistant_turn_markers": 1,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S05",
+      "path": "docs/design/alchemical-synthesis-Modular-Synth-Absorption-Design.md",
+      "sha256": "19b39c2b5293b6b116d8b4f5952249189c74234622d647d1ba29755bb4ad19c3",
+      "bytes": 6243,
+      "lines": 76,
+      "user_turn_markers": 1,
+      "assistant_turn_markers": 1,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S06",
+      "path": "docs/design/alchemical-synthesis-Relinquished-monster-process.md",
+      "sha256": "7fc93ba3517720bffec6710a92349be814561c20d7a2bad75ea27b6bcb1c13ed",
+      "bytes": 48989,
+      "lines": 1153,
+      "user_turn_markers": 4,
+      "assistant_turn_markers": 4,
+      "code_artifacts": 2,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S07",
+      "path": "docs/design/alchemical-synthesis-Agent-Smith-Synth-Design.md",
+      "sha256": "7a446693e4962a71ffb41d5e4e392c584d0aa997505f8615793afcdb1aa7cae0",
+      "bytes": 6348,
+      "lines": 70,
+      "user_turn_markers": 1,
+      "assistant_turn_markers": 1,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S08",
+      "path": "docs/design/alchemical-synthesis-Modular-Synth-Ditto-Design.md",
+      "sha256": "e0bd644304c3b14581802e6a7fcf4a92e6511e0bd201d976481169a4913ca836",
+      "bytes": 5167,
+      "lines": 97,
+      "user_turn_markers": 1,
+      "assistant_turn_markers": 1,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "S09",
+      "path": "docs/design/alchemical-synthesis-Anthropomorphized-Sampler-Creatures.md",
+      "sha256": "14692728c8f493f1861057bc4d35ee9f76d5c4d76ae0a3245086faa5fbadffe7",
+      "bytes": 70332,
+      "lines": 1947,
+      "user_turn_markers": 8,
+      "assistant_turn_markers": 8,
+      "code_artifacts": 16,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "C01",
+      "path": "docs/absorb-alchemize/Remix-of-Interactive-Drum-Machine-with-Claude-API.md",
+      "sha256": "a747adea74a5da4730ea84dd4a2638df24fde5216eb48f01440f8e469a603abf",
+      "bytes": 398016,
+      "lines": 7800,
+      "user_turn_markers": 8,
+      "assistant_turn_markers": 9,
+      "code_artifacts": 8,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    },
+    {
+      "id": "C02",
+      "path": "docs/absorb-alchemize/synth-drum-machine.tsx",
+      "sha256": "3c681449fd8f5e9931fe305ef08a4d51dcb1ebe009081d66d9fceaeaf95c0ba3",
+      "bytes": 64299,
+      "lines": 893,
+      "user_turn_markers": 0,
+      "assistant_turn_markers": 0,
+      "code_artifacts": 0,
+      "acquisition": "complete_checked_in_file",
+      "review": "requirements_and_relevant_implementation_correspondence",
+      "runtime_execution_in_this_review": false
+    }
+  ],
+  "remote_sources": [
+    {
+      "id": "R01",
+      "repository": "organvm-iv-taxis/universal-node-network",
+      "revision": "3f5c50236a2ff81be1ae427fd551f7ea0e146b39",
+      "files_read": [
+        "README.md",
+        "src/node.py",
+        "src/network.py"
+      ],
+      "execution": "not_run"
+    },
+    {
+      "id": "R02",
+      "repository": "organvm-ii-poiesis/universal-waveform-explorer",
+      "revision": "756c39f571e284103146263f79e3a33e73b6ad6d",
+      "files_read": [
+        "aether-canvas-the-universal-waveform-explorer.md",
+        "src/index.ts"
+      ],
+      "execution": "not_run"
+    },
+    {
+      "id": "R03",
+      "repository": "organvm-ii-poiesis/universal-waveform-explorer",
+      "revision": "756c39f571e284103146263f79e3a33e73b6ad6d",
+      "files_read": [
+        "universal-system-architecture.md"
+      ],
+      "execution": "not_run"
+    },
+    {
+      "id": "R04",
+      "repository": "organvm-ii-poiesis/metasystem-master",
+      "revision": "795426ae58ae30ba42de2ed43c89fc092818390e",
+      "files_read": [
+        "README.md",
+        "packages/audio-synthesis-bridge/README.md"
+      ],
+      "execution": "not_run"
+    }
+  ],
+  "coverage_gaps": [
+    "Provider-complete ChatGPT and Claude project title/ID inventories, branches and attachments were not recovered.",
+    "Earlier Claude code variants are retained and inventoried; complete semantic regression and runtime execution remain unmeasured.",
+    "Remote file/directory inspection is bounded to the declared public sources, not every related music repository.",
+    "Native code inspection and existing audition coverage do not establish every original organism behavior.",
+    "Material-to-DSP mappings, complete behavioral ledger, and integrated performer acceptance remain implementation work."
+  ]
+}
