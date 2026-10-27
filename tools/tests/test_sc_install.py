@@ -31,7 +31,7 @@ class ClassInstallation(unittest.TestCase):
         first = self.run_installer("--apply")
         self.assertEqual(first.returncode, 0, first.stderr)
         link = self.extensions / "Brahma"
-        self.assertEqual(link.resolve(), self.source)
+        self.assertEqual(link.resolve(), self.source.resolve())
         self.assertTrue((link / "transmutation/TransmutationEngine.sc").is_file())
         second = self.run_installer("--apply")
         self.assertEqual(second.returncode, 0, second.stderr)

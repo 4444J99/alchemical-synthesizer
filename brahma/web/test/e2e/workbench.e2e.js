@@ -293,9 +293,10 @@ describe("workbench E2E", () => {
 
   async function replaceActiveText(text) {
     await ctx.page.focus('.cm-content');
-    await ctx.page.keyboard.down('Control');
+    const modifier = process.platform === 'darwin' ? 'Meta' : 'Control';
+    await ctx.page.keyboard.down(modifier);
     await ctx.page.keyboard.press('KeyA');
-    await ctx.page.keyboard.up('Control');
+    await ctx.page.keyboard.up(modifier);
     await ctx.page.keyboard.sendCharacter(text);
   }
 

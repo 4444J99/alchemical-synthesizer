@@ -280,7 +280,10 @@ class ForgeNativeTests(ForgeFixture):
                    f"os.execv({sclang!r}, [{sclang!r}, '-a', '-l', {str(config)!r}] + sys.argv[1:])\n")
         (self.bin / "scsynth").unlink()
         (self.bin / "scsynth").symlink_to(scsynth)
-        self.env.update(QT_QPA_PLATFORM="offscreen", QTWEBENGINE_DISABLE_SANDBOX="1")
+        if sys.platform.startswith("linux"):
+            self.env.setdefault("QT_QPA_PLATFORM", "offscreen")
+            if os.geteuid() == 0:
+                self.env.setdefault("QTWEBENGINE_DISABLE_SANDBOX", "1")
 
     def test_native_renders_accept_literal_unusual_paths(self) -> None:
         quoted_bin = self.work / "bin 'quote\" $(touch BIN_EXECUTED)"
