@@ -7,6 +7,12 @@ acceptance of every original organism design. The [design contract](../design/mi
 and [issue #95](https://github.com/4444J99/alchemical-synthesizer/issues/95) retain
 the remaining organism behavior and integration requirements.
 
+The catalogue and material-phase measurements below are historical observations
+of the rack at the time of the original run. A subsequent review fix changed the
+donor rack's generator-gate handling. That change was tested with a silent-gap
+fixture for Prima Materia and Ouroboros; the complete catalogue and every
+material phase have not been rerendered after that change.
+
 ## Working path
 
 Five per-track glass vessels retain a module, base controls and optional material.

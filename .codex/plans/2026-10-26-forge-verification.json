@@ -1,5 +1,10 @@
 {
   "fixture": "four-second synthetic stereo donor, distinct 220/330 Hz tones and 85 Hz decaying pulses; no user media",
+  "fixture_generation": {
+    "cwd": ".",
+    "command": ["python3", "-c", "import pathlib,math,wave,struct,sys\nsource=pathlib.Path(sys.argv[1])\nsource.parent.mkdir(parents=True,exist_ok=True)\nwith source.open('xb') as raw, wave.open(raw,'wb') as w:\n w.setparams((2,2,44100,0,'NONE','not compressed'))\n frames=bytearray()\n for i in range(44100*4):\n  t=i/44100\n  hit=0.18*math.exp(-35*(t%0.5))*math.sin(2*math.pi*85*t)\n  l=0.17*math.sin(2*math.pi*220*t)+hit\n  r=0.17*math.sin(2*math.pi*330*t)+hit\n  frames.extend(struct.pack('<hh',int(32767*l),int(32767*r)))\n w.writeframes(frames)", "out/sampling-review-20261026/synthetic-donor.wav"],
+    "provenance": "Reconstructed from the original session's recorded producer; verified byte-identical against the retained fixture. Use a new output path to preserve the original."
+  },
   "gates": [
     {
       "gate": "ingest",

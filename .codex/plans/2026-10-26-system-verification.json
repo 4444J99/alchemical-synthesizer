@@ -314,6 +314,7 @@
     },
     {
       "gate": "browser_workbench",
+      "cwd": "brahma/web",
       "command": [
         "node",
         "--test",
