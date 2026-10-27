@@ -2,11 +2,9 @@
 /**
  * billing.js — Checkout & orders. Stripe-optional.
  *
- * Logical-order monetization: this ships a working checkout *today*. If
- * STRIPE_SECRET_KEY is set, real Stripe Checkout Sessions are created. If not,
- * a deterministic stub session is returned and can be completed via the dev
- * confirm endpoint — so the revenue surface is exercisable end-to-end before
- * Stripe is wired, then becomes real by adding one env var.
+ * Real checkout requires the Stripe SDK, API key and webhook signing secret.
+ * Local demonstration checkout is a separate, explicit opt-in and is disabled
+ * in production. A verified paid session must match its persisted order.
  */
 
 const crypto = require("crypto");
@@ -19,17 +17,27 @@ const orders = () => collection("orders");
 
 let stripe = null;
 let stripeReady = false;
+const apiKey = String(process.env.STRIPE_SECRET_KEY || "").trim(); // allow-secret: environment lookup, no embedded credential
+const webhookSecret = String(process.env.STRIPE_WEBHOOK_SECRET || "").trim();
+const stubEnabled = !apiKey && process.env.FOUNDRY_ALLOW_STUB_BILLING === "1" && process.env.NODE_ENV !== "production";
 (function initStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return;
+  if (!apiKey) return;
   try {
-    stripe = require("stripe")(key);
-    stripeReady = true;
-    console.log("[billing] Stripe enabled");
+    stripe = require("stripe")(apiKey);
+    stripeReady = Boolean(webhookSecret);
+    console.log(stripeReady ? "[billing] Stripe configured" : "[billing] Checkout disabled: webhook secret missing");
   } catch (e) {
-    console.warn("[billing] STRIPE_SECRET_KEY set but 'stripe' package missing — using stub checkout");
+    console.warn("[billing] Checkout disabled: Stripe SDK unavailable");
   }
 })();
+
+function billingError(message, status = 400) {
+  return Object.assign(new Error(message), { status });
+}
+
+function requireCheckout() {
+  if (!stripeReady && !stubEnabled) throw billingError("billing_unavailable", 503);
+}
 
 function baseUrl(req) {
   if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, "");
@@ -42,6 +50,7 @@ async function checkoutPlan({ email, plan, req }) {
   const target = getPlan(plan);
   if (!target || target.id === "free") throw new Error("choose a paid plan");
   if (target.contactSales) return { contactSales: true, plan: target.id };
+  requireCheckout();
 
   const order = baseOrder({ email, kind: "plan", amountCents: target.priceCents, meta: { plan: target.id } });
 
@@ -71,11 +80,12 @@ async function checkoutPlan({ email, plan, req }) {
 /** Create a checkout to buy a marketplace specimen. */
 async function checkoutSpecimen({ email, specimenId, req }) {
   const spc = getSpecimen(specimenId);
-  if (!spc || !spc.forSale) throw new Error("specimen not for sale");
+  if (!spc || !spc.forSale || spc.simulated || !spc.audioUrl || !spc.ownerEmail) throw new Error("specimen not for sale");
+  requireCheckout();
   const split = payoutSplit(spc.priceCents);
   const order = baseOrder({
     email, kind: "specimen", amountCents: spc.priceCents,
-    meta: { specimenId, creator: spc.creator, ...split }
+    meta: { specimenId, creator: spc.creator, ownerEmail: spc.ownerEmail, ...split }
   });
 
   if (stripeReady) {
@@ -103,17 +113,17 @@ function baseOrder({ email, kind, amountCents, meta }) {
   const order = {
     id: "ord_" + crypto.randomBytes(8).toString("hex"),
     email: String(email || "").toLowerCase(),
-    kind, amountCents, meta,
+    kind, amountCents, currency: "usd", meta,
     status: "pending",
-    provider: "stub",
-    confirmToken: crypto.randomBytes(8).toString("hex"),
+    provider: stripeReady ? "stripe" : "stub",
+    confirmToken: stripeReady ? null : crypto.randomBytes(16).toString("hex"),
     createdAt: new Date().toISOString()
   };
   orders().insert(order);
   return order;
 }
 
-/** Fulfil an order (called by stub confirm or Stripe webhook). */
+/** Private transition: callers must establish the matching payment authority. */
 function fulfil(orderId) {
   const order = orders().find((o) => o.id === orderId);
   if (!order) return { ok: false, error: "order_not_found" };
@@ -127,8 +137,43 @@ function fulfil(orderId) {
   return { ok: true, order: orders().find((o) => o.id === orderId) };
 }
 
+function confirmStub(orderId, token) {
+  const order = getOrder(orderId);
+  if (!stubEnabled || !order || order.provider !== "stub") throw billingError("stub_confirmation_unavailable", 403);
+  if (typeof token !== "string" || token !== order.confirmToken) throw billingError("bad_token", 403);
+  return fulfil(order.id);
+}
+
+function handleStripeWebhook(rawBody, signature) {
+  if (!stripeReady) throw billingError("stripe_webhook_unavailable", 503);
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+  } catch (_) {
+    throw billingError("invalid_webhook_signature");
+  }
+  if (event.type !== "checkout.session.completed" && event.type !== "checkout.session.async_payment_succeeded") {
+    return { received: true, ignored: true };
+  }
+  const session = event.data?.object;
+  const order = getOrder(session?.metadata?.orderId);
+  // Before this field existed every checkout was hardcoded to USD. Infer only
+  // an absent field on those persisted orders; an explicit different or invalid
+  // currency still fails. Migration occurs only after the paid event matches.
+  const expectedCurrency = order && Object.hasOwn(order, "currency") ? order.currency : "usd";
+  if (!order || order.provider !== "stripe" || !order.sessionId || session.id !== order.sessionId ||
+      session.payment_status !== "paid" || !Number.isSafeInteger(session.amount_total) ||
+      session.amount_total !== order.amountCents || session.currency !== expectedCurrency ||
+      !["pending", "paid"].includes(order.status)) {
+    throw billingError("payment_does_not_match_order");
+  }
+  if (!Object.hasOwn(order, "currency")) orders().update((o) => o.id === order.id, { currency: expectedCurrency });
+  fulfil(order.id);
+  return { received: true };
+}
+
 function getOrder(id) { return orders().find((o) => o.id === id) || null; }
 function listOrders(email) { return orders().filter((o) => o.email === String(email).toLowerCase()); }
-function status() { return { stripe: stripeReady, plans: Object.keys(PLANS) }; }
+function status() { return { stripe: stripeReady, mode: stripeReady ? "stripe" : stubEnabled ? "stub" : "disabled", plans: Object.keys(PLANS) }; }
 
-module.exports = { checkoutPlan, checkoutSpecimen, fulfil, getOrder, listOrders, status, stripeReady: () => stripeReady };
+module.exports = { checkoutPlan, checkoutSpecimen, confirmStub, handleStripeWebhook, getOrder, listOrders, status, stripeReady: () => stripeReady };

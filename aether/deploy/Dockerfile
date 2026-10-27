@@ -12,7 +12,7 @@
 #  BUILD CONTEXT = the repository root (COPY paths are repo-relative):
 #     docker build -f aether/deploy/Dockerfile -t aether-radio .
 # ============================================================================
-FROM node:20-bookworm-slim
+FROM node:24-bookworm-slim
 
 # ffmpeg (transport) + python3 (organism + hls_append). bash for the entrypoint.
 RUN apt-get update \
@@ -23,16 +23,14 @@ WORKDIR /app
 
 # The generator toolchain, the theatron player (static), and the runtime.
 COPY aether/tools/ /app/tools/
-# broadcast.sh reuses two Forge-lane tools (Aether -> Forge dependency, see
-# ORGANS.md): aether/tools/tune.py captures a queued submission,
-# forge/bounce.sh is the NRT render tier (SC-gated, no-op in this SC-less image
-# but kept for parity).
-COPY aether/tools/tune.py forge/bounce.sh /app/forge/
+# The SC-less container uses the donor/tone tiers. tune.py belongs to AETHER and
+# is already in /app/tools; do not copy a broken partial Forge/NRT installation.
+COPY aether/stations.json /app/stations.json
 COPY aether/web/listener/ /app/player/
 COPY aether/deploy/serve.js aether/deploy/entrypoint.sh /app/
 
 RUN mkdir -p /live \
- && chmod +x /app/entrypoint.sh /app/tools/broadcast.sh /app/tools/*.py 2>/dev/null || true
+ && chmod +x /app/entrypoint.sh /app/tools/broadcast.sh /app/tools/*.py
 
 ENV PORT=8080 \
     AETHER_LIVE_DIR=/live \

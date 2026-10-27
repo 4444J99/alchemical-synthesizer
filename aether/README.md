@@ -1,42 +1,56 @@
 # AETHER — the living radio
 
-> A distinct **product** that currently lives inside this repository. AETHER is the
-> 24/7 self-broadcasting radio: it tunes external sources, transmutes them through the
-> Brahma engine, and streams the result as live HLS (with an RTMP rebroadcast lure and
-> a public waitlist funnel). **Brahma** (the audio synthesizer + the Foundry product
-> surface) and **AETHER** (this streaming service) are two products that share the
-> engine but are otherwise separate concerns.
+AETHER is the broadcast product within this repository. Its source is consolidated
+under `aether/`: it captures sources, advances a generative organism, and publishes
+a rolling HLS stream. The local renderer can use the sibling Brahma/Forge NRT path;
+the current container uses donor playback or a generated tone and includes no SC.
 
-This directory is AETHER's **module home**: the place the repository formally acknowledges
-AETHER as its own modular bit. The code itself is still co-located across the Brahma tree
-(the AETHER radio worker deliberately builds from the repo root so it can bundle assets from
-`brahma/web/…`), so this module is declared here and mapped in [`MANIFEST.md`](MANIFEST.md)
-rather than physically consolidated — see the honest note below.
+## Current boundary
 
-## What AETHER is
+| Component | Location | Role |
+|---|---|---|
+| Deploy unit | [deploy/](deploy/README.md) | Local host, container, Cloudflare Worker and R2 configuration |
+| Broadcast tools | [tools/](tools/) | Broadcast, tuning, HLS, queue, lineage, rebroadcast and R2 sync |
+| Listener | [web/listener/](web/listener/) | HLS player and public lineage |
+| Stations | [stations.json](stations.json) | Source registry with recorded license tags |
+| Design history | [docs/BROADCAST-PLAN.md](docs/BROADCAST-PLAN.md) | Original broadcast plan |
+| Shared entrypoints | Root `Makefile` | `broadcast`, `rebroadcast`, `submit`, `tune`, `stations` |
 
-| Piece | Where it lives today | Role |
-|-------|----------------------|------|
-| Deploy unit | [`deploy/aether/`](../deploy/aether/) | Cloudflare **Containers** worker for the 24/7 radio (`aether-radio`), R2 segment bucket, `serve.js`, `Dockerfile`, `entrypoint.sh` |
-| Broadcast tooling | `tools/broadcast.sh`, `tools/rebroadcast.sh`, `tools/hls_append.py`, `tools/ingest_queue.py`, `tools/r2_sync.sh`, `tools/cellcycle.py`, `tools/lineage.py`, `forge/tune.py` | Segmented-NRT → live HLS, RTMP push, station tuning, ingest queue, lineage |
-| Web UI | [`brahma/web/public/aether/`](../brahma/web/public/aether/) | The listener page (`aether.js`, `index.html`) |
-| Stations | [`stations.json`](../stations.json) | The tunable source registry |
-| Plan / docs | [`docs/AETHER-BROADCAST-PLAN.md`](../docs/AETHER-BROADCAST-PLAN.md) | Broadcast architecture |
-| Make targets | `make broadcast`, `make rebroadcast`, `make submit` | Operator entrypoints |
+[MANIFEST.md](MANIFEST.md) identifies integration points outside this prefix.
+[EXTRACTION.md](EXTRACTION.md) records the remaining standalone acceptance work;
+the completed directory move must not be repeated.
 
-The authoritative, file-level footprint is in [`MANIFEST.md`](MANIFEST.md).
+## Local operation
 
-## Why it isn't physically extracted yet (the honest note)
+From the repository root, with Node 24+, Python 3.11+ and ffmpeg installed:
 
-AETHER is *tangled through* Brahma's directories — the radio worker's `wrangler.toml` says it
-must build from the **repository root** to bundle `brahma/web/…` assets, and the broadcast
-tooling is interleaved with the audio tooling in `tools/`. There is therefore **no single
-`git subtree` prefix** to split cleanly. A full extraction must first *consolidate* those
-scattered files into this `aether/` prefix and re-wire the deploy build context — which
-touches the **live** radio + funnel deploy. That migration is safe to do only against this
-repo's own CI + a `wrangler` build check, so it is staged as a recipe rather than done blind
-(breaking the live stream would be the wrong kind of "done").
+```bash
+bash aether/tools/broadcast.sh --segments 3 --seconds 2 --no-nrt
+node aether/deploy/serve.js
+# Open http://localhost:8080/ and /live/stream.m3u8
+```
 
-The extraction is a **repeatable recipe**, not a one-off: see [`EXTRACTION.md`](EXTRACTION.md)
-for the exact `git mv` set, the reference-update points, the verification gates, and the final
-lift into a standalone `aether` repository (the new-repo creation is the one human-gated atom).
+Both commands use repository `out/live` by default. An independently extracted
+AETHER tree uses its own `out/live`; a container explicitly sets
+`AETHER_LIVE_DIR=/live`. `AETHER_LIVE_DIR` overrides both generator and host.
+
+The gateway also mounts the listener at `/aether/`. Network intake at `POST /submit`
+is **disabled by default**. It can be enabled for a trusted operator with
+`AETHER_SUBMIT_TOKEN` and a matching Bearer header. The listener does not solicit
+public submissions. URLs are fetched on the broadcaster's network, so this is an
+operator trust boundary, not a safe public URL-fetching service. Public intake
+needs isolated egress, redirect/DNS controls, admission limits, and moderation.
+The local `make submit` queue path remains available to the operator.
+
+The host and edge publish only `stream.m3u8`, `seg_*.ts`, `telemetry.json`, and
+`lineage.json`. Pending/consumed queue records and generator state stay private.
+License labels record provenance; they do not establish rights clearance.
+
+## Evidence and remaining acceptance
+
+The [verification review](../docs/reviews/2026-10-24-verification-hardening.md)
+records host/listener/edge tests and a bounded ffmpeg broadcast using default
+paths. The edge tests use an in-memory platform adapter. No actual container build,
+Cloudflare deployment, R2 upload, or sustained public stream was performed in that
+pass. AETHER's coherence/fidelity/entropy remain explicitly provisional indicators;
+they are not the engine's new sample-derived measurements.

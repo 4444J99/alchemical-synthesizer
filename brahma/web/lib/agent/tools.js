@@ -15,33 +15,83 @@ const crypto = require("node:crypto");
 const { validateEvents } = require("./providers");
 
 function defaultExecFile(file, args, opts = {}) {
-  const { execFile } = require("node:child_process");
-  return new Promise((resolve, reject) => {
-    const child = execFile(
-      file,
-      args,
-      { timeout: opts.timeout || 300000, maxBuffer: 8 * 1024 * 1024, ...opts },
-      (err, stdout, stderr) => {
-        if (err) {
-          const detail = (stderr || stdout || "").split("\n").slice(-8).join("\n");
-          reject(new Error(`${path.basename(file)} failed: ${err.message}${detail ? `\n${detail}` : ""}`));
-          return;
-        }
-        resolve({ stdout, stderr });
-      }
-    );
-    child.stop = () => {
-      try { child.kill("SIGKILL"); } catch (_) { /* already gone */ }
+  const { spawn } = require("node:child_process");
+  const { signal, timeout = 300000, maxBuffer = 8 * 1024 * 1024, ...options } = opts;
+  let child;
+  const promise = new Promise((resolve, reject) => {
+    let timer;
+    let failure = null;
+    let bytes = 0;
+    const stdout = [];
+    const stderr = [];
+    const abortError = () => Object.assign(new Error(
+      signal && signal.reason instanceof Error ? signal.reason.message : "execution aborted"
+    ), { name: "AbortError", code: "ABORT_ERR" });
+    if (signal && signal.aborted) { reject(abortError()); return; }
+
+    // A render shell spawns sclang, scsynth and watchdogs. Terminate their shared
+    // process group; killing only the shell leaves those processes running.
+    const killTree = () => {
+      if (!child || !child.pid) return;
+      try {
+        if (process.platform === "win32") child.kill("SIGKILL");
+        else process.kill(-child.pid, "SIGKILL");
+      } catch (_) { /* process group already gone */ }
     };
-    resolve.child = child;
+    const abort = () => { failure = abortError(); killTree(); };
+    // execFile does not forward `detached` to spawn, so use spawn explicitly.
+    const env = { ...(options.env || process.env) };
+    if (process.platform !== "win32") env.BRAHMA_SUPERVISED_PROCESS_GROUP = "1";
+    else delete env.BRAHMA_SUPERVISED_PROCESS_GROUP;
+    child = spawn(file, args, {
+      ...options, env, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"]
+    });
+    child.stop = abort;
+    const capture = (chunks) => (chunk) => {
+      if (failure) return;
+      bytes += chunk.length;
+      if (bytes > maxBuffer) {
+        failure = Object.assign(new Error(`${path.basename(file)} output exceeded ${maxBuffer} bytes`), {
+          code: "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
+        });
+        killTree();
+        return;
+      }
+      chunks.push(chunk);
+    };
+    child.stdout.on("data", capture(stdout));
+    child.stderr.on("data", capture(stderr));
+    child.once("error", (err) => { failure = err; });
+    child.once("close", (code, exitSignal) => {
+      clearTimeout(timer);
+      if (signal) signal.removeEventListener("abort", abort);
+      if (failure) { reject(failure); return; }
+      const out = Buffer.concat(stdout).toString("utf8");
+      const err = Buffer.concat(stderr).toString("utf8");
+      if (code !== 0) {
+        const detail = (err || out).split("\n").slice(-8).join("\n");
+        reject(new Error(`${path.basename(file)} failed: ${exitSignal || `exit ${code}`}${detail ? `\n${detail}` : ""}`));
+        return;
+      }
+      resolve({ stdout: out, stderr: err });
+    });
+    // Also reap descendants after ordinary failure, output overflow, or a
+    // wrapper that exits without waiting for its own subprocesses.
+    child.once("exit", killTree);
+    if (signal) signal.addEventListener("abort", abort, { once: true });
+    timer = setTimeout(() => {
+      failure = Object.assign(new Error(`${path.basename(file)} timed out after ${timeout}ms`), { code: "ETIMEDOUT" });
+      killTree();
+    }, timeout);
   });
+  promise.child = child;
+  return promise;
 }
 
 function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engineHealth, now = () => Date.now() } = {}) {
   if (!repoRoot) throw new Error("createTools requires repoRoot");
 
   const scratch = scratchRoot || path.join(os.tmpdir(), "brahma-agent");
-  let activeChild = null;
 
   function toolError(code, message) {
     const err = new Error(message);
@@ -54,7 +104,7 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
       name: "render_pattern",
       approval: "required",
       description: "Render note events to a WAV with the NRT pattern voice, then measure it.",
-      async run({ events, duration, label } = {}) {
+      async run({ events, duration, label } = {}, { signal } = {}) {
         const valid = validateEvents(events);
         if (!valid) throw toolError("bad_events", "render_pattern requires valid note events");
 
@@ -71,7 +121,8 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
         const lastEnd = valid.reduce((m, e) => Math.max(m, e.time + e.dur), 0);
         const renderSecs = Number(duration) > 0 ? Number(duration) : Math.max(2, lastEnd + 1.5);
 
-        await execFile("bash", [path.join(repoRoot, "forge/render-pattern.sh"), scorePath, wavPath, String(renderSecs)]);
+        await execFile("bash", [path.join(repoRoot, "forge/render-pattern.sh"), scorePath, wavPath, String(renderSecs)], { signal });
+        if (signal) signal.throwIfAborted();
 
         if (!fs.existsSync(wavPath) || fs.statSync(wavPath).size === 0) {
           throw toolError("render_failed", "render produced no audio file");
@@ -82,7 +133,8 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
           wavPath,
           "--summary-json",
           summaryPath
-        ]);
+        ], { signal });
+        if (signal) signal.throwIfAborted();
 
         const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
 
@@ -103,7 +155,7 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
       name: "analyze_audio",
       approval: "none",
       description: "Measure an existing audio file (read-only).",
-      async run({ wavPath } = {}) {
+      async run({ wavPath } = {}, { signal } = {}) {
         if (!wavPath || !fs.existsSync(wavPath)) throw toolError("no_such_file", `no such audio file: ${wavPath}`);
         fs.mkdirSync(scratch, { recursive: true });
         const summaryPath = path.join(scratch, `analyze-${crypto.randomBytes(5).toString("hex")}.json`);
@@ -113,7 +165,8 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
           wavPath,
           "--summary-json",
           summaryPath
-        ]);
+        ], { signal });
+        if (signal) signal.throwIfAborted();
         return { wavPath, summaryPath, measured: JSON.parse(fs.readFileSync(summaryPath, "utf8")) };
       }
     },
@@ -135,34 +188,14 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
     return tools[String(name)] || null;
   }
 
-  async function run(name, args) {
+  async function run(name, args, { signal } = {}) {
     const tool = get(name);
     if (!tool) throw toolError("unknown_tool", `Unknown tool ${name}`);
 
-    // Track the execFile child process so stop_all can abort a long-running render.
-    const wrapped = execFile.bind(null);
-    const orig = execFile;
-    execFile = (...a) => {
-      const p = orig(...a);
-      activeChild = p && p.child ? p.child : null;
-      return p;
-    };
-
-    try {
-      return await tool.run(args || {});
-    } finally {
-      execFile = orig;
-      activeChild = null;
-    }
-  }
-
-  /** Abort the currently running render process, if any. Human-owned. */
-  function stop() {
-    const child = activeChild;
-    if (!child) return { ok: false, code: "nothing_running", message: "No render process is running" };
-    try { child.stop(); } catch (_) { /* already gone */ }
-    activeChild = null;
-    return { ok: true, message: "render process killed" };
+    if (signal) signal.throwIfAborted();
+    const result = await tool.run(args || {}, { signal });
+    if (signal) signal.throwIfAborted();
+    return result;
   }
 
   function catalogue() {
@@ -173,7 +206,7 @@ function createTools({ repoRoot, execFile = defaultExecFile, scratchRoot, engine
     }));
   }
 
-  return { get, run, catalogue, scratch, stop };
+  return { get, run, catalogue, scratch };
 }
 
 module.exports = { createTools, defaultExecFile };

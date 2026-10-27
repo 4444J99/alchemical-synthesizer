@@ -15,6 +15,15 @@ import { miniAllStrings } from "@strudel/mini";
 import { DEFAULT_ENGINE, toEvent } from "./event-map.mjs";
 
 const MAX_PENDING = 512;
+// Strudel installs these helpers globally for each repl. Capture their current
+// closures before user code can await, so a cancelled continuation retains its
+// own scheduler/transform state. Explicit globalThis mutations are not isolated.
+const REPL_HELPERS = "all,each,hush,cpm,setCps,setcps,setCpm,setcpm,compileKabel";
+
+function scopedTranspiler(code, options) {
+  const compiled = transpiler(code, options);
+  return { ...compiled, output: `return (({${REPL_HELPERS}}) => (async () => {${compiled.output}})())(globalThis);` };
+}
 
 // Strudel evaluates user code against a global scope. The host has to populate it,
 // otherwise `note(...)` is undefined at evaluation time. `repl.evaluate` injects only
@@ -36,8 +45,9 @@ export function createStrudel({ send, onError, onState, now, schedule } = {}) {
   const pending = new Set();
   const knownEngines = new Set();
 
-  let currentEngine = DEFAULT_ENGINE;
-  let patternId = "pattern";
+  let active = null;
+  let savedCps = 0.5;
+  let generation = 0;
 
   function clearPending() {
     for (const t of pending) clearTimeout(t);
@@ -49,12 +59,13 @@ export function createStrudel({ send, onError, onState, now, schedule } = {}) {
    * offset in seconds and `duration` is already in seconds — passing them through
    * unchanged is the whole timing contract.
    */
-  function defaultOutput(hap, deadline, duration) {
+  function defaultOutput(owner, hap, deadline, duration) {
+    if (owner.generation !== generation) return;
     try {
       const frame = toEvent(hap.value, {
         duration,
-        id: patternId,
-        engine: currentEngine,
+        id: owner.id,
+        engine: owner.engine,
         knownEngines
       });
       if (!frame) return;
@@ -63,9 +74,10 @@ export function createStrudel({ send, onError, onState, now, schedule } = {}) {
 
       const delaySecs = typeof deadline === "number" && Number.isFinite(deadline) ? deadline : 0;
       const delayMs = Math.max(0, Math.round(delaySecs * 1000));
+      const scheduledGeneration = generation;
       const timer = setTimer(() => {
         pending.delete(timer);
-        send(frame);
+        if (scheduledGeneration === generation) send(frame);
       }, delayMs);
       pending.add(timer);
     } catch (err) {
@@ -75,38 +87,57 @@ export function createStrudel({ send, onError, onState, now, schedule } = {}) {
 
   miniAllStrings();
 
-  const instance = repl({
-    defaultOutput,
-    getTime: clock,
-    transpiler,
-    onEvalError: (err) => onError?.(err),
-    onToggle: (started) => {
-      if (!started) clearPending();
-      onState?.({ started });
-    }
-  });
-
   return {
     /** Evaluate Strudel source and start it. Resolves to the pattern, or undefined on error. */
     async evaluate(code, { id = "pattern", engine = DEFAULT_ENGINE } = {}) {
+      const requestedGeneration = ++generation;
+      clearPending();
+      const previous = active;
+      active = null;
+      try { previous?.instance.stop(); } catch (_) { /* already stopped */ }
       await scopeReady;
-      patternId = id;
-      currentEngine = engine;
-      return instance.evaluate(code, true);
+      if (requestedGeneration !== generation) return;
+      // An abandoned top-level await cannot be forcibly cancelled in this
+      // context. Give each evaluation its own scheduler and only start it once
+      // evaluation completes while it still owns the current generation.
+      const owner = { generation: requestedGeneration, id, engine, instance: null };
+      const instance = repl({
+        defaultOutput: (hap, deadline, duration) => defaultOutput(owner, hap, deadline, duration),
+        getTime: clock,
+        transpiler: scopedTranspiler,
+        onEvalError: (err) => { if (owner.generation === generation) onError?.(err); },
+        onToggle: (started) => {
+          if (owner.generation !== generation) return;
+          if (!started) clearPending();
+          onState?.({ started });
+        }
+      });
+      owner.instance = instance;
+      active = owner;
+      instance.setCps(savedCps);
+      const result = await instance.evaluate(code, false);
+      if (requestedGeneration === generation && result) await instance.start();
+      if (requestedGeneration !== generation) instance.stop();
+      return result;
     },
     stop() {
+      generation += 1;
       clearPending();
-      try { instance.stop(); } catch (_) { /* already stopped */ }
+      const previous = active;
+      active = null;
+      try { previous?.instance.stop(); } catch (_) { /* already stopped */ }
     },
     setKnownEngines(names) {
       knownEngines.clear();
       for (const n of names || []) knownEngines.add(String(n));
     },
     setCps(cps) {
-      try { instance.setCps(cps); } catch (_) { /* invalid cps is ignored */ }
+      if (!Number.isFinite(cps) || cps <= 0) return;
+      savedCps = cps;
+      try { active?.instance.setCps(cps); } catch (_) { /* invalid cps is ignored */ }
     },
     get cps() {
-      return instance.scheduler.cps;
+      return active?.instance.scheduler.cps ?? savedCps;
     },
     _pending: pending
   };

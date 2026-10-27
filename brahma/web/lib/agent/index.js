@@ -32,13 +32,13 @@ function createAgentLayer({
   const runner = createJobRunner({
     now,
     maxQueued: 16,
-    execute: async (job) => {
+    execute: async (job, { signal }) => {
       try {
-        const result = await tools.run(job.tool, job.args);
-        if (job.approvalId) approvals.complete(job.approvalId, result);
+        const result = await tools.run(job.tool, job.args, { signal });
+        if (job.approvalId && !signal.aborted) approvals.complete(job.approvalId, result);
         return result;
       } catch (err) {
-        if (job.approvalId) approvals.failRun(job.approvalId, err.message);
+        if (job.approvalId && !signal.aborted) approvals.failRun(job.approvalId, err.message);
         throw err;
       }
     }
@@ -56,7 +56,7 @@ function createAgentLayer({
     let resolvedEvents = null;
     let resolvedSummary = "";
 
-    if (Array.isArray(events) && events.length > 0) {
+    if (events !== undefined) {
       // Agent-composed path: validate the supplied events, no provider call.
       const validated = validateEvents(events);
       if (!validated) {
@@ -124,22 +124,21 @@ function createAgentLayer({
     return { ok: true, approval: started.approval, job: queued.job };
   }
 
-  /** Stop all: kill the running render process and mark the active job stopped. Human only. */
+  /** Stop all active and queued renders. Cancellation is terminal. Human only. */
   function stop({ actor } = {}) {
     if (actor !== "human") {
       return { ok: false, code: "forbidden", message: "Only a human may stop renders" };
     }
-    const killed = tools.stop();
-    // Mark the active job as failed so pollers see terminal state immediately;
-    // the execute() rejection handler will reconcile when the child actually dies.
-    const activeId = runner.active;
-    const job = activeId ? runner.get(activeId) : null;
-    if (job && job.state === "running") {
-      job.state = "failed";
-      job.error = "stopped by human";
-      job.finishedAt = new Date(now()).toISOString();
+    const cancelled = runner.stopAll();
+    for (const job of cancelled.jobs) {
+      if (job.approvalId) approvals.failRun(job.approvalId, job.error);
     }
-    return { ok: true, killed: killed.ok, message: killed.message };
+    return {
+      ok: true,
+      stopped: cancelled.jobs.length,
+      jobs: cancelled.jobs.map((job) => job.id),
+      message: cancelled.jobs.length ? "Render cancellation requested; queued work cleared" : "No render jobs to stop"
+    };
   }
 
   return {

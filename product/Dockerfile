@@ -1,10 +1,10 @@
 # Brahma Foundry — productization service
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
-COPY package.json ./
+COPY package.json package-lock.json ./
 # Install only production deps; 'stripe' is optional and pulled in if present.
-RUN npm install --omit=dev || npm install --production
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
 
 COPY . .
 

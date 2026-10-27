@@ -1,0 +1,47 @@
+{
+  "source": "PR102 de89004982de728126de463c43a08a0cef94d680",
+  "scope": "actual SampleControls callbacks in isolated DOM/audio stubs; not real browser/audio acceptance",
+  "meter": {
+    "active": {
+      "rms": 0.4,
+      "peak": 0.7,
+      "wave": [
+        0.2
+      ]
+    },
+    "observed": {
+      "rms": 0,
+      "peak": 0,
+      "wave": null
+    },
+    "rendererRequestsBeforeSampleActivity": 0
+  },
+  "comparison": {
+    "currentChop": {
+      "start": 1,
+      "end": 2
+    },
+    "retainedOriginalChop": {
+      "start": 0,
+      "end": 4
+    },
+    "requestedOriginalEvent": {
+      "sampleId": "original",
+      "slice": 0,
+      "note": 60,
+      "gain": 0.8,
+      "dur": 4,
+      "t": 0
+    }
+  },
+  "exit_code": 1,
+  "independently_reproduced": true,
+  "source_sha256": "57fa77ff830907a54d7fa23bf996127adf1a09ec668ca94c96ede7ddc5b6a59b",
+  "required": {
+    "meter": {
+      "rms": 0.4,
+      "peak": 0.7
+    },
+    "original_audition_duration_seconds": 1
+  }
+}

@@ -13,13 +13,64 @@
 # locally (`make dist`).
 #
 set -euo pipefail
-# macOS tar otherwise adds AppleDouble sidecars alongside the release root.
+# Prevent macOS tar from adding AppleDouble sidecars.
 export COPYFILE_DISABLE=1
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 VERSION="${1:-$(git describe --tags --always --dirty 2>/dev/null || echo "0.0.0-dev")}"
+# A version is a label, never a path. Validate before deleting/replacing output.
+if [[ ${#VERSION} -gt 100 || ! "$VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]; then
+  echo "build_release: invalid version label" >&2
+  exit 2
+fi
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+  echo "build_release: run from a Git checkout (source allowlist required)" >&2
+  exit 2
+}
+
+# Both archive formats accept only regular source files. In particular zip
+# dereferences links by default: a tracked path replaced by a link must never
+# import a private file from outside this checkout. Check ancestors as well, and
+# do it before the builder writes its output or the old dist is removed.
+python3 - <<'PY'
+from pathlib import Path
+import os, stat, subprocess
+root = Path.cwd()
+def validate(relative, required=True):
+    path = root
+    for component in Path(relative).parts:
+        path = path / component
+        if path.is_symlink():
+            raise SystemExit(f"build_release: refusing symlinked source path: {relative}")
+    if path.exists():
+        if not stat.S_ISREG(path.stat().st_mode):
+            raise SystemExit(f"build_release: source is not a regular file: {relative}")
+    elif required:
+        raise SystemExit(f"build_release: tracked source is missing: {relative}")
+for name in subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0"):
+    if name:
+        validate(os.fsdecode(name))
+validate("brahma/web/public/workbench/vendor/workbench.js", required=False)
+PY
+
+# Ship the browser's executable asset as well as its corresponding source.
+# Dependencies are installed explicitly by the caller/CI, never copied into dist.
+WB_BUNDLE="brahma/web/public/workbench/vendor/workbench.js"
+if [ -L "$WB_BUNDLE" ]; then
+  echo "build_release: refusing a symlinked workbench bundle" >&2
+  exit 2
+fi
+if ! node tools/build-workbench.mjs; then
+  echo "build_release: workbench build failed; install locked dependencies and run npm run build:workbench" >&2
+  exit 1
+fi
+if [ ! -s "$WB_BUNDLE" ] || [ -L "$WB_BUNDLE" ]; then
+  echo "build_release: build:workbench did not produce a regular nonempty bundle" >&2
+  exit 1
+fi
+
 NAME="alchemical-synthesizer"
 SLUG="${NAME}-${VERSION}"
 DIST="${ROOT}/dist"
@@ -27,37 +78,30 @@ STAGE="${DIST}/${SLUG}"
 
 echo "=== Building ${SLUG} ==="
 
-# The workbench bundle is a build artefact (gitignored) that the served page
-# loads as its entry module (/workbench/vendor/workbench.js). Refuse to pack a
-# release whose workbench page would 404 on its own script.
-WB_BUNDLE="brahma/web/public/workbench/vendor/workbench.js"
-if [ ! -s "${ROOT}/${WB_BUNDLE}" ] || [ -L "${ROOT}/${WB_BUNDLE}" ]; then
-  echo "ERROR: ${WB_BUNDLE} is missing — the packaged workbench page would 404." >&2
-  echo "Build it first: (cd brahma/web && npm install && npm run build:workbench)" >&2
-  exit 1
-fi
-
 rm -rf "$DIST"
 mkdir -p "$STAGE"
 
-# Package committed source, never arbitrary ignored or untracked working state
-# (in particular .runtime agent tokens, .env files, and local media). Ignore
-# host-global attributes: a host's `tests export-ignore` must not strip our tests.
-git -c core.attributesFile=/dev/null archive --format=tar HEAD | tar -xf - -C "$STAGE"
-# This is the sole generated runtime asset, built explicitly before packaging.
-mkdir -p "${STAGE}/$(dirname "$WB_BUNDLE")"
-cp "${ROOT}/${WB_BUNDLE}" "${STAGE}/${WB_BUNDLE}"
-
-# The pre-flight check above is only half the contract: prove the staged tree
-# actually carries the bundle, so a future exclude pattern cannot silently
-# strip it again.
-if [ ! -s "${STAGE}/${WB_BUNDLE}" ]; then
-  echo "ERROR: ${WB_BUNDLE} did not survive staging — check the tar exclude list." >&2
-  exit 1
-fi
+# Copy only versioned source paths. A normal working tree also contains runtime
+# credentials, account stores and media; an ever-growing exclusion list cannot
+# safely turn that whole directory into a release. Copy current tracked contents
+# so a local dirty build is possible and label that state in the manifest.
+git ls-files -z | tar \
+  --exclude='.env' --exclude='.env.*' \
+  --exclude='*/.runtime/*' \
+  --exclude='*/node_modules' \
+  --exclude='*/__pycache__' \
+  --exclude='*.pyc' \
+  --exclude='*/.pytest_cache' \
+  --exclude='*.tgz' \
+  --exclude='*.abletonextension' \
+  --null --files-from=- -cf - | tar -xf - -C "$STAGE"
+mkdir -p "$STAGE/brahma/web/public/workbench/vendor"
+cp brahma/web/public/workbench/vendor/workbench.js "$STAGE/brahma/web/public/workbench/vendor/"
 
 # Build manifest — records exactly what shipped, for reproducibility.
 COMMIT="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
+SOURCE_STATE="clean"
+if ! git diff --quiet || ! git diff --cached --quiet; then SOURCE_STATE="modified"; fi
 BUILT_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 SCD_COUNT="$(find "$STAGE/brahma/sc" -name '*.scd' 2>/dev/null | wc -l | tr -d ' ')"
 SC_CLASS_COUNT="$(find "$STAGE/brahma/sc" -name '*.sc' 2>/dev/null | wc -l | tr -d ' ')"
@@ -68,18 +112,20 @@ Alchemical Synthesizer (Brahma Meta-Rack) — Build Manifest
 ==========================================================
 version:        ${VERSION}
 commit:         ${COMMIT}
+source_state:   ${SOURCE_STATE} (tracked working-tree contents)
 built_at:       ${BUILT_AT}
 
 components:
   supercollider: ${SCD_COUNT} .scd files, ${SC_CLASS_COUNT} .sc classes (brahma/sc/)
   pure_data:     ${PD_COUNT} patches (brahma/pd/)
-  web:           Visual Cortex (brahma/web/)  -> npm install && npm start
+  web:           Visual Cortex + bundled workbench (brahma/web/) -> npm ci && npm start
   ableton:       Brahma Bridge extension (brahma/ableton/)
   tools:         audio validation + smoke (tools/)
 
 quick start:
-  1. SuperCollider: open brahma/sc/loader.scd, evaluate
-  2. Web:           cd brahma/web && npm install && npm start  (http://localhost:3000)
+  1. SuperCollider: install the .sc classes as documented, then evaluate brahma/sc/loader.scd
+  2. Web:           cd brahma/web && npm ci && npm start  (http://localhost:3000)
+                    Set BRAHMA_COMMIT_SHA=${COMMIT} for archive source-revision reporting.
   3. Pure Data:     open brahma/pd/main.pd
   4. Smoke test:    bash tools/smoke.sh
 
@@ -91,65 +137,69 @@ mkdir -p "$DIST"
 ( cd "$DIST" && tar -czf "${SLUG}.tar.gz" "${SLUG}" )
 ( cd "$DIST" && zip -qr "${SLUG}.zip" "${SLUG}" )
 
-# Checksums.
-( cd "$DIST" && sha256sum "${SLUG}.tar.gz" "${SLUG}.zip" > "SHA256SUMS.txt" )
-
-# SBOM — SPDX 2.3 inventory of top-level components and their provenance.
-( cd "$STAGE" && cat > "${SLUG}.spdx" <<SPDX
+# Top-level component inventory, not a dependency-complete SBOM or a conclusion
+# about the combined distribution's license.
+cat > "$DIST/${SLUG}.spdx" <<SPDX
 SPDXVersion: SPDX-2.3
 DataLicense: CC0-1.0
 SPDXID: SPDXRef-DOCUMENT
 DocumentName: alchemical-synthesizer
-DocumentNamespace: https://github.com/4444J99/alchemical-synthesizer/build/${VERSION}
+DocumentNamespace: https://github.com/4444J99/alchemical-synthesizer/build/${VERSION}/${COMMIT}
 Creator: Tool: build_release.sh
 Created: ${BUILT_AT}
+CreatorComment: <text>Top-level source inventory only; transitive dependencies are not enumerated.</text>
 
 PackageName: alchemical-synthesizer
 SPDXID: SPDXRef-PKG-brahma
 PackageVersion: ${VERSION}
-PackageDownloadLocation: https://github.com/4444J99/alchemical-synthesizer/releases/tag/${VERSION}
+PackageDownloadLocation: NOASSERTION
 FilesAnalyzed: false
-LicenseConcluded: MIT
-LicenseInfoInFile: MIT
-PackageSummary: Brahma Meta-Rack — modular alchemical synthesizer
-PackageDescription: SuperCollider DSP engine, Pure Data performance UI, Node.js/p5.js Visual Cortex, Forge production pipeline, AETHER living radio deploy unit.
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageLicenseComments: <text>The root LICENSE declares MIT. The included workbench has an explicit AGPL-3.0-or-later boundary; no combined-license conclusion is asserted.</text>
+PackageCopyrightText: NOASSERTION
+
+PackageName: brahma-workbench
+SPDXID: SPDXRef-PKG-workbench
+PackageVersion: ${VERSION}
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: AGPL-3.0-or-later
+PackageCopyrightText: NOASSERTION
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-PKG-brahma
+Relationship: SPDXRef-PKG-brahma CONTAINS SPDXRef-PKG-workbench
 SPDX
-)
 
-# Provenance attestation — signed-by-commit metadata for reproducibility.
-cat > "$STAGE/PROVENANCE.json" <<EOF
-{
-  "schema": "https://github.com/4444J99/alchemical-synthesizer/provenance/v1",
-  "version": "${VERSION}",
-  "commit": "${COMMIT}",
-  "built_at": "${BUILT_AT}",
-  "builder": "${USER:-unknown}",
-  "host": "$(hostname 2>/dev/null || echo unknown)",
-  "components": {
-    "supercollider_scd": ${SCD_COUNT},
-    "supercollider_sc": ${SC_CLASS_COUNT},
-    "pure_data_patches": ${PD_COUNT}
-  },
-  "artifacts": [
-    "${SLUG}.tar.gz",
-    "${SLUG}.zip"
-  ],
-  "checksums_file": "SHA256SUMS.txt",
-  "sbom": "${SLUG}.spdx"
+# Unsigned build metadata. JSON encoding avoids interpolating unsafe host fields;
+# archive hashes identify the actual bytes rather than implying a signature.
+python3 - "$DIST" "$SLUG" "$VERSION" "$COMMIT" "$SOURCE_STATE" "$BUILT_AT" \
+  "$SCD_COUNT" "$SC_CLASS_COUNT" "$PD_COUNT" <<'PY'
+import hashlib, json, pathlib, sys
+dist, slug, version, commit, state, built, scd, classes, pd = sys.argv[1:]
+dist = pathlib.Path(dist)
+record = {
+    "schema": "https://github.com/4444J99/alchemical-synthesizer/provenance/v1",
+    "version": version, "commit": commit, "source_state": state,
+    "built_at": built, "builder": "tools/build_release.sh",
+    "attestation": "unsigned build metadata",
+    "components": {"supercollider_scd": int(scd), "supercollider_sc": int(classes),
+                   "pure_data_patches": int(pd)},
+    "artifacts": {name: hashlib.sha256((dist / name).read_bytes()).hexdigest()
+                  for name in [slug + ".tar.gz", slug + ".zip"]},
+    "checksums_file": "SHA256SUMS.txt", "sbom": slug + ".spdx"
 }
-EOF
+(dist / "PROVENANCE.json").write_text(json.dumps(record, indent=2) + "\n")
+PY
 
-# Move SBOM + provenance into dist root alongside checksums.
-mv "$STAGE/${SLUG}.spdx" "$DIST/${SLUG}.spdx" 2>/dev/null || true
-mv "$STAGE/PROVENANCE.json" "$DIST/PROVENANCE.json" 2>/dev/null || true
+( cd "$DIST" && sha256sum "${SLUG}.tar.gz" "${SLUG}.zip" "${SLUG}.spdx" PROVENANCE.json > "SHA256SUMS.txt" )
 
 # Clean the staging directory; keep only the packaged artifacts.
 rm -rf "$STAGE"
 
 echo "=== Artifacts ==="
-( cd "$DIST" && ls -lh "${SLUG}.tar.gz" "${SLUG}.zip" SHA256SUMS.txt "${SLUG}.spdx" PROVENANCE.json )
+( cd "$DIST" && ls -lh "${SLUG}.tar.gz" "${SLUG}.zip" "${SLUG}.spdx" PROVENANCE.json SHA256SUMS.txt )
 echo
 cat "$DIST/SHA256SUMS.txt"
 echo "=== Done: dist/${SLUG}.{tar.gz,zip} ==="

@@ -18,8 +18,9 @@ const theme = EditorView.theme({
 });
 
 export function createEditor({ mount, tabs, onChange }) {
+  const buffers = tabs?.length ? tabs : [{ id: "pattern", label: "pattern", doc: "" }];
   const states = new Map();
-  const order = (tabs || [{ id: "pattern", label: "pattern", doc: "" }]).map((t) => t.id);
+  const order = buffers.map((t) => t.id);
   let active = order[0];
 
   function extensions() {
@@ -35,7 +36,7 @@ export function createEditor({ mount, tabs, onChange }) {
     ];
   }
 
-  for (const tab of tabs || []) {
+  for (const tab of buffers) {
     states.set(tab.id, EditorState.create({ doc: tab.doc || "", extensions: extensions() }));
   }
 
@@ -59,6 +60,7 @@ export function createEditor({ mount, tabs, onChange }) {
       return [...order];
     },
     getText(id = active) {
+      if (id === active) return view.state.doc.toString();
       return states.get(id) ? states.get(id).doc.toString() : "";
     },
     setText(id, text) {

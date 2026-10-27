@@ -1,5 +1,6 @@
 """Exercise the real packer with private-state fixtures, never real credentials."""
 import os
+import json
 from pathlib import Path
 import subprocess
 import tarfile
@@ -23,6 +24,9 @@ class ReleasePackagingTests(unittest.TestCase):
         self.run_cmd("git", "config", "user.name", "Packaging Test")
         self.run_cmd("git", "config", "user.email", "test@example.invalid")
         self.write("tools/build_release.sh", (ROOT / "tools/build_release.sh").read_text())
+        self.write("tools/build-workbench.mjs", (ROOT / "tools/build-workbench.mjs").read_text())
+        self.write("brahma/web/package.json", '{"name":"release-fixture"}')
+        self.write("brahma/web/public/workbench/src/main.js", 'console.log("rebuilt fixture");\n')
         self.write("brahma/sc/tests/example.scd", '"native test".postln;\n')
         self.write("brahma/sc/Example.sc", "Example {}\n")
         self.write("brahma/pd/example.pd", "#N canvas 0 0 100 100 10;\n")
@@ -30,6 +34,7 @@ class ReleasePackagingTests(unittest.TestCase):
         self.write(".gitignore", "dist/\n.runtime/\n.env\nvendor/\n")
         self.run_cmd("git", "add", ".")
         self.run_cmd("git", "commit", "-qm", "fixture")
+        (self.repo / "brahma/web/node_modules").symlink_to(ROOT / "brahma/web/node_modules", target_is_directory=True)
         # Host export-ignore must not silently remove the native test suite.
         attrs = Path(self.tmp.name) / "attributes"
         attrs.write_text("tests export-ignore\n")
@@ -64,17 +69,44 @@ class ReleasePackagingTests(unittest.TestCase):
             self.assertNotIn(".env", names)
             self.assertNotIn("untracked-private-note.txt", names)
 
-    def test_missing_or_empty_bundle_fails_before_touching_existing_dist(self):
+        metadata = json.loads((self.repo / "dist/PROVENANCE.json").read_text())
+        self.assertEqual(metadata["attestation"], "unsigned build metadata")
+        self.assertEqual(len(metadata["artifacts"]), 2)
+        self.assertIn("PackageLicenseDeclared: AGPL-3.0-or-later",
+                      (self.repo / "dist/alchemical-synthesizer-fixture.spdx").read_text())
+
+    def test_failed_or_empty_build_preserves_existing_dist(self):
         self.write("dist/preserved.txt", "previous build\n")
         for empty in (False, True):
             with self.subTest(empty=empty):
                 (self.repo / BUNDLE).unlink(missing_ok=True)
-                if empty:
-                    self.write(BUNDLE, "")
+                self.write("tools/build-workbench.mjs", "" if empty else "process.exit(19);\n")
                 result = self.run_cmd("bash", "tools/build_release.sh", "fixture", check=False)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn("build:workbench", result.stderr)
                 self.assertEqual((self.repo / "dist/preserved.txt").read_text(), "previous build\n")
+
+    def test_symlinked_source_or_ancestor_cannot_leak_outside_files(self):
+        outside = Path(self.tmp.name) / "outside"
+        outside.mkdir()
+        (outside / "Example.sc").write_text("SYNTHETIC_PRIVATE_SENTINEL")
+        self.write("dist/preserved.txt", "previous build\n")
+        tracked = self.repo / "brahma/sc/Example.sc"
+        tracked.unlink()
+        tracked.symlink_to(outside / "Example.sc")
+        result = self.run_cmd("bash", "tools/build_release.sh", "fixture", check=False)
+        self.assertNotEqual(result.returncode, 0, "tracked symlink was packaged")
+        self.assertIn("symlink", result.stderr)
+        self.assertEqual((self.repo / "dist/preserved.txt").read_text(), "previous build\n")
+        tracked.unlink()
+        tracked.write_text("Example {}\n")
+        parent = self.repo / "brahma/sc"
+        parent.rename(self.repo / "brahma/sc-saved")
+        parent.symlink_to(outside, target_is_directory=True)
+        result = self.run_cmd("bash", "tools/build_release.sh", "fixture", check=False)
+        self.assertNotEqual(result.returncode, 0, "symlinked ancestor was packaged")
+        self.assertIn("symlink", result.stderr)
+        self.assertEqual((self.repo / "dist/preserved.txt").read_text(), "previous build\n")
 
 
 if __name__ == "__main__":

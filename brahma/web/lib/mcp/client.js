@@ -137,7 +137,7 @@ function createAgentGateway({ agent, role = "agent", engine } = {}) {
     accept: (id) => humanOnly("accept", async () => unwrap(await agent.accept(id, { actor: "human" }))),
     reject: (id, reason) => humanOnly("reject", async () => unwrap(await agent.reject(id, { actor: "human", reason }))),
     run: (id) => humanOnly("run", async () => unwrap(await agent.run(id, { actor: "human" }))),
-    stop: () => humanOnly("stop", async () => unwrap(await agent.stop())),
+    stop: () => humanOnly("stop", async () => unwrap(await agent.stop({ actor: "human" }))),
     engine: () => (typeof engine === "function" ? engine() : { sandbox: null, runtimes: [] })
   };
 }

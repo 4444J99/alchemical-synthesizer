@@ -134,7 +134,7 @@ test("Dirt conformance: an unsupported address is ignored, not guessed at", () =
 
 // ------------------------------------------------------------- runtime availability
 
-test("runtimes: unavailable engines are reported as not_installed, never green", async () => {
+test("runtimes: unimplemented adapters remain unavailable regardless of installation", async () => {
   const body = await waitForSandbox();
 
   // /api/runtimes serves a map keyed by runtime id.
@@ -144,11 +144,10 @@ test("runtimes: unavailable engines are reported as not_installed, never green",
 
   for (const id of ["tidalcycles", "sonicpi"]) {
     const rt = body.runtimes[id];
-    if (rt.available) {
-      assert.equal(rt.reason, "installed", `${id} available must report installed`);
-    } else {
-      assert.equal(rt.reason, "not_installed", `${id} unavailable must report not_installed`);
-    }
+    assert.equal(rt.available, false, `${id} has no server execution adapter`);
+    assert.equal(rt.reason, "adapter_not_implemented");
+    assert.equal(typeof rt.installed, "boolean");
+    assert.equal(rt.discovery.status, rt.installed ? "detected" : "not_installed");
   }
 
   // sclang is the one runtime that may be available here. Either answer is fine, but

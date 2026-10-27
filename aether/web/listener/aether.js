@@ -18,8 +18,9 @@
 
     // Where the broadcast's live output is served. server.js maps /live -> the
     // broadcast out dir; a static host maps it to the uploaded segments dir.
-    var STREAM = "/live/stream.m3u8";
-    var TELEMETRY = "/live/telemetry.json";
+    var STREAM_BASE = "/live";
+    var STREAM = STREAM_BASE + "/stream.m3u8";
+    var TELEMETRY = STREAM_BASE + "/telemetry.json";
     var POLL_MS = 2000;
     var PHASES = ["readable", "cluster", "dispersal"];
 
@@ -119,7 +120,7 @@
             var chips = t.recent.slice(-8).map(function (r) {
                 return r.creature.split("-")[0] + "·" + r.phase[0];
             });
-            $("lineage").innerHTML = "<b>lineage</b> → " + chips.join(" · ")
+            $("lineage").textContent = "lineage → " + chips.join(" · ")
                 + "  (" + (t.count || t.recent.length) + " segments this life)";
         }
         lastSeg = n.segment;
@@ -177,13 +178,20 @@
             .then(function (r) { if (!r.ok) throw 0; return r.json(); })
             .then(function (d) {
                 var es = (d && d.entries) || [];
-                if (!es.length) { box.innerHTML = ""; return; }
+                if (!es.length) { box.replaceChildren(); return; }
                 var chain = es.slice(-10).map(function (e) {
                     var self = e.source === "ouroboros:self";
                     var src = self ? "∞ self" : (e.source || "").replace(/^https?:\/\//, "").slice(0, 28);
-                    return '<span class="' + (self ? "self" : "lk") + '">' + e.creature.split("-")[0] + " ⟵ " + src + "</span>";
+                    var span = document.createElement("span");
+                    span.className = self ? "self" : "lk";
+                    span.textContent = String(e.creature || "unknown").split("-")[0] + " ⟵ " + src;
+                    return span;
                 });
-                box.innerHTML = "<b>lineage</b> (" + es.length + " absorbed) — " + chain.join(" · ");
+                box.replaceChildren(document.createTextNode("lineage (" + es.length + " absorbed) — "));
+                chain.forEach(function (span, i) {
+                    if (i) box.appendChild(document.createTextNode(" · "));
+                    box.appendChild(span);
+                });
             })
             .catch(function () { /* no lineage yet */ });
     }

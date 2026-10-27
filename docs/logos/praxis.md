@@ -1,80 +1,63 @@
-# Praxis — The Remediation Plan
+# Praxis — The Next Acceptance Milestones
 
-> *The attack vectors for evolution. How the distance between [pragma.md](pragma.md)
-> and [telos.md](telos.md) is closed, in order.*
+The current [Pragma](pragma.md) establishes sample-derived measurements and more
+substantive regression gates. The next advance is to connect those building blocks
+into one trustworthy musical workflow. Expanding the module catalog first would
+increase the surface that remains unverified.
 
-The single fact that governs everything below: **the instrument cannot honestly
-absorb until it can honestly measure.** The Analysis-Extraction (AE) stage and
-the `~METRIC_COLLECTOR` placeholders are the load-bearing gap. Every other
-ambition is downstream of fixing them.
+## 1. Establish the release baseline
 
-## Vector 1 — Make Measurement Real (critical)
+- Land the reviewed hardening branch only after hosted gates are observed passing.
+- Require full web/Foundry regressions, real-browser acceptance, native DSP and
+  render-wrapper checks, and release isolation.
+- Build and launch the actual distribution in a clean environment; publish archives
+  and matching checksums only after that test.
+- Make optional MIDI initialization nonfatal and verify the full loader's routing,
+  responder installation, governor ordering, shutdown and re-entry.
+- Finish AETHER's real container build and bounded restart/shutdown checks.
 
-Replace the placeholder metric dimensions with genuine DSP.
+Acceptance: an identified revision, reproducible commands, downloadable artifacts,
+and an honest list of platform prerequisites. A minimal green check is insufficient.
 
-- Integrate **FluidBufSpectralShape** (Fluid Corpus Manipulation toolkit) to
-  compute real **Coherence** (spectral stability) and **Entropy** (Shannon
-  entropy of the spectral distribution).
-- Implement **Fidelity** as a true cross-correlation between AE input and TE
-  output, so absorption quality is observed rather than asserted.
-- Promote these from `~METRIC_COLLECTOR` Event placeholders to validated
-  measurements feeding `AdamKadmon.validateTraitMap` (strictness threshold 0.85).
+## 2. Complete one measured audio-to-artifact workflow
 
-*Unblocks:* honest trait maps, meaningful A/B test bench results, trustworthy
-organism telemetry on the Web Cortex.
+Use a documented donor recording and one transformation path:
 
-## Vector 2 — Deepen Trait Extraction (high)
+1. Capture input and output with channel, rate, time window and alignment recorded.
+2. Compute the documented metrics and validate the appropriate trait contract.
+3. Feed measured values and their provenance to the trait view; preserve unavailable
+   state if any capture or analysis step fails.
+4. Render a validated WAV, record completion and ownership, and make it playable.
+5. Listen to the donor/output pair and record a human acceptance decision separately
+   from numerical validity.
 
-With real spectral analysis in hand, expand the AE stage from shallow
-descriptors to the full four-key trait schema —
-`[spectral_profile, temporal_topology, modulation_graph, performance_response]`
-— so that what an organism "wears" is structurally faithful to its donor, not a
-caricature.
+Connect Foundry's render action only after completion and artifact ingestion exist.
+Repair FSAP donor handling and the A/B benchmark as part of this vertical workflow.
+FluidBuf can expand analysis later; it is not a prerequisite for the implemented
+core FFT/correlation measurements. `strictness` is contract metadata, not a measured
+quality threshold.
 
-## Vector 3 — Close the Roadmap Phase-1 Items (high)
+Acceptance: a real donor → transformation → measured result → playable artifact,
+with failure, timeout, cancellation and stale-result paths demonstrated.
 
-From `ROADMAP.md`, still open:
+## 3. Make AETHER independently operable
 
-- [ ] Multi-channel specimen recording.
-- [ ] Expanded Trait Mapping (FluidBuf integration) — folds into Vector 1/2.
+- Specify the donor/tone baseline and optional Brahma/Forge NRT dependency.
+- Validate a standalone checkout, Docker context, listener and bounded broadcast.
+- Add an isolated fetch service before reopening public network submissions.
+- Establish the R2 write toolchain, credential injection, deployment and rollback.
+- Run a sustained stream trial with restart, segment continuity and provenance checks.
 
-## Vector 4 — Propagation Surfaces (medium)
+Acceptance: an independently runnable distribution with observed operational
+behavior. Source export alone does not satisfy it.
 
-`ROADMAP.md` Phase 2:
+## Subsequent capability work
 
-- Distributed OSC backplane (extend `BridgeRouter` beyond localhost).
-- **VCV Rack integration layer** — the most direct path to external adoption,
-  exposing Brahma organisms as patchable modules in an existing ecosystem.
+Real Tidal/Sonic Pi adapters need a documented bridge and round-trip acceptance.
+Commerce needs transactional storage, subscription/refund/dispute reconciliation
+and payout delivery before production use. Broader trait dimensions, distributed
+OSC, VCV integration and new visual substrates should follow measured workflow
+and listening evidence.
 
-## Vector 5 — Ship a Launchable Build (medium)
-
-`pragma.md` notes there is no one-command launch. Provide a scripted boot
-(symlink installer + layered start) so the stranger test — *can someone who is
-not the author run this?* — passes without tribal knowledge.
-
-## Vector 6 — Surface the Domains (this layer)
-
-Manifest the product beyond its source tree:
-
-- **Academic surface** ([../surfaces/academic.md](../surfaces/academic.md)) —
-  position the work as a research contribution on adaptive/parasitic synthesis.
-- **Market surface** ([../surfaces/market.md](../surfaces/market.md)) —
-  position it for instrument-makers, modular performers, and creative coders.
-- **Content/Community pillars** — `ecosystem/pillar-dna/` lists both at
-  *conception*; a docs site and process reference are the next concrete arms.
-
-## Sequencing
-
-```
-Vector 1 ──▶ Vector 2 ──▶ Vector 3
-   │                          │
-   └────────────▶ Vector 4 ◀──┘
-                     │
-            Vector 5 ─┴─ Vector 6 (parallel, doc-only)
-```
-
-Vectors 5 and 6 are doc/packaging work and can run in parallel with the DSP
-chain. Everything sensory waits on Vector 1.
-
-> *"If it is not on the Roadmap, it does not exist."* — these vectors are the
-> Roadmap made explicit.
+Keep no more than two implementation items active. For each milestone, define the
+failure examples and acceptance artifact before marking a roadmap item complete.

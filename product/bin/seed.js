@@ -24,6 +24,7 @@ function ensureUser(email, password, plan) {
 }
 
 function main() {
+  if (process.env.NODE_ENV === "production") throw new Error("Demo accounts must not be seeded in production");
   console.log("Seeding Brahma Foundry…");
 
   ensureUser("demo@brahma.studio", "transmute-me", "creator");
@@ -33,11 +34,12 @@ function main() {
   const modules = ["Azoth", "Nebula", "Relinquished", "Buchlaeus", "Quintessence"];
   let i = 0;
   for (const m of modules) {
-    const spc = engine.renderSpecimen({ module: m, title: `${m} — demo specimen`, creator: "demo@brahma.studio" });
-    if (i++ % 2 === 0) {
+    const spc = engine.renderSpecimen({ module: m, title: `${m} — demo specimen`, creator: "demo@brahma.studio" }, { ownerEmail: "demo@brahma.studio" });
+    if (!spc.simulated && i++ % 2 === 0) {
       marketplace.listSpecimen({ specimenId: spc.id, ownerEmail: "demo@brahma.studio", ownerPlan: "creator", priceCents: 300 + i * 100 });
     }
   }
+  console.log("  Simulated specimens remain unlisted until real audio artifacts exist.");
 
   // A couple of waitlist entries.
   const wl = collection("waitlist");

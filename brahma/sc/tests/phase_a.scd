@@ -15,13 +15,13 @@ try {
     check.value(~metric_collector.measureCoherence(source) > 0.95, "steady spectral coherence");
     check.value(~metric_collector.measureEntropy(noise) > (~metric_collector.measureEntropy(source) + 2), "noise has higher spectral entropy than tone");
     check.value(~metric_collector.measureFidelity(source, source) > 0.999, "identical signal fidelity");
-    check.value(~metric_collector.measureFidelity(source, source.neg) < 0.01, "inverted signal is not faithful reconstruction");
+    check.value(~metric_collector.measureFidelity(source, source.neg) > 0.999, "absolute Pearson fidelity is explicitly polarity invariant");
     check.value(~metric_collector.measureCoherence(source) > ~metric_collector.measureCoherence(changed), "changing spectrum lowers coherence");
     stereo = source.collect { |v| [v, v] }.flat;
     mixed = source.collect { |v, i| [v, noise[i]] }.flat;
     check.value(BrahmaMetrics.fidelity(stereo, mixed, 2).inclusivelyBetween(0.45, 0.55), "multichannel fidelity averages channel correlations");
     check.value(try { BrahmaMetrics.entropy([0.0/0.0]); false } { true }, "nonfinite samples are rejected");
-    check.value(~metric_collector.measureEntropy([]) == 0, "empty signal entropy");
+    check.value(~metric_collector.measureEntropy([]).isNil, "empty signal entropy is unavailable");
     traits = (spectral_profile: (centroid: 0.2), temporal_topology: (attack: 0.1), modulation_graph: (depth: 0.2), performance_response: (velocity: 0.8));
     check.value(~metric_collector.attachMeasurements(traits, 0.9, 2.0, 0.95)[\provenance] == \measured, "measurement provenance is explicit");
     check.value(AdamKadmon.validateMeasurement(~metric_collector.attachMeasurements(traits, 0.9, 2.0, 0.2)).not, "measured poor reconstruction fails confidence gate");

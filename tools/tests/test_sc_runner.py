@@ -19,6 +19,20 @@ class RunnerBounds(unittest.TestCase):
             self.assertIn("output limit", result.stderr)
             self.assertLess(len(result.stdout), 66000)
 
+    def test_deadline_covers_process_that_closes_stdout_and_keeps_running(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fake = pathlib.Path(directory) / "fake-sclang"
+            fake.write_text("#!/usr/bin/env python3\nimport os, time\nos.close(1)\nos.close(2)\ntime.sleep(30)\n")
+            fake.chmod(0o700)
+            script = pathlib.Path(directory) / "test.scd"
+            script.write_text("")
+            runner = pathlib.Path(__file__).resolve().parents[1] / "test-supercollider.py"
+            result = subprocess.run([sys.executable, str(runner), str(script), "--sclang", str(fake),
+                                     "--core-only", "--timeout", "0.2"],
+                                    capture_output=True, text=True, timeout=5)
+            self.assertEqual(result.returncode, 124, result.stdout + result.stderr)
+            self.assertIn("deadline", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

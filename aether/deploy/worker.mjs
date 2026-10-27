@@ -25,10 +25,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // 1. Durable segment path: serve /live/* from R2 if the object exists.
-    if (url.pathname.startsWith("/live/") && env.SEGMENTS) {
-      const key = url.pathname.slice("/live/".length);
-      if (key) {
+    // Pending intake, consumed records, and generator state stay private even
+    // if an older sync copied them into R2. Match the local host's public set.
+    if (url.pathname.startsWith("/live/")) {
+      let key;
+      try { key = decodeURIComponent(url.pathname.slice("/live/".length)); }
+      catch { return new Response("not found", { status: 404 }); }
+      if (!/^(?:stream\.m3u8|seg_\d+\.ts|telemetry\.json|lineage\.json)$/.test(key)) {
+        return new Response("not found", { status: 404 });
+      }
+      if (env.SEGMENTS) {
         const obj = await env.SEGMENTS.get(key);
         if (obj) {
           const headers = new Headers();

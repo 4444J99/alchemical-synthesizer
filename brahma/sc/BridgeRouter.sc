@@ -140,6 +140,6 @@ BridgeRouter {
     }
     
     *issueCapabilityToken { |entityId, capability|
-        ^[entityId, capability, Date.getDate.rawSeconds].asCompileString.hash;
+        ^Error("BridgeRouter capability signing is unavailable").throw;
     }
 }

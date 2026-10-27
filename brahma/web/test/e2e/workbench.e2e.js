@@ -24,13 +24,14 @@ const path = require("node:path");
 const osc = require("osc");
 
 const CHROME_CANDIDATES = [
+  process.env.BRAHMA_CHROME_PATH,
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "/Applications/Chromium.app/Contents/MacOS/Chromium",
   "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
   "/usr/bin/google-chrome",
   "/usr/bin/chromium",
   "/usr/bin/chromium-browser"
-];
+].filter(Boolean);
 
 function findChrome() {
   return CHROME_CANDIDATES.find((p) => {
@@ -93,6 +94,7 @@ describe("workbench E2E", () => {
   before(async () => {
     const chrome = findChrome();
     if (!chrome) {
+      if (process.env.BRAHMA_REQUIRE_BROWSER === "1") throw new Error("Chrome is required; set BRAHMA_CHROME_PATH to an installed test browser");
       ctx.skipReason = "no Chrome/Chromium binary on this host — browser E2E not run (this is a skip, not a pass)";
       return;
     }
@@ -132,7 +134,8 @@ describe("workbench E2E", () => {
       ctx.browser = await puppeteer.launch({
         executablePath: chrome,
         headless: true,
-        args: ["--no-first-run", "--no-default-browser-check", "--disable-dev-shm-usage"]
+        args: ["--no-first-run", "--no-default-browser-check", "--disable-dev-shm-usage",
+          ...(process.env.BRAHMA_BROWSER_NO_SANDBOX === "1" ? ["--no-sandbox"] : [])]
       });
 
       ctx.page = await ctx.browser.newPage();
@@ -263,7 +266,7 @@ describe("workbench E2E", () => {
     }
 
     assert.equal(play.args[0].value, "prima_materia", "an unknown sound name falls back to the default engine");
-    assert.equal(play.args[1].value, "pattern", "the active tab id becomes the instance");
+    assert.match(play.args[1].value, /^pattern\.[a-f0-9]+\.\d+$/, "each run has its own stoppable instance");
     assert.equal(typeof play.args[2].value, "number", "note is numeric");
     assert.ok(play.args[2].value >= 0 && play.args[2].value <= 127, "note is a MIDI number");
     assert.ok(play.args[3].value > 0 && play.args[3].value <= 1, "velocity is normalised");
@@ -286,5 +289,125 @@ describe("workbench E2E", () => {
 
     const log = await ctx.page.evaluate(() => document.querySelector("#log")?.textContent || "");
     assert.match(log, /panic/, "the UI must report the panic, not fail silently");
+  });
+
+  async function replaceActiveText(text) {
+    await ctx.page.focus('.cm-content');
+    await ctx.page.keyboard.down('Control');
+    await ctx.page.keyboard.press('KeyA');
+    await ctx.page.keyboard.up('Control');
+    await ctx.page.keyboard.sendCharacter(text);
+  }
+
+  it('edited active buffer is the source that actually plays', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    await replaceActiveText('note("a4").gain(0.1)');
+    const played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play', 3000, 'edited note');
+    await ctx.page.click('#run');
+    try {
+      const packet = await played;
+      assert.equal(packet.args[2].value, 69, 'Run must use the current visible document');
+    } finally { await ctx.page.click('#panic'); }
+  });
+
+  it('Stop releases the same instance as the scheduled events', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    const played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play', 3000, 'started note');
+    await ctx.page.click('#run');
+    const packet = await played;
+    const stopped = waitForOsc(ctx.sink, (f) => f.address === '/brahma/engine/freeAll', 1500, 'instance stop');
+    await ctx.page.click('#stop');
+    try { assert.equal((await stopped).args[0].value, packet.args[1].value); }
+    finally { await ctx.page.click('#panic'); }
+  });
+
+  it('editing a playing buffer preserves Stop authority', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    const played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play', 3000, 'started note');
+    await ctx.page.click('#run');
+    const packet = await played;
+    await replaceActiveText('note("b4").gain(0.1)');
+    const stopped = waitForOsc(ctx.sink, (f) => f.address === '/brahma/engine/freeAll', 1500, 'stop after edit');
+    await ctx.page.click('#stop');
+    try { assert.equal((await stopped).args[0].value, packet.args[1].value); }
+    finally { await ctx.page.click('#panic'); }
+  });
+
+  it('Run applies an edited draft and leaves one registered performance', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    await replaceActiveText('note("c4").gain(0.1)');
+    let played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play', 3000, 'first draft');
+    await ctx.page.click('#run');
+    const first = await played;
+    assert.equal(first.args[2].value, 60);
+    await replaceActiveText('note("d4").gain(0.1)');
+    const stopped = waitForOsc(ctx.sink, (f) => f.address === '/brahma/engine/freeAll', 1500, 'replaced performance');
+    played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play' && f.args[2].value === 62, 3000, 'replacement draft');
+    await ctx.page.click('#run');
+    try {
+      assert.equal((await stopped).args[0].value, first.args[1].value);
+      const replacement = await played;
+      await ctx.page.evaluate(() => { window.__brahmaFrames = []; });
+      await ctx.page.click('#status-btn');
+      await ctx.page.waitForFunction(() => window.__brahmaFrames.some((raw) => JSON.parse(raw).type === 'status'));
+      const status = (await ctx.frames()).map(JSON.parse).find((f) => f.type === 'status');
+      assert.equal(status.live.count, 1);
+      assert.equal(status.live.patterns[0].instance, replacement.args[1].value);
+      assert.notEqual(replacement.args[1].value, first.args[1].value);
+      assert.equal((await ctx.frames()).map(JSON.parse).some((f) => f.code === 'duplicate_id'), false);
+    } finally { await ctx.page.click('#panic'); }
+  });
+
+  async function liveStatus() {
+    await ctx.page.evaluate(() => { window.__brahmaFrames = []; });
+    await ctx.page.click('#status-btn');
+    await ctx.page.waitForFunction(() => window.__brahmaFrames.some((raw) => JSON.parse(raw).type === 'status'));
+    return (await ctx.frames()).map(JSON.parse).find((f) => f.type === 'status').live;
+  }
+
+  it('rapid Run–Stop–Run retains authority over the newest performance', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    await replaceActiveText('note("e4").gain(0.1)');
+    const played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play', 3000, 'rapid replacement');
+    await ctx.page.evaluate(() => {
+      document.querySelector('#run').click();
+      document.querySelector('#stop').click();
+      document.querySelector('#run').click();
+    });
+    try {
+      await played;
+      assert.match(await ctx.page.$eval('#running', (e) => e.textContent), /running:/);
+      assert.equal((await liveStatus()).count, 1);
+      await ctx.page.click('#stop');
+      assert.equal((await liveStatus()).count, 0, 'Stop must remove the replacement registration');
+    } finally { await ctx.page.click('#panic'); }
+  });
+
+  it('Stop abandons a pending evaluation and late completion cannot replace or stop its successor', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    await replaceActiveText('await new Promise((resolve) => { globalThis.__releaseOldPattern = resolve; }); setcps(10); note("c4").gain(0.1)');
+    await ctx.page.click('#run');
+    await ctx.page.waitForFunction(() => typeof globalThis.__releaseOldPattern === 'function');
+    await ctx.page.click('#stop');
+    await replaceActiveText('note("d4").gain(0.1)');
+    let played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play' && f.args[2].value === 62, 3000, 'new run after pending evaluation');
+    played.catch(() => {});
+    await ctx.page.click('#run');
+    try {
+      const current = await played;
+      const firstAt = Date.now();
+      await ctx.page.evaluate(() => globalThis.__releaseOldPattern());
+      played = waitForOsc(ctx.sink, (f) => f.address === '/brahma/live/play', 3000, 'successor after old completion');
+      const next = await played;
+      assert.ok(Date.now() - firstAt > 1000, 'stale setcps must not change the replacement tempo');
+      assert.equal(next.args[2].value, 62, 'stale source must not become the current scheduler pattern');
+      assert.equal(next.args[1].value, current.args[1].value);
+      assert.match(await ctx.page.$eval('#running', (e) => e.textContent), /running:/);
+      await ctx.page.click('#stop');
+      assert.equal((await liveStatus()).count, 0);
+    } finally {
+      await ctx.page.evaluate(() => globalThis.__releaseOldPattern?.());
+      await ctx.page.click('#panic');
+    }
   });
 });

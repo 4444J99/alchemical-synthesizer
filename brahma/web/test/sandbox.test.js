@@ -150,20 +150,26 @@ test("Suite 5: Runtime Status Gating Matrix", async (t) => {
     assert.equal(status.strudel.execution, "browser");
   });
 
-  await t.test("Tidal and Sonic Pi report not_installed when their binaries are absent", () => {
+  await t.test("Tidal and Sonic Pi distinguish missing installations from missing adapters", () => {
     const status = runtimes.getRuntimeStatus({ role: "human", sandboxStatus: { ok: true }, tidalBinary: null, sonicPiApp: null });
-    assert.equal(status.tidalcycles.available, false);
-    assert.equal(status.tidalcycles.reason, "not_installed");
-    assert.equal(status.sonicpi.available, false);
-    assert.equal(status.sonicpi.reason, "not_installed");
+    for (const name of ["tidalcycles", "sonicpi"]) {
+      assert.equal(status[name].available, false);
+      assert.equal(status[name].reason, "adapter_not_implemented");
+      assert.equal(status[name].installed, false);
+      assert.equal(status[name].discovery.status, "not_installed");
+    }
   });
 
-  await t.test("Tidal and Sonic Pi report installed when their binaries are present", () => {
+  await t.test("Tidal and Sonic Pi installations do not enable unimplemented execution adapters", () => {
     const status = runtimes.getRuntimeStatus({ role: "human", sandboxStatus: { ok: true }, tidalBinary: "/opt/homebrew/bin/ghci", sonicPiApp: "/Applications/Sonic Pi.app" });
-    assert.equal(status.tidalcycles.available, true);
-    assert.equal(status.tidalcycles.reason, "installed");
-    assert.equal(status.sonicpi.available, true);
-    assert.equal(status.sonicpi.reason, "installed");
+    for (const name of ["tidalcycles", "sonicpi"]) {
+      assert.equal(status[name].available, false);
+      assert.equal(status[name].reason, "adapter_not_implemented");
+      assert.equal(status[name].installed, true);
+      assert.equal(status[name].discovery.status, "detected");
+    }
+    assert.equal(status.tidalcycles.binary, "/opt/homebrew/bin/ghci");
+    assert.equal(status.sonicpi.app, "/Applications/Sonic Pi.app");
   });
 
   await t.test("sclang is disabled if BRAHMA_ALLOW_SCLANG is not 1", () => {
@@ -241,6 +247,16 @@ test("Suite 6: Sclang Runtime Spec and Execution Guard", async (t) => {
     } finally {
       if (ownsPort) occupied.close();
     }
+  });
+
+  await t.test("findSclang discovers the standard Linux binary and rejects directories", (t) => {
+    let isFile = true;
+    t.mock.method(fs, "existsSync", (file) => file === "/usr/bin/sclang");
+    t.mock.method(fs, "statSync", () => ({ isFile: () => isFile }));
+    t.mock.method(fs, "realpathSync", (file) => file);
+    assert.equal(runtimes.findSclang(), "/usr/bin/sclang");
+    isFile = false;
+    assert.equal(runtimes.findSclang(), null);
   });
 
   await t.test("sclangRuntimeSpec builds readRoots and execs for valid path", () => {

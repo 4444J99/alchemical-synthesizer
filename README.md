@@ -10,9 +10,14 @@
 > **Three organs live in this repo — see [`ORGANS.md`](ORGANS.md) for the boundary map.**
 > **Brahma** — the audio synthesizer engine + Visual Cortex (this README), the shared substrate;
 > **[Forge](forge/ORGAN.md)** — the audio → track + visual production pipeline; and
-> **[AETHER](aether/deploy/ORGAN.md)** — the 24/7 living-radio streaming service. They share the
+> **[AETHER](aether/README.md)** — the living-radio streaming service. They share the
 > Brahma engine but each owns its own lane (`feat(brahma|forge|aether):`); AETHER's boundary and
-> gated standalone-extraction recipe are declared in [`aether/deploy/`](aether/deploy/README.md).
+> current source layout and deployment requirements are declared in [`aether/`](aether/README.md).
+
+**Verification status:** See the [2026-10-24–26 review](docs/reviews/2026-10-24-verification-hardening.md)
+for tested behavior, reproduced defects, and the next acceptance milestones. Focused
+native DSP, browser, API, broadcast, and packaging checks are distinct from full-rack
+hardware operation, listening acceptance, and a deployed commercial service.
 
 ---
 
@@ -29,7 +34,7 @@ Modelled after **Rogue (X-Men)** and **The Thing (John Carpenter)**, this instru
 Every module in the Brahma Meta-Rack adheres to a strict biological signal path:
 
 ```mermaid
-graph LR
+graph TD
     IA[Assimilation] --> EG[Gating]
     EG --> BC[Binding Core]
     BC --> AE[Extraction]
@@ -53,22 +58,13 @@ graph LR
 ### Prerequisites
 - **SuperCollider** (v3.13+)
 - **Pure Data** (Vanilla v0.54+) — optional, for performance UI and visual patching
-- **Node.js** (v18+) — optional, for Visual Cortex web visualization
+- **Node.js** (v24+) — for Visual Cortex, the workbench, and Foundry
+- **Python** (v3.11+) and **ffmpeg** — for validation, rendering checks, and AETHER
 
 ### Installation
 
-**From a release** (recommended) — each tagged release ships a built bundle
-(`.tar.gz` / `.zip`) with checksums, attached automatically by the release
-pipeline:
-```bash
-# Download alchemical-synthesizer-<version>.tar.gz from the Releases page, then:
-tar -xzf alchemical-synthesizer-*.tar.gz
-cd alchemical-synthesizer-*/
-sha256sum -c SHA256SUMS.txt      # optional: verify integrity
-cat BUILD_MANIFEST.txt           # version, commit, component counts
-```
-
-**From source:**
+**From source:** The existing `v1.0.0` release has no attached binary archives as
+of this review. Build locally until a verified release bundle is published.
 ```bash
 git clone https://github.com/4444J99/alchemical-synthesizer.git
 cd alchemical-synthesizer
@@ -76,48 +72,61 @@ cd alchemical-synthesizer
 
 ### Smoke Test (verify it runs)
 
-One command checks that the rack is installable and runnable — no full
+One command checks the repository's basic integration — no full
 SuperCollider / Pd / Live setup required (it validates structure, the Ableton
 extension, the Visual Cortex web endpoint, and the audio validator):
 ```bash
 make smoke          # or: bash tools/smoke.sh
 ```
-This is the same "shipped-test" run in CI on every push. To build the
+This is the smoke subset of CI. It does not establish full audio acceptance.
+Native tests and prerequisites are in [`tools/dsp/README.md`](tools/dsp/README.md);
+CI also runs API, browser, render-wrapper, and packaging regressions. To build the
 distributable artifacts locally:
 ```bash
 make dist           # -> dist/alchemical-synthesizer-<version>.{tar.gz,zip} + SHA256SUMS.txt
-```
-Run smoke first to build the workbench bundle. Packaging includes committed `HEAD`
-plus that bundle; local edits, credentials, and runtime state are excluded.
-Verify an archive by unpacking it, installing its locked dependencies, and checking
-the served page and bundle:
-```bash
+(cd dist && sha256sum -c SHA256SUMS.txt)
 python3 tools/check-release-artifact.py dist/*.tar.gz
 python3 tools/check-release-artifact.py dist/*.zip --structure-only
 ```
+Install locked web dependencies before packaging (`npm --prefix brahma/web ci`).
+The packer rebuilds the browser bundle, includes tracked working-tree source,
+excludes local runtime state, and rejects symlinked sources. A modified checkout
+is labelled `source_state: modified`; a distributable release should come from a
+clean reviewed commit. The accompanying provenance is unsigned build metadata;
+the SPDX file is a top-level component inventory, not a complete dependency SBOM.
 
 ### SuperCollider Class Files
-The six `.sc` class files must be installed for the SC class compiler. From the repo root, the recommended path is:
-
+All nine recursive `.sc` classes must be visible to the SC class compiler:
 ```bash
 make install
+# Or choose the directory reported by Platform.userExtensionDir in the SC IDE:
+bash tools/install-brahma.sh --extensions-dir "/absolute/path/to/Extensions"
 ```
-
-`make install` runs [`tools/install-brahma.sh`](tools/install-brahma.sh), which symlinks `AdamKadmon`, `BridgeRouter`, `FSAP`, `BrahmaScale`, `BrahmaMPE`, and `BrahmaModBus` into the SuperCollider Extensions directory and recompiles the class library. You can run the script directly:
-
-```bash
-bash tools/install-brahma.sh
-```
-
-Manual fallback: symlink those six files from `brahma/sc/` into `Platform.userExtensionDir` (macOS `~/Library/Application Support/SuperCollider/Extensions/`, Linux `~/.local/share/SuperCollider/Extensions/`), then recompile in the SC IDE (Cmd+Shift+L).
+The installer links the complete source directory and checks compilation with a
+bounded native script. It migrates only old individual links pointing to the same
+source and refuses to replace foreign class files. `--no-recompile` performs the
+link step only; recompile an already-open SC IDE with Cmd+Shift+L. FluCoMa is an
+optional, separately installed analysis backend; see [its setup guide](docs/setup/fluid-ugens.md).
 
 ### Running the Ritual
+
+For a supervised web-only launch, use:
+
+```bash
+bash tools/start-brahma.sh --no-sc --no-pd
+```
+
+Open the human launch URL printed in the terminal to enable Run, Stop and Panic.
+The launcher builds the workbench, checks its own server's readiness, and stops
+its child process groups on Ctrl-C. `make start` also requests SC and Pd when
+installed; their physical-device and full-rack acceptance remains separate.
+
 1.  Launch **SuperCollider** and evaluate `brahma/sc/loader.scd` (Cmd+Return).
     - Expected: `--- BRAHMA SYSTEM ONLINE ---`
     - A demo patch auto-plays: Prima Materia + MOIRAI melody + Euclidean rhythm + Lorenz modulation + reverb
 2.  Launch **Visual Cortex** (optional):
     ```bash
-    cd brahma/web && npm install && npm start
+    cd brahma/web && npm ci && npm run build:workbench && npm start
     ```
     - `http://localhost:3000` — **Etz Chaim**: the recursive Tree of Life, and a *universal* synthesizer. Organisms emanate down the Lightning Flash into the ten Sephirot; an Ouroboros coils the cosmos and every illumined vessel contains the Tree again (fractal). **Retune it across four substrates** — `1` Sound · `2` Idea · `3` Product · `4` Cosmos (`T` to cycle) — the one engine re-expressing timbre, thought, value, and worlds through the same vessels (see [`docs/the-universal-synthesizer.md`](docs/the-universal-synthesizer.md)). Self-emanates a demo stream when SuperCollider is silent. Keys: `SPACE` flash · `+/-` recursion depth · `O` ouroboros · `M` multiverse · `D` demo · `H` help.
     - `http://localhost:3000/cortex` — Canvas web patching UI (module browser, drag-drop, cable routing)
@@ -127,6 +136,10 @@ Manual fallback: symlink those six files from `brahma/sc/` into `Platform.userEx
 3.  Launch **Pure Data** (optional):
     - `brahma/pd/main.pd` — master control surface with OSC bridge
     - `brahma/pd/canvas/brahma_canvas.pd` — Pd-native visual patching via GOP abstractions
+
+The full loader still requires its platform dependencies. On a headless Linux
+host without an ALSA MIDI sequencer, the current MIDI initialization blocks full
+boot. Passing the isolated dummy-audio tests does not resolve that requirement.
 
 ---
 
@@ -287,20 +300,21 @@ The **Web Canvas** provides a Max/MSP-style module browser with drag-drop patchi
 ## Productization — The Foundry
 
 The [`product/`](product/) directory is the commercial surface of the engine: a
-single Node service that turns Brahma into a runnable, sellable, agent-drivable
-product. It runs with or without a live SuperCollider engine (cloud renders are
-flagged `simulated`).
+single Node service exposing accounts, metering, adapters, and specimen records.
+`render_specimen` currently creates a simulated record with no audio URL, even
+when engine telemetry is observed. Real render completion and artifact ingestion
+remain a required integration milestone.
 
 ```bash
-cd product && npm install && npm run seed && npm start
+cd product && npm ci && npm start
 # → http://localhost:4000/pricing   (dashboard at /dashboard)
-npm run smoke   # end-to-end test across every surface
+npm run smoke   # local adapter and artifact-serving checks; explicit test billing
 ```
 
 | Surface | Route | Purpose |
 | :--- | :--- | :--- |
 | **Dashboard UI** | `/dashboard` | Telemetry, render, catalog, marketplace, API keys, usage |
-| **Pricing / waitlist** | `/pricing` | Plans + Stripe(-stub) checkout |
+| **Pricing / waitlist** | `/pricing` | Plans + configured Stripe checkout or explicit local demo billing |
 | **REST API** | `/api/v1` | Metered, key-gated, OpenAPI |
 | **MCP server** | `/mcp` | JSON-RPC tools for any MCP agent |
 | **ACP (both)** | `/acp/runs` · `/acp/jsonrpc` | Agent Communication + Agent Client protocols |
@@ -376,7 +390,9 @@ Contributions are welcome! Please see [CONTRIBUTING.md](.github/CONTRIBUTING.md)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The repository defaults to [MIT](LICENSE). The browser workbench and its build
+tool have an explicit [AGPL-3.0-or-later boundary](brahma/web/public/workbench/README.md).
+Dependency notices are retained in its generated bundle.
 
 ---
 

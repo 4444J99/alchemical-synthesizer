@@ -14,6 +14,13 @@ The **Alchemical Synthesizer**, also known as the **Brahma Meta-Rack**, is a mod
 - **Pure Data (Pd):** Performance interface, virtual patching, and macro-control.
 - **OSC:** Bidirectional communication between the UI (Pd) and the Engine (SC).
 - **Python:** Automated specimen validation and dataset management.
+- **Node.js 24:** Visual Cortex, workbench, Foundry and browser tests.
+
+Current ownership: `brahma/` is the engine/interface lane, `forge/` is rendering
+and export, and `aether/` contains capture, broadcast, listener and deploy source.
+`aether/tools/tune.py` belongs to AETHER. Its current container uses donor/tone
+rendering and copies only AETHER source; source consolidation is not deployment
+acceptance. See [ORGANS.md](ORGANS.md).
 
 ---
 
@@ -47,10 +54,13 @@ Every primary module (e.g., **Relinquished**) adheres to a strict stage specific
 ## Building and Running
 
 ### 1. Booting the System
-1.  **Launch SuperCollider.**
-2.  **Open and Execute `brahma/sc/loader.scd`.** This script loads all SynthDefs, Classes (Adam Kadmon, FSAP, BridgeRouter), and operational engines in the correct order.
+1.  **Install the `.sc` class files.** Add `brahma/sc/` to SC include paths or symlink its `.sc` files into `Platform.userExtensionDir`, then recompile the class library.
+2.  **Open and execute `brahma/sc/loader.scd` in SuperCollider.** It loads `.scd` scripts after server boot; it does not install or compile classes. Full boot still needs platform audio/MIDI support; the headless Linux attempt was blocked by ALSA MIDI sequencing.
 3.  **Launch Pure Data.**
 4.  **Open `brahma/pd/main.pd`.** This is the master patching surface.
+
+For the web interfaces, use Node.js 24 and run
+`cd brahma/web && npm ci && npm run build:workbench && npm start`.
 
 ### 2. Operational Workflows
 - **Absorption Ritual:** Feed audio into a module's IA stage, trigger an EQUIP pulse, and observe the trait extraction in the AE stage.
@@ -59,6 +69,30 @@ Every primary module (e.g., **Relinquished**) adheres to a strict stage specific
 
 ### 3. Automation & Validation
 - **Validate Audio:** Run `python3 forge/validate_audio.py path/to/specimen.wav` to ensure the viability of a recorded specimen.
+- **Native predicates:** See [tools/dsp/README.md](tools/dsp/README.md). Local acceptance is 8/8 native DSP groups, 10/10 browser checks, and 11/11 Forge wrapper/native checks; this is not a full-rack or production certification.
+
+### 4. Measurements and contracts
+
+`~metric_collector` uses core FFT analysis: coherence is spectral-centroid
+stability, entropy is Shannon entropy of spectral power, and fidelity is absolute
+zero-lag Pearson correlation of aligned samples (no latency correction). CPU stress
+requires a running server. Invalid, silent or missing samples are unavailable.
+Live organism capture is not connected; synthetic telemetry is opt-in and labelled.
+
+AdamKadmon validates dictionary-shaped trait dimensions and contract-scoped ranges.
+`strictness` is metadata, not a measured quality threshold; normalization preserves
+categorical fields. Capability signing is unavailable, and `checkPermission` remains
+a permissive placeholder. See [CLAUDE.md](CLAUDE.md#core-infrastructure-classes) for
+a valid dictionary example and the API limits.
+
+### 5. Workbench providers and authority
+
+Mock is a deterministic offline baseline. Claude and Gemini require a key and an
+explicit `BRAHMA_CLAUDE_MODEL` or `BRAHMA_GEMINI_MODEL`; no Gemini default is chosen.
+Tidal/Sonic Pi adapters are unavailable even when discovery detects an installation.
+Propose, human accept and human run are separate acts; human-only `brahma_stop`
+cancels active and queued renders. Configuration and discovery details are in
+[docs/agent-clients.md](docs/agent-clients.md#composition-providers).
 
 ---
 
@@ -77,9 +111,15 @@ Every primary module (e.g., **Relinquished**) adheres to a strict stage specific
 ---
 
 ## TODO / Roadmap
-- [ ] Implement actual `FluidBuf` analysis in `MetricCollector`. (blocked: Fluid Corpus Manipulation UGens not installed on this host)
-- [x] Expand `AdamKadmon` to include a full JSON-based contract system. (brahma/sc/AdamKadmon.sc: loadContract, contractNames, validateTraitMap with contract-scoped ranges)
-- [x] Create 3D visualizations for trait maps in a browser-based overlay. (brahma/web/public/tree/tree-renderer.js: radar-chart trait-map overlay on organism pick)
+- [x] Verify core FFT sample/file/buffer measurements and explicit unavailable input.
+- [x] Verify named JSON contracts, required dictionaries and scoped ranges in native tests.
+- [x] Exercise the trait-map overlay with browser regressions, including empty selections and updates.
+- [ ] Connect captured organism audio to measured traits, telemetry and completed artifacts.
+- [ ] Establish remote CI, clean-machine launch and independently runnable AETHER acceptance.
+
+The prioritized next three milestones and evidence limits are recorded in
+[ROADMAP.md](ROADMAP.md#current-acceptance--2026-10-25). FluidBuf expansion remains
+optional future work; it is not required for the implemented measurements.
 
 <!-- ORGANVM:AUTO:START -->
 ## System Context (auto-generated — do not edit)

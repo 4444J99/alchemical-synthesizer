@@ -53,8 +53,15 @@ CHANNELS = 2  # stereo, matching ingest.sh's primary output
 
 
 def repo_root() -> str:
-    """The repo root: tune.py lives in <root>/tools/."""
+    """AETHER root: owns stations.json in both repository and container layouts."""
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def output_root() -> str:
+    """Use the host repository output when embedded beside Brahma."""
+    root = repo_root()
+    parent = os.path.dirname(root)
+    return parent if os.path.isdir(os.path.join(parent, "brahma")) else root
 
 
 def find_ffmpeg() -> str | None:
@@ -185,7 +192,7 @@ def main(argv: list[str]) -> int:
         print("tune: ffmpeg is required (brew install ffmpeg)", file=sys.stderr)
         return 3
 
-    out = args.out or os.path.join(repo_root(), "out", "tuned", f"{name}.wav")
+    out = args.out or os.path.join(output_root(), "out", "tuned", f"{name}.wav")
 
     banner = "PUBLISH-SAFE" if safe else "R&D-ONLY (license not cleared for publish)"
     print(f"tune: listening to '{name}' [{license_tag}] — {banner}", file=sys.stderr)

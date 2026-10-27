@@ -39,8 +39,10 @@
 # ============================================================================
 set -uo pipefail
 
-HERE="$(cd "$(dirname "$0")/.." && pwd)"   # repo root
-OUT="$HERE/out/live"
+HERE="$(cd "$(dirname "$0")/.." && pwd)"   # AETHER root (or /app in the container)
+WORKSPACE="$HERE"
+if [ -d "$HERE/../brahma" ]; then WORKSPACE="$(cd "$HERE/.." && pwd)"; fi
+OUT="${AETHER_LIVE_DIR:-$WORKSPACE/out/live}"
 SOURCE=""
 SEGMENTS=0            # 0 = forever
 SECONDS_OVERRIDE=""   # cap/override the organism's per-segment seconds

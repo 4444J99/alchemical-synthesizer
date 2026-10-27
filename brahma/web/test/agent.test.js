@@ -183,7 +183,7 @@ test("jobs: unknown job is null, not an exception", () => {
 
 // --------------------------------------------------------------------- providers
 
-test("providers: availability is probed and reported with a reason", () => {
+test("providers: cached availability distinguishes unimplemented adapters from discovery", () => {
   const registry = createProviderRegistry({ env: {} });
   const list = registry.list();
   const byName = Object.fromEntries(list.map((p) => [p.name, p]));
@@ -191,11 +191,11 @@ test("providers: availability is probed and reported with a reason", () => {
   assert.equal(byName.mock.available, true);
   assert.equal(byName.claude.available, false);
   assert.match(byName.claude.reason, /not_configured/);
-  // tidal/sonicpi availability depends on the host; assert a reason is stated.
-  assert.ok(byName.tidal.reason, "tidal must state a reason");
-  assert.ok(byName.sonicpi.reason, "sonicpi must state a reason");
-  if (!byName.tidal.available) assert.match(byName.tidal.reason, /not_installed|not_probed/);
-  if (!byName.sonicpi.available) assert.match(byName.sonicpi.reason, /not_installed|not_probed/);
+  for (const name of ["tidal", "sonicpi"]) {
+    assert.equal(byName[name].available, false);
+    assert.match(byName[name].reason, /^adapter_not_implemented/);
+    assert.equal(byName[name].discovery.status, "not_probed");
+  }
 
   for (const p of list) {
     assert.ok(p.reason, `${p.name} must state why it is available or not`);
@@ -204,24 +204,23 @@ test("providers: availability is probed and reported with a reason", () => {
 
 test("providers: claude is available only with a key, and needs a pinned model", async () => {
   const withKey = createProviderRegistry({ env: { ANTHROPIC_API_KEY: "k" } });
-  assert.equal(withKey.list().find((p) => p.name === "claude").available, true);
+  assert.equal(withKey.list().find((p) => p.name === "claude").available, false);
 
-  // Available but unpinned: a typed refusal, not a guess at a model id.
+  // A key alone does not make an unpinned model available.
   const unpinned = await withKey.propose("claude", { prompt: "x" });
   assert.equal(unpinned.ok, false);
+  assert.equal(unpinned.code, "provider_unavailable");
   assert.match(unpinned.message, /BRAHMA_CLAUDE_MODEL/);
 });
 
 test("providers: an unavailable provider refuses, it never returns an empty pattern", async () => {
   const registry = createProviderRegistry({ env: {} });
 
-  // Only providers that are actually unavailable on this host can be tested for refusal.
-  const unavailable = ["tidal", "sonicpi"].filter((n) => !registry.list().find((p) => p.name === n).available);
-  for (const name of unavailable) {
+  for (const name of ["tidal", "sonicpi"]) {
     const result = await registry.propose(name, { prompt: "anything" });
     assert.equal(result.ok, false);
     assert.equal(result.code, "provider_unavailable");
-    assert.match(result.message, /not_installed|not running|not yet wired|not_probed/);
+    assert.match(result.message, /adapter_not_implemented/);
     assert.equal(result.events, undefined, "no events field may exist on a refusal");
   }
 });

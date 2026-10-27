@@ -1,0 +1,715 @@
+{
+  "review_dates": [
+    "2026-10-24",
+    "2026-10-26"
+  ],
+  "recorded_at_utc": "2026-10-26T20:25:00.810125+00:00",
+  "repository": "4444J99/alchemical-synthesizer",
+  "branch": "fix/verified-hardening-2026-10-24",
+  "initial_revision": "bf6c8257ac976efaf526ae1b612bb7371f96f64a",
+  "integration_base": "e27f020306273c697a6c7909ca1c7c4e3ea5e9c2",
+  "base_tree": "fe2821cff4872c29258db907073a2cee734b9db5",
+  "fingerprint_scope": "Changed non-documentation code/config/test paths relative to integration_base. Unchanged source is pinned by that Git commit; docs/reviews and docs/superpowers are excluded. Aggregate hashes ordered mode, SHA-256, two spaces, path, newline.",
+  "code_snapshot_sha256": "7465a9b99eb4f1618d169c778454b076ba8b8653c78b6e3c437a1b16b5b255cb",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "mode": "100644",
+      "sha256": "816b230977cea6deba8193a210621af9d52109de822e54450a98c1a28fb41f0f"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "mode": "100644",
+      "sha256": "2ccd9ccafe4af4f6a250f9a2a8a9fe1f23250eb0267c60ec4d23e8bfe2aefe5a"
+    },
+    {
+      "path": "Makefile",
+      "mode": "100644",
+      "sha256": "97926547743244a92464d4575d30fcd43c88ac80e50291803b07a776a157293a"
+    },
+    {
+      "path": "aether/deploy/Dockerfile",
+      "mode": "100644",
+      "sha256": "d798b627a28c81f5b80e31caf5799c4569b3a450e4e79b945b4a7c9ef037dddb"
+    },
+    {
+      "path": "aether/deploy/integration.test.js",
+      "mode": "100644",
+      "sha256": "c7e4f035d76c11f8c8ee4581b3ee4a7291ed236e4cd77b56656c050d808e1078"
+    },
+    {
+      "path": "aether/deploy/serve.js",
+      "mode": "100755",
+      "sha256": "3f7969b48c0998d0bc4edb0b715dfb49bc5010cf3648e6d4cc423a79c70db4ff"
+    },
+    {
+      "path": "aether/deploy/worker.mjs",
+      "mode": "100644",
+      "sha256": "7bb97ba8254aae117d8daa32aa062c2e371b358fa34e7f786a2e046653457259"
+    },
+    {
+      "path": "aether/deploy/worker.test.js",
+      "mode": "100644",
+      "sha256": "fda42041486526d937f7ce80919f61c73bf53d004966d4f096eb2e5fc0a2196f"
+    },
+    {
+      "path": "aether/tools/broadcast.sh",
+      "mode": "100755",
+      "sha256": "1ef2e1202bf5d578de275b59aa3ccad2d4218417fe1977371f92d6d1b2621974"
+    },
+    {
+      "path": "aether/tools/r2_sync.sh",
+      "mode": "100755",
+      "sha256": "b85869842c8b71d88d723dd5a31b71b2dddc02273b70d36cbea62b71d121839c"
+    },
+    {
+      "path": "aether/tools/tune.py",
+      "mode": "100644",
+      "sha256": "c8be4ecb3aa4508331d7bafa61e1db341632a7cf7f17cf46e59deca578e413b4"
+    },
+    {
+      "path": "aether/web/listener/aether.js",
+      "mode": "100644",
+      "sha256": "792ef01490be490fbf52b1b005afc2a4853e1b6738f4e2cc3204ece93da0aab3"
+    },
+    {
+      "path": "aether/web/listener/aether.test.js",
+      "mode": "100644",
+      "sha256": "2aa6ee9103cc68e3b893c36790f293bc0c0a44e326e7878bb6f1c89af9e08837"
+    },
+    {
+      "path": "aether/web/listener/index.html",
+      "mode": "100644",
+      "sha256": "aec69690bce807ae3983a17a3ddef900ae44024012e6c41eda2ddb5972b72ccf"
+    },
+    {
+      "path": "brahma/sc/07_safety.scd",
+      "mode": "100644",
+      "sha256": "c7471331fffa44e40814922b850ef35926ef9b93b0333bc7ead9e193bc80fcc6"
+    },
+    {
+      "path": "brahma/sc/10_validation.scd",
+      "mode": "100644",
+      "sha256": "a9aa17db11165ab4e941a71143197fffc2ef56de2ade476bbb416da82b8d75f3"
+    },
+    {
+      "path": "brahma/sc/11_metrics.scd",
+      "mode": "100644",
+      "sha256": "87ed801ffb196255b7426e0d59c99ae91b8c18f01c8bc67bfadb229e32c416c7"
+    },
+    {
+      "path": "brahma/sc/13_nrt_renderer.scd",
+      "mode": "100644",
+      "sha256": "29c00f136a5eceda29b51942c0ba6d0c82f587fdd1353e3da2aaa31fdc1ef547"
+    },
+    {
+      "path": "brahma/sc/14_visual_cortex.scd",
+      "mode": "100644",
+      "sha256": "8b0f64fc92c414d62f1b29777137da7f4d23f8b366e8ea620eb775afbdf55e92"
+    },
+    {
+      "path": "brahma/sc/16_engine_responders.scd",
+      "mode": "100644",
+      "sha256": "23270dec47d21c462c74194d26a88382f01c04d275ae02d3b346a1cf4adaf421"
+    },
+    {
+      "path": "brahma/sc/31_live_gateway.scd",
+      "mode": "100644",
+      "sha256": "90284b5834a39916ce2f11e6d5602f20301b24c11327e181451d22d161d9e74f"
+    },
+    {
+      "path": "brahma/sc/AdamKadmon.sc",
+      "mode": "100644",
+      "sha256": "2f6e8e28bdba55ff11f6e4f3bb9a1ba6beeff6e5e8517193c11df4c12b966553"
+    },
+    {
+      "path": "brahma/sc/BrahmaContracts.sc",
+      "mode": "100644",
+      "sha256": "4ee74e1b687f49ab5724a3b54c08a131c30e5a9d437cf78bdc59c17bc95d8b68"
+    },
+    {
+      "path": "brahma/sc/BrahmaMetrics.sc",
+      "mode": "100644",
+      "sha256": "e51f2a66f00a0d2e288459d4ba49d816d6e4971e9ba314512b21dc9770ee29c7"
+    },
+    {
+      "path": "brahma/sc/BridgeRouter.sc",
+      "mode": "100644",
+      "sha256": "8b4e73e2ca2c3c69492f46cc0e4f6f58bf925a913ef7af35e37b70d966d945cb"
+    },
+    {
+      "path": "brahma/sc/FSAP.sc",
+      "mode": "100644",
+      "sha256": "60db408a58bad49261b29be9eadaed562953e0f044afc0b2e908202e9d97a67b"
+    },
+    {
+      "path": "brahma/sc/tests/class_runtime.scd",
+      "mode": "100644",
+      "sha256": "63607a886862d7f99153e33472bbb22c85a9774853443bab362e14f2084dc822"
+    },
+    {
+      "path": "brahma/sc/tests/flucoma_buffer.scd",
+      "mode": "100644",
+      "sha256": "b7aab4b3af2908edd57c74c7f272c5e94ff1c3b27acca807b24c412842520a47"
+    },
+    {
+      "path": "brahma/sc/tests/phase_a.scd",
+      "mode": "100644",
+      "sha256": "d08cb682e298751466652d76be56101494d4ee9d8ac3b4e4a69c729fda24c731"
+    },
+    {
+      "path": "brahma/sc/transmutation/TransmutationEngine.sc",
+      "mode": "100644",
+      "sha256": "b77821801d659a81ce5f7f0a5b46c451a4f4c7f4be7824f42333ffb3562efb1e"
+    },
+    {
+      "path": "brahma/web/lib/agent/index.js",
+      "mode": "100644",
+      "sha256": "20442f701c0f0a2572b6ecda0dedb86665a8aac68bf2dc04914eba5d2da7f533"
+    },
+    {
+      "path": "brahma/web/lib/agent/jobs.js",
+      "mode": "100644",
+      "sha256": "75003049d1152f2cee97912b42dcf487b64332ba630ac4cb8bf14f33b207fed1"
+    },
+    {
+      "path": "brahma/web/lib/agent/providers.js",
+      "mode": "100644",
+      "sha256": "0ee42d7197b20c2ea817442fbf19699b9fee54f5fdff5db8c7c6a240a4922265"
+    },
+    {
+      "path": "brahma/web/lib/agent/tools.js",
+      "mode": "100644",
+      "sha256": "6c09000eccb8b49ec2d87dfb0b5ec577c7a0554f9b302ba2529995a03144598b"
+    },
+    {
+      "path": "brahma/web/lib/auth.js",
+      "mode": "100644",
+      "sha256": "6120a2a57220ed249260a6e8b3fd6e24556d7a142924656611380bfae3e73e45"
+    },
+    {
+      "path": "brahma/web/lib/mcp/client.js",
+      "mode": "100644",
+      "sha256": "38f3a59aaeb321852d197f7e44e9a978c7169ccc60cd7845714f09373de6f872"
+    },
+    {
+      "path": "brahma/web/lib/mcp/server.js",
+      "mode": "100644",
+      "sha256": "a168c7b0a707388bed0b882a134d1420ee019fc0e2b434bca464867ccbc75d62"
+    },
+    {
+      "path": "brahma/web/lib/runtimes.js",
+      "mode": "100644",
+      "sha256": "3495c27387557178fba3778a207b49c7d2dd53cf1f4ffc4d780c7aca6b1a5251"
+    },
+    {
+      "path": "brahma/web/package-lock.json",
+      "mode": "100644",
+      "sha256": "ce2fcdc28c579c7e4f5133cf211d9c18f79aeaccd60b5a59f48187a311ff682c"
+    },
+    {
+      "path": "brahma/web/package.json",
+      "mode": "100644",
+      "sha256": "82e4abd3960a878bf911037ebc070da63e27c47e78dea1dd8d71990768876e21"
+    },
+    {
+      "path": "brahma/web/public/tree/tree-renderer.js",
+      "mode": "100644",
+      "sha256": "c2e539fb31822ccd24ef108fb77224a40775b1689bc44827f5e61ff7362796d3"
+    },
+    {
+      "path": "brahma/web/public/workbench/src/editor.js",
+      "mode": "100644",
+      "sha256": "899ddfd0f128cca6a922f1a308ba0e896ea9c227d250c416fa4dbff51f414cf6"
+    },
+    {
+      "path": "brahma/web/public/workbench/src/main.js",
+      "mode": "100644",
+      "sha256": "4457be462a2f3145226b6961bb03170401306a3b9d21ee59859a507cc9190b72"
+    },
+    {
+      "path": "brahma/web/public/workbench/src/strudel.js",
+      "mode": "100644",
+      "sha256": "53c2f134da29ae778e4ce0c54abbcaa32c8f6d19dfaf2d4439c3da5fed99db1e"
+    },
+    {
+      "path": "brahma/web/server.js",
+      "mode": "100644",
+      "sha256": "9890da3ffabd6f2fead0d9297ca34b013a144a4297abd30ae2896517fa0ee00e"
+    },
+    {
+      "path": "brahma/web/test/agent-admission.test.js",
+      "mode": "100644",
+      "sha256": "040ed7add8494a7ace32ae67be4f8dfb1e6ff02cfe573ec8644acce6606fc862"
+    },
+    {
+      "path": "brahma/web/test/agent-http.test.js",
+      "mode": "100644",
+      "sha256": "8f9ac74acdc04878f514cfea60cf9e4869a81fbb51d35ad4b6a032b3564a71e3"
+    },
+    {
+      "path": "brahma/web/test/agent-stop.test.js",
+      "mode": "100644",
+      "sha256": "3017ea888b339e3cd6a342dd318d7c6a8ed1f3e6e137201f10723dd2e3b6410c"
+    },
+    {
+      "path": "brahma/web/test/agent.test.js",
+      "mode": "100644",
+      "sha256": "e10267ffa6ddb0c23b22668720d3ccc61fb67d1d8e94ef4c45c0668e6fcf55a4"
+    },
+    {
+      "path": "brahma/web/test/auth-malformed-ws.test.js",
+      "mode": "100644",
+      "sha256": "3ca1eaf81d765a3b20e0cbe2d842867ac8835c5a8c6a3bc4db81fb56c05deeaa"
+    },
+    {
+      "path": "brahma/web/test/auth.test.js",
+      "mode": "100644",
+      "sha256": "f41bf2bacbffacd01ea1879d92bd1b8a36818d77db7efca1b650ddef3b2203ef"
+    },
+    {
+      "path": "brahma/web/test/conformance.test.js",
+      "mode": "100644",
+      "sha256": "d91da800361ba4dd6b185cd6afef3011f414d81dd7978478b26d15b295e5026f"
+    },
+    {
+      "path": "brahma/web/test/e2e/workbench.e2e.js",
+      "mode": "100644",
+      "sha256": "c8a6c6a6feabfb387cc9c456eebf129eb0741fce505a42db7399addde939c241"
+    },
+    {
+      "path": "brahma/web/test/mcp.test.js",
+      "mode": "100644",
+      "sha256": "9c946a89fa3d320294c63578467b925649ba517798cd31e4f50f6281671a901c"
+    },
+    {
+      "path": "brahma/web/test/provider-probes.test.js",
+      "mode": "100644",
+      "sha256": "123f864fff822707a2c6a3eb7e7dc929d14f57890863e47b1b997e0d89e4049d"
+    },
+    {
+      "path": "brahma/web/test/providers-hardening.test.js",
+      "mode": "100644",
+      "sha256": "59851340e4a92fa3663fad41085dd1c20c9c09224e1a0e6d9664dce30f69eb6c"
+    },
+    {
+      "path": "brahma/web/test/sandbox.test.js",
+      "mode": "100644",
+      "sha256": "fdcffcf6eb9304dc79728123012d069c23886b6a8ad299f37960780f317ba753"
+    },
+    {
+      "path": "brahma/web/test/tree-renderer.test.js",
+      "mode": "100644",
+      "sha256": "4bc7af74bad786e3c61f24bdc41089269b238b16e8f615671629172efb205426"
+    },
+    {
+      "path": "forge/bounce.sh",
+      "mode": "100755",
+      "sha256": "e00d26e011372a97bf071b1a69f1d6d0b7089159ab897d3a0e86cfec25ed6386"
+    },
+    {
+      "path": "forge/render-pattern.sh",
+      "mode": "100755",
+      "sha256": "f4ca6f9c19e8a54ce2c45f359ab81682b71c13e66573a8ebfdffe1e481794045"
+    },
+    {
+      "path": "product/.dockerignore",
+      "mode": "100644",
+      "sha256": "bfe2fd60e757e3c2145c30f6716f53720e75e9c6edba101f9ddf25e19570c4cf"
+    },
+    {
+      "path": "product/Dockerfile",
+      "mode": "100644",
+      "sha256": "b1c7ae171dcea47ff4e37740e03057e7d2562b535317a3d6c65a36c6e4981492"
+    },
+    {
+      "path": "product/bin/seed.js",
+      "mode": "100644",
+      "sha256": "b8bf77c8521e8265b4aaeeb5632cc18c5195e5ee27240889aaca378e319a8d62"
+    },
+    {
+      "path": "product/bin/smoke.js",
+      "mode": "100644",
+      "sha256": "807f631e644f0c58d943b3830cb3d359c209095b6304e5e7025d034369cf7548"
+    },
+    {
+      "path": "product/package-lock.json",
+      "mode": "100644",
+      "sha256": "f55308ccd95d3b0257275718ae0b003794fa25ac2e30288856c71960ba27fabe"
+    },
+    {
+      "path": "product/package.json",
+      "mode": "100644",
+      "sha256": "b9dbd11cdc097ac1a30f1eea65fe59957cd8251e1563286be1e6ec37dee37b1b"
+    },
+    {
+      "path": "product/server.js",
+      "mode": "100644",
+      "sha256": "3d1e4cd50ec919046885f935b10b50e125c7299709fed65808ba1317ef2846b4"
+    },
+    {
+      "path": "product/src/api/acp.js",
+      "mode": "100644",
+      "sha256": "d8a70c382c75d15ac9dcac2dabed49175a39dd06350da870a5a0b003e11e2cb1"
+    },
+    {
+      "path": "product/src/api/audio.test.js",
+      "mode": "100644",
+      "sha256": "3d6ade8a4cb0c717941d3939860576de329af24968ecf605008025a3c2544e31"
+    },
+    {
+      "path": "product/src/api/mcp.js",
+      "mode": "100644",
+      "sha256": "1fb23e6f21fe3897d46d74292c63d9baf8dfb8d034c400b8c16ed46845260f04"
+    },
+    {
+      "path": "product/src/api/ownership.test.js",
+      "mode": "100644",
+      "sha256": "292bb30687bf0597510bfaf034ffacd9cf841d323d7b03d5e4e53a5a517ffab8"
+    },
+    {
+      "path": "product/src/api/rest.js",
+      "mode": "100644",
+      "sha256": "1d15e0b31962b275766291c06ccd8ba8cd214978ea468e2de73e4257e1be43d0"
+    },
+    {
+      "path": "product/src/billing/billing.js",
+      "mode": "100644",
+      "sha256": "4a019a9c3b259d5810e654d9e44de7d7a47b4654ce8bf38fc0c8b70d05ace835"
+    },
+    {
+      "path": "product/src/billing/billing.test.js",
+      "mode": "100644",
+      "sha256": "d5f3e30731209a44cfaee8350e489fc89c29dbce3f598144f378df3a29e6b7d8"
+    },
+    {
+      "path": "product/src/core/actions.js",
+      "mode": "100644",
+      "sha256": "dbeb5d48717c1dfbc729a566ae27a3c1dc28e147635af91434db0c56c79b3383"
+    },
+    {
+      "path": "product/src/core/engine.js",
+      "mode": "100644",
+      "sha256": "38bd86f03c21906aee9bbe14826146ffb409b3b1ac7741680de01a2c98f2e4e2"
+    },
+    {
+      "path": "product/src/core/engine.test.js",
+      "mode": "100644",
+      "sha256": "712b09a7c61940768aa1255820432f06ed1c36c082e4fa0558f50338857388aa"
+    },
+    {
+      "path": "product/src/marketplace/marketplace.js",
+      "mode": "100644",
+      "sha256": "a80d6879b1a08eebf4aa64e76dda70c84bcbbeec296e37552c8ff43372dae74e"
+    },
+    {
+      "path": "tools/build_release.sh",
+      "mode": "100755",
+      "sha256": "909495ac8b41b4fcf03e7562def34c5698723fa3df940c912687110eca19d725"
+    },
+    {
+      "path": "tools/check-release-artifact.py",
+      "mode": "100644",
+      "sha256": "4f387b09d8cdd2c64ae81a8433f9e1ad93ca1bc82ebd6296706b3c9a2ea7da43"
+    },
+    {
+      "path": "tools/dsp/compile.scd",
+      "mode": "100644",
+      "sha256": "6b8b522e642d4abba2c5908990d232391c4f5d7a941c644d117dd2e76e60e782"
+    },
+    {
+      "path": "tools/dsp/contracts.scd",
+      "mode": "100644",
+      "sha256": "9aa438de4fcb9ee4fb5cbf7cb242a217ccd302a5ff00e92cdcc3c66719280b3c"
+    },
+    {
+      "path": "tools/dsp/immune.scd",
+      "mode": "100644",
+      "sha256": "c353704dc2d9ec17353049e30dc84b139baa585420244a69287998c0e1e3d9b7"
+    },
+    {
+      "path": "tools/dsp/live.scd",
+      "mode": "100644",
+      "sha256": "abcd4fc6a35bfecacb785f448b63a83e7c85bc314631e22f8209209ecd7220c4"
+    },
+    {
+      "path": "tools/dsp/metrics.scd",
+      "mode": "100644",
+      "sha256": "7fd0c63136663638dc7c2b8817d4db80db0c75761900a60b3517d3d7c66f73fd"
+    },
+    {
+      "path": "tools/dsp/telemetry.scd",
+      "mode": "100644",
+      "sha256": "238306b891ba8e06c3f4fa0ac72a10d2db4eae849c845369701998450de1812b"
+    },
+    {
+      "path": "tools/dsp/test_dsp.py",
+      "mode": "100644",
+      "sha256": "4137f2332e94fb4f6ceefeda30d6743ce9e8c457e054d8d2850ca87a3c2189eb"
+    },
+    {
+      "path": "tools/install-brahma-classes.py",
+      "mode": "100644",
+      "sha256": "c284f96accbbbd9dffabfbd7815e01f4f50049a6eaa9015540139447b3772bf9"
+    },
+    {
+      "path": "tools/install-brahma.sh",
+      "mode": "100755",
+      "sha256": "10f55cbeb17cafdfacdcd7feb8537a0b96cdc78c31b41cc348d76821742ff26d"
+    },
+    {
+      "path": "tools/smoke.sh",
+      "mode": "100755",
+      "sha256": "375236bdaa6bd823e5ca66e6cebba43ce79ccf22ea2952888ecde2097e8ddf38"
+    },
+    {
+      "path": "tools/start-brahma.py",
+      "mode": "100644",
+      "sha256": "149ea1d560de8c5cc2af0ddf8a55e1d0d74c17d0a3c826ac97229251830d6406"
+    },
+    {
+      "path": "tools/start-brahma.sh",
+      "mode": "100755",
+      "sha256": "a82fbda7ba059bf32e5b3e24440f57aced446cd02b3d222d130f1dc6411a6a10"
+    },
+    {
+      "path": "tools/test-supercollider.py",
+      "mode": "100644",
+      "sha256": "86056d6acc06b55747a41532b2f42b3f2986f49300841275d3f2cc48511312c9"
+    },
+    {
+      "path": "tools/test_forge.py",
+      "mode": "100644",
+      "sha256": "ba53a6ea03c6968bafe0fe16149b06bb77dffc6450a61508284ff6225da8af94"
+    },
+    {
+      "path": "tools/test_release.py",
+      "mode": "100644",
+      "sha256": "e541e713e3d5e81dfade7e03a7fedc2e9817b16a40bb0c91413719ebb2d2ac0c"
+    },
+    {
+      "path": "tools/tests/test_launch.py",
+      "mode": "100644",
+      "sha256": "64e14cd06eff900b9e0146c3c74ebac4701a8c42fc35f11973172b7ba3c4d0a8"
+    },
+    {
+      "path": "tools/tests/test_release_packaging.py",
+      "mode": "100644",
+      "sha256": "c86dc72d9e667e9a55b3e025981800987e8717ec03f27ac2e2c236075bfb75df"
+    },
+    {
+      "path": "tools/tests/test_sc_install.py",
+      "mode": "100644",
+      "sha256": "951a6df679f4dff94b0b88dc3f6ea4758e1d2882687b44217e725262a0f68c32"
+    },
+    {
+      "path": "tools/tests/test_sc_runner.py",
+      "mode": "100644",
+      "sha256": "fcf8f3cc928175753c276947c2bb04109c9015931e7970edfc2d375ef188d426"
+    }
+  ],
+  "environment": {
+    "platform": "Linux",
+    "node": "v24.22.1",
+    "python": "3.12.14",
+    "supercollider": "3.13.0",
+    "native_classes": 9,
+    "native_scripts": 72,
+    "chrome": "156.0.8078.47",
+    "audio": "isolated named JACK dummy backend",
+    "browser_note": "Local root fixture run used BRAHMA_BROWSER_NO_SANDBOX=1 and the explicit locked Chrome path; no external browsing."
+  },
+  "checks": [
+    {
+      "gate": "web",
+      "command": "npm test",
+      "cwd": "brahma/web",
+      "exit_code": 0,
+      "passed": 177,
+      "skipped": 2,
+      "log_name": "alchemical-final-web.log",
+      "log_sha256": "ca67e05e3836263cb87c953043cd8f38e0d36338d08b31a5063508861d06926a"
+    },
+    {
+      "gate": "product-tests",
+      "command": "node --test 'src/**/*.test.js' 'public/**/*.test.js'",
+      "cwd": "product",
+      "exit_code": 0,
+      "passed": 57,
+      "skipped": 0,
+      "log_name": "alchemical-final-product-tests.log",
+      "log_sha256": "fb8c14f3286fa5b86b64d2579d53ee8d714cbb2169a3b3c036e71f282e622016"
+    },
+    {
+      "gate": "browser",
+      "command": "BRAHMA_REQUIRE_BROWSER=1 npm run test:e2e",
+      "cwd": "brahma/web",
+      "exit_code": 0,
+      "passed": 10,
+      "skipped": 0,
+      "log_name": "alchemical-final-browser.log",
+      "log_sha256": "d1090ccdb1301b25ed4360b6bda988752f52a2580d87c5dc6d72d918f642a603"
+    },
+    {
+      "gate": "aether",
+      "command": "node --test aether/deploy/serve.test.js aether/deploy/integration.test.js aether/deploy/worker.test.js aether/web/listener/aether.test.js docs/absorb-alchemize/engine-path.test.cjs",
+      "cwd": ".",
+      "exit_code": 0,
+      "passed": 10,
+      "skipped": 0,
+      "log_name": "alchemical-final-aether.log",
+      "log_sha256": "045c11631d66cf80c757e78bed71005b3def3ba81c06c4cce3146ac4d05ebcf8"
+    },
+    {
+      "gate": "native",
+      "command": "BRAHMA_DSP_DUMMY_AUDIO=1 python3 tools/dsp/test_dsp.py",
+      "cwd": ".",
+      "exit_code": 0,
+      "passed": 8,
+      "skipped": 0,
+      "log_name": "alchemical-final-native.log",
+      "log_sha256": "d754195a802741a53794494ea449079998a99e92c507f20ac8141fed70ecdbaf"
+    },
+    {
+      "gate": "forge",
+      "command": "BRAHMA_FORGE_NATIVE=1 python3 tools/test_forge.py",
+      "cwd": ".",
+      "exit_code": 0,
+      "passed": 11,
+      "skipped": 0,
+      "log_name": "alchemical-final-forge.log",
+      "log_sha256": "a920eb0bd94f1001ade1265d28d2de2b9a43309e53099c9d3cc4a64a13be522c"
+    },
+    {
+      "gate": "release-fixtures",
+      "command": "python3 tools/test_release.py",
+      "cwd": ".",
+      "exit_code": 0,
+      "passed": 2,
+      "skipped": 0,
+      "log_name": "alchemical-final-release-fixtures.log",
+      "log_sha256": "40afceb65e60ee3d0ae4da407bc52cc44fa919e721fe47f95dd04906317638a1"
+    },
+    {
+      "gate": "tools",
+      "command": "python3 -m unittest discover -s tools/tests -p 'test_*.py' -v",
+      "cwd": ".",
+      "exit_code": 0,
+      "passed": 19,
+      "skipped": 0,
+      "log_name": "alchemical-final-tools-complete.log",
+      "log_sha256": "1cd67510440d05612a5d67c16011a343b05216b8394e441c6e1f9a755260370e"
+    },
+    {
+      "gate": "smoke",
+      "command": "bash tools/smoke.sh --strict",
+      "cwd": ".",
+      "exit_code": 0,
+      "passed": 75,
+      "skipped": 0,
+      "log_name": "alchemical-final-smoke.log",
+      "log_sha256": "5dff89c4fd72630d0446af46f1807bb79c6be502c624ddcb899b19af2a2bc23e"
+    },
+    {
+      "gate": "product-smoke",
+      "command": "npm run smoke",
+      "cwd": "product",
+      "exit_code": 0,
+      "passed": 21,
+      "skipped": 0,
+      "log_name": "alchemical-final-product-smoke.log",
+      "log_sha256": "caee6f6f990ebb655c022c854bb9c19600e7ade198a105b38a0616f6be5b0850"
+    }
+  ],
+  "audits": [
+    {
+      "package": "web",
+      "command": "npm ci --ignore-scripts --no-audit --no-fund && npm audit --json",
+      "includes_dev_dependencies": true,
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "log_sha256": "ee1a98da92739e832e207b8e66acae97c0df3929e36a0384c440dcc7f087aea8"
+    },
+    {
+      "package": "product",
+      "command": "npm ci --ignore-scripts --no-audit --no-fund && npm audit --json",
+      "includes_dev_dependencies": true,
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "log_sha256": "86a8ca7b77871018cd7d1756844c4c3408761cce5d42ead26b55cb4526077b79"
+    }
+  ],
+  "platform_skips": [
+    "Harmless OSC network probe through macOS Seatbelt",
+    "Sclang coexistence with occupied IDE port through macOS Seatbelt"
+  ],
+  "supervised_real_web_launch": {
+    "result": "passed",
+    "endpoints": [
+      "/workbench/",
+      "/workbench/vendor/workbench.js",
+      "/api/modules",
+      "/api/substrates/sound.json",
+      "/aether/"
+    ],
+    "shutdown_exit_code": 143,
+    "log_sha256": "49c7c80ed39b5c42ba68acad3090499524f6d82fcd49424bbbadf21426b7661d"
+  },
+  "review_status": "Separate read-only agent reviews and root verification completed for changed slices; four explicitly separate open-stack findings remain in 2026-10-26-open-stack-review.md.",
+  "logs_note": "Full local logs are not committed because normal test server output can contain ephemeral local capabilities. Hashes identify the recorded runs; these records are not signed attestations.",
+  "artifact_status": {
+    "result": "passed",
+    "build_commit": "a65864ca3214594ea1218753b90d8009042306d4",
+    "source_state": "clean",
+    "source_tree": "0bea2f6f786cd2fc2344bbe4d25329c20558863c",
+    "files": 421,
+    "http_checks": 7,
+    "archive_sha256": {
+      "tar.gz": "25e53f8c25537db4e45fc1280630c02817cbb7441880c91ac2c7ee522cbb1983",
+      "zip": "78d8f45e68744b0517ff9ff082777226eeace591a54d3ce10a076926dc0d3ba2"
+    },
+    "checks": [
+      "SHA256SUMS for archives and metadata",
+      "TAR extraction and ZIP structure",
+      "Clean locked dependency installation",
+      "Seven HTTP endpoints",
+      "Served bundle equals packaged bytes",
+      "Source offer matches manifest commit"
+    ],
+    "log_sha256": "5b222b7104fb39518a9459b4c8d668642465703f00343ec0fac87be0fd85c69b",
+    "note": "This was the preserved local commit with the identical tree published initially as2eb21e1. Final public-head build/hosted status is recorded in the handoff."
+  },
+  "publication_status": {
+    "pr": 103,
+    "url": "https://github.com/4444J99/alchemical-synthesizer/pull/103",
+    "draft": true,
+    "initial_remote_head": "2eb21e1a0622570d442798ee87dbe8c967feb5c4",
+    "observed_initial_checks": {
+      "CI": "in_progress",
+      "CI Minimal": "success"
+    },
+    "final_head_checks": "recorded in final handoff; not inferred from local gates"
+  },
+  "unverified": [
+    "Two macOS Seatbelt checks skipped on Linux",
+    "Full rack routing/shutdown with physical audio/MIDI/Pd/Ableton",
+    "FluCoMa plugin algorithm without its optional runtime",
+    "Authenticated capture provenance and measured cross-substrate remapping",
+    "Real cloud provider calls and alternative-language adapters",
+    "Production billing subscriptions/refunds/disputes/payouts and transactional storage",
+    "Actual Docker image, remote Cloudflare/R2 deployment and sustained radio operation",
+    "Full executable acceptance of open feature-stack PRs97-102"
+  ]
+}

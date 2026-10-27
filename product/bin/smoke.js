@@ -17,6 +17,10 @@ process.env.FOUNDRY_DATA_DIR = path.join(os.tmpdir(), "brahma-foundry-smoke-" + 
 process.env.BRAHMA_SPECIMENS_DIR = SPECIMENS_DIR; // where wired specimen audio is streamed from
 process.env.OSC_RECV_PORT = "0"; // avoid binding the real OSC port during tests
 process.env.PORT = "0";
+process.env.NODE_ENV = "test";
+process.env.STRIPE_SECRET_KEY = "";
+process.env.STRIPE_WEBHOOK_SECRET = "";
+process.env.FOUNDRY_ALLOW_STUB_BILLING = "1";
 
 const { server } = require("../server");
 const { collection } = require("../src/core/store");

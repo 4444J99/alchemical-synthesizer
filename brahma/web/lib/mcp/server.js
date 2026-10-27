@@ -14,6 +14,8 @@
  * paraphrase it as "confirmed".
  */
 
+const { PROVIDER_NAMES } = require("../agent/providers");
+
 const PROTOCOL_VERSION = "2025-06-18";
 const SERVER_INFO = { name: "brahma-workbench", version: "0.1.0" };
 
@@ -65,7 +67,7 @@ const SHARED_TOOLS = [
       type: "object",
       properties: {
         prompt: { type: "string", minLength: 1, description: "What to compose. Used when no events are supplied (provider path)." },
-        provider: { type: "string", enum: ["mock", "claude", "tidal", "sonicpi"], default: "mock" },
+        provider: { type: "string", enum: [...PROVIDER_NAMES], default: "mock" },
         events: {
           type: "array",
           description: "Agent-composed note events. If supplied, no provider is called; the connected agent composed using its own allotment. Each event: {time, note, vel?, dur?}.",
@@ -90,7 +92,7 @@ const SHARED_TOOLS = [
     },
     annotations: WRITES,
     handler: async (args, { api }) => {
-      const hasEvents = Array.isArray(args.events) && args.events.length > 0;
+      const hasEvents = args.events !== undefined;
       if (!hasEvents && (!args.prompt || !String(args.prompt).trim())) {
         throw Object.assign(new Error("prompt or events is required"), { code: "bad_request" });
       }
@@ -215,8 +217,8 @@ const HUMAN_TOOLS = [
     name: "brahma_stop",
     title: "Stop all rendering (human only)",
     description:
-      "HUMAN ONLY. Kill the running render process (sclang via render-pattern.sh) and mark the active job failed. " +
-      "Use this to abort an in-progress render. Polling brahma_job after stopping shows the stopped state.",
+      "HUMAN ONLY. Cancel active and queued renders, terminate the running render process group, and mark their jobs failed. " +
+      "Polling brahma_job after stopping shows 'stopped by human'; queued work will not start.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     annotations: Object.freeze({ readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: false }),
     handler: async (_args, { api }) => {

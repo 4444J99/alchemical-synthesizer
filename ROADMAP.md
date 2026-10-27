@@ -10,6 +10,59 @@ This roadmap is a living system. It bridges the gap between the **Brahma Strateg
 
 ---
 
+## Current acceptance — 2026-10-26
+
+This section records the current local hardening pass. The milestones below it
+are retained as historical reports: their old paths, checkmarks, deployment dates
+and host-specific observations are not fresh acceptance evidence. Current ownership
+is in [ORGANS.md](ORGANS.md); the detailed findings and limits are in the
+[verification review](docs/reviews/2026-10-24-verification-hardening.md).
+
+| Locally verified | Evidence and limit |
+|---|---|
+| Native DSP: **8/8** groups | `BRAHMA_DSP_DUMMY_AUDIO=1 python3 tools/dsp/test_dsp.py`; compilation, governor waveform, metrics, contracts, telemetry and isolated dummy-server lifecycle. See [native prerequisites](tools/dsp/README.md). |
+| Browser: **10/10** checks | `BRAHMA_REQUIRE_BROWSER=1 npm run test:e2e` in `brahma/web/`, with an installed test browser (`BRAHMA_CHROME_PATH` if needed). Covers the exercised workbench/trait-overlay behavior, not physical audio acceptance. |
+| Forge: **11/11** wrapper/native checks | `BRAHMA_FORGE_NATIVE=1 python3 tools/test_forge.py`; argument/path handling, failures/timeouts and expected WAV publication. |
+
+Use **Node.js 24** for the web/Foundry tooling and browser suite. Remote CI for
+this hardening branch is recorded in its final PR handoff. Upstream main `e27f020`
+has a successful full CI run, which does not certify subsequent changes. Full-loader boot on headless Linux remains
+blocked by ALSA MIDI sequencing; isolated native checks do not prove whole-rack
+routing, physical MIDI/Pd/Ableton operation, listening quality or production readiness.
+
+Implemented measurements use core FFT spectral-centroid stability, spectral-power
+entropy and aligned absolute Pearson correlation. Invalid/missing samples are
+unavailable. Live organism capture is not yet connected to the trait/telemetry path. Shared
+class/collector metrics and provenance/FSAP admission now execute in the native gate.
+AdamKadmon validates dictionary contracts and ranges; `strictness` is metadata,
+permission checking remains a placeholder, and capability signing is unavailable.
+
+Claude/Gemini require keys and explicit models; mock remains the offline baseline.
+Tidal/Sonic Pi adapters remain unavailable, with installation discovery reported
+separately. Human-only stop cancels active/queued work. AETHER consolidation is
+complete under `aether/`, including `aether/tools/tune.py`; its current container
+copies only AETHER source and uses donor/tone rendering. Actual container build/run,
+standalone distribution and live deployment acceptance remain separate work.
+
+### Next three milestones, in priority order
+
+1. **Establish a reproducible acceptance baseline.** Independently review this
+   hardening pass, run native/browser and distribution checks in supported CI,
+   verify a clean-machine launch, and publish a release only with its tested
+   archives and checksums. Remote green checks and a working full-loader path
+   remain evidence to obtain.
+2. **Complete one measured audio-to-artifact workflow.** Capture actual donor/output
+   samples, derive documented metrics, validate a trait contract and update the UI
+   with provenance. Reconcile the existing PR97–102 stack and its [four review
+   findings](docs/reviews/2026-10-26-open-stack-review.md). Record completed audio
+   and ownership before connecting Foundry
+   render/listing operations; conduct a separate human listening review.
+3. **Verify AETHER as an independent distribution.** Define its optional engine
+   dependencies, build/run the existing source as a container, and prove listener,
+   queue and bounded broadcast behavior. Establish deployment/rollback evidence
+   separately. Preserve current repository boundaries while doing this; real
+   Tidal/Sonic Pi adapters remain later capability work.
+
 ## 📅 Milestones
 
 ### Phase 1: Stability (Active)
