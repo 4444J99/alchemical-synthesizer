@@ -126,7 +126,14 @@ def build_ledger(catalogue, runs, root=None):
     return rows
 
 
+def validate_renderer_identity(run):
+    if (run.get("implementation_sha256") != sha256(Path(assimilate.__file__)) or
+            run.get("native_rack_sha256") != sha256(assimilate.SC / "32_donor_rack.scd")):
+        raise ValueError("Audition renderer implementation or native rack changed; rerender the comparison")
+
+
 def validate_native_reuse(catalogue, run, selected):
+    validate_renderer_identity(run)
     by_name = {item["name"]: item for item in run["modules"]}
     if not selected <= by_name.keys():
         raise ValueError("Reused native audition is missing selected definitions")
@@ -232,6 +239,9 @@ def main():
             lines = log.read_text().splitlines()
             result = json.loads(lines[-1])
             run = load_audition(result["directory"], original_hash)
+            validate_renderer_identity(run)
+            for previous in runs.values():
+                validate_renderer_identity(previous)
             if runs and run["donor"]["stereo_sha256"] != next(iter(runs.values()))["donor"]["stereo_sha256"]:
                 raise ValueError("Normalized donor differs between runs")
             runs[label] = run

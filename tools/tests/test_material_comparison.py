@@ -101,9 +101,24 @@ class MaterialComparisonTest(unittest.TestCase):
         tool = self.model()
         catalog = [{"name": "ditto_morphic_core", "role": "audio_processor", "definition_sha256": "a" * 64}]
         item = {**catalog[0], "status": "rendered", "overrides": {}, "parameters": {"inBus": 4, "outBus": 8}}
-        tool.validate_native_reuse(catalog, {"modules": [item]}, {"ditto_morphic_core"})
+        identity = {"implementation_sha256": tool.sha256(pathlib.Path(tool.assimilate.__file__)),
+                    "native_rack_sha256": tool.sha256(tool.assimilate.SC / "32_donor_rack.scd")}
+        tool.validate_native_reuse(catalog, {**identity, "modules": [item]}, {"ditto_morphic_core"})
+        with self.assertRaisesRegex(ValueError, "renderer|rack|implementation"):
+            tool.validate_native_reuse(catalog, {**identity, "native_rack_sha256": "0" * 64, "modules": [item]}, {"ditto_morphic_core"})
         with self.assertRaisesRegex(ValueError, "missing|selected"):
-            tool.validate_native_reuse(catalog, {"modules": []}, {"ditto_morphic_core"})
+            tool.validate_native_reuse(catalog, {**identity, "modules": []}, {"ditto_morphic_core"})
         for changed in [{"material": {"phase": "gas"}}, {"overrides": {"observe": .9}}]:
             with self.assertRaisesRegex(ValueError, "native|default|material"):
-                tool.validate_native_reuse(catalog, {"modules": [{**item, **changed}]}, {"ditto_morphic_core"})
+                tool.validate_native_reuse(catalog, {**identity, "modules": [{**item, **changed}]}, {"ditto_morphic_core"})
+
+    def test_comparison_rejects_a_different_or_unidentified_renderer(self):
+        tool = self.model()
+        current = {"implementation_sha256": tool.sha256(pathlib.Path(tool.assimilate.__file__)),
+                   "native_rack_sha256": tool.sha256(tool.assimilate.SC / "32_donor_rack.scd")}
+        tool.validate_renderer_identity(current)
+        for field in current:
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, "renderer|rack|implementation"):
+                tool.validate_renderer_identity({**current, field: "0" * 64})
+            with self.subTest(missing=field), self.assertRaisesRegex(ValueError, "renderer|rack|implementation"):
+                tool.validate_renderer_identity({key: value for key, value in current.items() if key != field})

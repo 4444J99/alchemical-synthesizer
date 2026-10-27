@@ -102,9 +102,9 @@ shape difference removes each signal's RMS gain for measurement only. Playback
 is not loudness-normalized. Compare repeated-neutral variability before
 attributing a difference to material in stochastic DSP.
 
-Comparison checks original, normalized donor, output and native definition
+Comparison checks original, normalized donor, output, renderer and native definition
 hashes. `--reuse-native PATH` can retain a prior native-default audition of the
-same source/timing; selected results and their hashes are checked before copying
+same source/timing and renderer; selected results and their hashes are checked before copying
 it into the new run. Earlier evidence is preserved. Excerpts are 1–30 seconds,
 the source is at most 64 MiB, and a hard process deadline bounds each native run.
 `stages_complete` means stages ran; silent, failed, unmapped and patch-required
