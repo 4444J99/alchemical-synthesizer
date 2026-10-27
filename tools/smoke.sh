@@ -79,6 +79,15 @@ fi
 
 echo "=== [3/6] JS syntax (node --check) ==="
 if command -v node >/dev/null 2>&1; then
+  # Native sample service tests require brahma/web deps (express), but [5/6]
+  # installs them only after this section runs, so on a clean checkout the
+  # [3/6] gate fails with MODULE_NOT_FOUND before it ever reaches [5/6].
+  # Install here first; [5/6] skips reinstall when node_modules already exists.
+  if [ ! -d brahma/web/node_modules ]; then
+    echo "  ... installing web deps early for [3/6] (npm ci/install)"
+    ( cd brahma/web && { npm ci --no-audit --no-fund >/tmp/brahma_npm.log 2>&1 \
+        || npm install --no-audit --no-fund >/tmp/brahma_npm.log 2>&1; } )
+  fi
   for js in brahma/web/server.js brahma/web/bin/brahma-mcp.js \
             brahma/web/lib/mcp/server.js brahma/web/lib/mcp/client.js \
             brahma/web/public/sketch.js \
