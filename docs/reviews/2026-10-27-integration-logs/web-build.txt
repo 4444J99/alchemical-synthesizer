@@ -1,0 +1,5 @@
+
+> brahma-visual-cortex@1.0.0 build:workbench
+> node ../../tools/build-workbench.mjs
+
+workbench bundle -> public/workbench/vendor/workbench.js

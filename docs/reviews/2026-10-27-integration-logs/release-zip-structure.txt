@@ -1,0 +1,2 @@
+STRUCTURE PASS: 470 files, bundle 956838 bytes, no private state
+RELEASE ARTIFACT: PASS

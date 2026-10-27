@@ -1,0 +1,39 @@
+[
+  {
+    "gate": "release-build",
+    "command": [
+      "bash",
+      "tools/build_release.sh",
+      "integration-20261027-2409fde"
+    ],
+    "deadline_seconds": 120,
+    "exit_code": 0,
+    "seconds": 0.728,
+    "log": "docs/reviews/2026-10-27-integration-logs/release-build.txt"
+  },
+  {
+    "gate": "release-tar-runtime",
+    "command": [
+      "python3",
+      "tools/check-release-artifact.py",
+      "dist/alchemical-synthesizer-integration-20261027-2409fde.tar.gz"
+    ],
+    "deadline_seconds": 180,
+    "exit_code": 0,
+    "seconds": 2.15,
+    "log": "docs/reviews/2026-10-27-integration-logs/release-tar-runtime.txt"
+  },
+  {
+    "gate": "release-zip-structure",
+    "command": [
+      "python3",
+      "tools/check-release-artifact.py",
+      "dist/alchemical-synthesizer-integration-20261027-2409fde.zip",
+      "--structure-only"
+    ],
+    "deadline_seconds": 60,
+    "exit_code": 0,
+    "seconds": 0.059,
+    "log": "docs/reviews/2026-10-27-integration-logs/release-zip-structure.txt"
+  }
+]

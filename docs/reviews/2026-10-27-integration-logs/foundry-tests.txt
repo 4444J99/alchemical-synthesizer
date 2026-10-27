@@ -1,0 +1,71 @@
+✔ old stored credentials migrate into this page once, then reload signs out (1.492916ms)
+✔ session generations invalidate pending same-account responses (0.700875ms)
+✔ disabled browser storage does not prevent an in-memory session (0.905166ms)
+✔ key identity and revocation stay bound to the authenticated account (160.774667ms)
+✔ ACP keeps structured directives and command precedence (2.276916ms)
+✔ repeated command words and absent suffixes finish within a bounded process (146.385083ms)
+✔ regular specimen files and contained symlinks stream their exact bytes (32.479625ms)
+✔ canonical resolution rejects files outside the specimen directory (6.857167ms)
+✔ directories and unavailable paths fail safely (3.690208ms)
+▶ single byte ranges return the requested inclusive bytes
+  ✔ bytes=2-5 (2.65225ms)
+  ✔ bytes=6- (3.495083ms)
+  ✔ bytes=-3 (2.006625ms)
+  ✔ bytes=-20 (1.916208ms)
+  ✔ bytes=8-100 (2.809791ms)
+  ✔ bytes=0-999999999999999999999 (3.255084ms)
+  ✔ bytes=-999999999999999999999 (1.851583ms)
+  ✔ BYTES=0-0 (3.887041ms)
+  ✔ bytes= 1-2 (3.391167ms)
+✔ single byte ranges return the requested inclusive bytes (27.049833ms)
+▶ malformed and unsatisfiable byte ranges return explicit 416 responses
+  ✔ nonsense (3.653333ms)
+  ✔ bytes=- (1.439417ms)
+  ✔ bytes=1-2 trailing (1.017625ms)
+  ✔ bytes=1x-2 (1.135625ms)
+  ✔ bytes=-0 (1.315625ms)
+  ✔ bytes=10- (1.497292ms)
+  ✔ bytes=7-2 (1.07325ms)
+  ✔ bytes=999999999999999999999- (0.685709ms)
+✔ malformed and unsatisfiable byte ranges return explicit 416 responses (13.078458ms)
+✔ unsupported range units and multipart requests fall back to the full representation (2.031333ms)
+✔ HEAD ignores Range and describes the full representation without a body (2.571625ms)
+✔ If-Range falls back to a complete response when no validator has been established (3.444667ms)
+✔ empty files ignore ranges and return a complete zero-length representation (2.733125ms)
+✔ simulation is unavailable and remote artifacts redirect without fetching (2.896333ms)
+✔ a read error before response bytes returns a controlled failure (2.380667ms)
+✔ a read error after response bytes terminates the stream without crashing the server (5.8355ms)
+▶ ownership: authenticated identity is preserved across every specimen surface
+  ✔ REST, MCP, and both HTTP ACP adapters derive ownership from the key (46.812375ms)
+  ✔ native ACP stdio carries the same authenticated ownership (181.539583ms)
+  ✔ only the owner can list or unlist; listing never transfers identity (5.539292ms)
+  ✔ legacy unowned records and simulated specimens cannot become sale listings (1.465958ms)
+✔ ownership: authenticated identity is preserved across every specimen surface (292.030958ms)
+✔ limits one peer, ignores spoofed forwarding, and recovers after expiry (0.493333ms)
+✔ bounded peer table refuses new identities without evicting live budgets (0.079917ms)
+✔ bounded peer table removes entries that expire before the scheduled sweep (0.066167ms)
+✔ invalid limits fail at initialization (0.176208ms)
+✔ REST admission covers both account routes and audio before expensive work (203.374875ms)
+✔ billing: raw Stripe events require valid signatures and matching paid order data (824.71ms)
+✔ billing: unconfigured billing does not create orders or accept callbacks (253.261ms)
+✔ billing: pre-upgrade USD orders require the same verified payment and gain explicit currency (366.18ms)
+✔ billing: explicit local stub mode confirms only its own stub orders (299.8855ms)
+[engine] OSC listener ready :0
+[engine] OSC sender → 127.0.0.1:51083
+▶ engine evidence and specimen simulation stay honest
+  ✔ a bound local UDP listener is not evidence of an engine (0.667708ms)
+  ✔ malformed telemetry cannot establish availability or populate organisms (4.386917ms)
+  ✔ validated observed telemetry enables command dispatch (2.054875ms)
+  ✔ stale evidence expires even when unrelated or invalid packets arrive (1.075084ms)
+  ✔ fresh engine evidence cannot turn a simulated specimen into rendered audio (33.967708ms)
+  ✔ specimen ownership comes only from trusted invocation context (0.379416ms)
+  ✔ closing the telemetry transport clears its evidence (2.435708ms)
+✔ engine evidence and specimen simulation stay honest (88.225625ms)
+ℹ tests 57
+ℹ suites 0
+ℹ pass 57
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3654.592833

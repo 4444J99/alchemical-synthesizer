@@ -1,0 +1,15 @@
+{
+  "source_commit": "2409fde5e5cefb34ef605f49378dc0d89953c9e3",
+  "artifacts": [
+    {
+      "path": "dist/alchemical-synthesizer-integration-20261027-2409fde.tar.gz",
+      "size": 1489861,
+      "sha256": "0cc902a1cc4126bc70b9e9b58b115189d00bcb9f0a566c7891eafc186b3c2898"
+    },
+    {
+      "path": "dist/alchemical-synthesizer-integration-20261027-2409fde.zip",
+      "size": 1748663,
+      "sha256": "0516cfc9f1340c93613c57ec5a2d2c125bb1c5194420d95f8f6de6abeb3c0039"
+    }
+  ]
+}

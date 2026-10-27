@@ -1,0 +1,18 @@
+✔ every Docker COPY input exists in its declared repository context (1.944625ms)
+✔ local stream host serves bundled listener and accepts authenticated operator intake (92.617833ms)
+✔ broadcast and host share the same repository out/live with zero path overrides (754.515583ms)
+✔ malformed submission fields cannot terminate the host (91.520875ms)
+✔ network intake is disabled by default and otherwise requires the operator token (155.689375ms)
+✔ static resolution rejects malformed URLs, traversal and escaped symlinks (4.0545ms)
+✔ malformed HTTP paths fail without losing server liveness (65.449625ms)
+✔ edge host exposes only listener artifacts, including when private records already exist in R2 (23.844625ms)
+✔ listener initializes, polls lineage, and renders submitted text without HTML (4.424375ms)
+✔ example engine updates cannot traverse prototypes or absent properties (1.770417ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1690.212875

@@ -1,0 +1,39 @@
+
+> brahma-foundry@0.1.0 smoke
+> node bin/smoke.js
+
+[engine] OSC listener ready :0
+[engine] OSC sender → 127.0.0.1:57120
+
+=== BRAHMA FOUNDRY ONLINE ===
+  Pricing / landing : http://localhost:0/pricing
+  Dashboard         : http://localhost:0/dashboard
+  REST API          : http://localhost:0/api/v1
+  MCP server        : http://localhost:0/mcp
+  ACP (comm/client) : http://localhost:0/acp
+  Engine            : simulation (no SC detected yet)
+  Billing           : stub
+
+  ✓ GET /api/v1 lists surfaces
+  ✓ GET /modules returns catalog
+  ✓ POST /account/signup issues api key
+  ✓ POST /render (metered) succeeds
+  ✓ render usage incremented
+  ✓ POST /render without key → 401
+  ✓ MCP tools/list returns tools
+  ✓ MCP tools/call list_modules works
+  ✓ MCP costed tool without key → JSON-RPC error
+  ✓ ACP GET /agents lists brahma
+  ✓ ACP POST /runs completes
+  ✓ ACP jsonrpc session/prompt works
+  ✓ GET /plans returns tiers
+  ✓ checkout returns a url (stub or stripe)
+  ✓ POST /waitlist joins
+  ✓ GET / serves the AETHER radio home
+  ✓ GET /specimens/:id/audio streams the real file (200)
+  ✓ audio endpoint advertises Range support
+  ✓ audio Range request → 206 partial content
+  ✓ simulated specimen audio → 409
+  ✓ real specimen, missing file → 404
+
+Smoke: 21 passed, 0 failed

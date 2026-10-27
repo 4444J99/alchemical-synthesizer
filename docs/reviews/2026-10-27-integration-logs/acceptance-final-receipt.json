@@ -1,0 +1,38 @@
+[
+  {
+    "gate": "browser-tests-configured",
+    "command": [
+      "npm",
+      "run",
+      "test:e2e",
+      "--",
+      "--test-concurrency=1"
+    ],
+    "cwd": "brahma/web",
+    "environment": {
+      "BRAHMA_REQUIRE_BROWSER": "1",
+      "BRAHMA_CHROME_PATH": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    },
+    "deadline_seconds": 90,
+    "exit_code": 0,
+    "seconds": 6.612,
+    "log": "docs/reviews/2026-10-27-integration-logs/browser-tests-configured.txt"
+  },
+  {
+    "gate": "native-sample-admission",
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "test/native-samples.test.js"
+    ],
+    "cwd": "brahma/web",
+    "environment": {
+      "RUN_NATIVE_DONOR_TESTS": "1"
+    },
+    "deadline_seconds": 90,
+    "exit_code": 0,
+    "seconds": 1.425,
+    "log": "docs/reviews/2026-10-27-integration-logs/native-sample-admission.txt"
+  }
+]

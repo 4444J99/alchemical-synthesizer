@@ -1,0 +1,16 @@
+✔ native sample admission validates actual PCM frames and content hashes (45.968084ms)
+✔ native jobs retain validated output and reject routing, simultaneous renders and corrupt results (9.658292ms)
+✔ cancelled native jobs cannot become completed when a late render returns (3.108583ms)
+✔ shutdown refuses requests still awaiting catalogue admission (0.974667ms)
+✔ native routes require human role and trusted loopback Origin before reading uploaded audio (31.835209ms)
+✔ completed native audio is retrievable from an owned hidden worktree directory (14.337541ms)
+✔ installed Forge pipeline produces a measured native sound from admitted PCM (1154.692ms)
+✔ material admission resolves controls and rejects a renderer with a different material receipt (4.987542ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1318.181834

@@ -1,0 +1,116 @@
+=== [1/6] Structure ===
+  PASS  exists: brahma/sc/loader.scd
+  PASS  exists: brahma/web/server.js
+  PASS  exists: brahma/web/bin/brahma-mcp.js
+  PASS  exists: brahma/web/lib/mcp/server.js
+  PASS  exists: brahma/web/lib/mcp/client.js
+  PASS  exists: brahma/web/public/instrument/sample-project.js
+  PASS  exists: brahma/web/public/instrument/sample-audio.js
+  PASS  exists: brahma/web/public/instrument/sample-controls.js
+  PASS  exists: docs/agent-clients.md
+  PASS  exists: brahma/ableton/src/index.js
+  PASS  exists: forge/validate_audio.py
+  PASS  exists: forge/assimilate.py
+  PASS  exists: brahma/sc/32_donor_rack.scd
+  PASS  exists: forge/native-controls.json
+  PASS  exists: forge/materials.json
+  PASS  exists: forge/materials.py
+  PASS  exists: forge/compare.py
+  PASS  exists: brahma/web/public/instrument/material-model.js
+  PASS  exists: brahma/web/public/instrument/material-controls.js
+  PASS  exists: brahma/web/public/instrument/material-vessels.css
+  PASS  exists: tools/verify-material-vessels.cjs
+  PASS  exists: forge/sketch.py
+  PASS  exists: tools/verify-song-sketch.cjs
+  PASS  exists: brahma/web/public/instrument/native-controls.js
+  PASS  exists: README.md
+  PASS  SynthDef files: 73 (>= 60)
+=== [2/6] Ableton extension smoke (node) ===
+  PASS  brahma/ableton/test/smoke.js
+=== [3/6] JS syntax (node --check) ===
+  PASS  node --check brahma/web/server.js
+  PASS  node --check brahma/web/bin/brahma-mcp.js
+  PASS  node --check brahma/web/lib/mcp/server.js
+  PASS  node --check brahma/web/lib/mcp/client.js
+  PASS  node --check brahma/web/public/sketch.js
+  PASS  node --check brahma/web/public/tree/video.js
+  PASS  node --check aether/web/listener/aether.js
+  PASS  node --check brahma/web/public/instrument/pattern.js
+  PASS  node --check brahma/web/public/instrument/instrument.js
+  PASS  node --check brahma/web/public/instrument/sample-project.js
+  PASS  node --check brahma/web/public/instrument/sample-audio.js
+  PASS  node --check brahma/web/public/instrument/sample-controls.js
+  PASS  node --check brahma/web/public/instrument/native-controls.js
+  PASS  node --check brahma/web/public/instrument/material-model.js
+  PASS  node --check brahma/web/public/instrument/material-controls.js
+  PASS  node --check tools/verify-material-vessels.cjs
+  PASS  node --check tools/verify-song-sketch.cjs
+  PASS  node --check aether/deploy/serve.js
+  PASS  node --check aether/deploy/worker.mjs
+  PASS  node --check forge/render_video.mjs
+  PASS  instrument pattern.js --self-test
+  PASS  sample project contracts (audio integrity, bounds, pattern references)
+  PASS  native sample service admission, authorization, cancellation and integrity contracts
+  PASS  material model and Node/Python resolution parity
+=== [4/6] Python audio validator ===
+  PASS  material and source-bound comparison contracts
+  PASS  donor assimilation contracts (native integration separately opt-in)
+  PASS  portable native song sketch contracts
+  PASS  validate_audio.py accepts generated tone
+  PASS  analyze_audio.py --summary-json measures a real tone
+=== [5/6] Web endpoint boot ===
+  PASS  workbench bundle built (public/workbench/vendor/workbench.js)
+  PASS  Visual Cortex served / (200) and /api/modules (200)
+  PASS  workbench page + source offer served (200/200)
+  PASS  agent API refuses unauthenticated callers (401)
+  PASS  MCP endpoint refuses unauthenticated callers (401)
+  PASS  MCP agent tools: propose yes, accept/run no
+  PASS  stdio MCP bridge handshake (initialize → brahma-workbench)
+  PASS  human launch URL targets /workbench/#t=
+  PASS  workbench licence boundary clean (AGPL subtree isolated)
+=== [6/6] Forge tools syntax (py_compile + bash -n) ===
+  PASS  py_compile forge/sketch.py
+  PASS  py_compile forge/assimilate.py
+  PASS  py_compile forge/rip.py
+  PASS  py_compile forge/stemforge.py
+  PASS  py_compile forge/analyze_audio.py
+  PASS  py_compile forge/validate_audio.py
+  PASS  py_compile tools/gen_test_tone.py
+  PASS  py_compile aether/tools/tune.py
+  PASS  py_compile aether/tools/cellcycle.py
+  PASS  py_compile aether/tools/hls_append.py
+  PASS  cellcycle.py --self-test
+  PASS  hls_append.py --self-test
+  PASS  ingest_queue.py --self-test
+  PASS  lineage.py --self-test
+  PASS  stations.json: all sources carry name+url+license
+  PASS  tune.py --list
+  PASS  bash -n forge/forge.sh
+  PASS  bash -n forge/bounce.sh
+  PASS  bash -n forge/render-pattern.sh
+  PASS  bash -n forge/ingest.sh
+  PASS  bash -n forge/setup-demucs.sh
+  PASS  bash -n forge/videotrack.sh
+  PASS  bash -n forge/setup-video.sh
+  PASS  bash -n forge/package.sh
+  PASS  bash -n aether/tools/broadcast.sh
+  PASS  bash -n aether/tools/r2_sync.sh
+  PASS  bash -n aether/tools/rebroadcast.sh
+  PASS  bash -n aether/deploy/entrypoint.sh
+  PASS  bash -n tools/smoke.sh
+  PASS  rebroadcast.json valid (targets + video + audio)
+  PASS  rebroadcast.sh --dry-run encodes a FLV (audio->visualizer->flv)
+  PASS  aether/deploy/wrangler.toml valid (name + containers + r2_buckets)
+  PASS  aether/deploy/Dockerfile has FROM + ENTRYPOINT
+  PASS  AETHER Dockerfile COPY sources exist in the declared build context
+  PASS  exists: aether/deploy/README.md
+  PASS  exists: brahma/sc/13_nrt_renderer.scd
+  PASS  exists: brahma/sc/14_stem_voices.scd
+  PASS  exists: brahma/web/public/tree/video.js
+  PASS  exists: aether/web/listener/index.html
+  PASS  exists: aether/web/listener/aether.js
+  PASS  exists: brahma/web/public/instrument/index.html
+  PASS  Ouroboros: submission absorbed + lineage recorded
+
+=== Summary: 107 passed, 0 failed, 0 skipped ===
+SMOKE: PASS

@@ -1,0 +1,293 @@
+
+> brahma-visual-cortex@1.0.0 test
+> node --test 'test/**/*.test.js' --test-concurrency=1
+
+✔ admission: agent malformed explicit events never invoke a provider (14.679167ms)
+✔ admission: MCP malformed explicit events never invoke a provider (0.414042ms)
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57134 -> SC 57998 ---
+OSC Listener Ready on port 0
+OSC Sender Ready -> port 57998
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:61905 ---
+--- GOLEM UI: http://127.0.0.1:61905/golem ---
+--- CORTEX UI: http://127.0.0.1:61905/cortex ---
+--- MCP (agent): http://127.0.0.1:61905/mcp ---
+--- AGENT TOKEN FILE: /Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/.runtime/agent-token-61905 (0600, local MCP bridges) ---
+--- HUMAN ROLE: supplied by environment, not printed ---
+✔ agent HTTP: unauthenticated callers are refused (59.293417ms)
+✔ agent HTTP: providers report honest availability (7.805667ms)
+✔ agent HTTP: an agent may propose, and the proposal does not run (19.244125ms)
+✔ agent HTTP: an agent cannot accept its own proposal (5.329ms)
+✔ agent HTTP: an agent cannot run an accepted proposal (13.920625ms)
+✔ agent HTTP: a human accepts, and a rejected proposal cannot run (11.01375ms)
+✔ agent HTTP: unknown approvals and jobs are 404, not 500 (4.620042ms)
+✔ agent HTTP: an unavailable provider is a typed refusal, not an empty proposal (2.812417ms)
+✔ agent HTTP: a cross-origin proposal is refused even with a valid token (5.3165ms)
+✔ agent HTTP: stop is human-only and cancels the running approval (14.710958ms)
+✔ agent HTTP: malformed explicit events cannot fall through to provider composition (8.191791ms)
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+✔ stop: cancellation before launch executes no command (12.576791ms)
+✔ stop: active and queued approvals fail terminally despite late render success (6.671375ms)
+✔ stop: runner retains the execution slot until aborted work settles (2.440958ms)
+✔ stop: MCP human adapter forwards authority and the agent cannot stop (1.579375ms)
+✔ executor: successful commands retain stdout and stderr (79.315334ms)
+✔ executor: excessive output remains bounded (99.149709ms)
+✔ executor: abort terminates the renderer's spawned descendants (254.773167ms)
+✔ executor: timeout terminates the renderer's spawned descendants (844.264083ms)
+✔ executor: the renderer wrapper keeps sclang and its children cancellable (1135.732458ms)
+✔ approval: a proposal starts in `proposed` and carries its payload (10.415667ms)
+✔ approval: an agent may not accept or reject its own proposal (1.179ms)
+✔ approval: accepting does not run, and run requires accepted state (0.323375ms)
+✔ approval: invalid transitions are refused rather than coerced (0.374875ms)
+✔ approval: a rejected proposal can never run (0.366708ms)
+✔ approval: unknown ids are a typed miss, not a throw (0.328333ms)
+✔ approval: the store is bounded so a runaway agent cannot grow it forever (0.941833ms)
+✔ jobs: FIFO, one at a time (37.608334ms)
+✔ jobs: a failure is recorded and does not stall the queue (1.912625ms)
+✔ jobs: the queue is bounded and refuses rather than dropping work silently (0.1825ms)
+✔ jobs: unknown job is null, not an exception (0.046292ms)
+✔ providers: cached availability distinguishes unimplemented adapters from discovery (0.28775ms)
+✔ providers: claude is available only with a key, and needs a pinned model (0.09475ms)
+✔ providers: an unavailable provider refuses, it never returns an empty pattern (0.052125ms)
+✔ providers: an injected transport is parsed and normalised (0.299041ms)
+✔ providers: a malformed model response is refused (0.072167ms)
+✔ providers: the mock motif is deterministic and needs no model (0.317666ms)
+✔ providers: event validation rejects out-of-range values (0.037709ms)
+✔ loop: propose → accept → run, with nothing executing before the human acts (4.645334ms)
+✔ loop: an agent cannot run what a human accepted (0.568875ms)
+✔ loop: a run that fails marks the approval failed with the reason (1.118291ms)
+✔ loop: a proposal the provider refused is never filed (0.370041ms)
+✔ loop: the tool catalogue declares which tools need a human (0.305417ms)
+✔ auth: malformed WebSocket cookie cannot crash the gateway (560.875ms)
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57130 -> SC 57120 ---
+OSC Listener Ready on port 57122
+OSC Sender Ready -> port 57120
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:61910 ---
+--- GOLEM UI: http://127.0.0.1:61910/golem ---
+--- CORTEX UI: http://127.0.0.1:61910/cortex ---
+--- MCP (agent): http://127.0.0.1:61910/mcp ---
+--- AGENT TOKEN FILE: /Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/.runtime/agent-token-61910 (0600, local MCP bridges) ---
+--- HUMAN ROLE: supplied by environment, not printed ---
+✔ lib/auth.js: randomToken generates 32-hex character string (0.50225ms)
+✔ lib/auth.js: safeEqual compares constant-time buffers (0.077459ms)
+✔ lib/auth.js: isLoopbackAddress correctly classifies IP addresses (0.101083ms)
+✔ lib/auth.js: parseCookies extracts cookie attributes (0.321875ms)
+✔ lib/auth.js: malformed cookie encoding is ignored without granting a role (0.157875ms)
+✔ lib/auth.js: createAuth resolves human vs agent roles and prevents cross-spoofing (0.121375ms)
+✔ lib/auth.js: originOk permits localhost/127.0.0.1/[::1] and blocks foreign origins (0.104875ms)
+✔ Gateway Integration: binds to loopback and respects HOST env var (0.042291ms)
+✔ Gateway Integration: /api/auth/exchange sets HttpOnly cookie (57.996416ms)
+✔ Gateway Integration: /api/auth/status reflects session role (71.407708ms)
+✔ Gateway Integration: malformed cookie returns unauthenticated status (63.920208ms)
+Client Connected to Visual Cortex [role: unauthenticated]
+✔ Gateway Integration: WebSocket verifyClient enforces 403 on untrusted Origin (5.088917ms)
+Client Connected to Visual Cortex [role: unauthenticated]
+Client Disconnected [role: unauthenticated]
+Client Connected to Visual Cortex [role: agent]
+Client Connected to Visual Cortex [role: unauthenticated]
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+Client Connected to Visual Cortex [role: human]
+✔ Gateway Integration: WebSocket enforces roles and the browser allowlist (70.771375ms)
+Client Disconnected [role: human]
+Client Disconnected [role: human]
+Client Disconnected [role: agent]
+Client Disconnected [role: unauthenticated]
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57136 -> SC 57996 ---
+OSC Listener Ready on port 0
+OSC Sender Ready -> port 57996
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:61908 ---
+--- GOLEM UI: http://127.0.0.1:61908/golem ---
+--- CORTEX UI: http://127.0.0.1:61908/cortex ---
+--- MCP (agent): http://127.0.0.1:61908/mcp ---
+--- AGENT TOKEN FILE: /Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/.runtime/agent-token-61908 (0600, local MCP bridges) ---
+--- HUMAN ROLE: supplied by environment, not printed ---
+✔ Dirt conformance: a captured /dirt/play packet decodes to the documented fields (20.3135ms)
+✔ Dirt conformance: /dirt/panic forwards as the engine's panic address (0.136625ms)
+✔ Dirt conformance: /play2 aliases (sound, midinote, velocity) are honoured (0.078959ms)
+✔ Dirt conformance: every fixture packet is well-formed (no truncated hex) (0.227417ms)
+✔ Dirt conformance: an unsupported address is ignored, not guessed at (0.196083ms)
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+✔ runtimes: unimplemented adapters remain unavailable regardless of installation (264.004375ms)
+✔ sclang gate: anonymous callers are refused before anything else (6.384083ms)
+✔ sclang gate: the human role alone is not enough without the opt-in env var (5.191958ms)
+✔ sclang gate: with the opt-in set, request validation runs (the gate really opened) (6.586666ms)
+✔ sclang gate: the outcome matches the probe, so a green probe cannot hide a broken eval (906.138958ms)
+▶ Dirt Bridge — parseDirtArgs
+  ✔ parses flat alternating key-value array (1.055125ms)
+  ✔ parses typed metadata object array (0.110875ms)
+  ✔ handles object input directly (0.079375ms)
+  ✔ handles empty or odd-length arrays gracefully (0.077375ms)
+✔ Dirt Bridge — parseDirtArgs (2.397ms)
+▶ Dirt Bridge — translateDirtMessage
+  ✔ translates /dirt/play to /brahma/live/play with defaults (0.165666ms)
+  ✔ translates /play2 with full parameters and metadata format (0.070542ms)
+  ✔ clamps note, gain, and duration to valid ranges (0.047292ms)
+  ✔ filters reserved keys from extra synthesis parameters (0.067458ms)
+  ✔ translates /dirt/panic to /brahma/live/panic (0.692542ms)
+  ✔ rejects unsupported addresses (0.080292ms)
+✔ Dirt Bridge — translateDirtMessage (1.49425ms)
+✔ Dirt Bridge — UDP Network Round-Trip (14.769708ms)
+▶ Live Bridge — SuperCollider File & Schema Integrity
+  ✔ 31_live_gateway.scd exists and defines required OSCdefs (1.641041ms)
+  ✔ loader.scd loads 31_live_gateway.scd inside doWhenBooted (0.265375ms)
+  ✔ IMMUNE Safety Governor Preservation Invariant (0.185542ms)
+  ✔ /brahma/live/play auto-release duration contract (0.070834ms)
+✔ Live Bridge — SuperCollider File & Schema Integrity (3.31875ms)
+✔ Live Bridge — Gateway Server Namespace Whitelist (0.134583ms)
+✔ Live Bridge — OSC sockets bind loopback only (0.069167ms)
+✔ material composition rejects invalid matter rather than silently changing the sound (24.295041ms)
+✔ phase changes real organism controls while zero amount preserves the base recipe (0.686875ms)
+✔ mixture order canonicalizes and extreme material settings stay inside native control ranges (3.28325ms)
+✔ Nucleus persistence switches between retained playback and its native muted recording state (0.21475ms)
+✔ Node/browser and native Python use identical material properties, mappings and model identity (58.281167ms)
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57135 -> SC 57997 ---
+OSC Listener Ready on port 0
+OSC Sender Ready -> port 57997
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:61913 ---
+--- GOLEM UI: http://127.0.0.1:61913/golem ---
+--- CORTEX UI: http://127.0.0.1:61913/cortex ---
+--- MCP (agent): http://127.0.0.1:61913/mcp ---
+--- AGENT TOKEN FILE: /var/folders/l9/zn9x070d4xqb1qb5wfzr9tjr0000gn/T/brahma-mcp-test-vHnBID/agent-token-61913 (0600, local MCP bridges) ---
+--- HUMAN ROLE: supplied by environment, not printed ---
+✔ mcp: the gateway writes the agent token 0600 and never the human token (1.153ms)
+✔ mcp HTTP: unauthenticated initialize is refused (121.102166ms)
+✔ mcp HTTP: the agent tool list offers propose and no decision tools (8.009709ms)
+✔ mcp HTTP: an agent cannot call a decision tool by guessing its name (39.807333ms)
+✔ mcp HTTP: propose files an approval and does not run (11.083708ms)
+✔ mcp HTTP: the human tool list adds accept/reject/run (1.959917ms)
+✔ mcp HTTP: human stop succeeds and agent stop is not exposed (28.304166ms)
+✔ mcp HTTP: accepting is a separate act from running (5.391125ms)
+✔ mcp HTTP: run refuses an unaccepted proposal, and an unknown job is typed (3.923625ms)
+✔ mcp HTTP: engine status answers with the shared runtime snapshot (1.69525ms)
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+✔ mcp stdio: the bridge every client launches answers initialize and tools/list (93.932292ms)
+✔ mcp stdio: the human role refuses to start without a human token (66.829625ms)
+✔ native sample admission validates actual PCM frames and content hashes (91.739708ms)
+✔ native jobs retain validated output and reject routing, simultaneous renders and corrupt results (14.579417ms)
+✔ cancelled native jobs cannot become completed when a late render returns (7.112292ms)
+✔ shutdown refuses requests still awaiting catalogue admission (3.197583ms)
+✔ native routes require human role and trusted loopback Origin before reading uploaded audio (38.405209ms)
+✔ completed native audio is retrievable from an owned hidden worktree directory (39.401792ms)
+﹣ installed Forge pipeline produces a measured native sound from admitted PCM (1.849ms) # set RUN_NATIVE_DONOR_TESTS=1 for installed SC
+✔ material admission resolves controls and rejects a renderer with a different material receipt (9.520458ms)
+✔ slow provider discovery returns immediately and reports pending honestly (974.798917ms)
+✔ a failed probe cannot inherit availability from another registry (232.086416ms)
+✔ overlapping capability refreshes share a bounded subprocess (344.038417ms)
+✔ HTTP binds and serves provider status while ghci is still pending (491.083583ms)
+✔ providers: construction and listing do no optional-runtime work, and explicit discovery yields (584.2335ms)
+✔ providers: discovery timeout terminates the optional command and its descendants (840.554333ms)
+✔ providers: a missing optional executable is reported as not installed (3.094042ms)
+✔ providers: installed runtimes remain unavailable, and discovery is deduplicated and registry-local (539.645958ms)
+✔ providers: missing or blank model configuration cannot call a model transport (0.783125ms)
+✔ providers: configured Gemini is discoverable and proposes over MCP without a live call (1.77575ms)
+✔ providers: malformed event elements are refused without throwing (0.064333ms)
+✔ providers: close cancels pending discovery and prevents another subprocess (215.511792ms)
+✔ portable project restores exact source bytes, chop edits, pattern and transport (50.529125ms)
+✔ equal chops cover the whole source without dropping the last region (0.321625ms)
+✔ corrupt embedded audio is rejected before it can replace a session (1.426709ms)
+✔ source identity deduplicates identical bytes even when filenames differ (3.546792ms)
+✔ native transformation recipes retain their source and exact settings after reopen (2.486584ms)
+✔ replacing one track sound changes its future notes and preserves unrelated sources and chops (1.103167ms)
+✔ invalid source references and slice bounds cannot silently fall back to synthesis (1.065833ms)
+✔ resource budgets reject project audio before decoding and are configurable (0.634666ms)
+✔ sample references survive ratchets, stutters and every generative phase (0.435583ms)
+✔ per-track vessels survive reopen separately from the compositional arc and retained native material recipe (1.153083ms)
+✔ rendered material recipes retain base controls, effective controls and the model identity (1.581875ms)
+✔ sandbox network probe sends a valid harmless OSC message (94.660916ms)
+▶ Suite 1: Sandbox Backend & Profile Generation
+  ✔ backend() identifies seatbelt on darwin (0.48ms)
+  ✔ buildProfile() generates deny-default Seatbelt syntax (0.530667ms)
+✔ Suite 1: Sandbox Backend & Profile Generation (2.931083ms)
+▶ Suite 2: Scratch Directory Lifecycle
+  ✔ makeScratch() creates directory with 0700 permissions (0.31125ms)
+  ✔ rmScratch() removes directory cleanly (0.195542ms)
+✔ Suite 2: Scratch Directory Lifecycle (0.64525ms)
+▶ Suite 3: Fail-Closed Self-Test Verification
+  ✔ selfTest() passes 7-point isolation verification (87.54ms)
+✔ Suite 3: Fail-Closed Self-Test Verification (87.904166ms)
+▶ Suite 4: Sandbox Resource Limits & Process Group Teardown
+  ✔ launch() terminates process exceeding outputBytes limit (86.494625ms)
+  ✔ launch() terminates process exceeding wallMs timeout (219.115625ms)
+✔ Suite 4: Sandbox Resource Limits & Process Group Teardown (308.253583ms)
+▶ Suite 5: Runtime Status Gating Matrix
+  ✔ Strudel is always available (browser) (0.575125ms)
+  ✔ Tidal and Sonic Pi distinguish missing installations from missing adapters (0.170584ms)
+  ✔ Tidal and Sonic Pi installations do not enable unimplemented execution adapters (0.145792ms)
+  ✔ sclang is disabled if BRAHMA_ALLOW_SCLANG is not 1 (0.276375ms)
+  ✔ sclang requires human role (0.365792ms)
+  ✔ sclang fails closed if sandbox self-test failed (0.389417ms)
+  ✔ sclang reports not_installed if binary missing (0.072709ms)
+  ✔ sclang reports available when all gates pass (0.043125ms)
+✔ Suite 5: Runtime Status Gating Matrix (2.97525ms)
+▶ Suite 6: Sclang Runtime Spec and Execution Guard
+  ✔ headless evaluation coexists with an occupied IDE port (662.717458ms)
+  ✔ findSclang discovers the standard Linux binary and rejects directories (1.032583ms)
+  ✔ sclangRuntimeSpec builds readRoots and execs for valid path (0.143959ms)
+  ✔ executeSclang throws when BRAHMA_ALLOW_SCLANG != 1 (0.589583ms)
+✔ Suite 6: Sclang Runtime Spec and Execution Guard (665.740459ms)
+✔ ratelimit: bucket drains, refuses, then refills (1.018958ms)
+✔ ratelimit: rejects nonsense configuration (0.214542ms)
+✔ session: human token yields human role (0.882167ms)
+✔ session: agent token yields agent role, never human (0.158792ms)
+✔ session: bad token is rejected with a typed error (0.120333ms)
+✔ session: malformed frames produce typed errors, never throw (0.114666ms)
+✔ session: run registers a pattern and pings the engine (0.998209ms)
+✔ session: run rejects duplicate ids and bad ids (0.178417ms)
+✔ session: agent cannot run (0.183166ms)
+✔ session: unauthenticated cannot run (0.179792ms)
+✔ session: event maps to /brahma/live/play with clamped arguments (0.281209ms)
+✔ session: event rejects non-numeric note/vel/dur (0.107542ms)
+✔ session: event is rate limited without dropping the connection (0.156084ms)
+✔ session: stop releases that instance's voices only (0.636625ms)
+✔ session: stop of an unknown pattern is a typed error (0.098042ms)
+✔ session: stop_all panics the engine and clears the registry (0.193125ms)
+✔ session: stop_all is human-only (0.05275ms)
+✔ session: status reports no_pong_yet before the engine answers (0.1325ms)
+✔ session: status is fresh after a pong and stale after the window (0.089542ms)
+✔ session: agent may read status but not control (0.052834ms)
+✔ session: unauthenticated status is forbidden (0.036667ms)
+✔ session: legacy OSC inside the allowlist still forwards for humans (0.143458ms)
+✔ session: legacy OSC outside the allowlist is refused (0.085792ms)
+✔ session: legacy OSC is human-only (0.080042ms)
+✔ session: legacy OSC is rate limited too (0.1765ms)
+✔ oscArgs: types integers, floats and strings for metadata mode (0.080542ms)
+✔ Tree loads the same substrate contracts that AdamKadmon consumes (2.759041ms)
+✔ tree: selecting an empty vessel does not crash the next draw (3.650167ms)
+✔ tree: selected traits follow current organism state and disappear when it expires (6.825625ms)
+✔ tree: trait panel fits a narrow viewport and identifies derived proxies (1.295125ms)
+✔ tree: incomplete captured trait maps are not filled with invented midpoint values (1.407375ms)
+[boot] server.js entry
+--- DIRT BRIDGE ONLINE: UDP 57131 -> SC 57999 ---
+OSC Listener Ready on port 0
+OSC Sender Ready -> port 57999
+--- VISUAL CORTEX ONLINE: http://127.0.0.1:61932 ---
+--- GOLEM UI: http://127.0.0.1:61932/golem ---
+--- CORTEX UI: http://127.0.0.1:61932/cortex ---
+--- MCP (agent): http://127.0.0.1:61932/mcp ---
+--- AGENT TOKEN FILE: /Users/4jp/Workspace/.worktrees/alchemical-smoke-clean-checkout-20261027/brahma/web/.runtime/agent-token-61932 (0600, local MCP bridges) ---
+--- WORKBENCH (human): http://127.0.0.1:61932/workbench/#t=[REDACTED_TEST_CAPABILITY] ---
+--- INSTRUMENT (human): http://127.0.0.1:61932/instrument/#t=[REDACTED_TEST_CAPABILITY] ---
+--- Open that URL on this machine to claim the human role. ---
+✔ workbench licence: full AGPL text ships (1.540375ms)
+✔ workbench licence: NOTICE lists the bundled dependencies (0.218875ms)
+✔ workbench licence: every shipped source carries an AGPL SPDX header (1.514125ms)
+✔ workbench licence: the page offers its source and imports only its own bundle (0.101291ms)
+✔ GET /workbench/source.json names the licence, repository and dependencies (35.300292ms)
+✔ GET /workbench/ serves the page (6.677083ms)
+✔ event-map: note control becomes a Brahma event (0.489833ms)
+✔ event-map: a sound matching a real module selects that engine (0.108042ms)
+✔ event-map: note names become MIDI, since Strudel passes strings (0.167333ms)
+✔ event-map: pitch comes from note, freq, or nothing (0.098958ms)
+✔ event-map: velocity, duration and params are clamped and filtered (0.341417ms)
+[sandbox] Seatbelt isolation verified (backend: seatbelt, checks: 7/7 passed)
+ℹ tests 205
+ℹ suites 0
+ℹ pass 204
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 2794.575417
