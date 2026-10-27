@@ -308,8 +308,9 @@ describe("local sample instrument", () => {
       assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
       await ctx.page.click("#stop"); await ctx.page.click("#freeze"); await status("Saved");
       const filename = path.join(ctx.dir, "Native-acceptance.brahma.json");
-      await until(() => fs.existsSync(filename));
-      const project = JSON.parse(fs.readFileSync(filename));
+      const project = await until(() => {
+        try { return JSON.parse(fs.readFileSync(filename)); } catch (_) { return null; }
+      });
       assert.equal(project.sources.length, 2);
       const output = project.sources.find(source => source.recipe);
       assert.equal(output.recipe.module, "solve_pitch_shift");
