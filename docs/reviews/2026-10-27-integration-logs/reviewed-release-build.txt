@@ -1,0 +1,14 @@
+workbench bundle -> public/workbench/vendor/workbench.js
+=== Building alchemical-synthesizer-integration-20261027-1d9fa17-reviewed ===
+=== Artifacts ===
+-rw-r--r--@ 1 4jp  staff   868B Oct 27 11:30 PROVENANCE.json
+-rw-r--r--@ 1 4jp  staff   479B Oct 27 11:30 SHA256SUMS.txt
+-rw-r--r--@ 1 4jp  staff   1.3K Oct 27 11:30 alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.spdx
+-rw-r--r--@ 1 4jp  staff   1.5M Oct 27 11:30 alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.tar.gz
+-rw-r--r--@ 1 4jp  staff   1.7M Oct 27 11:30 alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.zip
+
+5caa6f7a67730cfb165850af23d33aee773f4ea45c6a8917c42736aad0cd0e07  alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.tar.gz
+441841a2073825b1cadc25d34282a9dd3ed372031dce274e64e9d3e6e64a5d84  alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.zip
+dadc0dc8b2767702711fedf315d69686832149fda2a3a045e3dfa7a43528fd07  alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.spdx
+5039993de68b87ad99011d0c094d68ae3d95bcf9266a43b2ba9f5b5fb4254c62  PROVENANCE.json
+=== Done: dist/alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.{tar.gz,zip} ===

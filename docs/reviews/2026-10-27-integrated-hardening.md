@@ -52,9 +52,9 @@ installed runtime configuration were not changed.
 
 ## Acceptance boundaries
 
-The inspected archive was built from clean source commit
+The initial inspected archive was built from clean source commit
 `2409fde5e5cefb34ef605f49378dc0d89953c9e3`; the later browser-discovery fix changes
-the test harness only. The tar and ZIP contain 470 source files and the same
+the test harness only at that checkpoint. The retained tar and ZIP contain 470 source files and the same
 956838-byte workbench bundle. Archive hashes and sizes are recorded in
 release-artifacts.json. The test artifacts remain in the retained checkout's
 ignored dist directory; no public release or deployment was performed.
@@ -101,6 +101,30 @@ runs. Two ephemeral human launch capabilities were redacted from the web log.
 
 The earlier release archives and full-suite results remain historical: they
 precede both independent-review repairs. The updated bundle's hash/size and
-source identities are in `strudel-label-review-receipt.json`; no updated archive
-or deployment is claimed. Pattern code remains trusted JavaScript, with the
+source identities are in `strudel-label-review-receipt.json`. Refreshed archive
+acceptance follows below. Pattern code remains trusted JavaScript, with the
 side-effect and sandbox limitations documented in the workbench README.
+
+## Refreshed release after accepted review fixes
+
+After the parent independently accepted both repairs, the release builder ran
+from clean source commit `1d9fa17576c9b6e24a308ebd7219569f592a742c`. The tar and
+ZIP each contain 515 files, including the same 957695-byte corrected workbench
+bundle. The actual tar passed safe extraction, locked dependency installation,
+all seven HTTP checks, bundle identity and source-revision checks. The ZIP passed
+structure inspection. The provenance records `source_state: clean`.
+
+| Archive | SHA-256 |
+| --- | --- |
+| `dist/alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.tar.gz` | `5caa6f7a67730cfb165850af23d33aee773f4ea45c6a8917c42736aad0cd0e07` |
+| `dist/alchemical-synthesizer-integration-20261027-1d9fa17-reviewed.zip` | `441841a2073825b1cadc25d34282a9dd3ed372031dce274e64e9d3e6e64a5d84` |
+
+The previous five artifact files were moved unchanged into a unique directory
+under the configured custody staging root before rebuilding. Every retained file
+matched its pre-move hash, and both earlier archives still match the original
+release receipt. `reviewed-release-artifacts.json` records their retained paths,
+the new archive sizes/hashes and bundle identity. `reviewed-release-gate-receipt.json`
+records the original bounded commands and results; logs retain all three passes.
+No implementation file changed during this refresh. Its later evidence commit
+contains report/receipt additions only. No public release or deployment occurred,
+and no unrelated full suite was repeated.

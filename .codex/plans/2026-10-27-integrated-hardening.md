@@ -67,3 +67,11 @@ browser tests and 54 affected protocol/workbench tests passed. Separate receipts
 retain the red case, stale-bundle attempt, final passes and bundle/source hashes.
 The earlier release archives precede these repairs; the parent owns final review,
 any refreshed release acceptance, the PR and repository merge.
+
+The parent independently accepted both fixes and delegated a bounded release
+refresh. Built tar/ZIP from clean `1d9fa175`, preserving all five earlier artifact
+files unchanged under a unique custody staging directory. Actual tar runtime
+acceptance passed all seven HTTP/bundle/source checks; ZIP structure passed.
+Both new archives contain 515 files and the corrected 957695-byte bundle.
+Only release evidence/report additions follow the inspected source commit;
+the parent retains PR/merge authority. No public release or deployment occurred.
