@@ -1,0 +1,33 @@
+[
+  {
+    "gate": "strudel-label-review-browser",
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "test/e2e/workbench.e2e.js"
+    ],
+    "cwd": "brahma/web",
+    "deadline_seconds": 45,
+    "exit_code": 0,
+    "seconds": 7.109,
+    "log": "docs/reviews/2026-10-27-integration-logs/strudel-label-review-browser.txt"
+  },
+  {
+    "gate": "strudel-label-review-web",
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "test/workbench.test.js",
+      "test/live_bridge.test.js",
+      "test/session.test.js",
+      "test/conformance.test.js"
+    ],
+    "cwd": "brahma/web",
+    "deadline_seconds": 45,
+    "exit_code": 0,
+    "seconds": 1.644,
+    "log": "docs/reviews/2026-10-27-integration-logs/strudel-label-review-web.txt"
+  }
+]

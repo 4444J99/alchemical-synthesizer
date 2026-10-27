@@ -1,0 +1,56 @@
+{
+  "base_commit": "d755da6b5bc9942bc2a5bb28ac172374232f794e",
+  "scope": "Cancelled labelled Strudel evaluation cannot register notes in a pending successor",
+  "environment": {
+    "BRAHMA_REQUIRE_BROWSER": "1",
+    "BRAHMA_CHROME_PATH": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  },
+  "regression_command": [
+    "node",
+    "--test",
+    "--test-concurrency=1",
+    "--test-name-pattern=a cancelled labelled evaluation",
+    "test/e2e/workbench.e2e.js"
+  ],
+  "regression_cwd": "brahma/web",
+  "regression_deadline_seconds": 30,
+  "attempts": [
+    {
+      "log": "strudel-label-review-red.txt",
+      "exit_code": 1,
+      "source": "original wrapper"
+    },
+    {
+      "log": "strudel-label-review-stale-bundle.txt",
+      "exit_code": 1,
+      "source": "adapter edited but old generated bundle still served"
+    },
+    {
+      "log": "strudel-label-review-built-green.txt",
+      "exit_code": 0,
+      "source": "rebuilt adapter; plain and labelled successors"
+    }
+  ],
+  "final_receipts": [
+    "strudel-label-review-scoped-receipt.json",
+    "strudel-label-review-browser-final-receipt.json"
+  ],
+  "web_log_redactions": "two ephemeral launch capabilities; server processes had exited",
+  "build": {
+    "command": [
+      "npm",
+      "run",
+      "build:workbench"
+    ],
+    "cwd": "brahma/web",
+    "exit_code": 0,
+    "bundle_bytes": 957695,
+    "bundle_sha256": "5e69fff713cd2642a5af1a0bf1a585aede762aec22027f92ad790f73aa2feb6b"
+  },
+  "source_sha256": {
+    "brahma/web/public/workbench/src/strudel.js": "9c5ed3bff3795bcebd0300f5e0079775137d3f228d1dc2a3cbbce6a30248eb06",
+    "brahma/web/test/e2e/workbench.e2e.js": "39760ab1a0b50ae0912cd8868a7405897b874f3cc911e6e367c03e796de5de59",
+    "brahma/web/package.json": "be56a6579a979597a58a3a0adaac67ca354d9b0870cf48fc343681f1c9e31d9c",
+    "brahma/web/package-lock.json": "d6f595e4f25ff49b5053d385dfa8e80bad7bdddfb65dac39d41689770fae8a04"
+  }
+}

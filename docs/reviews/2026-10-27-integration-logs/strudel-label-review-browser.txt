@@ -1,0 +1,21 @@
+▶ workbench E2E
+  ✔ Tier 1 — UI: the page serves, claims the human role, and strips the token from the URL (3.695041ms)
+  ✔ Tier 2 — protocol: server frames are typed JSON and `run` is acknowledged (140.615542ms)
+  ✔ Tier 3 — engine: a scheduled hap reaches the engine socket as a typed play packet (7.868375ms)
+  ✔ Tier 4 — panic: the panic control reaches the panic address (10.615542ms)
+  ✔ edited active buffer is the source that actually plays (157.839875ms)
+  ✔ Stop releases the same instance as the scheduled events (161.183084ms)
+  ✔ editing a playing buffer preserves Stop authority (181.568708ms)
+  ✔ Run applies an edited draft and leaves one registered performance (331.960875ms)
+  ✔ rapid Run–Stop–Run retains authority over the newest performance (249.915584ms)
+  ✔ Stop abandons a pending evaluation and late completion cannot replace or stop its successor (2187.09ms)
+  ✔ a cancelled labelled evaluation cannot register notes in its pending successor (695.9465ms)
+✔ workbench E2E (6621.971708ms)
+ℹ tests 11
+ℹ suites 1
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6872.3635

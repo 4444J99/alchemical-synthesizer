@@ -59,3 +59,11 @@ Actual native regressions failed before the fix; the scoped contract and source
 compilation tests passed afterward. Keep this fix atomic. A second atomic change
 will isolate labelled Strudel evaluation state during cancellation and replacement;
 the parent will independently inspect both fixes before its exact-head PR.
+
+The labelled Strudel regression failed in the real browser/gateway before the
+adapter repair, and passed after an explicit workbench rebuild. The fix preserves
+plain/labelled successors and custom JavaScript method receivers. All 11 workbench
+browser tests and 54 affected protocol/workbench tests passed. Separate receipts
+retain the red case, stale-bundle attempt, final passes and bundle/source hashes.
+The earlier release archives precede these repairs; the parent owns final review,
+any refreshed release acceptance, the PR and repository merge.

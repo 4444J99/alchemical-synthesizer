@@ -12,6 +12,9 @@
 import { evalScope, repl } from "@strudel/core";
 import { transpiler } from "@strudel/transpiler";
 import { miniAllStrings } from "@strudel/mini";
+import { parse } from "acorn";
+import escodegen from "escodegen";
+import { walk } from "estree-walker";
 import { DEFAULT_ENGINE, toEvent } from "./event-map.mjs";
 
 const MAX_PENDING = 512;
@@ -22,7 +25,28 @@ const REPL_HELPERS = "all,each,hush,cpm,setCps,setcps,setCpm,setcpm,compileKabel
 
 function scopedTranspiler(code, options) {
   const compiled = transpiler(code, options);
-  return { ...compiled, output: `return (({${REPL_HELPERS}}) => (async () => {${compiled.output}})())(globalThis);` };
+  const methods = ["p", "cpm"];
+  const ast = parse(compiled.output, { ecmaVersion: 2022, allowAwaitOutsideFunction: true, allowReturnOutsideFunction: true });
+  walk(ast, { leave(node) {
+    const member = node.type === "CallExpression" && node.callee;
+    if (!member || node.optional || member.type !== "MemberExpression" || member.optional || member.object.type === "Super") return;
+    const name = member.computed ? member.property.value : member.property.name;
+    if (!methods.includes(name)) return;
+    // Strudel turns labels into pattern.p(label), and replaces that prototype
+    // method for every repl. Bind the callee to this evaluation before any await.
+    node.callee = { type: "CallExpression", optional: false,
+      callee: { type: "Identifier", name: "__brahmaPatternMethod" },
+      arguments: [member.object, { type: "Literal", value: name }] };
+  } });
+  const output = escodegen.generate(ast);
+  return { ...compiled, output: `return (({${REPL_HELPERS}}, Pattern) => {
+    const ownedMethods = { p: Pattern.prototype.p, cpm: Pattern.prototype.cpm };
+    const __brahmaPatternMethod = (target, name) => {
+      const method = target instanceof Pattern ? ownedMethods[name] : target[name];
+      return typeof method === "function" ? method.bind(target) : method;
+    };
+    return (async () => {${output}})();
+  })(globalThis, globalThis.Pattern);` };
 }
 
 // Strudel evaluates user code against a global scope. The host has to populate it,

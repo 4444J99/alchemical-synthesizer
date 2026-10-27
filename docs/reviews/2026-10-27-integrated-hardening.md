@@ -78,5 +78,29 @@ normalization. It failed before the repair. The scoped native contract test and
 all repository SC source compilation passed after the repair (2 tests). Logs are
 `contracts-review-red.txt` and `contracts-review-green.txt` in the existing log
 directory. These scoped results supplement, rather than replace, the earlier
-full integration observations. A separate labelled-Strudel cancellation finding
-remains under repair and is not covered by the native contract checks.
+full integration observations. The labelled-Strudel cancellation finding has its
+separate browser/protocol evidence below.
+
+## Independent review: cancelled labelled evaluations
+
+The reviewer reproduced a cancelled pending source containing `$: note("c4")`
+registering C4 into a newer pending source that requested D4. Upstream Strudel
+rewrites labels into `pattern.p(label)` and replaces that prototype method for
+each repl. The adapter now captures the evaluation's `p` and `cpm` methods and
+rewrites their call sites using the already-installed parser/code generator.
+Their exact existing versions are direct locked dependencies; upstream source
+is unchanged. Labelled patterns remain supported, with responsive Stop and Run.
+
+The actual browser/gateway regression failed before the repair (60 instead of
+62). It now passes with plain and labelled successors, plus an ordinary JavaScript
+`p` getter/method retaining its receiver. All 11 workbench browser checks and 54
+affected workbench/protocol checks passed. An initial post-edit run still used the
+old generated bundle and failed; that attempt is retained as
+`strudel-label-review-stale-bundle.txt`. Explicit rebuilding preceded the passing
+runs. Two ephemeral human launch capabilities were redacted from the web log.
+
+The earlier release archives and full-suite results remain historical: they
+precede both independent-review repairs. The updated bundle's hash/size and
+source identities are in `strudel-label-review-receipt.json`; no updated archive
+or deployment is claimed. Pattern code remains trusted JavaScript, with the
+side-effect and sandbox limitations documented in the workbench README.

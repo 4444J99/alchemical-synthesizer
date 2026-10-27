@@ -49,6 +49,10 @@ commercial service needs a licence review first.
 Each Run receives a distinct gateway registration and scheduler. Editing keeps the
 previous performance stoppable; Run applies the visible document. Stop abandons a
 pending evaluation, and a late continuation retains its own Strudel helper bindings.
+Labels and direct pattern registration use the evaluation's captured `p` method;
+pattern `cpm` calls also retain their own scheduler binding. The source-owned
+adapter rewrites those method calls after upstream transpilation. The upstream
+dependency remains unchanged, and ordinary JavaScript method receivers are preserved.
 This controls playback ownership; it is not a JavaScript sandbox. Explicit global
 mutations, arbitrary asynchronous side effects and a synchronous infinite loop are
 not cancelled by Stop. Pattern code is trusted local user code.

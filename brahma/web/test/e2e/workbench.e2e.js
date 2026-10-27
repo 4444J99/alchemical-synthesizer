@@ -411,4 +411,40 @@ describe("workbench E2E", () => {
       await ctx.page.click('#panic');
     }
   });
+
+  it('a cancelled labelled evaluation cannot register notes in its pending successor', async (t) => {
+    if (skipIfNoChrome(t)) return;
+    const successors = [
+      'note("d4").gain(0.1)',
+      'melody: note("d4").gain(0.1)',
+      // Ordinary JavaScript methods keep their original getter and receiver.
+      'const voice = { pitch: 62, get p() { return function () { return note(this.pitch); }; } }; voice.p().gain(0.1)'
+    ];
+    for (const successor of successors) {
+      await ctx.page.evaluate(() => {
+        delete globalThis.__releaseLabelledOld; delete globalThis.__releaseLabelledNew;
+        globalThis.__labelledOldFinished = false;
+      });
+      await replaceActiveText('await new Promise(r => { globalThis.__releaseLabelledOld = r; }); $: note("c4").gain(0.1); globalThis.__labelledOldFinished = true;');
+      await ctx.page.click('#run');
+      await ctx.page.waitForFunction(() => typeof globalThis.__releaseLabelledOld === 'function');
+      await ctx.page.click('#stop');
+      await replaceActiveText('await new Promise(r => { globalThis.__releaseLabelledNew = r; }); ' + successor);
+      await ctx.page.click('#run');
+      await ctx.page.waitForFunction(() => typeof globalThis.__releaseLabelledNew === 'function');
+      try {
+        await ctx.page.evaluate(() => globalThis.__releaseLabelledOld());
+        await ctx.page.waitForFunction(() => globalThis.__labelledOldFinished);
+        const played = waitForOsc(ctx.sink, f => f.address === '/brahma/live/play', 3000, 'pending successor after cancelled label');
+        await ctx.page.evaluate(() => globalThis.__releaseLabelledNew());
+        assert.equal((await played).args[2].value, 62, 'only the successor may register its notes');
+        assert.equal((await liveStatus()).count, 1);
+        await ctx.page.click('#stop');
+        assert.equal((await liveStatus()).count, 0);
+      } finally {
+        await ctx.page.evaluate(() => { globalThis.__releaseLabelledOld?.(); globalThis.__releaseLabelledNew?.(); });
+        await ctx.page.click('#panic');
+      }
+    }
+  });
 });

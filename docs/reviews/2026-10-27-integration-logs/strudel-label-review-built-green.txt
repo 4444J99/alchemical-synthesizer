@@ -1,0 +1,11 @@
+▶ workbench E2E
+  ✔ a cancelled labelled evaluation cannot register notes in its pending successor (680.895917ms)
+✔ workbench E2E (1426.78ms)
+ℹ tests 1
+ℹ suites 1
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1587.16025

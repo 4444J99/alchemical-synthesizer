@@ -1,0 +1,13 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "--test-concurrency=1",
+    "test/e2e/workbench.e2e.js"
+  ],
+  "cwd": "brahma/web",
+  "deadline_seconds": 45,
+  "exit_code": 0,
+  "seconds": 6.481,
+  "log": "docs/reviews/2026-10-27-integration-logs/strudel-label-review-browser-final.txt"
+}
