@@ -75,6 +75,32 @@ describe("local sample instrument", () => {
     await ctx.page.$eval(selector, (el, v) => { el.value = v; el.dispatchEvent(new Event("input", { bubbles: true })); }, value);
   }
 
+  it("meters the real synth-only track without creating audio while idle", async t => {
+    if (skip(t)) return;
+    await ctx.page.evaluate(() => {
+      const NativeContext = window.AudioContext, originalLevel = SampleAudio.Renderer.prototype.level;
+      window.__meterProof = { contexts: 0, playing: 0, other: 0, stopped: null };
+      window.AudioContext = class extends NativeContext { constructor(...args) { super(...args); window.__meterProof.contexts++; } };
+      SampleAudio.Renderer.prototype.level = function (track) {
+        const level = originalLevel.call(this, track), proof = window.__meterProof;
+        if (track === 3) proof.playing = Math.max(proof.playing, level.rms);
+        if (track === 1) proof.other = Math.max(proof.other, level.rms);
+        if (track === 3 && document.querySelector("#play").getAttribute("aria-pressed") === "false") proof.stopped = level.rms;
+        return level;
+      };
+    });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    assert.equal(await ctx.page.evaluate(() => window.__meterProof.contexts), 0);
+    await ctx.page.click("#play");
+    await new Promise(resolve => setTimeout(resolve, 600));
+    await ctx.page.click("#stop");
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const proof = await ctx.page.evaluate(() => window.__meterProof);
+    assert.equal(proof.contexts, 1); assert.ok(proof.playing > .001, "sounding synth track must drive its vessel");
+    assert.equal(proof.other, 0); assert.equal(proof.stopped, 0);
+    await ctx.page.reload();
+  });
+
   it("imports real audio, edits chops, saves bytes, reopens and exports the chosen sample", async t => {
     if (skip(t)) return;
     await upload("#audio-file", ctx.donor); await status("Loaded");
@@ -208,6 +234,26 @@ describe("local sample instrument", () => {
     await ctx.page.select("#adapter", "webaudio");
   });
 
+  it("auditioning a chop stops OSC transport before switching to local audio", async t => {
+    if (skip(t)) return;
+    await ctx.page.reload(); await upload("#audio-file", ctx.donor); await status("Loaded");
+    await ctx.page.select("#adapter", "osc"); await ctx.page.click("#play");
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+    await ctx.page.click('#chops button[data-slice="0"]');
+    await ctx.page.waitForFunction(() => document.querySelector("#adapter").value === "webaudio");
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+  });
+  it("auditioning a chop keeps an already local loop playing", async t => {
+    if (skip(t)) return;
+    await ctx.page.reload(); await upload("#audio-file", ctx.donor); await status("Loaded");
+    await ctx.page.click("#play");
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+    await ctx.page.click('#chops button[data-slice="0"]');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+    await ctx.page.click("#stop");
+  });
+
   async function nativeFixture() {
     const bytes = donorWav();
     for (let i = 44; i < bytes.length; i += 2) bytes.writeInt16LE(-bytes.readInt16LE(i), i);
@@ -276,6 +322,37 @@ describe("local sample instrument", () => {
       await ctx.page.click("#native-original");
       assert.match(await ctx.page.$eval("#sample-source", el => el.selectedOptions[0].textContent), /donor/);
     } finally { await cleanup(); }
+  });
+  it("auditions the same edited chop range for original and transformed audio without changing the original", async t => {
+    if (skip(t)) return;
+    await upload("#open-project", ctx.saved); await status("Opened");
+    const cleanup = await nativeFixture();
+    try {
+      await connectNative(); await ctx.page.click("#native-render");
+      await ctx.page.waitForFunction(() => /^Applied/.test(document.querySelector("#native-status").textContent));
+      await ctx.page.click('#chops button[data-slice="2"]');
+      await setInput("#slice-start", "0.6"); await setInput("#slice-end", "0.65"); await ctx.page.click("#apply-slice");
+      await ctx.page.evaluate(() => {
+        window.__auditionCalls = [];
+        const original = AudioBufferSourceNode.prototype.start;
+        AudioBufferSourceNode.prototype.start = function (...args) {
+          window.__auditionCalls.push({ offset: args[1], duration: args[2] });
+          return original.apply(this, args);
+        };
+      });
+      await ctx.page.click("#native-audition-original");
+      await ctx.page.waitForFunction(() => window.__auditionCalls.length >= 1);
+      await ctx.page.click("#native-audition-current");
+      await ctx.page.waitForFunction(() => window.__auditionCalls.length >= 2);
+      const calls = await ctx.page.evaluate(() => window.__auditionCalls);
+      for (const call of calls) { assert.ok(Math.abs(call.offset - .6) < 1e-6); assert.ok(Math.abs(call.duration - .05) < 1e-6); }
+      await setInput("#project-name", "Original unchanged"); await ctx.page.click("#freeze");
+      const saved = await until(() => { try { return JSON.parse(fs.readFileSync(path.join(ctx.dir, "Original-unchanged.brahma.json"))); } catch (_) { return null; } });
+      const derived = saved.sources.find(source => source.recipe);
+      const original = saved.sources.find(source => source.id === derived.recipe.parentId);
+      assert.deepEqual(original.slices[2], { start: .5, end: .7 });
+      assert.deepEqual(derived.slices[2], { start: .6, end: .65 });
+    } finally { await cleanup(); await ctx.page.reload(); }
   });
   it("Stop invalidates a pending native result without replacing the current source", async t => {
     if (skip(t)) return;

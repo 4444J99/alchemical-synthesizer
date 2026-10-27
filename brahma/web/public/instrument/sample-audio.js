@@ -59,8 +59,8 @@
       if (ev.sampleId != null) {
         const entry = this.entries.get(ev.sampleId);
         if (!entry) throw new Error("Sample unavailable: " + ev.sampleId);
-        const slice = entry.source.slices[ev.slice];
-        if (!slice || slice.start < 0 || slice.end <= slice.start || slice.end > entry.buffer.duration + 0.02) {
+        const slice = ev.sliceBounds || entry.source.slices[ev.slice];
+        if (!slice || !Number.isFinite(slice.start) || !Number.isFinite(slice.end) || slice.start < 0 || slice.end <= slice.start || slice.end > entry.buffer.duration + 0.02) {
           throw new Error("Invalid sample slice");
         }
         source = c.createBufferSource(); source.buffer = entry.buffer;

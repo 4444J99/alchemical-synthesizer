@@ -241,6 +241,7 @@
   }
   samples = window.SampleControls.attach({
     renderer: function () { ensureAudio(); return sampleRenderer; },
+    level: function (track) { return sampleRenderer ? sampleRenderer.level(track) : { rms: 0, peak: 0, wave: null }; },
     scene: function () { return scene; },
     transport: function () { return state; },
     stop: stop, local: localEngine,

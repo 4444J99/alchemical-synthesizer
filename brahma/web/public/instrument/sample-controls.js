@@ -76,6 +76,7 @@
         button.addEventListener("click", async () => {
           selectedSlice = i; renderEditor();
           try {
+            if (bridge.transport().adapterName !== "webaudio") bridge.stop();
             const engine = audio(), generation = engine.generation, trackIndex = track();
             await engine.context.resume();
             if (engine.generation !== generation) return;
@@ -173,9 +174,10 @@
       const engine = audio(), generation = engine.generation;
       await engine.context.resume();
       if (engine.generation !== generation) return;
-      const slice = Math.min(selectedSlice, source.slices.length - 1);
+      const slice = Math.min(selectedSlice, target.source.slices.length - 1);
+      const sliceBounds = target.source.slices[slice];
       bridge.local(); engine.trigger(target.track, { sampleId: source.id, slice, note: 60, gain: .8,
-        dur: source.slices[slice].end - source.slices[slice].start, t: 0 }, engine.context.currentTime);
+        sliceBounds, dur: sliceBounds.end - sliceBounds.start, t: 0 }, engine.context.currentTime);
     }
     async function replace(target, source, buffer) {
       if (revision !== target.revision || track() !== target.track || !selectedSource() || selectedSource().id !== target.source.id) throw new Error("Native target changed; current project preserved");
@@ -192,7 +194,7 @@
       setVessel(value) { vessels[track()] = M.vessel(value); revision++; },
       selectTrack,
       tracks: () => P.TRACKS.map((name, index) => ({ name, vessel: vessels[index], source: sources.find(s => s.id === trackSources[index]) })),
-      level: index => renderer ? renderer.level(index) : { rms: 0, peak: 0, wave: null },
+      level: index => bridge.level(index),
       audition,
       buffer: id => audio().entries.get(id).buffer,
       decode: bytes => audio().context.decodeAudioData(bytes.slice().buffer),
