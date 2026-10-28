@@ -92,6 +92,11 @@ jobs:
       - name: Sample instrument browser regression tests
         working-directory: brahma/web
         timeout-minutes: 3
+        env:
+          # Same disposable-CI-browser setting as the acceptance step above:
+          # the local test gateway only, so the runner's sandbox block does
+          # not cancel the suite.
+          BRAHMA_BROWSER_NO_SANDBOX: "1"
         run: node --test --test-concurrency=1 test/e2e/instrument.e2e.js
 
       - name: Release packaging regression tests
