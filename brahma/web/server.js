@@ -640,8 +640,12 @@ function stopOnSignal() {
     const hardStop = setTimeout(() => process.exit(1), SHUTDOWN_GRACE_MS);
     hardStop.unref();
     closeServer(() => {
-        // closeServer() cancelled the renders; let them settle so none outlives a
-        // gateway that reports a clean stop.
+        // The server reports closed only once its in-flight requests are done, and one
+        // of them may have started a render since closeServer() cancelled the rest.
+        // Cancel again, then let everything settle so no renderer outlives a gateway
+        // that reports a clean stop.
+        agent.runner.stopAll();
+        nativeSamples.service.close();
         Promise.allSettled([agent.runner.drain(), nativeSamples.service.drain()])
             .then(() => process.exit(0));
     });
