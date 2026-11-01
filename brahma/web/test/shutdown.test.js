@@ -50,26 +50,33 @@ async function startGateway(runtimeDir) {
   });
 
   let output = "";
-  const port = await new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error(`gateway did not report a listening port within ${BOOT_TIMEOUT_MS}ms:\n${output}`));
-    }, BOOT_TIMEOUT_MS);
-    const onData = (chunk) => {
-      output += chunk;
-      const match = /VISUAL CORTEX ONLINE: http:\/\/127\.0\.0\.1:(\d+)/.exec(output);
-      if (match) {
+  try {
+    const port = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`gateway did not report a listening port within ${BOOT_TIMEOUT_MS}ms:\n${output}`));
+      }, BOOT_TIMEOUT_MS);
+      const onData = (chunk) => {
+        output += chunk;
+        const match = /VISUAL CORTEX ONLINE: http:\/\/127\.0\.0\.1:(\d+)/.exec(output);
+        if (match) {
+          clearTimeout(timer);
+          resolve(Number(match[1]));
+        }
+      };
+      child.stdout.on("data", onData);
+      child.stderr.on("data", (chunk) => { output += chunk; });
+      child.once("exit", (code, signal) => {
         clearTimeout(timer);
-        resolve(Number(match[1]));
-      }
-    };
-    child.stdout.on("data", onData);
-    child.stderr.on("data", (chunk) => { output += chunk; });
-    child.once("exit", (code, signal) => {
-      clearTimeout(timer);
-      reject(new Error(`gateway exited during boot (code ${code}, signal ${signal}):\n${output}`));
+        reject(new Error(`gateway exited during boot (code ${code}, signal ${signal}):\n${output}`));
+      });
     });
-  });
-  return { child, port };
+    return { child, port };
+  } catch (error) {
+    // A gateway that is alive but never printed its banner must not outlive the test.
+    child.kill("SIGKILL");
+    await child.exited;
+    throw error;
+  }
 }
 
 function connect(port) {
@@ -85,14 +92,15 @@ function connect(port) {
 for (const signal of ["SIGTERM", "SIGINT"]) {
   test(`gateway exits on ${signal} while a WebSocket client is connected`, async () => {
     const runtimeDir = fs.mkdtempSync(path.join(os.tmpdir(), "brahma-shutdown-"));
-    const { child, port } = await startGateway(runtimeDir);
+    let gateway = null;
     let ws = null;
     try {
-      ws = await connect(port);
-      child.kill(signal);
+      gateway = await startGateway(runtimeDir);
+      ws = await connect(gateway.port);
+      gateway.child.kill(signal);
       let deadline;
       const result = await Promise.race([
-        child.exited,
+        gateway.child.exited,
         new Promise((resolve) => { deadline = setTimeout(() => resolve(null), EXIT_TIMEOUT_MS); })
       ]);
       clearTimeout(deadline);
@@ -101,8 +109,10 @@ for (const signal of ["SIGTERM", "SIGINT"]) {
       assert.deepEqual(result, { code: 0, signal: null });
     } finally {
       if (ws) ws.terminate();
-      child.kill("SIGKILL");
-      await child.exited;
+      if (gateway) {
+        gateway.child.kill("SIGKILL");
+        await gateway.child.exited;
+      }
       fs.rmSync(runtimeDir, { recursive: true, force: true });
     }
   });
