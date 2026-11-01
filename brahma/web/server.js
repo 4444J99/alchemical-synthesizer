@@ -605,16 +605,36 @@ function closeServer(cb) {
     try { dirtBridge.close(); } catch (_) {}
     try { udpPort.close(); } catch (_) {}
     try { sendPort.close(); } catch (_) {}
-    try { wss.close(); } catch (_) {}
+    try {
+        // wss.close() only stops accepting: connected clients stay open, and an
+        // open upgraded socket keeps server.close() from ever calling back.
+        for (const client of wss.clients) client.terminate();
+        wss.close();
+    } catch (_) {}
     if (server) {
         server.close(cb);
+        // Drop idle and in-flight HTTP connections too (Node >= 18.2).
+        if (typeof server.closeAllConnections === "function") server.closeAllConnections();
     } else if (cb) {
         cb();
     }
 }
 
-process.on("SIGTERM", () => closeServer());
-process.on("SIGINT", () => closeServer());
+// A signal handler that does not exit replaces the default action, so the process
+// would ignore SIGTERM/SIGINT for as long as any handle stayed open. Drain, then
+// exit 0 (a clean stop). once() puts the default action back after the first
+// signal, so a second one stops the process at once, and the unref'd timer exits 1
+// when a drain never completes.
+const SHUTDOWN_GRACE_MS = Number(process.env.BRAHMA_SHUTDOWN_GRACE_MS) || 3000;
+
+function stopOnSignal() {
+    const hardStop = setTimeout(() => process.exit(1), SHUTDOWN_GRACE_MS);
+    hardStop.unref();
+    closeServer(() => process.exit(0));
+}
+
+process.once("SIGTERM", stopOnSignal);
+process.once("SIGINT", stopOnSignal);
 
 module.exports = {
     app,
