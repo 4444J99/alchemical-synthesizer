@@ -1,0 +1,7 @@
+schema_version: '1.0'
+repo: audio-synthesis-bridge
+organ: II
+display_name: TypeScript bridge for audio synthesis via OSC and WebAudio
+delivery:
+- platform: web_app
+  status: not_started
