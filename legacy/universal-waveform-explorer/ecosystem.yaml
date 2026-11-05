@@ -1,0 +1,8 @@
+schema_version: '1.0'
+repo: universal-waveform-explorer
+organ: II
+display_name: "Aether Canvas \u2014 web-based 3D modular synthesizer reframing sound\
+  \ design as exploration of universal vibrations via WebGL and Web Audio API"
+delivery:
+- platform: web_app
+  status: not_started
