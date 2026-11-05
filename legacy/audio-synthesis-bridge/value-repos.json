@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "description": "Repos promoted into the ranked value tier - discovered to hold concrete, build-out-worthy latent value.",
+  "ranked": [
+    {
+      "repo": "organvm/audio-synthesis-bridge",
+      "promoted": "2026-07-01",
+      "source": "auto-discovery",
+      "tier": "creative-infrastructure",
+      "value": "Audio output adapter for ORGAN-II generative structure and live state: a tested TypeScript OSC/WebAudio core plus SuperCollider performance scripts that can make demos, installations, and synchronized audiovisual artifacts audible.",
+      "first_task": "Implement and test an OpeStateMapper that converts normalized intensity/density/pitch/participants/variance state into both the documented SuperCollider /ope/state OSC payload and equivalent WebAudioEngine voice updates.",
+      "thesis": "DISCOVERY.md"
+    }
+  ]
+}
