@@ -1,0 +1,23 @@
+{
+  "name": "universal-waveform-explorer",
+  "version": "0.1.0",
+  "description": "Part of the organvm eight-organ creative-institutional system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --coverage",
+    "lint": "eslint src/ --ext .ts",
+    "dev": "tsc --watch"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.1.0",
+    "eslint": "^10.4.1",
+    "@typescript-eslint/parser": "^8.61.0",
+    "@typescript-eslint/eslint-plugin": "^8.61.0"
+  }
+}
