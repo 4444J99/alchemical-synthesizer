@@ -60,3 +60,13 @@ brahma/web/public/workbench/vendor/
 # Per-launch gateway runtime state. Holds the agent token (0600) that local MCP
 # bridges read; never the human token. Must never be committed.
 brahma/web/.runtime/
+
+# Agent work records are kept in a private archive, not in public repos.
+.claude/plans/
+.claude/handoffs/
+.codex/plans/
+.codex/receipts/
+.gemini/plans/
+.gemini/handoffs/
+.conductor/
+.specstory/
