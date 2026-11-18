@@ -62,12 +62,24 @@ SynthDef(\golem_lfo, {
             // transport); the chop plays at its native length, so
             // source timing is preserved separately from project
             // tempo. rate is playback rate only: how fast the chop
-            // plays, never independent pitch/time stretch — that needs
-            // the octahedron_timestretch voice (plan step 5).
+            // plays, never independent pitch/time stretch.
+            // Transform (plan step 5): when transform is \timestretch,
+            // the chop sounds through the octahedron_timestretch voice
+            // instead of the plain slicer — independent pitch/time:
+            // the pointer scans the chop at the tempo-match rate while
+            // the grains play at stretchPitch. stretchRate nil means
+            // auto: project tempo / sourceTempo when the source tempo
+            // is known, the track rate otherwise. stretchPitch 1.0 is
+            // the chop's own pitch; stretchGrain is the grain duration
+            // in seconds. transform \none is the step-4 direct path.
             sliceTrack: false,
             sliceIndex: 0,
             sourceTempo: nil,
             rate: 1.0,
+            transform: \none,
+            stretchRate: nil,
+            stretchPitch: 1.0,
+            stretchGrain: 0.1,
 
             // Blend sources (synthA, synthB, sampleA, sampleB)
             blend: (synthA: 1.0, synthB: 0.0, sampleA: 0.0, sampleB: 0.0),
@@ -173,9 +185,27 @@ SynthDef(\golem_lfo, {
                                         if(track[\audioBus].notNil) {
                                             {
                                                 // Time randomization (microsecond jitter)
-                                                var delay = rrand(0, track[\humanize][\timeRand].clip(0, 0.05));
+                                                var delay, stretchRate, stretchDur;
+                                                delay = rrand(0, track[\humanize][\timeRand].clip(0, 0.05));
                                                 delay.wait;
-                                                ~octahedron_playSlice.(~octahedron_nodes, slice, track[\rate], vel, sliceDur, track[\audioBus].index);
+                                                if(track[\transform] == \timestretch) {
+                                                    // Transformed chop (plan step 5):
+                                                    // the chop sounds through the
+                                                    // granular time-stretch voice at
+                                                    // the tempo-match rate with
+                                                    // independent pitch, for its
+                                                    // stretched length — source timing
+                                                    // matched to the project tempo,
+                                                    // pitch preserved. sliceDur is the
+                                                    // native length divided by |rate|,
+                                                    // so multiply |rate| back out and
+                                                    // divide by the pointer speed.
+                                                    stretchRate = self.sliceStretchRate(track);
+                                                    stretchDur = sliceDur * track[\rate].abs.max(0.01) / stretchRate.abs.max(0.01);
+                                                    ~octahedron_playSliceStretched.(~octahedron_nodes, slice, stretchRate, track[\stretchPitch], track[\stretchGrain], vel, stretchDur, track[\audioBus].index);
+                                                } {
+                                                    ~octahedron_playSlice.(~octahedron_nodes, slice, track[\rate], vel, sliceDur, track[\audioBus].index);
+                                                };
                                             }.fork(self.clock);
                                             ~visual_cortex.target.sendMsg(
                                                 "/golem/slice/trigger", trackIdx, slice
@@ -298,6 +328,26 @@ SynthDef(\golem_lfo, {
         ^(nodes[\numSlices] ? 16);
     },
 
+    // Pointer speed for a stretched chop (plan step 5): the explicit
+    // stretchRate when set, else the tempo-match rate — project tempo /
+    // source tempo — when the source tempo is known, else the track's
+    // playback rate. Clipped to the voice's 0.01..4 range. A 100 BPM
+    // chop in a 120 BPM project scans at 1.2 with its pitch preserved;
+    // that is the tempo match step 4 deferred to this voice.
+    sliceStretchRate: { |self, track|
+        var rate;
+        if(track[\stretchRate].notNil) {
+            rate = track[\stretchRate];
+        } {
+            if(track[\sourceTempo].notNil) {
+                rate = self.tempo / track[\sourceTempo];
+            } {
+                rate = track[\rate];
+            };
+        };
+        ^rate.clip(0.01, 4);
+    },
+
     // ==========================================
     // PATTERN EDITING
     // ==========================================
@@ -355,7 +405,11 @@ SynthDef(\golem_lfo, {
                 sliceTrack: t[\sliceTrack],
                 sliceIndex: t[\sliceIndex],
                 sourceTempo: t[\sourceTempo],
-                rate: t[\rate]
+                rate: t[\rate],
+                transform: t[\transform],
+                stretchRate: t[\stretchRate],
+                stretchPitch: t[\stretchPitch],
+                stretchGrain: t[\stretchGrain]
             )
         });
         "GOLEM: Scene '%' saved".format(name).postln;
@@ -377,6 +431,11 @@ SynthDef(\golem_lfo, {
                 self.tracks[i][\sliceIndex] = data[\sliceIndex] ? 0;
                 self.tracks[i][\sourceTempo] = data[\sourceTempo];
                 self.tracks[i][\rate] = data[\rate] ? 1.0;
+                // Transform fields default for scenes saved before step 5.
+                self.tracks[i][\transform] = data[\transform] ? \none;
+                self.tracks[i][\stretchRate] = data[\stretchRate];
+                self.tracks[i][\stretchPitch] = data[\stretchPitch] ? 1.0;
+                self.tracks[i][\stretchGrain] = data[\stretchGrain] ? 0.1;
             });
             "GOLEM: Scene '%' loaded".format(name).postln;
         } {
@@ -675,11 +734,23 @@ SynthDef(\golem_lfo, {
         // is the clip's native BPM when known (0 or omitted =
         // unknown); it is stored for later steps and never retunes
         // the voice. /golem/slice/rate sets playback rate only —
-        // never independent pitch/time stretch (that needs the
-        // octahedron_timestretch voice, plan step 5). All three
+        // never independent pitch/time stretch (that is the
+        // octahedron_timestretch voice, plan step 5).
+        // /golem/slice/transform <track:int> <name:symbol> routes the
+        // track's chops through one transformation: \none (the direct
+        // slicer path) or \timestretch (the granular time-stretch
+        // voice, independent pitch/time). Unknown names are rejected
+        // with a warn and leave the track unchanged.
+        // /golem/slice/stretch <track:int> [rate:float] [pitch:float]
+        // [grainSize:float] sets the stretch voice's controls: rate 0
+        // or omitted means auto tempo-match (project tempo / source
+        // tempo, resolved at the step); pitch 1.0 is the chop's own
+        // pitch; grainSize is the grain duration in seconds. All five
         // reply on /golem/slice/state
-        // <track> <slice> <sourceTempo|0> <rate>; unbind reports
-        // slice -1.
+        // <track> <slice> <sourceTempo|0> <rate> <transform>
+        // <stretchRate|0> <stretchPitch> <stretchGrain> — the first
+        // four args keep their step-4 positions; unbind reports
+        // slice -1 with the transform fields at their defaults.
         OSCdef(\golem_slice_bind, { |msg|
             var trackIdx = msg[1].asInteger;
             var slice = msg[2].asInteger.max(0);
@@ -693,7 +764,8 @@ SynthDef(\golem_lfo, {
                 track[\sliceIndex] = slice;
                 track[\sourceTempo] = if(tempo > 0) { tempo } { nil };
                 ~visual_cortex.target.sendMsg("/golem/slice/state",
-                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate]);
+                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate],
+                    track[\transform], track[\stretchRate] ? 0, track[\stretchPitch], track[\stretchGrain]);
                 "GOLEM: Track % bound to slice % (source tempo %)".format(
                     trackIdx, track[\sliceIndex], track[\sourceTempo] ? "unknown").postln;
             };
@@ -709,10 +781,54 @@ SynthDef(\golem_lfo, {
                 track = self.tracks[trackIdx];
                 track[\rate] = rate;
                 ~visual_cortex.target.sendMsg("/golem/slice/state",
-                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate]);
+                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate],
+                    track[\transform], track[\stretchRate] ? 0, track[\stretchPitch], track[\stretchGrain]);
                 "GOLEM: Track % playback rate % (rate only, not pitch/time stretch)".format(trackIdx, rate).postln;
             };
         }, "/golem/slice/rate");
+
+        OSCdef(\golem_slice_transform, { |msg|
+            var trackIdx = msg[1].asInteger;
+            var name = msg[2] !? _.asSymbol ?? \none;
+            var track;
+            if(trackIdx < 0 or: { trackIdx >= self.tracks.size }) {
+                "GOLEM: Slice transform: track % out of range".format(trackIdx).warn;
+            } {
+                if((name != \none) and: { name != \timestretch }) {
+                    "GOLEM: Slice transform: unknown transform % (none, timestretch)".format(name).warn;
+                } {
+                    track = self.tracks[trackIdx];
+                    track[\transform] = name;
+                    ~visual_cortex.target.sendMsg("/golem/slice/state",
+                        trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate],
+                        track[\transform], track[\stretchRate] ? 0, track[\stretchPitch], track[\stretchGrain]);
+                    "GOLEM: Track % slice transform %".format(trackIdx, name).postln;
+                };
+            };
+        }, "/golem/slice/transform");
+
+        OSCdef(\golem_slice_stretch, { |msg|
+            var trackIdx = msg[1].asInteger;
+            var rate = msg[2] !? _.asFloat;
+            var pitch = msg[3] !? _.asFloat;
+            var grain = msg[4] !? _.asFloat;
+            var track;
+            if(trackIdx < 0 or: { trackIdx >= self.tracks.size }) {
+                "GOLEM: Slice stretch: track % out of range".format(trackIdx).warn;
+            } {
+                track = self.tracks[trackIdx];
+                // rate 0 (or omitted) = auto tempo-match: store nil and
+                // let the step resolve project tempo / source tempo.
+                track[\stretchRate] = if(rate.notNil and: { rate > 0 }) { rate.clip(0.01, 4) } { nil };
+                if(pitch.notNil) { track[\stretchPitch] = pitch.clip(0.25, 4) };
+                if(grain.notNil) { track[\stretchGrain] = grain.clip(0.01, 1) };
+                ~visual_cortex.target.sendMsg("/golem/slice/state",
+                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate],
+                    track[\transform], track[\stretchRate] ? 0, track[\stretchPitch], track[\stretchGrain]);
+                "GOLEM: Track % slice stretch rate % pitch % grain %".format(
+                    trackIdx, track[\stretchRate] ? "auto", track[\stretchPitch], track[\stretchGrain]).postln;
+            };
+        }, "/golem/slice/stretch");
 
         OSCdef(\golem_slice_unbind, { |msg|
             var trackIdx = msg[1].asInteger;
@@ -725,8 +841,14 @@ SynthDef(\golem_lfo, {
                 track[\sliceIndex] = 0;
                 track[\sourceTempo] = nil;
                 track[\rate] = 1.0;
+                // The transform fields are slice fields: unbinding
+                // returns them to their defaults with the chop.
+                track[\transform] = \none;
+                track[\stretchRate] = nil;
+                track[\stretchPitch] = 1.0;
+                track[\stretchGrain] = 0.1;
                 ~visual_cortex.target.sendMsg("/golem/slice/state",
-                    trackIdx, -1, 0, 1.0);
+                    trackIdx, -1, 0, 1.0, \none, 0, 1.0, 0.1);
                 "GOLEM: Track % unbound from slices".format(trackIdx).postln;
             };
         }, "/golem/slice/unbind");

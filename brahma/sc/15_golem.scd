@@ -424,11 +424,17 @@ SynthDef(\golem_rr, {
             };
             // A slice binding does not survive evict: the track goes
             // back to its drum preset, so clear the chop, its source
-            // tempo, and the playback rate with it (plan step 4).
+            // tempo, and the playback rate with it (plan step 4), and
+            // the transform fields with them (plan step 5) — a drum
+            // track must not keep a stretch it never plays.
             track[\sliceTrack] = false;
             track[\sliceIndex] = 0;
             track[\sourceTempo] = nil;
             track[\rate] = 1.0;
+            track[\transform] = \none;
+            track[\stretchRate] = nil;
+            track[\stretchPitch] = 1.0;
+            track[\stretchGrain] = 0.1;
         });
 
         "GOLEM: Donor traits evicted, factory defaults restored".postln;
