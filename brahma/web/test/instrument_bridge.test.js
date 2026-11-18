@@ -158,12 +158,15 @@ test("Instrument Bridge — slice addressing (plan step 3)", async (t) => {
     const content = octa();
     // Scope to the instrument-note receiver: the /octahedron/slice responder
     // above it also triggers the slicer, so a file-wide indexOf would point
-    // at the wrong Synth call.
+    // at the wrong trigger call. The receiver now sounds the note through
+    // the shared ~octahedron_playSlice helper (plan step 4), not an inline
+    // Synth call — the contract is unchanged: the range check must precede
+    // the trigger.
     const receiver = content.slice(content.indexOf("OSCdef(\\instrument_note"));
     const rangeIdx = receiver.indexOf("bad_args: slice out of range");
     assert.ok(rangeIdx !== -1, "Out-of-range slice must get a typed ack, never a silent clip");
-    const synthIdx = receiver.indexOf("syn = Synth(\\octahedron_slicer");
-    assert.ok(synthIdx !== -1 && rangeIdx < synthIdx, "Range check must precede the slicer trigger");
+    const playIdx = receiver.indexOf("~octahedron_playSlice.(");
+    assert.ok(playIdx !== -1 && rangeIdx < playIdx, "Range check must precede the slice trigger");
   });
 
   await t.test("the edited .scd stays bracket-balanced (a missing close breaks the CI compile)", () => {

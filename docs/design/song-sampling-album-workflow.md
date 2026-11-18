@@ -15,8 +15,7 @@ of the plan: `/brahma/instrument/note` receiver with engine acks, and
 `/octahedron/load` binding a real buffer to the slicer with release and
 replacement rules), and the note contract now carries the pattern cell's chosen
 chop (loop PR for #95, step 3: an optional 5th arg on `/brahma/instrument/note`;
-plain notes keep the pitch-derived slice). The separate live Golem sequencer,
-live modular routing, and album arrangement below remain unfinished. Render
+plain notes keep the pitch-derived slice), and slice tracks now ride the live Golem sequencer (loop PR for #95, step 4: a bound track sounds its chop on the shared project transport at its native length, source tempo stored separately from project tempo). Live modular routing and album arrangement below remain unfinished. Render
 validation with selected songs does not establish musical acceptance.
 
 The [original-organism and material reconciliation](mimicry-material-universe.md)
@@ -59,11 +58,11 @@ Song selections + local audio
 | Decode and normalize source audio | `forge/ingest.sh` | Batch selections, stable source IDs, collision-safe destinations |
 | Optional stem extraction | `forge/rip.py` | Show actual engine and quality; keep original source available |
 | Source and recipe provenance | `forge/rip.py`, `forge/forge.sh`, `forge/stemforge.py` | Extend identities to clips, slices, transformations, and sessions |
-| Slice, loop, stretch, and crossfade | `brahma/sc/25_elektron_octatrack.scd` | Buffer loading, allocation, acknowledgements, release (done, loop PR for #95 steps 1–2); slice addressing (done, loop PR for #95 step 3): the note contract carries the cell's chop, plain notes keep the pitch-derived slice; Golem transport still pending |
+| Slice, loop, stretch, and crossfade | `brahma/sc/25_elektron_octatrack.scd` | Buffer loading, allocation, acknowledgements, release (done, loop PR for #95 steps 1–2); slice addressing (done, loop PR for #95 step 3): the note contract carries the cell's chop, plain notes keep the pitch-derived slice; Golem transport (done, loop PR for #95 step 4): slice tracks in `brahma/sc/15_golem_sequencer.scd` sound chops on the shared transport at native length |
 | Granular, tape, reverse, resonant processing | `brahma/sc/05_sampler_creatures*.scd`, `14_stem_voices.scd` | Expose the appropriate live/offline controls consistently |
 | Pattern editing and commands | `brahma/web/public/instrument/pattern.js` | Sample and slice references per event, arrangement, persistence |
 | Authenticated control and live scheduling | `brahma/web/public/workbench/`, `31_live_gateway.scd` | Reuse session/approval boundaries and extend the event contract |
-| Drums | Golem (`brahma/sc/15_*`, web Golem surface) | Shared transport and saved routing with sample tracks |
+| Drums | Golem (`brahma/sc/15_*`, web Golem surface) | Shared transport and scene-saved routing with sample tracks (done, loop PR for #95 step 4) |
 | Offline production | Forge and Brahma NRT renderers | Render the same saved sample arrangement used in performance |
 | Broadcasting | AETHER | Optional downstream use of completed output; not required to compose |
 
