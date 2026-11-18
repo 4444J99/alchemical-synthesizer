@@ -140,3 +140,67 @@ test("Instrument Bridge — slicer gain control", () => {
   assert.ok(content.includes("play * env * amp"), "Slicer output must scale by amp");
   assert.ok(content.includes("(\\name: \\amp,"), "Slicer registry entry must expose amp");
 });
+
+test("Instrument Bridge — slice addressing (plan step 3)", async (t) => {
+  await t.test("receiver accepts an explicit slice and keeps the pitch fallback", () => {
+    const content = octa();
+    assert.ok(
+      content.includes("slice = if(msg.size > 5) { msg[5].asInteger } { nil };"),
+      "Receiver must read the optional 5th arg as the explicit slice"
+    );
+    assert.ok(
+      content.includes("sliceIndex = slice ? (note % (nodes[\\numSlices]"),
+      "Explicit slice must win when present; absent slice falls back to note % numSlices"
+    );
+  });
+
+  await t.test("out-of-range slice gets a typed ack and starts no voice", () => {
+    const content = octa();
+    // Scope to the instrument-note receiver: the /octahedron/slice responder
+    // above it also triggers the slicer, so a file-wide indexOf would point
+    // at the wrong Synth call.
+    const receiver = content.slice(content.indexOf("OSCdef(\\instrument_note"));
+    const rangeIdx = receiver.indexOf("bad_args: slice out of range");
+    assert.ok(rangeIdx !== -1, "Out-of-range slice must get a typed ack, never a silent clip");
+    const synthIdx = receiver.indexOf("syn = Synth(\\octahedron_slicer");
+    assert.ok(synthIdx !== -1 && rangeIdx < synthIdx, "Range check must precede the slicer trigger");
+  });
+
+  await t.test("the edited .scd stays bracket-balanced (a missing close breaks the CI compile)", () => {
+    const content = octa();
+    for (const [open, close] of [["{", "}"], ["(", ")"], ["[", "]"]]) {
+      const opens = content.split(open).length - 1;
+      const closes = content.split(close).length - 1;
+      assert.equal(opens, closes, `25_elektron_octatrack.scd: ${opens} '${open}' vs ${closes} '${close}'`);
+    }
+  });
+
+  await t.test("browser sends the cell's chop for sample events, four args otherwise", () => {
+    const instrument = fs.readFileSync(INSTRUMENT_JS, "utf8");
+    assert.ok(
+      instrument.includes("if (ev.sampleId != null) args.push(ev.slice"),
+      "OscAdapter must append the cell's slice for sample events"
+    );
+    assert.ok(
+      !instrument.includes('throw new Error("Imported samples play in WebAudio'),
+      "OSC must no longer refuse sample events — the engine can sound the exact chop now"
+    );
+    assert.ok(
+      !instrument.includes('samples.report("Imported samples play in WebAudio'),
+      "play() must no longer refuse the OSC engine when cells carry samples"
+    );
+  });
+
+  await t.test("pattern.js carries the chop through expansion (behavioral)", () => {
+    const Pattern = require("../public/instrument/pattern.js");
+    const scene = Pattern.makeScene(16, 5);
+    Pattern.setCell(scene, 0, 0, { note: 60, vel: 0.8, sampleId: "src-1", slice: 2 });
+    const evs = Pattern.expandCell(scene.grid[0][0], 0.5, Pattern.makeRng(1));
+    assert.equal(evs.length, 1, "Sample cell must expand to one event");
+    assert.equal(evs[0].sampleId, "src-1", "Event must keep its sample identity");
+    assert.equal(evs[0].slice, 2, "Event must carry the cell's chosen chop");
+    // A plain note event carries no slice: the receiver derives it from pitch.
+    const plain = Pattern.expandCell({ note: 60, vel: 0.8 }, 0.5);
+    assert.equal(plain[0].slice, undefined, "Plain note must not carry a slice");
+  });
+});

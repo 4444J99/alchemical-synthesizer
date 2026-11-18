@@ -446,6 +446,12 @@ OSCdef(\octahedron_arr_advance, {
 // which forwards /brahma/ only from authenticated human sessions
 // (brahma/web/lib/session.js, handleLegacyOsc) at a rate-limited 200/s.
 // Buffer.read only reads: the load path never writes the source file.
+//
+// Step 3 (plan step 3): the note contract carries the pattern cell's chosen
+// chop as an optional 5th arg. The browser sends it only for sample events;
+// plain notes still derive their slice from pitch. The slice selects within
+// the one bound buffer — the browser's sampleId stays local, so the chop a
+// cell plays is the chop of whatever file /octahedron/load bound last.
 
 // Release every tracked slice voice. Returns the count released.
 // A slice synth holds its ASR gate until gated off, so stop must be
@@ -469,15 +475,20 @@ OSCdef(\octahedron_arr_advance, {
     };
 };
 
-// Instrument note: /brahma/instrument/note <track:string> <note:int> <gain:float> <dur:float>
-// Maps the note to a slice (note % numSlices) and triggers the slicer on
-// the bound buffer, auto-releasing after <dur> so pattern events never
-// leave hanging notes. Replies on /brahma/instrument/note/ack
+// Instrument note: /brahma/instrument/note <track:string> <note:int> <gain:float> <dur:float> [slice:int]
+// Maps the note to a slice and triggers the slicer on the bound buffer,
+// auto-releasing after <dur> so pattern events never leave hanging notes.
+// The optional 5th arg is the pattern cell's chosen chop (plan step 3):
+// a sample event carries its slice explicitly and sounds exactly that chop;
+// a plain note event omits it and keeps the pitch-derived slice
+// (note % numSlices). An out-of-range slice is a typed ack, never a clip —
+// silently playing a different chop than the pattern asked for would hide
+// a broken binding. Replies on /brahma/instrument/note/ack
 // <track> <note> <ok:int> <sliceIndex|message>: an open socket is not an
 // ack — the browser learns whether the engine actually sounded the note,
 // or that no sample is bound yet.
 OSCdef(\instrument_note, { |msg|
-    var track, note, gain, dur, nodes, buf, sliceIndex, syn, task;
+    var track, note, gain, dur, slice, nodes, buf, sliceIndex, syn, task;
     if(msg.size < 5) {
         ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
             msg[1] ? "?", 0, 0, "bad_args: note needs <track> <note> <gain> <dur>");
@@ -486,6 +497,7 @@ OSCdef(\instrument_note, { |msg|
         note = msg[2].asInteger;
         gain = msg[3].asFloat.clip(0, 1);
         dur = msg[4].asFloat.clip(0.01, 30);
+        slice = if(msg.size > 5) { msg[5].asInteger } { nil };
         if(note < 0 or: { note > 127 }) {
             ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
                 track, note, 0, "bad_args: note out of range 0..127");
@@ -497,8 +509,12 @@ OSCdef(\instrument_note, { |msg|
                     ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
                         track, note, 0, "no buffer loaded: send /octahedron/load first");
                 } {
-                    sliceIndex = note % (nodes[\numSlices] ? 16);
-                    syn = Synth(\octahedron_slicer, [
+                    if(slice.notNil and: { slice < 0 or: { slice >= (nodes[\numSlices] ? 16) } }) {
+                        ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
+                            track, note, 0, "bad_args: slice out of range 0..%".format((nodes[\numSlices] ? 16) - 1));
+                    } {
+                        sliceIndex = slice ? (note % (nodes[\numSlices] ? 16));
+                        syn = Synth(\octahedron_slicer, [
                         \outBus, nodes[\mainBus] ? 0,
                         \bufnum, buf,
                         \sliceIndex, sliceIndex,
@@ -515,6 +531,7 @@ OSCdef(\instrument_note, { |msg|
                     task.play(SystemClock);
                     ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
                         track, note, 1, sliceIndex);
+                    };
                 };
             };
         };
