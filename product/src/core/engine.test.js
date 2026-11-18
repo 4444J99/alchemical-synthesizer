@@ -152,13 +152,18 @@ test("engine evidence and specimen simulation stay honest", { timeout: 10000 }, 
       assert.equal(specimen.renderId, specimen.id);
       assert.equal(store.collection("specimens").find((row) => row.id === specimen.id), specimen);
       await delay(30);
-      assert.equal(dispatched.length, 1);
-      assert.equal(dispatched[0].address, "/brahma/foundry/render");
-      assert.equal(dispatched[0].args[0], specimen.id);
-      assert.equal(dispatched[0].args[1], "Azoth");
-      assert.equal(dispatched[0].args[2], 4);
-      assert.equal(typeof dispatched[0].args[3], "string");
-      assert.ok(dispatched[0].args[3].endsWith(`${specimen.id}.wav`));
+      // Scope the assertion to this specimen: UDP delivery is async, so a
+      // packet dispatched by an earlier render can still be in flight when
+      // this capture attaches. What matters is that THIS specimen dispatched
+      // exactly once, with the right request.
+      const mine = dispatched.filter((p) => p.args[0] === specimen.id);
+      assert.equal(mine.length, 1);
+      assert.equal(mine[0].address, "/brahma/foundry/render");
+      assert.equal(mine[0].args[0], specimen.id);
+      assert.equal(mine[0].args[1], "Azoth");
+      assert.equal(mine[0].args[2], 4);
+      assert.equal(typeof mine[0].args[3], "string");
+      assert.ok(mine[0].args[3].endsWith(`${specimen.id}.wav`));
     } finally { peer.off("message", capture); }
   });
 
@@ -189,7 +194,9 @@ test("engine evidence and specimen simulation stay honest", { timeout: 10000 }, 
       assert.equal(specimen.renderState, "unavailable");
       assert.equal(specimen.renderId, specimen.id);
       await delay(30);
-      assert.deepEqual(dispatched, []);
+      // Scope to this specimen: UDP delivery is async, so packets dispatched
+      // by earlier renders can still be in flight when this capture attaches.
+      assert.deepEqual(dispatched.filter((p) => p.args[0] === specimen.id), []);
     } finally { peer.off("message", capture); }
   });
 
@@ -211,7 +218,9 @@ test("engine evidence and specimen simulation stay honest", { timeout: 10000 }, 
       const refused = engine.renderSpecimen({ module: "Azoth" });
       assert.equal(refused.renderState, "unavailable");
       await delay(30);
-      assert.deepEqual(dispatched, []);
+      // Scope to the refused specimen: the dispatch for the earlier pending
+      // render in this test can still be in flight when this capture attaches.
+      assert.deepEqual(dispatched.filter((p) => p.args[0] === refused.id), []);
     } finally { peer.off("message", capture); }
   });
 
