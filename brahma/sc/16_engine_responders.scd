@@ -171,5 +171,98 @@ OSCdef(\engine_freeAll, { |msg|
     };
 }, "/brahma/engine/freeAll");
 
+// ==========================================
+// OSC: Foundry render request (issue #96)
+// /brahma/foundry/render <renderId> <module> <durationSec> <outputPath>
+//
+// Renders one module voice to a WAV with the headless NRT renderer and
+// reports completion back to the Foundry. This lives here, not in
+// 13_nrt_renderer.scd: 13 is headless-only (driven from sclang/bounce.sh,
+// its renderSpecimen needs an input file), while this file owns live OSC
+// dispatch and the module registry lookup. The NRT score below follows
+// 13's recordNRT pattern (WAV int16, 44100 Hz, stereo).
+//
+// Every outcome gets a reply — the Foundry's ack discipline from #119:
+//   /brahma/foundry/render/done   <renderId> "ok" <outputPath>
+//   /brahma/foundry/render/failed <renderId> <reason>
+// A dispatch is not a completion: the Foundry only trusts a file it can
+// measure itself. Replies go to the Foundry bridge via ~visual_cortex.target
+// (127.0.0.1:57122), the same path the instrument-note acks use.
+// ==========================================
+OSCdef(\foundry_render, { |msg|
+    var renderId, moduleName, duration, outputPath, spec, desc, defBytes;
+    var score, opts, oscFile, target;
+    renderId = msg[1].asString;
+    moduleName = msg[2].asString;
+    duration = msg[3].asFloat;
+    outputPath = msg[4].asString;
+    target = ~visual_cortex.target;
+
+    if(target.isNil) {
+        "FOUNDRY_RENDER: no visual-cortex target, cannot reply".postln;
+    } {
+        if(renderId.isNil or: { renderId.size == 0 }) {
+            // No renderId the Foundry can match: nothing to reply to.
+            "FOUNDRY_RENDER: missing renderId".postln;
+        } {
+            if(moduleName.isNil or: { moduleName.size == 0 }) {
+                target.sendMsg("/brahma/foundry/render/failed", renderId, "missing module");
+            } {
+                spec = ~module_registry.getSpec(moduleName.asSymbol);
+                if(spec.isNil) {
+                    target.sendMsg("/brahma/foundry/render/failed", renderId, "unknown module: " ++ moduleName);
+                } {
+                    if(duration.isNil or: { duration <= 0 } or: { duration > 60 }) {
+                        target.sendMsg("/brahma/foundry/render/failed", renderId, "durationSec out of range (0, 60]");
+                    } {
+                        if(outputPath.isNil or: { outputPath.size == 0 } or: { outputPath.endsWith(".wav").not }) {
+                            target.sendMsg("/brahma/foundry/render/failed", renderId, "outputPath must be a .wav path");
+                        } {
+                            desc = SynthDescLib.global.at(spec[\synthDef]);
+                            if(desc.isNil or: { desc.def.isNil }) {
+                                target.sendMsg("/brahma/foundry/render/failed", renderId, "module synthdef unavailable: " ++ moduleName);
+                            } {
+                                defBytes = desc.def.asBytes;
+                                oscFile = outputPath ++ ".osc";
+                                score = Score([
+                                    [0.0, [\d_recv, defBytes]],
+                                    [0.0, [\s_new, spec[\synthDef], 1000, 0, 0,
+                                        \freq, 440, \gate, 1, \velocity, 0.8, \outBus, 0]],
+                                    [duration, [\n_set, 1000, \gate, 0]],
+                                    [duration + 0.5, [\c_set, 0, 0]]
+                                ]);
+                                opts = ServerOptions.new
+                                    .numOutputBusChannels_(2)
+                                    .numInputBusChannels_(0)
+                                    .sampleRate_(44100);
+                                ("FOUNDRY_RENDER: " ++ moduleName ++ " -> " ++ outputPath
+                                    ++ " (" ++ duration ++ "s)").postln;
+                                score.recordNRT(
+                                    oscFilePath: oscFile,
+                                    outputFilePath: outputPath,
+                                    sampleRate: 44100,
+                                    headerFormat: "WAV",
+                                    sampleFormat: "int16",
+                                    options: opts,
+                                    duration: duration + 1.0,
+                                    action: { |exitCode|
+                                        if(exitCode == 0) {
+                                            target.sendMsg("/brahma/foundry/render/done",
+                                                renderId, "ok", outputPath);
+                                        } {
+                                            target.sendMsg("/brahma/foundry/render/failed",
+                                                renderId, "nrt exit " ++ exitCode);
+                                        };
+                                    }
+                                );
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+}, "/brahma/foundry/render");
+
 "--- BRAHMA: Engine Voice Manager Online ---".postln;
 )

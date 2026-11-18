@@ -15,7 +15,15 @@ const specimens = () => collection("specimens");
 const PAYOUT_RATE = 0.85;
 
 function listForSale(filter = {}) {
-  let out = specimens().filter((s) => s.forSale && !s.simulated && s.audioUrl && s.ownerEmail);
+  // A listing is a public claim that the audio is a measured render, not a
+  // simulation: only specimens whose render completed through the verified
+  // completion contract (issue #96) are listable. Rows that predate the
+  // contract carry no renderState and keep the old rules (ownership.test.js
+  // pins that a legacy owner can still list); a row that carries a
+  // renderState must be "complete" — pending, failed, or unavailable renders
+  // are never listable, even if audioUrl is set.
+  let out = specimens().filter((s) => s.forSale && !s.simulated && s.audioUrl && s.ownerEmail &&
+    (s.renderState === undefined || s.renderState === "complete"));
   if (filter.creator) out = out.filter((s) => s.creator === filter.creator);
   if (filter.module) out = out.filter((s) => s.sourceModule === filter.module);
   return out.sort((a, b) => (b.createdAt > a.createdAt ? 1 : -1)).map(publicSpecimen);
@@ -49,7 +57,11 @@ function listSpecimen({ specimenId, ownerEmail, ownerPlan, priceCents }) {
     err.code = "plan_forbidden";
     throw err;
   }
-  if (spc.simulated || !spc.audioUrl) throw new Error("specimen has no completed audio artifact");
+  // A specimen whose render never completed cannot be listed as live audio,
+  // even if audioUrl is set (see listForSale). Rows that predate the render
+  // contract carry no renderState and keep the old rules.
+  if (spc.simulated || !spc.audioUrl ||
+      (spc.renderState !== undefined && spc.renderState !== "complete")) throw new Error("specimen has no completed audio artifact");
   if (!Number.isSafeInteger(priceCents) || priceCents <= 0) throw new Error("priceCents must be a positive integer");
   specimens().update((s) => s.id === specimenId, {
     forSale: true, priceCents, listedAt: new Date().toISOString()

@@ -17,7 +17,8 @@ const DB_PATH = path.join(DATA_DIR, "store.json");
 const EMPTY = {
   users: [],        // { id, email, passwordHash, salt, plan, createdAt }
   apiKeys: [],      // { key, ownerEmail, plan, label, status, createdAt, usage:{count, periodStart} }
-  specimens: [],    // { id, title, creator, priceCents, sourceModule, traitMap, audioUrl, forSale, simulated, createdAt }
+  specimens: [],    // { id, title, creator, priceCents, sourceModule, traitMap, audioUrl, forSale, simulated, renderState, renderId, createdAt }
+                    // renderState: unavailable | pending | failed | complete (issue #96); audioUrl is set only on complete
   orders: [],       // { id, email, items, amountCents, status, provider, sessionId, createdAt }
   waitlist: [],     // { email, interest, createdAt }
   events: []        // { ts, type, ref } — lightweight audit trail

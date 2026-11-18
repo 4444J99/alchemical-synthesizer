@@ -8,12 +8,46 @@ const os = require("node:os");
 const path = require("node:path");
 const { setTimeout: delay } = require("node:timers/promises");
 
+/** Poll a check with real-time delays (Date.now is mocked in this file). */
+async function waitFor(check, label) {
+  for (let i = 0; i < 100; i++) {
+    if (check()) return;
+    await delay(5);
+  }
+  assert.fail(`timed out waiting for ${label}`);
+}
+
+/** Write a minimal PCM WAV fixture and return its measured properties. */
+function writeWavFixture(file, { channels = 2, sampleRate = 44100, bitsPerSample = 16, frames = 44100 } = {}) {
+  const bytesPerSample = bitsPerSample / 8;
+  const blockAlign = channels * bytesPerSample;
+  const dataSize = frames * blockAlign;
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0, "ascii");
+  header.writeUInt32LE(36 + dataSize, 4);
+  header.write("WAVE", 8, "ascii");
+  header.write("fmt ", 12, "ascii");
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20); // PCM
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(sampleRate * blockAlign, 28); // byteRate
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write("data", 36, "ascii");
+  header.writeUInt32LE(dataSize, 40);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, Buffer.concat([header, Buffer.alloc(dataSize)]));
+  return { channels, sampleRate, bitsPerSample, frames, durationSec: frames / sampleRate };
+}
+
 test("engine evidence and specimen simulation stay honest", { timeout: 10000 }, async (t) => {
   const data = fs.mkdtempSync(path.join(os.tmpdir(), "foundry-engine-"));
   const peer = dgram.createSocket("udp4");
   peer.bind(0, "127.0.0.1");
   await once(peer, "listening");
   process.env.FOUNDRY_DATA_DIR = data;
+  process.env.FOUNDRY_RENDER_TIMEOUT_MS = "60"; // pending renders fail fast here; production default is 30000
   process.env.SC_HOST = "127.0.0.1";
   process.env.OSC_RECV_PORT = "0";
   process.env.OSC_SEND_PORT = String(peer.address().port);
@@ -102,18 +136,29 @@ test("engine evidence and specimen simulation stay honest", { timeout: 10000 }, 
     assert.equal(engine.send("/brahma/test", []), false);
   });
 
-  await t.test("fresh engine evidence cannot turn a simulated specimen into rendered audio", async () => {
+  await t.test("fresh engine evidence dispatches a render that stays pending without a completion receipt", async () => {
     await freshTelemetry();
     const dispatched = [];
     const capture = (packet) => dispatched.push(osc.readPacket(packet, { metadata: false, unpackSingleArgs: false }));
     peer.on("message", capture);
     try {
       const specimen = engine.renderSpecimen({ module: "Azoth" });
+      // Dispatch happened, but nothing about the render is claimed yet: the
+      // specimen is still simulated, with no audio, until a completion
+      // receipt is verified against a measured file.
       assert.equal(specimen.simulated, true);
       assert.equal(specimen.audioUrl, null);
+      assert.equal(specimen.renderState, "pending");
+      assert.equal(specimen.renderId, specimen.id);
       assert.equal(store.collection("specimens").find((row) => row.id === specimen.id), specimen);
       await delay(30);
-      assert.deepEqual(dispatched, [], "no renderer completion contract exists to dispatch");
+      assert.equal(dispatched.length, 1);
+      assert.equal(dispatched[0].address, "/brahma/foundry/render");
+      assert.equal(dispatched[0].args[0], specimen.id);
+      assert.equal(dispatched[0].args[1], "Azoth");
+      assert.equal(dispatched[0].args[2], 4);
+      assert.equal(typeof dispatched[0].args[3], "string");
+      assert.ok(dispatched[0].args[3].endsWith(`${specimen.id}.wav`));
     } finally { peer.off("message", capture); }
   });
 
@@ -126,6 +171,100 @@ test("engine evidence and specimen simulation stay honest", { timeout: 10000 }, 
     );
     assert.equal(owned.ownerEmail, "owner@example.test");
     assert.equal(owned.creator, "display handle");
+  });
+
+  // ---- issue #96: the five required render-lifecycle cases ----
+
+  await t.test("(a) absent peer: no telemetry, no dispatch, specimen stays simulated", async () => {
+    now += 3000;
+    engine.organismState(); // expire any telemetry left by earlier tests
+    assert.equal(engine.isOnline(), false);
+    const dispatched = [];
+    const capture = (packet) => dispatched.push(osc.readPacket(packet, { metadata: false, unpackSingleArgs: false }));
+    peer.on("message", capture);
+    try {
+      const specimen = engine.renderSpecimen({ module: "Azoth" });
+      assert.equal(specimen.simulated, true);
+      assert.equal(specimen.audioUrl, null);
+      assert.equal(specimen.renderState, "unavailable");
+      assert.equal(specimen.renderId, specimen.id);
+      await delay(30);
+      assert.deepEqual(dispatched, []);
+    } finally { peer.off("message", capture); }
+  });
+
+  await t.test("(b) stale peer: dispatch refused once telemetry expires, pending render fails closed", async () => {
+    await freshTelemetry();
+    const specimen = engine.renderSpecimen({ module: "Azoth" });
+    assert.equal(specimen.renderState, "pending");
+    now += 3000;
+    engine.organismState(); // telemetry is stale now: the pending render must fail closed
+    const row = store.collection("specimens").find((s) => s.id === specimen.id);
+    assert.equal(row.renderState, "failed");
+    assert.equal(row.audioUrl, null);
+    assert.equal(row.simulated, true);
+    // A new render while stale is refused outright.
+    const dispatched = [];
+    const capture = (packet) => dispatched.push(osc.readPacket(packet, { metadata: false, unpackSingleArgs: false }));
+    peer.on("message", capture);
+    try {
+      const refused = engine.renderSpecimen({ module: "Azoth" });
+      assert.equal(refused.renderState, "unavailable");
+      await delay(30);
+      assert.deepEqual(dispatched, []);
+    } finally { peer.off("message", capture); }
+  });
+
+  await t.test("(c) dispatch with no completion: pending, then timeout fails it closed; late receipts ignored", async () => {
+    await freshTelemetry();
+    const specimen = engine.renderSpecimen({ module: "Azoth" });
+    assert.equal(specimen.renderState, "pending");
+    await waitFor(
+      () => store.collection("specimens").find((s) => s.id === specimen.id).renderState === "failed",
+      "pending render to time out");
+    const row = store.collection("specimens").find((s) => s.id === specimen.id);
+    assert.equal(row.audioUrl, null);
+    assert.equal(row.simulated, true);
+    // A completion receipt arriving after the timeout must not resurrect it.
+    await sendTelemetry([specimen.renderId, "ok", "/tmp/never-arrived.wav"], "/brahma/foundry/render/done");
+    await delay(20);
+    assert.equal(store.collection("specimens").find((s) => s.id === specimen.id).renderState, "failed");
+    assert.equal(store.collection("specimens").find((s) => s.id === specimen.id).audioUrl, null);
+  });
+
+  await t.test("(d) failed rendering: engine /failed receipt fails the render closed", async () => {
+    await freshTelemetry();
+    const specimen = engine.renderSpecimen({ module: "Azoth" });
+    assert.equal(specimen.renderState, "pending");
+    await sendTelemetry([specimen.renderId, "nrt exit 1"], "/brahma/foundry/render/failed");
+    await waitFor(
+      () => store.collection("specimens").find((s) => s.id === specimen.id).renderState === "failed",
+      "failed receipt to settle");
+    const row = store.collection("specimens").find((s) => s.id === specimen.id);
+    assert.equal(row.audioUrl, null);
+    assert.equal(row.simulated, true);
+  });
+
+  await t.test("(e) valid measured file completion: receipt + real file completes the render", async () => {
+    await freshTelemetry();
+    const specimen = engine.renderSpecimen({ module: "Azoth" });
+    assert.equal(specimen.renderState, "pending");
+    const expected = path.join(store.DATA_DIR, "specimens", `${specimen.renderId}.wav`);
+    const measured = writeWavFixture(expected, { channels: 2, sampleRate: 44100, frames: 44100 });
+    // The echoed path is deliberately bogus: completion trusts the file the
+    // engine locates itself under FOUNDRY_DATA_DIR, never the peer's claim.
+    await sendTelemetry([specimen.renderId, "ok", "/tmp/evil.wav"], "/brahma/foundry/render/done");
+    await waitFor(
+      () => store.collection("specimens").find((s) => s.id === specimen.id).renderState === "complete",
+      "completion receipt to settle");
+    const row = store.collection("specimens").find((s) => s.id === specimen.id);
+    assert.equal(row.simulated, false);
+    assert.equal(row.audioUrl, `${specimen.renderId}.wav`);
+    assert.equal(row.durationSec, measured.durationSec);
+    assert.equal(row.renderState, "complete");
+    assert.ok(row.renderCompletedAt);
+    // The file the completion measured is the one under FOUNDRY_DATA_DIR.
+    assert.ok(fs.existsSync(expected));
   });
 
   await t.test("closing the telemetry transport clears its evidence", async () => {
