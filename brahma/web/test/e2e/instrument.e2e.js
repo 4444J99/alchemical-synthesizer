@@ -228,14 +228,29 @@ describe("local sample instrument", () => {
     assert.equal(triggers, 0, "Stop must invalidate pending auditions as well as existing voices");
   });
 
-  it("changing engines stops playback and cannot send sample notes over OSC", async t => {
+  it("changing engines keeps playback running and sends sample chops over OSC", async t => {
     if (skip(t)) return;
+    // Capture the frames the OSC adapter sends, whatever the test gateway
+    // does with them (it has no SC rack behind it, so acks never arrive).
+    await ctx.page.evaluate(() => {
+      window.__oscFrames = [];
+      const origSend = WebSocket.prototype.send;
+      WebSocket.prototype.send = function (data) { window.__oscFrames.push(String(data)); return origSend.call(this, data); };
+    });
     await ctx.page.click("#play");
     assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
     await ctx.page.select("#adapter", "osc");
     assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
-    await ctx.page.click("#play"); await status("Imported samples play in WebAudio");
-    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+    await ctx.page.click("#play");
+    // The grid still holds the round-trip sample cell (track 0, step 0,
+    // chop 2): the note must carry that chop as its 5th arg, not the
+    // pitch-derived slice. A full 16-step cycle is 2s at 120bpm.
+    await ctx.page.waitForFunction(() => (window.__oscFrames || []).some(f => {
+      try { const m = JSON.parse(f); return m.address === "/brahma/instrument/note" && m.args[4] === 2; }
+      catch (_) { return false; }
+    }), { timeout: 10000 });
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+    await ctx.page.click("#stop");
     await ctx.page.select("#adapter", "webaudio");
   });
 
