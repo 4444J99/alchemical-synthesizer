@@ -10,8 +10,11 @@ The instrument now sends short sounds to Forge for native transformations and
 applies the result to future notes while its browser sequence keeps playing.
 Portable projects retain original excerpts, transformed audio, recipes and chops;
 the starter sketch includes actual rendered Golem presets on that transport.
-Real-time SC buffer transfer, the separate live Golem sequencer, live modular
-routing, and album arrangement below remain unfinished. Render validation with
+The SC side of real-time buffer transfer has landed (loop PR for #95, steps 1–2
+of the plan: `/brahma/instrument/note` receiver with engine acks, and
+`/octahedron/load` binding a real buffer to the slicer with release and
+replacement rules). The separate live Golem sequencer, live modular routing,
+and album arrangement below remain unfinished. Render validation with
 selected songs does not establish musical acceptance.
 
 The [original-organism and material reconciliation](mimicry-material-universe.md)
@@ -54,7 +57,7 @@ Song selections + local audio
 | Decode and normalize source audio | `forge/ingest.sh` | Batch selections, stable source IDs, collision-safe destinations |
 | Optional stem extraction | `forge/rip.py` | Show actual engine and quality; keep original source available |
 | Source and recipe provenance | `forge/rip.py`, `forge/forge.sh`, `forge/stemforge.py` | Extend identities to clips, slices, transformations, and sessions |
-| Slice, loop, stretch, and crossfade | `brahma/sc/25_elektron_octatrack.scd` | Buffer loading, allocation, acknowledgements, release, and sample bindings |
+| Slice, loop, stretch, and crossfade | `brahma/sc/25_elektron_octatrack.scd` | Buffer loading, allocation, acknowledgements, release (done, loop PR for #95 steps 1–2); sample bindings in `pattern.js` still pending |
 | Granular, tape, reverse, resonant processing | `brahma/sc/05_sampler_creatures*.scd`, `14_stem_voices.scd` | Expose the appropriate live/offline controls consistently |
 | Pattern editing and commands | `brahma/web/public/instrument/pattern.js` | Sample and slice references per event, arrangement, persistence |
 | Authenticated control and live scheduling | `brahma/web/public/workbench/`, `31_live_gateway.scd` | Reuse session/approval boundaries and extend the event contract |

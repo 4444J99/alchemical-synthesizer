@@ -128,7 +128,7 @@ SynthDef(\octahedron_timestretch, {
 // sliceIndex selects which slice to trigger with per-slice enveloping.
 SynthDef(\octahedron_slicer, {
     |outBus=0, bufnum=0, sliceIndex=0, numSlices=16,
-     gate=1, rate=1.0, startPos=0|
+     gate=1, rate=1.0, startPos=0, amp=1.0|
 
     var sliceStart, sliceLen, play, env;
     var numFrames, sliceFrames;
@@ -158,7 +158,7 @@ SynthDef(\octahedron_slicer, {
         loop: 0
     );
 
-    Out.ar(outBus, play * env);
+    Out.ar(outBus, play * env * amp);
 }).add;
 
 // ==========================================
@@ -347,10 +347,11 @@ OSCdef(\octahedron_pickup_fb, { |msg|
 OSCdef(\octahedron_slice, { |msg|
     var idx = msg[1].asInteger;
     var rate = msg[2] !? _.asFloat ?? 1.0;
+    var syn;
     // Trigger a one-shot slice playback
     ~octahedron_nodes !? { |nodes|
         if(nodes[\sliceBuf].notNil) {
-            Synth(\octahedron_slicer, [
+            syn = Synth(\octahedron_slicer, [
                 \outBus, nodes[\mainBus] ? 0,
                 \bufnum, nodes[\sliceBuf],
                 \sliceIndex, idx,
@@ -358,6 +359,9 @@ OSCdef(\octahedron_slice, { |msg|
                 \rate, rate.clip(-4, 4),
                 \gate, 1
             ], target: ~sc_grp[\te]);
+            // Track the voice so /octahedron/stop can release it: a slice
+            // synth holds its ASR gate until gated off (#95).
+            nodes[\sliceVoices].add(syn);
         };
     };
     ~visual_cortex.target.sendMsg("/octahedron/slice/state", idx, rate);
@@ -425,6 +429,174 @@ OSCdef(\octahedron_arr_advance, {
 }, "/octahedron/arranger/advance");
 
 // ==========================================
+// INSTRUMENT NOTES + SAMPLE LOAD — song sampling (#95, plan steps 1-2)
+// ==========================================
+// The browser instrument sends /brahma/instrument/note for every pattern
+// event when the OSC engine is selected (brahma/web/public/instrument/
+// instrument.js, OscAdapter), but no receiver existed: the notes went
+// nowhere. And the slicer above could never sound: sliceBuf was nil with
+// no load path. This section closes both gaps.
+//
+// Placement note: the receiver lives here, not in 16_engine_responders.scd,
+// because the slicer and sliceBuf live here; the generic voice manager in
+// 16 owns engine voices, which instrument notes deliberately bypass —
+// they trigger slices, not engine voices.
+//
+// Trust boundary: these addresses arrive over the browser WebSocket bridge,
+// which forwards /brahma/ only from authenticated human sessions
+// (brahma/web/lib/session.js, handleLegacyOsc) at a rate-limited 200/s.
+// Buffer.read only reads: the load path never writes the source file.
+
+// Release every tracked slice voice. Returns the count released.
+// A slice synth holds its ASR gate until gated off, so stop must be
+// explicit — ending the Routine or freeing the buffer does not end it.
+~octahedron_sliceStopAll = { |nodes|
+    var count = 0;
+    nodes[\sliceVoices].do({ |syn|
+        if(syn.notNil) { syn.set(\gate, 0); count = count + 1 };
+    });
+    nodes[\sliceVoices] = List.new;
+    count
+};
+
+// Release one tracked slice voice, if it is still tracked. A later stop
+// or load clears the list first, so a stale auto-release timer must never
+// gate off a newer voice (same guard shape as /brahma/live/play).
+~octahedron_sliceReleaseVoice = { |nodes, syn|
+    if(nodes[\sliceVoices].includes(syn)) {
+        nodes[\sliceVoices].remove(syn);
+        syn.set(\gate, 0);
+    };
+};
+
+// Instrument note: /brahma/instrument/note <track:string> <note:int> <gain:float> <dur:float>
+// Maps the note to a slice (note % numSlices) and triggers the slicer on
+// the bound buffer, auto-releasing after <dur> so pattern events never
+// leave hanging notes. Replies on /brahma/instrument/note/ack
+// <track> <note> <ok:int> <sliceIndex|message>: an open socket is not an
+// ack — the browser learns whether the engine actually sounded the note,
+// or that no sample is bound yet.
+OSCdef(\instrument_note, { |msg|
+    var track, note, gain, dur, nodes, buf, sliceIndex, syn, task;
+    if(msg.size < 5) {
+        ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
+            msg[1] ? "?", 0, 0, "bad_args: note needs <track> <note> <gain> <dur>");
+    } {
+        track = msg[1].asString;
+        note = msg[2].asInteger;
+        gain = msg[3].asFloat.clip(0, 1);
+        dur = msg[4].asFloat.clip(0.01, 30);
+        if(note < 0 or: { note > 127 }) {
+            ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
+                track, note, 0, "bad_args: note out of range 0..127");
+        } {
+            ~octahedron_nodes !? { |nds|
+                nodes = nds;
+                buf = nodes[\sliceBuf];
+                if(buf.isNil) {
+                    ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
+                        track, note, 0, "no buffer loaded: send /octahedron/load first");
+                } {
+                    sliceIndex = note % (nodes[\numSlices] ? 16);
+                    syn = Synth(\octahedron_slicer, [
+                        \outBus, nodes[\mainBus] ? 0,
+                        \bufnum, buf,
+                        \sliceIndex, sliceIndex,
+                        \numSlices, nodes[\numSlices] ? 16,
+                        \rate, 1.0,
+                        \amp, gain,
+                        \gate, 1
+                    ], target: ~sc_grp[\te]);
+                    nodes[\sliceVoices].add(syn);
+                    task = Routine({
+                        dur.wait;
+                        ~octahedron_sliceReleaseVoice.(nodes, syn);
+                    });
+                    task.play(SystemClock);
+                    ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
+                        track, note, 1, sliceIndex);
+                };
+            };
+        };
+    };
+}, "/brahma/instrument/note");
+
+// Sample load: /octahedron/load <path:string> [numSlices:int]
+// Binds a real audio file to the slicer (sliceBuf), so
+// /brahma/instrument/note and /octahedron/slice can sound it. The path is
+// validated before any server call (File.exists, then SoundFile.openRead
+// for the header): a missing or unreadable file gets an error ack, never
+// a silent no-op. Replacing a bound buffer first gates off every sounding
+// slice voice, then frees the old buffer after the 5ms release tail, so
+// the previous sample never keeps sounding; the source file itself is
+// only ever read. A later load supersedes an in-flight one: its action
+// frees its buffer instead of binding a stale one (loadToken guard).
+// Replies on /octahedron/load/state — success:
+//   <1> <path> <bufnum> <numFrames> <numChannels> <numSlices> <voicesFreed>
+// failure: <0> <path> <message>.
+OSCdef(\octahedron_load, { |msg|
+    var path, slices, token, nodes, sf;
+    if(msg.size < 2 or: { msg[1].asString.size == 0 }) {
+        ~visual_cortex.target.sendMsg("/octahedron/load/state",
+            0, "", "bad_args: load needs <path> [numSlices]");
+    } {
+        path = msg[1].asString;
+        slices = if(msg.size > 2) { msg[2].asInteger.clip(1, 128) } { nil };
+        if(File.exists(path).not) {
+            ~visual_cortex.target.sendMsg("/octahedron/load/state",
+                0, path, "no such file");
+        } {
+            sf = SoundFile.openRead(path);
+            if(sf.isNil) {
+                ~visual_cortex.target.sendMsg("/octahedron/load/state",
+                    0, path, "not a readable audio file");
+            } {
+                sf.close;
+                ~octahedron_nodes !? { |nds|
+                    nodes = nds;
+                    nodes[\loadToken] = nodes[\loadToken] + 1;
+                    token = nodes[\loadToken];
+                    Buffer.read(s, path, action: { |buf|
+                        var oldBuf, oldVoices;
+                        if(token == nodes[\loadToken]) {
+                            if(buf.numFrames == 0) {
+                                buf.free;
+                                ~visual_cortex.target.sendMsg("/octahedron/load/state",
+                                    0, path, "not a readable audio file");
+                            } {
+                                if(slices.notNil) { nodes[\numSlices] = slices };
+                                oldBuf = nodes[\sliceBuf];
+                                oldVoices = ~octahedron_sliceStopAll.(nodes);
+                                nodes[\sliceBuf] = buf;
+                                if(oldBuf.notNil) {
+                                    Routine({ 0.1.wait; oldBuf.free; }).play(SystemClock);
+                                };
+                                ~visual_cortex.target.sendMsg("/octahedron/load/state",
+                                    1, path, buf.bufnum, buf.numFrames, buf.numChannels,
+                                    nodes[\numSlices], oldVoices);
+                            };
+                        } {
+                            buf.free;
+                        };
+                    });
+                };
+            };
+        };
+    };
+}, "/octahedron/load");
+
+// Slice stop: /octahedron/stop — gates off every sounding slice voice.
+// Replies on /octahedron/stop/state <freed:int>. Stop never frees the
+// bound buffer: a later note on the same buffer must still sound.
+OSCdef(\octahedron_stop, {
+    var freed = 0;
+    ~octahedron_nodes !? { |nodes|
+        freed = ~octahedron_sliceStopAll.(nodes);
+    };
+    ~visual_cortex.target.sendMsg("/octahedron/stop/state", freed);
+}, "/octahedron/stop");
+
+// ==========================================
 // Node holder for live instances
 // ==========================================
 ~octahedron_nodes = (
@@ -433,6 +605,8 @@ OSCdef(\octahedron_arr_advance, {
     stretch: nil,
     cue: nil,
     sliceBuf: nil,
+    sliceVoices: List.new,
+    loadToken: 0,
     mainBus: 0,
     cueBus: 2,
     numSlices: 16
@@ -509,6 +683,7 @@ if(~module_registry.notNil) {
         (\name: \sliceIndex, \default: 0, \min: 0, \max: 127, \units: "", \desc: "Slice index"),
         (\name: \numSlices, \default: 16, \min: 1, \max: 128, \units: "", \desc: "Total number of slices"),
         (\name: \rate, \default: 1.0, \min: -4, \max: 4, \units: "x", \desc: "Playback rate"),
+        (\name: \amp, \default: 1.0, \min: 0, \max: 2, \units: "", \desc: "Slice voice level (instrument note gain)"),
         (\name: \startPos, \default: 0, \min: 0, \max: 1, \units: "", \desc: "Start position (normalized, if sliceIndex=0)"),
     ], ~sc_grp[\te], "Sample slicer with indexed slice playback");
 
