@@ -86,24 +86,47 @@ SynthDef(\octahedron_pickup, {
 // ==========================================
 // Independent rate and pitch control via GrainBuf.
 // rate controls playback speed (pointer movement), pitch shifts grain playback.
+// Slice-bounded (plan step 5, #95): sliceIndex/numSlices confine the
+// pointer to one chop of the buffer, and the gate envelope frees the
+// voice when gated off. Defaults (sliceIndex 0, numSlices 1) play the
+// whole buffer, exactly as before — a bare Synth(\octahedron_timestretch)
+// sounds unchanged, and the persistent /octahedron/stretch voice keeps
+// its continuous behaviour (gate defaults to 1, never gated off).
 SynthDef(\octahedron_timestretch, {
     |inBus=0, outBus=0, bufnum=0, rate=1.0, pitch=1.0,
-     grainSize=0.1, overlap=4|
+     grainSize=0.1, overlap=4, sliceIndex=0, numSlices=1, gate=1, amp=1.0|
 
-    var pointer, grains, trig;
-    var grainFreq, grainDur;
+    var pointer, grains, trig, env;
+    var grainFreq, grainDur, sliceStart, sliceEnd;
 
     // Grain trigger frequency derived from overlap and grain size
     grainDur = grainSize.clip(0.01, 1.0);
     grainFreq = overlap.clip(1, 16) / grainDur;
     trig = Impulse.ar(grainFreq);
 
-    // Playback pointer: rate controls how fast we scan through the buffer
+    // Slice bounds, normalized 0..1: the voice sounds one chop, not the
+    // whole buffer. numSlices 1 is the whole buffer (the old behaviour).
+    sliceStart = sliceIndex.clip(0, numSlices.clip(1, 128) - 1) / numSlices.clip(1, 128);
+    sliceEnd = (sliceIndex.clip(0, numSlices.clip(1, 128) - 1) + 1) / numSlices.clip(1, 128);
+
+    // Playback pointer: rate controls how fast we scan through the slice.
+    // The pointer wraps from sliceEnd back to sliceStart, so the caller
+    // must gate the voice off at the stretched chop length — the envelope
+    // below is the gate, same shape as the slicer's.
     pointer = Phasor.ar(
         trig: 0,
         rate: rate.clip(0.01, 4.0) * BufRateScale.kr(bufnum) * SampleDur.ir,
-        start: 0,
-        end: 1
+        start: sliceStart,
+        end: sliceEnd
+    );
+
+    // Gate envelope: sustains while gate is 1, frees the voice when the
+    // caller gates it off (doneAction 2). A voice created without a gate
+    // arg never frees — the continuous /octahedron/stretch behaviour.
+    env = EnvGen.ar(
+        Env.asr(0.001, 1, 0.005),
+        gate,
+        doneAction: 2
     );
 
     // GrainBuf: pos is 0-1 normalized, rate here controls pitch
@@ -118,7 +141,7 @@ SynthDef(\octahedron_timestretch, {
         pan: 0
     );
 
-    Out.ar(outBus, grains);
+    Out.ar(outBus, grains * env * amp);
 }).add;
 
 // ==========================================
@@ -484,8 +507,9 @@ OSCdef(\octahedron_arr_advance, {
 // <outBus> lets the sequencer route the voice through the track's audio
 // bus and its FX chain; the note receiver passes the main bus.
 // <rate> is playback rate only: how fast the chop plays, never an
-// independent pitch/time stretch — that needs the octahedron_timestretch
-// voice (plan step 5), never a rate relabel.
+// independent pitch/time stretch — that is the octahedron_timestretch
+// voice, reached through ~octahedron_playSliceStretched (plan step 5),
+// never a rate relabel.
 ~octahedron_playSlice = { |nodes, sliceIndex, rate, gain, dur, outBus|
     var buf, syn, task;
     buf = nodes[\sliceBuf];
@@ -496,6 +520,44 @@ OSCdef(\octahedron_arr_advance, {
             \sliceIndex, sliceIndex,
             \numSlices, nodes[\numSlices] ? 16,
             \rate, rate.clip(-4, 4),
+            \amp, gain,
+            \gate, 1
+        ], target: ~sc_grp[\te]);
+        nodes[\sliceVoices].add(syn);
+        task = Routine({
+            dur.wait;
+            ~octahedron_sliceReleaseVoice.(nodes, syn);
+        });
+        task.play(SystemClock);
+        syn
+    };
+};
+
+// Trigger one slice voice through the granular time-stretch voice
+// (\octahedron_timestretch, plan step 5) and auto-release it after
+// <dur> seconds. Same shape as ~octahedron_playSlice — one voice path
+// for stretched slice tracks, so stop and release semantics stay
+// identical whichever transform sounded the voice. <rate> is pointer
+// speed: how fast the chop is scanned (the tempo-match rate, project
+// tempo / source tempo, when known) — never a pitch control. <pitch>
+// is independent grain pitch (1.0 = the chop's own pitch) and
+// <grainSize> the grain duration in seconds. The voice is tracked in
+// sliceVoices, so /octahedron/stop releases stretched sequencer voices
+// exactly like plain slice voices. Returns the Synth, or nil when no
+// buffer is bound. Callers pass gain 0..1, rate 0.01..4,
+// pitch 0.25..4, grainSize 0.01..1, dur > 0.
+~octahedron_playSliceStretched = { |nodes, sliceIndex, rate, pitch, grainSize, gain, dur, outBus|
+    var buf, syn, task;
+    buf = nodes[\sliceBuf];
+    if(buf.isNil) { nil } {
+        syn = Synth(\octahedron_timestretch, [
+            \outBus, outBus,
+            \bufnum, buf,
+            \sliceIndex, sliceIndex,
+            \numSlices, nodes[\numSlices] ? 16,
+            \rate, rate.clip(0.01, 4),
+            \pitch, pitch.clip(0.25, 4),
+            \grainSize, grainSize.clip(0.01, 1),
             \amp, gain,
             \gate, 1
         ], target: ~sc_grp[\te]);
