@@ -475,6 +475,40 @@ OSCdef(\octahedron_arr_advance, {
     };
 };
 
+// Trigger one slice voice on the bound buffer and auto-release it after
+// <dur> seconds. Shared by /brahma/instrument/note (plan steps 1-3) and
+// the Golem sequencer's slice tracks (plan step 4): one voice path, so
+// stop and release semantics stay identical whichever side started the
+// voice. Returns the Synth, or nil when no buffer is bound (the caller
+// acks that case itself). Callers pass gain 0..1, rate -4..4, dur > 0.
+// <outBus> lets the sequencer route the voice through the track's audio
+// bus and its FX chain; the note receiver passes the main bus.
+// <rate> is playback rate only: how fast the chop plays, never an
+// independent pitch/time stretch — that needs the octahedron_timestretch
+// voice (plan step 5), never a rate relabel.
+~octahedron_playSlice = { |nodes, sliceIndex, rate, gain, dur, outBus|
+    var buf, syn, task;
+    buf = nodes[\sliceBuf];
+    if(buf.isNil) { nil } {
+        syn = Synth(\octahedron_slicer, [
+            \outBus, outBus,
+            \bufnum, buf,
+            \sliceIndex, sliceIndex,
+            \numSlices, nodes[\numSlices] ? 16,
+            \rate, rate.clip(-4, 4),
+            \amp, gain,
+            \gate, 1
+        ], target: ~sc_grp[\te]);
+        nodes[\sliceVoices].add(syn);
+        task = Routine({
+            dur.wait;
+            ~octahedron_sliceReleaseVoice.(nodes, syn);
+        });
+        task.play(SystemClock);
+        syn
+    };
+};
+
 // Instrument note: /brahma/instrument/note <track:string> <note:int> <gain:float> <dur:float> [slice:int]
 // Maps the note to a slice and triggers the slicer on the bound buffer,
 // auto-releasing after <dur> so pattern events never leave hanging notes.
@@ -488,7 +522,7 @@ OSCdef(\octahedron_arr_advance, {
 // ack — the browser learns whether the engine actually sounded the note,
 // or that no sample is bound yet.
 OSCdef(\instrument_note, { |msg|
-    var track, note, gain, dur, slice, nodes, buf, sliceIndex, syn, task;
+    var track, note, gain, dur, slice, nodes, buf, sliceIndex;
     if(msg.size < 5) {
         ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
             msg[1] ? "?", 0, 0, "bad_args: note needs <track> <note> <gain> <dur>");
@@ -514,23 +548,9 @@ OSCdef(\instrument_note, { |msg|
                             track, note, 0, "bad_args: slice out of range 0..%".format((nodes[\numSlices] ? 16) - 1));
                     } {
                         sliceIndex = slice ? (note % (nodes[\numSlices] ? 16));
-                        syn = Synth(\octahedron_slicer, [
-                        \outBus, nodes[\mainBus] ? 0,
-                        \bufnum, buf,
-                        \sliceIndex, sliceIndex,
-                        \numSlices, nodes[\numSlices] ? 16,
-                        \rate, 1.0,
-                        \amp, gain,
-                        \gate, 1
-                    ], target: ~sc_grp[\te]);
-                    nodes[\sliceVoices].add(syn);
-                    task = Routine({
-                        dur.wait;
-                        ~octahedron_sliceReleaseVoice.(nodes, syn);
-                    });
-                    task.play(SystemClock);
-                    ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
-                        track, note, 1, sliceIndex);
+                        ~octahedron_playSlice.(nodes, sliceIndex, 1.0, gain, dur, nodes[\mainBus] ? 0);
+                        ~visual_cortex.target.sendMsg("/brahma/instrument/note/ack",
+                            track, note, 1, sliceIndex);
                     };
                 };
             };

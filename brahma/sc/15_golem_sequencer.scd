@@ -52,6 +52,23 @@ SynthDef(\golem_lfo, {
             synthDef: \drum_subtractive,
             synthArgs: (freq: 150, cutoff: 2000, res: 1, envAmt: 0.5),
 
+            // Slice track (plan step 4, #95): when sliceTrack is true,
+            // this track sounds a chop of the bound sample buffer
+            // through the Octatrack slicer instead of its drum
+            // SynthDef. sliceIndex is the chop; a per-step p-lock
+            // named slice overrides it. sourceTempo is the clip's
+            // native BPM when known, nil when unknown — stored, never
+            // imposed. The step fires on the project TempoClock (one
+            // transport); the chop plays at its native length, so
+            // source timing is preserved separately from project
+            // tempo. rate is playback rate only: how fast the chop
+            // plays, never independent pitch/time stretch — that needs
+            // the octahedron_timestretch voice (plan step 5).
+            sliceTrack: false,
+            sliceIndex: 0,
+            sourceTempo: nil,
+            rate: 1.0,
+
             // Blend sources (synthA, synthB, sampleA, sampleB)
             blend: (synthA: 1.0, synthB: 0.0, sampleA: 0.0, sampleB: 0.0),
 
@@ -115,7 +132,7 @@ SynthDef(\golem_lfo, {
 
                     // Trigger each track
                     self.tracks.do({ |track, trackIdx|
-                        var step, shouldPlay, vel, args, pitchOff, timeOff;
+                        var step, shouldPlay, vel, args, pitchOff, timeOff, slice, sliceDur;
 
                         step = track[\pattern][self.currentStep % track[\steps]];
 
@@ -137,43 +154,74 @@ SynthDef(\golem_lfo, {
                             vel = vel + rrand(track[\humanize][\velRand].neg, track[\humanize][\velRand]);
                             vel = vel.clip(0.01, 1.0);
 
-                            // Pitch randomization
-                            pitchOff = rrand(track[\humanize][\pitchRand].neg, track[\humanize][\pitchRand]);
-
-                            // Build args: base + p-locks
-                            args = track[\synthArgs].copy;
-                            if(step[\pLocks].notNil) {
-                                step[\pLocks].keysValuesDo({ |k, v|
-                                    args[k] = v;
-                                });
-                            };
-
-                            // Apply modulation matrix values
-                            self.applyModulation(track, self.currentStep, args);
-
-                            // Apply automation
-                            track[\automation].keysValuesDo({ |param, values|
-                                if(values[self.currentStep % track[\steps]].notNil) {
-                                    args[param.asSymbol] = values[self.currentStep % track[\steps]];
+                            if(track[\sliceTrack]) {
+                                // Slice track: sound the bound chop on
+                                // this track's bus, on the shared project
+                                // transport. Pitch humanization does not
+                                // apply: retuning a chop would retime it.
+                                slice = track[\sliceIndex];
+                                if(step[\pLocks].notNil and: { step[\pLocks][\slice].notNil }) {
+                                    slice = step[\pLocks][\slice].asInteger;
                                 };
-                            });
+                                sliceDur = self.sliceDuration(track);
+                                if(sliceDur.isNil) {
+                                    "GOLEM: Slice track % has no buffer loaded - bind a file with /octahedron/load first".format(trackIdx).warn;
+                                } {
+                                    if(slice < 0 or: { slice >= self.sliceCount }) {
+                                        "GOLEM: Slice track % chop % out of range (0..%)".format(trackIdx, slice, self.sliceCount - 1).warn;
+                                    } {
+                                        if(track[\audioBus].notNil) {
+                                            {
+                                                // Time randomization (microsecond jitter)
+                                                var delay = rrand(0, track[\humanize][\timeRand].clip(0, 0.05));
+                                                delay.wait;
+                                                ~octahedron_playSlice.(~octahedron_nodes, slice, track[\rate], vel, sliceDur, track[\audioBus].index);
+                                            }.fork(self.clock);
+                                            ~visual_cortex.target.sendMsg(
+                                                "/golem/slice/trigger", trackIdx, slice
+                                            );
+                                        };
+                                    };
+                                };
+                            } {
+                                // Pitch randomization
+                                pitchOff = rrand(track[\humanize][\pitchRand].neg, track[\humanize][\pitchRand]);
 
-                            // Add pitch offset
-                            args[\freq] = (args[\freq] ? 150) + pitchOff;
+                                // Build args: base + p-locks
+                                args = track[\synthArgs].copy;
+                                if(step[\pLocks].notNil) {
+                                    step[\pLocks].keysValuesDo({ |k, v|
+                                        args[k] = v;
+                                    });
+                                };
 
-                            // Trigger synth
-                            if(track[\audioBus].notNil) {
-                                {
-                                    // Time randomization (microsecond jitter)
-                                    var delay = rrand(0, track[\humanize][\timeRand].clip(0, 0.05));
-                                    delay.wait;
+                                // Apply modulation matrix values
+                                self.applyModulation(track, self.currentStep, args);
 
-                                    Synth(track[\synthDef],
-                                        [\outBus, track[\audioBus].index,
-                                         \velocity, vel, \gate, 1] ++ args.asPairs,
-                                        target: ~sc_grp[\te]
-                                    );
-                                }.fork(self.clock);
+                                // Apply automation
+                                track[\automation].keysValuesDo({ |param, values|
+                                    if(values[self.currentStep % track[\steps]].notNil) {
+                                        args[param.asSymbol] = values[self.currentStep % track[\steps]];
+                                    };
+                                });
+
+                                // Add pitch offset
+                                args[\freq] = (args[\freq] ? 150) + pitchOff;
+
+                                // Trigger synth
+                                if(track[\audioBus].notNil) {
+                                    {
+                                        // Time randomization (microsecond jitter)
+                                        var delay = rrand(0, track[\humanize][\timeRand].clip(0, 0.05));
+                                        delay.wait;
+
+                                        Synth(track[\synthDef],
+                                            [\outBus, track[\audioBus].index,
+                                             \velocity, vel, \gate, 1] ++ args.asPairs,
+                                            target: ~sc_grp[\te]
+                                        );
+                                    }.fork(self.clock);
+                                };
                             };
 
                             // Broadcast trigger to Visual Cortex
@@ -224,6 +272,30 @@ SynthDef(\golem_lfo, {
             self.clock.tempo = self.tempo / 60;
         };
         "GOLEM: Tempo set to % BPM".format(self.tempo).postln;
+    },
+
+    // Native length (seconds) of one chop of the bound buffer at the
+    // track's playback rate, or nil when no buffer is bound or the
+    // slicer is not loaded. The chop plays at its source length: the
+    // step fires on the project clock, the sound keeps source timing
+    // (plan step 4). Rate divides by its absolute value so a reversed
+    // chop (negative rate) still reports its true length.
+    sliceDuration: { |self, track|
+        var nodes, buf, dur;
+        nodes = ~octahedron_nodes;
+        if(nodes.isNil or: { ~octahedron_playSlice.isNil }) { ^nil };
+        buf = nodes[\sliceBuf];
+        if(buf.isNil) { ^nil };
+        dur = (buf.numFrames / (nodes[\numSlices] ? 16)) / buf.sampleRate;
+        ^(dur / track[\rate].abs.max(0.01));
+    },
+
+    // Chop count of the bound buffer (16 when unknown), for the
+    // trigger range check. Never touches the project clock.
+    sliceCount: { |self|
+        var nodes = ~octahedron_nodes;
+        if(nodes.isNil) { ^16 };
+        ^(nodes[\numSlices] ? 16);
     },
 
     // ==========================================
@@ -279,7 +351,11 @@ SynthDef(\golem_lfo, {
                 blend: t[\blend].copy,
                 fx: t[\fx].copy,
                 muted: t[\muted],
-                solo: t[\solo]
+                solo: t[\solo],
+                sliceTrack: t[\sliceTrack],
+                sliceIndex: t[\sliceIndex],
+                sourceTempo: t[\sourceTempo],
+                rate: t[\rate]
             )
         });
         "GOLEM: Scene '%' saved".format(name).postln;
@@ -296,6 +372,11 @@ SynthDef(\golem_lfo, {
                 self.tracks[i][\fx] = data[\fx].copy;
                 self.tracks[i][\muted] = data[\muted];
                 self.tracks[i][\solo] = data[\solo];
+                // Slice fields default for scenes saved before step 4.
+                self.tracks[i][\sliceTrack] = data[\sliceTrack] ? false;
+                self.tracks[i][\sliceIndex] = data[\sliceIndex] ? 0;
+                self.tracks[i][\sourceTempo] = data[\sourceTempo];
+                self.tracks[i][\rate] = data[\rate] ? 1.0;
             });
             "GOLEM: Scene '%' loaded".format(name).postln;
         } {
@@ -586,6 +667,69 @@ SynthDef(\golem_lfo, {
                 );
             };
         }, "/golem/pad/trigger");
+
+        // Slice tracks (plan step 4): bind a Golem track to a chop of
+        // the bound sample buffer so the sequencer sounds slices on
+        // the shared project transport. /golem/slice/bind
+        // <track:int> <slice:int> [sourceTempo:float] — sourceTempo
+        // is the clip's native BPM when known (0 or omitted =
+        // unknown); it is stored for later steps and never retunes
+        // the voice. /golem/slice/rate sets playback rate only —
+        // never independent pitch/time stretch (that needs the
+        // octahedron_timestretch voice, plan step 5). All three
+        // reply on /golem/slice/state
+        // <track> <slice> <sourceTempo|0> <rate>; unbind reports
+        // slice -1.
+        OSCdef(\golem_slice_bind, { |msg|
+            var trackIdx = msg[1].asInteger;
+            var slice = msg[2].asInteger.max(0);
+            var tempo = msg[3] !? _.asFloat ?? 0;
+            var track;
+            if(trackIdx < 0 or: { trackIdx >= self.tracks.size }) {
+                "GOLEM: Slice bind: track % out of range".format(trackIdx).warn;
+            } {
+                track = self.tracks[trackIdx];
+                track[\sliceTrack] = true;
+                track[\sliceIndex] = slice;
+                track[\sourceTempo] = if(tempo > 0) { tempo } { nil };
+                ~visual_cortex.target.sendMsg("/golem/slice/state",
+                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate]);
+                "GOLEM: Track % bound to slice % (source tempo %)".format(
+                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? "unknown").postln;
+            };
+        }, "/golem/slice/bind");
+
+        OSCdef(\golem_slice_rate, { |msg|
+            var trackIdx = msg[1].asInteger;
+            var rate = msg[2].asFloat.clip(-4, 4);
+            var track;
+            if(trackIdx < 0 or: { trackIdx >= self.tracks.size }) {
+                "GOLEM: Slice rate: track % out of range".format(trackIdx).warn;
+            } {
+                track = self.tracks[trackIdx];
+                track[\rate] = rate;
+                ~visual_cortex.target.sendMsg("/golem/slice/state",
+                    trackIdx, track[\sliceIndex], track[\sourceTempo] ? 0, track[\rate]);
+                "GOLEM: Track % playback rate % (rate only, not pitch/time stretch)".format(trackIdx, rate).postln;
+            };
+        }, "/golem/slice/rate");
+
+        OSCdef(\golem_slice_unbind, { |msg|
+            var trackIdx = msg[1].asInteger;
+            var track;
+            if(trackIdx < 0 or: { trackIdx >= self.tracks.size }) {
+                "GOLEM: Slice unbind: track % out of range".format(trackIdx).warn;
+            } {
+                track = self.tracks[trackIdx];
+                track[\sliceTrack] = false;
+                track[\sliceIndex] = 0;
+                track[\sourceTempo] = nil;
+                track[\rate] = 1.0;
+                ~visual_cortex.target.sendMsg("/golem/slice/state",
+                    trackIdx, -1, 0, 1.0);
+                "GOLEM: Track % unbound from slices".format(trackIdx).postln;
+            };
+        }, "/golem/slice/unbind");
 
         // XY pad
         OSCdef(\golem_xy, { |msg|

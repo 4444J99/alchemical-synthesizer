@@ -422,6 +422,13 @@ SynthDef(\golem_rr, {
                 track[\synthDef] = preset[\synthDef];
                 track[\synthArgs] = preset[\args].copy;
             };
+            // A slice binding does not survive evict: the track goes
+            // back to its drum preset, so clear the chop, its source
+            // tempo, and the playback rate with it (plan step 4).
+            track[\sliceTrack] = false;
+            track[\sliceIndex] = 0;
+            track[\sourceTempo] = nil;
+            track[\rate] = 1.0;
         });
 
         "GOLEM: Donor traits evicted, factory defaults restored".postln;
