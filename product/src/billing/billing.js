@@ -80,7 +80,8 @@ async function checkoutPlan({ email, plan, req }) {
 /** Create a checkout to buy a marketplace specimen. */
 async function checkoutSpecimen({ email, specimenId, req }) {
   const spc = getSpecimen(specimenId);
-  if (!spc || !spc.forSale || spc.simulated || !spc.audioUrl || !spc.ownerEmail) throw new Error("specimen not for sale");
+  if (!spc || !spc.forSale || spc.simulated || !spc.audioUrl ||
+      (spc.renderState !== undefined && spc.renderState !== "complete") || !spc.ownerEmail) throw new Error("specimen not for sale");
   requireCheckout();
   const split = payoutSplit(spc.priceCents);
   const order = baseOrder({

@@ -45,7 +45,7 @@ const ACTIONS = {
   },
 
   render_specimen: {
-    description: "Create a simulated specimen record from a module. Metered. Audio rendering and artifact completion are not connected; audioUrl is null.",
+    description: "Create a specimen record from a module. Metered. With no live engine it returns a simulated record (renderState unavailable, audioUrl null); with a live engine it dispatches a render and returns the specimen pending completion — audioUrl is set only when the render completes and its file is measured.",
     cost: 1,
     schema: { type: "object", required: ["module"], properties: {
       module: { type: "string", description: "Source module name" },

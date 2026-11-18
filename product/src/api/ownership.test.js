@@ -74,6 +74,23 @@ test("ownership: authenticated identity is preserved across every specimen surfa
         assert.equal(specimens.find((s) => s.id === id).forSale, false);
       }
     });
+    await t.test("pending, failed, and unavailable specimens cannot become sale listings; completed ones can", async () => {
+      const specimens = store.collection("specimens");
+      // These rows pass the old guards (not simulated, audioUrl set) but their
+      // renders never completed — the renderState guard (issue #96) must stop them.
+      for (const [id, renderState] of [["pending", "pending"], ["failed", "failed"], ["unavailable", "unavailable"]]) {
+        specimens.insert({ id, ownerEmail: "alice@example.test", creator: "alice@example.test", simulated: false,
+          audioUrl: "fixture.wav", renderState, forSale: false, createdAt: new Date().toISOString() });
+        const res = await post(`/api/v1/specimens/${id}/list`, { priceCents: 100 });
+        assert.equal(res.status, 400); await res.text();
+        assert.equal(specimens.find((s) => s.id === id).forSale, false);
+      }
+      specimens.insert({ id: "completed", ownerEmail: "alice@example.test", creator: "alice@example.test", simulated: false,
+        audioUrl: "fixture.wav", renderState: "complete", forSale: false, priceCents: 0, createdAt: new Date().toISOString() });
+      const res = await post("/api/v1/specimens/completed/list", { priceCents: 100 });
+      assert.equal(res.status, 200); await res.text();
+      assert.equal(specimens.find((s) => s.id === "completed").forSale, true);
+    });
   } finally {
     server.closeAllConnections(); await new Promise((resolve) => server.close(resolve));
     store.flushSync(); fs.rmSync(data, { recursive: true, force: true });
