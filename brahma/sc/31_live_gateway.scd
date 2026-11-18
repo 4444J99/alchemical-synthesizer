@@ -114,7 +114,9 @@ OSCdef(\live_panic, {
     ~live_gateway[\tasks].do({ |t| t.stop });
     ~live_gateway[\tasks] = IdentitySet.new;
     // 2. transports and generators (existing responders, looked up by path)
-    ["/chronos/transport/stop", "/golem/transport/stop", "/brahma/demo/stop", "/brahma/midi/panic"].do({ |path|
+    // Slice voices too: a slice synth holds its ASR gate until gated off,
+    // so panic must release them through /octahedron/stop (#95).
+    ["/chronos/transport/stop", "/golem/transport/stop", "/brahma/demo/stop", "/brahma/midi/panic", "/octahedron/stop"].do({ |path|
         OSCdef.all.values.select({ |d| d.path == path.asSymbol }).do({ |d|
             try { d.func.value([path], nil, nil, nil) };
         });
