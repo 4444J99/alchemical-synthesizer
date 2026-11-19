@@ -7,6 +7,7 @@
     const caps = M.limits(window.BRAHMA_SAMPLE_LIMITS);
     let sources = [], trackSources = P.TRACKS.map(() => null), selectedSlice = 0, busy = false;
     let vessels = P.TRACKS.map(() => null);
+    let sliceTracks = P.TRACKS.map(() => null);
     let renderer = null;
     let native = null, revision = 0;
     function invalidateNative() { revision++; if (native) native.cancel(); }
@@ -22,7 +23,7 @@
       const transport = bridge.transport();
       return M.validateProject({ schema: M.SCHEMA, name: $("project-name").value.trim() || "Brahma session",
         tempo: transport.tempo, phase: transport.phase, cycle: transport.cycle,
-        scene: bridge.scene(), trackSources, sources, vessels }, caps);
+        scene: bridge.scene(), trackSources, sliceTracks, sources, vessels }, caps);
     }
     function download(bytes, name, type) {
       const url = URL.createObjectURL(new Blob([bytes], { type }));
@@ -144,12 +145,28 @@
       invalidateNative();
       operation("Opening project...", async () => {
         if (file.size > caps.maxProjectBytes) throw new Error("Project exceeds file size limit");
-        const project = await M.deserialize(await file.text(), caps);
+        const { project, report: reopened } = await M.reopen(await file.text(), caps);
+        // A file with missing assets must not wipe the session that is
+        // playing: keep the current sources and pattern, and name what is
+        // missing. Salvage is adopted only when nothing playable is lost
+        // (an empty session) — the library still salvages, the UI decides.
+        if (reopened.missing.length && sources.length) {
+          report("Could not open " + project.name + ": missing assets (" +
+            reopened.missing.map(m => m.name + ": " + m.reason).join("; ") +
+            "). Current session kept.", true);
+          return;
+        }
         await audio().loadSources(project.sources);
         bridge.stop(); sources = project.sources; trackSources = project.trackSources; vessels = project.vessels;
+        sliceTracks = project.sliceTracks;
         $("project-name").value = project.name; $("sample-track").value = "0"; selectedSlice = 0;
         bridge.restore(project); renderSources();
-        report("Opened " + project.name + ". Ready to play; transport is stopped.");
+        // Reopening reports missing assets instead of losing the session:
+        // the playable remainder is restored, the missing names are named.
+        const missingNote = reopened.missing.length ?
+          " Missing assets (" + reopened.missing.map(m => m.name + ": " + m.reason).join("; ") + "); " +
+          reopened.droppedCells.length + " note(s) dropped." : "";
+        report("Opened " + project.name + "." + missingNote + " Ready to play; transport is stopped.");
       }).finally(() => { event.target.value = ""; });
     });
     $("export-loop").addEventListener("click", () => operation("Rendering current loop...", async () => {
@@ -186,7 +203,7 @@
       else if (source.recipe && JSON.stringify(existing.recipe) !== JSON.stringify(source.recipe)) throw new Error("This audio already exists with a different recipe; existing sources preserved");
       const checked = M.replaceTrackSource(candidate, target.track, target.source.id, source.id, caps);
       await audio().loadSources(checked.sources, buffer ? new Map([[source.id, buffer]]) : undefined);
-      sources = checked.sources; trackSources = checked.trackSources;
+      sources = checked.sources; trackSources = checked.trackSources; sliceTracks = checked.sliceTracks;
       bridge.replaceScene(checked.scene); renderSources();
     }
     if (window.NativeControls) native = window.NativeControls.attach({
