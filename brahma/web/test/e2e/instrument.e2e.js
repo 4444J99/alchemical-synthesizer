@@ -149,6 +149,37 @@ describe("local sample instrument", () => {
     assert.ok(peak > 500, "export must contain the uploaded sound");
     const hz = crossings / 0.075;
     assert.ok(hz > 420 && hz < 470, `expected the 440 Hz chop, got ${hz} Hz`);
+    // Step 7 of the #95 plan: the export ships a receipt tying the WAV to
+    // the exact session bytes rendered, with its own measurements.
+    const receiptName = await until(() => fs.readdirSync(ctx.dir).find(f => f.endsWith(".receipt.json")));
+    const receipt = JSON.parse(fs.readFileSync(path.join(ctx.dir, receiptName), "utf8"));
+    assert.equal(receipt.schema, "brahma.export-receipt.v1");
+    assert.equal(receipt.take, 1);
+    assert.equal(receipt.wav.filename, wav);
+    assert.equal(receipt.wav.sha256, crypto.createHash("sha256").update(rendered).digest("hex"));
+    assert.equal(receipt.wav.byteLength, rendered.length);
+    assert.equal(receipt.session.sha256, crypto.createHash("sha256").update(fs.readFileSync(ctx.saved)).digest("hex"),
+      "receipt session hash must reproduce from the saved project file");
+    assert.equal(receipt.session.name, "Chopped session");
+    assert.equal(receipt.session.tempo, 104);
+    assert.equal(receipt.session.sources[0].sha256, project.sources[0].sha256);
+    assert.equal(receipt.render.channels, 2);
+    assert.equal(receipt.render.audible, true);
+    assert.ok(receipt.render.peak > 0);
+    assert.equal(receipt.render.frames, Math.round(16 * 60 / 104 / 4 * receipt.render.sampleRate));
+    assert.equal(receipt.receipt.filename, receiptName);
+    // A second export is a new take: a different basename, a matching
+    // receipt, the same session hash — earlier takes are never overwritten.
+    await ctx.page.click("#export-loop");
+    const wav2 = await until(() => fs.readdirSync(ctx.dir).find(f => f.endsWith(".wav") && !f.startsWith("donor") && f !== wav));
+    assert.notEqual(wav2, wav);
+    const receipt2Name = await until(() => fs.readdirSync(ctx.dir).find(f => f.endsWith(".receipt.json") && f !== receiptName));
+    const receipt2 = JSON.parse(fs.readFileSync(path.join(ctx.dir, receipt2Name), "utf8"));
+    assert.equal(receipt2.take, 2);
+    assert.equal(receipt2.wav.filename, wav2);
+    assert.equal(receipt2.session.sha256, receipt.session.sha256);
+    assert.equal(receipt2.wav.sha256,
+      crypto.createHash("sha256").update(fs.readFileSync(path.join(ctx.dir, wav2))).digest("hex"));
     if (process.env.BRAHMA_INSTRUMENT_SCREENSHOT) await ctx.page.screenshot({
       path: process.env.BRAHMA_INSTRUMENT_SCREENSHOT, fullPage: true });
     assert.deepEqual(ctx.errors, []);

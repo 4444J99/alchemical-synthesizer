@@ -131,5 +131,79 @@
     }
     return bytes;
   }
-  return { Renderer, outputGraph, renderLoop, wavBytes };
+  // Measured render evidence: the numbers a receipt can be checked against
+  // without replaying the render. `audible` is a peak gate, not a musical
+  // judgement — a silent render must never ship as a take.
+  function measureAudio(buffer) {
+    if (!buffer || typeof buffer.numberOfChannels !== "number" || buffer.numberOfChannels < 1 ||
+        !Number.isFinite(buffer.length) || buffer.length < 0 ||
+        !Number.isFinite(buffer.sampleRate) || buffer.sampleRate <= 0 ||
+        typeof buffer.getChannelData !== "function") throw new Error("Invalid audio buffer");
+    const channels = buffer.numberOfChannels, frames = buffer.length;
+    let sumSquares = 0, peak = 0;
+    for (let ch = 0; ch < channels; ch++) {
+      const data = buffer.getChannelData(ch);
+      if (!data || data.length < frames) throw new Error("Invalid audio channel data");
+      for (let i = 0; i < frames; i++) {
+        const value = data[i];
+        if (!Number.isFinite(value)) throw new Error("Invalid audio sample");
+        sumSquares += value * value; peak = Math.max(peak, Math.abs(value));
+      }
+    }
+    const total = frames * channels;
+    return { sampleRate: buffer.sampleRate, channels, frames,
+      durationSeconds: frames / buffer.sampleRate,
+      rms: total ? Math.sqrt(sumSquares / total) : 0, peak, audible: peak > 0.01 };
+  }
+  const RECEIPT_SCHEMA = "brahma.export-receipt.v1";
+  // A take stem that can never overwrite an earlier take: the take number
+  // orders exports inside one page session, and the millisecond timestamp
+  // keeps the basename unique across reloads, where the take counter
+  // restarts. `base` must already be filename-safe (the caller sanitizes
+  // the project name); the stem stays filename-safe by construction.
+  function exportStem(base, take, exportedAt) {
+    if (typeof base !== "string" || !base || /[^A-Za-z0-9_-]/.test(base)) throw new Error("Invalid export name");
+    if (!Number.isInteger(take) || take < 1) throw new Error("Invalid export take");
+    if (!(exportedAt instanceof Date) || !Number.isFinite(exportedAt.getTime())) throw new Error("Invalid export time");
+    const stamp = exportedAt.toISOString().replace(/[-:.]/g, "");
+    return base + "-loop-take" + take + "-" + stamp;
+  }
+  // The receipt tying one exported WAV to the exact saved session it was
+  // rendered from. The session hash is the tie: it is the SHA-256 of the
+  // serialized session bytes at export time, so re-saving the project and
+  // hashing it reproduces the receipt's session hash. The render inputs
+  // (tempo, cycle, sources with their hashes and chop boundaries, slice
+  // routing) are recorded in the clear so the receipt reads without the
+  // session file; the WAV hash lets the file itself be re-verified.
+  // Input files are preserved by identity, not by copy: every source is
+  // named by its sha256 (and its relative library path when referenced),
+  // and the session file holds the embedded bytes.
+  function exportReceipt(input) {
+    if (!input || typeof input !== "object") throw new Error("Invalid export receipt");
+    const clean = M.validateProject(input.project);
+    if (typeof input.sessionSha256 !== "string" || !/^[a-f0-9]{64}$/.test(input.sessionSha256)) throw new Error("Invalid session hash");
+    if (typeof input.wavSha256 !== "string" || !/^[a-f0-9]{64}$/.test(input.wavSha256)) throw new Error("Invalid WAV hash");
+    if (!Number.isInteger(input.wavByteLength) || input.wavByteLength < 44) throw new Error("Invalid WAV size");
+    if (typeof input.wavFilename !== "string" || !input.wavFilename ||
+        typeof input.receiptFilename !== "string" || !input.receiptFilename) throw new Error("Invalid export filenames");
+    if (!Number.isInteger(input.take) || input.take < 1) throw new Error("Invalid export take");
+    if (!(input.exportedAt instanceof Date) || !Number.isFinite(input.exportedAt.getTime())) throw new Error("Invalid export time");
+    const render = input.measurements;
+    if (!render || typeof render !== "object" ||
+        !Number.isFinite(render.sampleRate) || !Number.isInteger(render.channels) || render.channels < 1 ||
+        !Number.isInteger(render.frames) || render.frames < 0 ||
+        !Number.isFinite(render.durationSeconds) || !Number.isFinite(render.rms) || !Number.isFinite(render.peak) ||
+        typeof render.audible !== "boolean") throw new Error("Invalid render measurements");
+    return { schema: RECEIPT_SCHEMA, take: input.take, exportedAt: input.exportedAt.toISOString(),
+      session: { schema: M.SCHEMA, name: clean.name, sha256: input.sessionSha256,
+        tempo: clean.tempo, cycle: clean.cycle,
+        sources: clean.sources.map(source => ({ id: source.id, sha256: source.sha256, name: source.name,
+          slices: source.slices, ref: source.ref ? source.ref.path : null })),
+        sliceTracks: clean.sliceTracks },
+      render: { sampleRate: render.sampleRate, channels: render.channels, frames: render.frames,
+        durationSeconds: render.durationSeconds, rms: render.rms, peak: render.peak, audible: render.audible },
+      wav: { filename: input.wavFilename, sha256: input.wavSha256, byteLength: input.wavByteLength },
+      receipt: { filename: input.receiptFilename } };
+  }
+  return { Renderer, outputGraph, renderLoop, wavBytes, measureAudio, exportStem, exportReceipt, RECEIPT_SCHEMA };
 });
