@@ -258,6 +258,15 @@
       $("tempo").value = state.tempo; $("tempoval").textContent = state.tempo;
       $("phase").value = state.phase; $("s-phase").textContent = state.phase;
       $("s-phase").className = "badge phase-" + (P.PHASES.indexOf(state.phase) >= 0 ? state.phase : "readable");
+      // Plan step 6: the session now carries the Golem sequencer's slice
+      // tracks, so reopening re-drives them — bind, transform, stretch —
+      // when the OSC bridge is already connected. The WebAudio path plays
+      // each cell's chop directly and needs no sequencer state.
+      if (window.SampleProject && OscAdapter.ready) {
+        window.SampleProject.sliceTrackMessages(project).forEach(function (m) {
+          OscAdapter.ws.send(JSON.stringify(m));
+        });
+      }
       localEngine(); renderGrid(); updateVersion();
     },
   });
