@@ -145,7 +145,17 @@
       invalidateNative();
       operation("Opening project...", async () => {
         if (file.size > caps.maxProjectBytes) throw new Error("Project exceeds file size limit");
-        const { project, report } = await M.reopen(await file.text(), caps);
+        const { project, report: reopened } = await M.reopen(await file.text(), caps);
+        // A file with missing assets must not wipe the session that is
+        // playing: keep the current sources and pattern, and name what is
+        // missing. Salvage is adopted only when nothing playable is lost
+        // (an empty session) — the library still salvages, the UI decides.
+        if (reopened.missing.length && sources.length) {
+          report("Could not open " + project.name + ": missing assets (" +
+            reopened.missing.map(m => m.name + ": " + m.reason).join("; ") +
+            "). Current session kept.", true);
+          return;
+        }
         await audio().loadSources(project.sources);
         bridge.stop(); sources = project.sources; trackSources = project.trackSources; vessels = project.vessels;
         sliceTracks = project.sliceTracks;
@@ -153,9 +163,9 @@
         bridge.restore(project); renderSources();
         // Reopening reports missing assets instead of losing the session:
         // the playable remainder is restored, the missing names are named.
-        const missingNote = report.missing.length ?
-          " Missing assets (" + report.missing.map(m => m.name + ": " + m.reason).join("; ") + "); " +
-          report.droppedCells.length + " note(s) dropped." : "";
+        const missingNote = reopened.missing.length ?
+          " Missing assets (" + reopened.missing.map(m => m.name + ": " + m.reason).join("; ") + "); " +
+          reopened.droppedCells.length + " note(s) dropped." : "";
         report("Opened " + project.name + "." + missingNote + " Ready to play; transport is stopped.");
       }).finally(() => { event.target.value = ""; });
     });
