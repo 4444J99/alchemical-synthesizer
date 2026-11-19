@@ -9,7 +9,7 @@
     let vessels = P.TRACKS.map(() => null);
     let sliceTracks = P.TRACKS.map(() => null);
     let renderer = null;
-    let native = null, revision = 0;
+    let native = null, revision = 0, exportTake = 0;
     function invalidateNative() { revision++; if (native) native.cancel(); }
     const audio = () => renderer || (renderer = bridge.renderer());
     const track = () => Number($("sample-track").value);
@@ -170,9 +170,24 @@
       }).finally(() => { event.target.value = ""; });
     });
     $("export-loop").addEventListener("click", () => operation("Rendering current loop...", async () => {
-      const rendered = await A.renderLoop(snapshot(), caps);
-      download(A.wavBytes(rendered), filename() + "-loop.wav", "audio/wav");
-      report("Exported the current loop as a stereo WAV.");
+      // Step 7 of the #95 plan: the export is a take, not a bare file. The
+      // receipt ties the WAV to the exact session bytes rendered (hash the
+      // saved project file to reproduce it), the measurements prove the
+      // render is audible, and the take-numbered, timestamped stem means a
+      // repeat export never overwrites an earlier take by basename.
+      const project = snapshot();
+      const sessionSha256 = await M.digest(new TextEncoder().encode(M.serialize(project, caps)));
+      const rendered = await A.renderLoop(project, caps);
+      const bytes = A.wavBytes(rendered), measurements = A.measureAudio(rendered);
+      if (!measurements.audible) throw new Error("Render is silent; nothing to export");
+      const take = ++exportTake, exportedAt = new Date(), stem = A.exportStem(filename(), take, exportedAt);
+      const wavName = stem + ".wav", receiptName = stem + ".receipt.json";
+      const receipt = A.exportReceipt({ project, sessionSha256,
+        wavSha256: await M.digest(new Uint8Array(bytes)), wavByteLength: bytes.byteLength,
+        wavFilename: wavName, receiptFilename: receiptName, measurements, take, exportedAt });
+      download(bytes, wavName, "audio/wav");
+      download(new TextEncoder().encode(JSON.stringify(receipt, null, 2)), receiptName, "application/json");
+      report("Exported take " + take + " of the current loop as a stereo WAV with its receipt.");
     }));
     window.addEventListener("resize", drawWaveform);
     renderSources();
