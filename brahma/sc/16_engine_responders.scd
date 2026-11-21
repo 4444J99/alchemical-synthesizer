@@ -264,5 +264,207 @@ OSCdef(\foundry_render, { |msg|
     };
 }, "/brahma/foundry/render");
 
+// ==========================================
+// OSC: Testament sonic bridge receiver (issue #127)
+// /testament/master <amp>
+// /testament/bpm <bpm>
+// /testament/env <attack> <decay> <sustain> <release>
+// /testament/filter <cutoff> <resonance>
+// /testament/voice/N <freq> <amp> <waveform> <detune> <pan>
+//
+// The engine half (organvm-engine#49) renders the system's sonic
+// self-portrait and transmits it as OSC 1.0 over UDP to 127.0.0.1:57120
+// (one bundle with an immediate timetag, or per-message datagrams;
+// sclang dispatches bundle elements individually, so both forms arrive
+// here identically). This section is the listening half: it sounds the
+// portrait through one oscillator voice per organ index.
+//
+// Deviations from the engine's docstring, on live evidence: the engine
+// names a TestamentReceiver.sc class file, but this repo's receivers are
+// OSCdefs in responder .scd files (this file already owns
+// /brahma/foundry/render the same way), so the receiver lives here and
+// needs no loader change — loader.scd already loads this file inside
+// s.doWhenBooted. The engine bridge is fire-and-forget (no receive path
+// in osc_bridge.py), so there is no ack surface to reply on: outcomes are
+// posted to the SC post window, and bad args are typed postln warnings,
+// never a silent no-op. bpm drives the shared Chronos clock when it
+// exists (~chronos.setTempo, the same call its own
+// /chronos/transport/tempo responder makes); without Chronos the value is
+// stored, not pretended. The wire carries no filter type (the renderer
+// always sends lowpass), so the voice is lowpass by construction.
+// ==========================================
+~testament = (
+    master: 0.5,
+    attack: 0.01, decay: 0.5, sustain: 0.7, release: 0.3,
+    cutoff: 8000, resonance: 0.0, bpm: 120,
+    voices: IdentityDictionary.new, // index -> Synth
+    maxVoices: 16
+);
+
+// One oscillator voice per organ. Waveform is an index (0 sine, 1 saw,
+// 2 square, 3 tri) so the SynthDef never parses strings; detune is in
+// cents, as the engine sends it. The filter is lowpass by construction
+// (the wire carries no type). master is a separate multiplier so a
+// /testament/master message retunes live voices without re-voicing them.
+SynthDef(\testament_voice, { |freq=440, amp=0.2, wave=0, detune=0, pan=0,
+    attack=0.01, decay=0.5, sustain=0.7, release=0.3,
+    cutoff=8000, resonance=0, master=1, gate=1, out=0|
+    var detuned, sig, filtered, env;
+    detuned = freq * (2 ** (detune.clip(-100, 100) / 1200));
+    sig = Select.ar(wave.clip(0, 3), [
+        SinOsc.ar(detuned),
+        Saw.ar(detuned),
+        Pulse.ar(detuned, 0.5),
+        LFTri.ar(detuned)
+    ]);
+    filtered = RLPF.ar(sig, cutoff.clip(20, 20000),
+        (1 - resonance.clip(0, 1)).clip(0.05, 1));
+    env = Env.adsr(attack.clip(0.001, 10), decay.clip(0.001, 10),
+        sustain.clip(0, 1), release.clip(0.01, 10));
+    sig = filtered * EnvGen.kr(env, gate, doneAction: 2);
+    Out.ar(out, Pan2.ar(sig, pan.clip(-1, 1), amp.clip(0, 1) * master.clip(0, 1)));
+}).add;
+
+// Waveform string -> voice index. Unknown names fall back to sine and say
+// so: silently playing a different timbre than the portrait asked for
+// would hide a broken mapping.
+~testamentWaveIndex = { |waveform|
+    var w = waveform.asString;
+    if(w == "saw") { 1 } {
+        if(w == "square") { 2 } {
+            if(w == "tri") { 3 } {
+                if(w != "sine") {
+                    "TESTAMENT: unknown waveform '%' — using sine".format(w).postln;
+                };
+                0
+            }
+        }
+    }
+};
+
+// Trigger (or retrigger) one voice index. Retriggering gates the previous
+// node off first — its release tail plays out, then /n_end frees it —
+// so a new portrait never leaves hanging duplicates behind.
+~testamentVoiceTrigger = { |index, freq, amp, wave, detune, pan|
+    var previous, synth;
+    previous = ~testament[\voices][index];
+    if(previous.notNil) {
+        previous.set(\gate, 0);
+        ~testament[\voices].removeAt(index);
+    };
+    synth = Synth(\testament_voice, [
+        \freq, freq.clip(20, 20000),
+        \amp, amp.clip(0, 1),
+        \wave, ~testamentWaveIndex.(wave),
+        \detune, detune.clip(-100, 100),
+        \pan, pan.clip(-1, 1),
+        \attack, ~testament[\attack], \decay, ~testament[\decay],
+        \sustain, ~testament[\sustain], \release, ~testament[\release],
+        \cutoff, ~testament[\cutoff], \resonance, ~testament[\resonance],
+        \master, ~testament[\master],
+        \gate, 1, \out, 0
+    ]);
+    ~testament[\voices][index] = synth;
+    synth.onFree {
+        if(~testament[\voices][index] === synth) { ~testament[\voices].removeAt(index) };
+    };
+    synth
+};
+
+// Free every testament voice (operator/console use; the engine sends no
+// stop message — a new portrait replaces voices index by index).
+~testamentFreeAll = {
+    var count = 0;
+    ~testament[\voices].keysValuesDo({ |index, synth|
+        synth.set(\gate, 0);
+        count = count + 1;
+    });
+    ~testament[\voices] = IdentityDictionary.new;
+    count
+};
+
+OSCdef(\testament_master, { |msg|
+    var master;
+    if(msg.size < 2) {
+        "TESTAMENT: bad_args: /testament/master needs <amp>".postln;
+    } {
+        master = msg[1].asFloat.clip(0, 1);
+        ~testament[\master] = master;
+        ~testament[\voices].do({ |synth| synth.set(\master, master) });
+        ("TESTAMENT: master " ++ master).postln;
+    };
+}, "/testament/master");
+
+OSCdef(\testament_bpm, { |msg|
+    var bpm;
+    if(msg.size < 2) {
+        "TESTAMENT: bad_args: /testament/bpm needs <bpm>".postln;
+    } {
+        bpm = msg[1].asFloat.clip(20, 300);
+        ~testament[\bpm] = bpm;
+        if(~chronos.notNil and: { ~chronos[\setTempo].notNil }) {
+            ~chronos.setTempo(bpm);
+        } {
+            "TESTAMENT: bpm % (no Chronos clock to drive)".format(bpm).postln;
+        };
+    };
+}, "/testament/bpm");
+
+OSCdef(\testament_env, { |msg|
+    if(msg.size < 5) {
+        "TESTAMENT: bad_args: /testament/env needs <attack> <decay> <sustain> <release>".postln;
+    } {
+        ~testament[\attack] = msg[1].asFloat.clip(0.001, 10);
+        ~testament[\decay] = msg[2].asFloat.clip(0.001, 10);
+        ~testament[\sustain] = msg[3].asFloat.clip(0, 1);
+        ~testament[\release] = msg[4].asFloat.clip(0.01, 10);
+        ~testament[\voices].do({ |synth|
+            synth.set(\attack, ~testament[\attack], \decay, ~testament[\decay],
+                \sustain, ~testament[\sustain], \release, ~testament[\release]);
+        });
+        "TESTAMENT: env set".postln;
+    };
+}, "/testament/env");
+
+OSCdef(\testament_filter, { |msg|
+    if(msg.size < 3) {
+        "TESTAMENT: bad_args: /testament/filter needs <cutoff> <resonance>".postln;
+    } {
+        ~testament[\cutoff] = msg[1].asFloat.clip(20, 20000);
+        ~testament[\resonance] = msg[2].asFloat.clip(0, 1);
+        ~testament[\voices].do({ |synth|
+            synth.set(\cutoff, ~testament[\cutoff], \resonance, ~testament[\resonance]);
+        });
+        "TESTAMENT: filter set".postln;
+    };
+}, "/testament/filter");
+
+// One OSCdef for every voice index, via the OSC address pattern. The
+// index is the last path segment; a non-numeric tail or an index at or
+// above maxVoices is a typed warning, never a voice-0 mis-trigger.
+OSCdef(\testament_voice, { |msg|
+    var tail, index, freq, amp, wave, detune, pan;
+    tail = msg[0].asString.split($/).last;
+    if(tail.size == 0 or: { tail.every({ |c| c.isDecDigit }).not }) {
+        "TESTAMENT: bad_args: /testament/voice/N needs a numeric index, got '%'".format(tail).postln;
+    } {
+        index = tail.asInteger;
+        if(index >= ~testament[\maxVoices]) {
+            "TESTAMENT: voice index % out of range (max %)".format(index, ~testament[\maxVoices]).postln;
+        } {
+            if(msg.size < 6) {
+                "TESTAMENT: bad_args: /testament/voice/% needs <freq> <amp> <waveform> <detune> <pan>".format(index).postln;
+            } {
+                freq = msg[1].asFloat;
+                amp = msg[2].asFloat;
+                wave = msg[3];
+                detune = msg[4].asFloat;
+                pan = msg[5].asFloat;
+                ~testamentVoiceTrigger.(index, freq, amp, wave, detune, pan);
+            };
+        };
+    };
+}, "/testament/voice/*");
+
 "--- BRAHMA: Engine Voice Manager Online ---".postln;
 )
