@@ -10,9 +10,13 @@ The instrument now sends short sounds to Forge for native transformations and
 applies the result to future notes while its browser sequence keeps playing.
 Portable projects retain original excerpts, transformed audio, recipes and chops;
 the starter sketch includes actual rendered Golem presets on that transport.
-Real-time SC buffer transfer, the separate live Golem sequencer, live modular
-routing, and album arrangement below remain unfinished. Render validation with
-selected songs does not establish musical acceptance.
+The SC side of real-time buffer transfer has landed (loop PR for #95, steps 1–2
+of the plan: `/brahma/instrument/note` receiver with engine acks, and
+`/octahedron/load` binding a real buffer to the slicer with release and
+replacement rules), and the note contract now carries the pattern cell's chosen
+chop (loop PR for #95, step 3: an optional 5th arg on `/brahma/instrument/note`;
+plain notes keep the pitch-derived slice), and slice tracks now ride the live Golem sequencer (loop PR for #95, step 4: a bound track sounds its chop on the shared project transport at its native length, source tempo stored separately from project tempo), and slice tracks now route through one live transformation (loop PR for #95, step 5: a \timestretch track sounds its chop through the granular time-stretch voice at the tempo-match rate — project tempo / source tempo — with independent pitch, via `/golem/slice/transform` and `/golem/slice/stretch`, persisted in scenes), and save/reopen now verifies the session against the SC slice path (loop PR for #95, step 6: the session carries per-track slice routing and transform fields, relative asset references, and a tolerant reopen that reports missing assets and restores the playable remainder; the live RNG needs no stored seed — it derives from step, track, and cycle, all persisted), and export now renders the loop with a receipt tying the WAV to the saved session (loop PR for #95, step 7: take-numbered, timestamped filenames that never overwrite an earlier take by basename, a receipt with the session and WAV hashes plus measured render evidence, verified first with a synthetic stereo fixture). Album arrangement below remains unfinished. Render
+validation with selected songs does not establish musical acceptance.
 
 The [original-organism and material reconciliation](mimicry-material-universe.md)
 connects this workflow to the original ChatGPT designs, the Claude drum machine,
@@ -54,11 +58,11 @@ Song selections + local audio
 | Decode and normalize source audio | `forge/ingest.sh` | Batch selections, stable source IDs, collision-safe destinations |
 | Optional stem extraction | `forge/rip.py` | Show actual engine and quality; keep original source available |
 | Source and recipe provenance | `forge/rip.py`, `forge/forge.sh`, `forge/stemforge.py` | Extend identities to clips, slices, transformations, and sessions |
-| Slice, loop, stretch, and crossfade | `brahma/sc/25_elektron_octatrack.scd` | Buffer loading, allocation, acknowledgements, release, and sample bindings |
-| Granular, tape, reverse, resonant processing | `brahma/sc/05_sampler_creatures*.scd`, `14_stem_voices.scd` | Expose the appropriate live/offline controls consistently |
+| Slice, loop, stretch, and crossfade | `brahma/sc/25_elektron_octatrack.scd` | Buffer loading, allocation, acknowledgements, release (done, loop PR for #95 steps 1–2); slice addressing (done, loop PR for #95 step 3): the note contract carries the cell's chop, plain notes keep the pitch-derived slice; Golem transport (done, loop PR for #95 step 4): slice tracks in `brahma/sc/15_golem_sequencer.scd` sound chops on the shared transport at native length; one live transformation (done, loop PR for #95 step 5): a \timestretch track routes its chop through the slice-bounded `\octahedron_timestretch` voice at the tempo-match rate with independent pitch |
+| Granular, tape, reverse, resonant processing | `brahma/sc/05_sampler_creatures*.scd`, `14_stem_voices.scd` | One live transformation landed (loop PR for #95, step 5): the granular time-stretch voice, with live OSC (`/golem/slice/transform`, `/golem/slice/stretch`) and scene persistence as the consistently exposed controls. Deviation from this row's file list, on live evidence: the slice-routable granular voice is `\octahedron_timestretch` in `25_elektron_octatrack.scd` — the 05/14 voices loop whole buffers or whole stems from an input bus and cannot sound one chop — so step 5 extends that voice with slice bounds and a gate instead. Tape, reverse, and resonant transforms remain for later steps |
 | Pattern editing and commands | `brahma/web/public/instrument/pattern.js` | Sample and slice references per event, arrangement, persistence |
 | Authenticated control and live scheduling | `brahma/web/public/workbench/`, `31_live_gateway.scd` | Reuse session/approval boundaries and extend the event contract |
-| Drums | Golem (`brahma/sc/15_*`, web Golem surface) | Shared transport and saved routing with sample tracks |
+| Drums | Golem (`brahma/sc/15_*`, web Golem surface) | Shared transport and scene-saved routing with sample tracks (done, loop PR for #95 step 4) |
 | Offline production | Forge and Brahma NRT renderers | Render the same saved sample arrangement used in performance |
 | Broadcasting | AETHER | Optional downstream use of completed output; not required to compose |
 

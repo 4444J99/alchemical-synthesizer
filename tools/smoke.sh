@@ -116,6 +116,11 @@ if command -v node >/dev/null 2>&1; then
   else
     bad "sample project contracts (see /tmp/brahma_sample_project.log)"; tail -12 /tmp/brahma_sample_project.log
   fi
+  if node --test brahma/web/test/sample-export.test.js >/tmp/brahma_sample_export.log 2>&1; then
+    ok "sample export contracts (receipt ties WAV to session, takes never overwrite)"
+  else
+    bad "sample export contracts (see /tmp/brahma_sample_export.log)"; tail -12 /tmp/brahma_sample_export.log
+  fi
   if node --test brahma/web/test/native-samples.test.js >/tmp/brahma_native_samples.log 2>&1; then
     ok "native sample service admission, authorization, cancellation and integrity contracts"
   else

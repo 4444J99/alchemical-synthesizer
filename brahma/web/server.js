@@ -600,21 +600,59 @@ sendPort.open();
 initSandbox();
 
 function closeServer(cb) {
+    // Cancel the work this gateway started: aborting a job SIGKILLs its detached
+    // render process group, which would otherwise outlive the gateway.
+    agent.runner.stopAll();
     nativeSamples.service.close();
     agent.providers.close();
     try { dirtBridge.close(); } catch (_) {}
     try { udpPort.close(); } catch (_) {}
     try { sendPort.close(); } catch (_) {}
-    try { wss.close(); } catch (_) {}
+    try {
+        // wss.close() only stops accepting: connected clients stay open, and an
+        // open upgraded socket keeps server.close() from ever calling back.
+        for (const client of wss.clients) client.terminate();
+        wss.close();
+    } catch (_) {}
     if (server) {
         server.close(cb);
+        // Idle keep-alive sockets would hold close() open; requests still being
+        // served are left to finish, bounded by the signal handler's grace timer.
+        if (typeof server.closeIdleConnections === "function") server.closeIdleConnections();
     } else if (cb) {
         cb();
     }
 }
 
-process.on("SIGTERM", () => closeServer());
-process.on("SIGINT", () => closeServer());
+// A signal handler that does not exit replaces the default action, so the process
+// would ignore SIGTERM/SIGINT for as long as any handle stayed open. Drain, wait
+// for cancelled renders to settle, then exit 0 (a clean stop). The first signal
+// removes both handlers, so a second SIGTERM or SIGINT, of either kind, takes the
+// default action and stops the process at once; the unref'd timer exits 1 when a
+// drain never completes. The grace must be a positive timer-safe integer.
+const MAX_TIMER_MS = 2 ** 31 - 1;
+const graceMs = Number(process.env.BRAHMA_SHUTDOWN_GRACE_MS);
+const SHUTDOWN_GRACE_MS = Number.isInteger(graceMs) && graceMs > 0 && graceMs <= MAX_TIMER_MS ? graceMs : 3000;
+
+function stopOnSignal() {
+    process.removeListener("SIGTERM", stopOnSignal);
+    process.removeListener("SIGINT", stopOnSignal);
+    const hardStop = setTimeout(() => process.exit(1), SHUTDOWN_GRACE_MS);
+    hardStop.unref();
+    closeServer(() => {
+        // The server reports closed only once its in-flight requests are done, and one
+        // of them may have started a render since closeServer() cancelled the rest.
+        // Cancel again, then let everything settle so no renderer outlives a gateway
+        // that reports a clean stop.
+        agent.runner.stopAll();
+        nativeSamples.service.close();
+        Promise.allSettled([agent.runner.drain(), nativeSamples.service.drain()])
+            .then(() => process.exit(0));
+    });
+}
+
+process.on("SIGTERM", stopOnSignal);
+process.on("SIGINT", stopOnSignal);
 
 module.exports = {
     app,

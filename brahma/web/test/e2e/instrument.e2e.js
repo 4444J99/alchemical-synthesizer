@@ -149,6 +149,37 @@ describe("local sample instrument", () => {
     assert.ok(peak > 500, "export must contain the uploaded sound");
     const hz = crossings / 0.075;
     assert.ok(hz > 420 && hz < 470, `expected the 440 Hz chop, got ${hz} Hz`);
+    // Step 7 of the #95 plan: the export ships a receipt tying the WAV to
+    // the exact session bytes rendered, with its own measurements.
+    const receiptName = await until(() => fs.readdirSync(ctx.dir).find(f => f.endsWith(".receipt.json")));
+    const receipt = JSON.parse(fs.readFileSync(path.join(ctx.dir, receiptName), "utf8"));
+    assert.equal(receipt.schema, "brahma.export-receipt.v1");
+    assert.equal(receipt.take, 1);
+    assert.equal(receipt.wav.filename, wav);
+    assert.equal(receipt.wav.sha256, crypto.createHash("sha256").update(rendered).digest("hex"));
+    assert.equal(receipt.wav.byteLength, rendered.length);
+    assert.equal(receipt.session.sha256, crypto.createHash("sha256").update(fs.readFileSync(ctx.saved)).digest("hex"),
+      "receipt session hash must reproduce from the saved project file");
+    assert.equal(receipt.session.name, "Chopped session");
+    assert.equal(receipt.session.tempo, 104);
+    assert.equal(receipt.session.sources[0].sha256, project.sources[0].sha256);
+    assert.equal(receipt.render.channels, 2);
+    assert.equal(receipt.render.audible, true);
+    assert.ok(receipt.render.peak > 0);
+    assert.equal(receipt.render.frames, Math.round(16 * 60 / 104 / 4 * receipt.render.sampleRate));
+    assert.equal(receipt.receipt.filename, receiptName);
+    // A second export is a new take: a different basename, a matching
+    // receipt, the same session hash — earlier takes are never overwritten.
+    await ctx.page.click("#export-loop");
+    const wav2 = await until(() => fs.readdirSync(ctx.dir).find(f => f.endsWith(".wav") && !f.startsWith("donor") && f !== wav));
+    assert.notEqual(wav2, wav);
+    const receipt2Name = await until(() => fs.readdirSync(ctx.dir).find(f => f.endsWith(".receipt.json") && f !== receiptName));
+    const receipt2 = JSON.parse(fs.readFileSync(path.join(ctx.dir, receipt2Name), "utf8"));
+    assert.equal(receipt2.take, 2);
+    assert.equal(receipt2.wav.filename, wav2);
+    assert.equal(receipt2.session.sha256, receipt.session.sha256);
+    assert.equal(receipt2.wav.sha256,
+      crypto.createHash("sha256").update(fs.readFileSync(path.join(ctx.dir, wav2))).digest("hex"));
     if (process.env.BRAHMA_INSTRUMENT_SCREENSHOT) await ctx.page.screenshot({
       path: process.env.BRAHMA_INSTRUMENT_SCREENSHOT, fullPage: true });
     assert.deepEqual(ctx.errors, []);
@@ -228,14 +259,29 @@ describe("local sample instrument", () => {
     assert.equal(triggers, 0, "Stop must invalidate pending auditions as well as existing voices");
   });
 
-  it("changing engines stops playback and cannot send sample notes over OSC", async t => {
+  it("changing engines keeps playback running and sends sample chops over OSC", async t => {
     if (skip(t)) return;
+    // Capture the frames the OSC adapter sends, whatever the test gateway
+    // does with them (it has no SC rack behind it, so acks never arrive).
+    await ctx.page.evaluate(() => {
+      window.__oscFrames = [];
+      const origSend = WebSocket.prototype.send;
+      WebSocket.prototype.send = function (data) { window.__oscFrames.push(String(data)); return origSend.call(this, data); };
+    });
     await ctx.page.click("#play");
     assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
     await ctx.page.select("#adapter", "osc");
     assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
-    await ctx.page.click("#play"); await status("Imported samples play in WebAudio");
-    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "false");
+    await ctx.page.click("#play");
+    // The grid still holds the round-trip sample cell (track 0, step 0,
+    // chop 2): the note must carry that chop as its 5th arg, not the
+    // pitch-derived slice. A full 16-step cycle is 2s at 120bpm.
+    await ctx.page.waitForFunction(() => (window.__oscFrames || []).some(f => {
+      try { const m = JSON.parse(f); return m.address === "/brahma/instrument/note" && m.args[4] === 2; }
+      catch (_) { return false; }
+    }), { timeout: 10000 });
+    assert.equal(await ctx.page.$eval("#play", el => el.getAttribute("aria-pressed")), "true");
+    await ctx.page.click("#stop");
     await ctx.page.select("#adapter", "webaudio");
   });
 
@@ -295,8 +341,8 @@ describe("local sample instrument", () => {
     assert.ok(await ctx.page.$("#native-connect"), "the instrument needs native transformation controls");
     await ctx.page.click("#native-connect");
     await ctx.page.waitForFunction(() => document.querySelector("#native-module").options.length > 200);
-    assert.match(await ctx.page.$eval("#module-count", el => el.textContent), /245 native definitions.*26 material mappings.*21/);
-    assert.equal(await ctx.page.$$eval("#module-ledger tr", rows => rows.length), 245);
+    assert.match(await ctx.page.$eval("#module-count", el => el.textContent), /246 native definitions.*26 material mappings.*21/);
+    assert.equal(await ctx.page.$$eval("#module-ledger tr", rows => rows.length), 246);
     await ctx.page.select("#native-module", "solve_pitch_shift");
     await setInput('#native-params input[data-param="semitones"]', "7");
   }

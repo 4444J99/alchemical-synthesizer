@@ -164,3 +164,165 @@ test("rendered material recipes retain base controls, effective controls and the
   const bad = structuredClone(project); bad.sources[1].recipe.modelSha256 = "missing";
   assert.throws(() => M.validateProject(bad), /material|model|hash/i);
 });
+
+// ---- plan step 6 (#95): save/reopen against the new SC slice path ----
+
+async function fixtureTwo() {
+  const M = model(), project = await fixture();
+  const second = await M.createSource(new Uint8Array([4, 5, 6, 7]), {
+    name: "second.wav", mime: "audio/wav", duration: 4, sampleRate: 8000, channels: 1,
+  });
+  project.sources.push(second);
+  project.trackSources[1] = second.id;
+  P.setCell(project.scene, 1, 0, { note: 60, vel: 0.5, sampleId: second.id, slice: 1 });
+  return { M, project, second };
+}
+
+test("slice tracks round-trip through save/reopen, with the SC transform fields", async () => {
+  const { M, project } = await fixtureTwo();
+  project.sliceTracks = [
+    { slice: 2, sourceTempo: 120, rate: 1, transform: "timestretch", stretchRate: null, stretchPitch: 0.5, stretchGrain: 0.05 },
+    { slice: 0, sourceTempo: null, rate: 0.5, transform: "none", stretchRate: null, stretchPitch: 1, stretchGrain: 0.1 },
+    null, null, null,
+  ];
+  const reopened = await M.deserialize(M.serialize(project));
+  assert.deepEqual(reopened.sliceTracks, project.sliceTracks);
+  // Sessions saved before step 6 carry no sliceTracks and reopen unbound.
+  assert.deepEqual(M.validateProject(await fixture()).sliceTracks, [null, null, null, null, null]);
+});
+
+test("slice tracks reject bindings the engine cannot play", async () => {
+  const { M, project } = await fixtureTwo();
+  project.sliceTracks = [
+    { slice: 2, sourceTempo: 120, rate: 1, transform: "timestretch", stretchRate: null, stretchPitch: 0.5, stretchGrain: 0.05 },
+    null, null, null, null,
+  ];
+  for (const mutate of [
+    p => { p.sliceTracks[0].transform = "reverse"; },
+    p => { p.sliceTracks[0].slice = 8; },
+    p => { p.sliceTracks[2] = { slice: 0 }; },
+    p => { p.sliceTracks[0].rate = 5; },
+    p => { p.sliceTracks[0].stretchPitch = 0.1; },
+    p => { p.sliceTracks[0].stretchGrain = 2; },
+    p => { p.sliceTracks[0].sourceTempo = -3; },
+    p => { p.sliceTracks.pop(); },
+  ]) {
+    const bad = structuredClone(project); mutate(bad);
+    assert.throws(() => M.validateProject(bad), /slice|transform|rate|pitch|grain|tempo|track/i);
+  }
+});
+
+test("sliceTrackMessages restores the SC sequencer state in order", async () => {
+  const { M, project } = await fixtureTwo();
+  project.sliceTracks = [
+    { slice: 2, sourceTempo: 120, rate: 1, transform: "timestretch", stretchRate: null, stretchPitch: 0.5, stretchGrain: 0.05 },
+    { slice: 0, sourceTempo: null, rate: 0.5, transform: "none", stretchRate: null, stretchPitch: 1, stretchGrain: 0.1 },
+    null, null, null,
+  ];
+  assert.deepEqual(M.sliceTrackMessages(project), [
+    { address: "/golem/slice/bind", args: [0, 2, 120] },
+    { address: "/golem/slice/transform", args: [0, "timestretch"] },
+    { address: "/golem/slice/stretch", args: [0, 0, 0.5, 0.05] },
+    { address: "/golem/slice/bind", args: [1, 0, 0] },
+    { address: "/golem/slice/rate", args: [1, 0.5] },
+  ]);
+  assert.deepEqual(M.sliceTrackMessages(await fixture()), []);
+});
+
+test("reopen reports a referenced-but-unembedded asset and restores the playable remainder", async () => {
+  const { M, project, second } = await fixtureTwo();
+  const referenced = M.createReference({
+    name: "library song.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+    ref: { path: "donors/library song.wav", sha256: "e".repeat(64) },
+  });
+  project.sources.push(referenced);
+  project.trackSources[2] = referenced.id;
+  project.sliceTracks = [null, null, { slice: 1 }, null, null];
+  P.setCell(project.scene, 2, 0, { note: 60, vel: 0.5, sampleId: referenced.id, slice: 1 });
+  // Strict reopening keeps the reference named: its bytes are not in the
+  // file, so there is nothing to verify and nothing to silently drop.
+  const strict = await M.deserialize(M.serialize(project));
+  assert.equal(strict.sources.length, 3);
+  assert.equal(strict.sources[2].data, null);
+  assert.deepEqual(strict.sources[2].ref, { path: "donors/library song.wav", sha256: "e".repeat(64) });
+  // Tolerant reopening reports it missing and restores the playable rest.
+  const { project: restored, report } = await M.reopen(M.serialize(project));
+  assert.equal(restored.sources.length, 2);
+  assert.equal(report.missing.length, 1);
+  assert.equal(report.missing[0].reason, "referenced but not embedded");
+  assert.equal(report.missing[0].ref, "donors/library song.wav");
+  assert.equal(restored.scene.grid[2][0], null);
+  assert.equal(restored.trackSources[2], null);
+  assert.equal(restored.sliceTracks[2], null);
+  assert.equal(report.droppedCells.length, 1);
+  assert.deepEqual(report.droppedCells[0], { track: 2, step: 0, sampleId: referenced.id, slice: 1 });
+  assert.equal(report.droppedSliceTracks.length, 1);
+  assert.deepEqual(report.droppedSliceTracks[0], { track: 2, sampleId: referenced.id });
+  // The surviving sources and their notes are untouched.
+  assert.equal(restored.scene.grid[0][0].sampleId, project.sources[0].id);
+  assert.equal(restored.scene.grid[1][0].sampleId, second.id);
+});
+
+test("reopen salvages a session with one corrupt source instead of losing it", async () => {
+  const { M, project } = await fixtureTwo();
+  project.sources[1].data = "AQIDBA=="; // valid base64, wrong bytes for second.wav's hash
+  await assert.rejects(M.deserialize(JSON.stringify(project)), /integrity/i);
+  const { project: restored, report } = await M.reopen(JSON.stringify(project));
+  assert.equal(restored.sources.length, 1);
+  assert.equal(restored.sources[0].id, project.sources[0].id);
+  assert.equal(report.missing.length, 1);
+  assert.equal(report.missing[0].reason, "source audio integrity check failed");
+  assert.equal(restored.scene.grid[1][0], null);
+  assert.equal(restored.trackSources[1], null);
+  assert.equal(restored.scene.grid[0][0].sampleId, project.sources[0].id);
+});
+
+test("reopen drops a recipe child whose parent did not survive", async () => {
+  const M = model(), project = await fixture(), parent = project.sources[0];
+  const output = await M.createSource(new Uint8Array([4, 5, 6, 7]), {
+    name: "Native pitch.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+  });
+  output.recipe = { schema: "brahma.native-recipe.v1", parentId: parent.id, module: "solve_pitch_shift",
+    params: { semitones: -7, mix: .75 }, inputSha256: "c".repeat(64),
+    definitionSha256: "a".repeat(64), rackSha256: "b".repeat(64) };
+  project.sources.push(output);
+  project.sources[0].data = "AQIDBA=="; // corrupt the parent
+  const { project: restored, report } = await M.reopen(JSON.stringify(project));
+  assert.equal(restored.sources.length, 0);
+  assert.equal(report.missing.length, 2);
+  assert.ok(report.missing.some(m => m.reason === "source audio integrity check failed"));
+  assert.ok(report.missing.some(m => m.reason === "recipe parent missing"));
+});
+
+test("replacing a track sound keeps an in-range slice binding and clears an out-of-range one", async () => {
+  const { M, project, second } = await fixtureTwo();
+  const narrow = await M.createSource(new Uint8Array([8, 9, 10, 11]), {
+    name: "narrow.wav", mime: "audio/wav", duration: 4, sampleRate: 8000, channels: 1,
+  });
+  narrow.slices = narrow.slices.slice(0, 4);
+  project.sources.push(narrow);
+  project.sliceTracks = [
+    { slice: 6, sourceTempo: null, rate: 1, transform: "none", stretchRate: null, stretchPitch: 1, stretchGrain: 0.1 },
+    null, null, null, null,
+  ];
+  // In-range swap: track 0 to `second` (8 chops) keeps chop 6.
+  const kept = M.replaceTrackSource(project, 0, project.sources[0].id, second.id);
+  assert.equal(kept.sliceTracks[0].slice, 6);
+  // Out-of-range swap: track 0 to `narrow` (4 chops) clears the binding.
+  const cleared = M.replaceTrackSource(kept, 0, second.id, narrow.id);
+  assert.equal(cleared.sliceTracks[0], null);
+});
+
+test("relative asset references cannot escape the library", () => {
+  const M = model();
+  const ok = M.createReference({ name: "song.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+    ref: { path: "donors/song.wav", sha256: "e".repeat(64) } });
+  assert.equal(ok.ref.path, "donors/song.wav");
+  assert.equal(ok.data, null);
+  for (const path of ["/absolute/song.wav", "../escape.wav", "donors/../escape.wav", "donors\\song.wav", ""]) {
+    assert.throws(() => M.createReference({ name: "song.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+      ref: { path, sha256: "e".repeat(64) } }), /asset reference/i);
+  }
+  assert.throws(() => M.createReference({ name: "song.wav", mime: "audio/wav", duration: 8, sampleRate: 8000, channels: 1,
+    ref: { path: "donors/song.wav", sha256: "not-a-hash" } }), /asset reference/i);
+});

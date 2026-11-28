@@ -1,0 +1,72 @@
+{
+ "repo": "alchemical-synthesizer",
+ "slug": "4444J99/alchemical-synthesizer",
+ "archived_upstream": false,
+ "prs": {
+  "prs_total": 107,
+  "prs_merged": 83,
+  "prs_open": 0,
+  "prs_closed_unmerged": 24
+ },
+ "closed_classes": {
+  "abandoned": 16,
+  "series_superseded": 8
+ },
+ "supersession_links": [
+  {
+   "old": 8,
+   "new": 51,
+   "class": "series_superseded",
+   "title": "chore(deps): bump the npm_and_yarn group across 1 directory with 2 updates"
+  },
+  {
+   "old": 13,
+   "new": 51,
+   "class": "series_superseded",
+   "title": "chore(deps): bump the npm_and_yarn group across 1 directory with 3 updates"
+  },
+  {
+   "old": 46,
+   "new": 53,
+   "class": "series_superseded",
+   "title": "chore(deps): bump qs from 6.15.2 to 6.16.0 in /product in the npm_and_yarn group across 1 directory"
+  },
+  {
+   "old": 48,
+   "new": 116,
+   "class": "series_superseded",
+   "title": "chore(deps): bump ws from 8.21.3 to 8.22.0 in /brahma/web in the npm-deps group across 1 directory"
+  },
+  {
+   "old": 54,
+   "new": 117,
+   "class": "series_superseded",
+   "title": "chore(deps): bump the npm-deps group across 1 directory with 2 updates"
+  },
+  {
+   "old": 72,
+   "new": 73,
+   "class": "series_superseded",
+   "title": "Merge PR #47: security hardening (resolved against main)"
+  },
+  {
+   "old": 84,
+   "new": 86,
+   "class": "series_superseded",
+   "title": "Fix SuperCollider crash probes and validate native Brahma measurements"
+  },
+  {
+   "old": 85,
+   "new": 86,
+   "class": "series_superseded",
+   "title": "Fix SuperCollider crash probes and validate native Brahma measurements"
+  }
+ ],
+ "open_pr_actions": [],
+ "issues": {
+  "total": 10,
+  "open": 3,
+  "stale": 0
+ },
+ "generated": "2026-11-17"
+}

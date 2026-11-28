@@ -63,12 +63,19 @@
     },
     connected: function () { return this.ready; },
     trigger: function (track, ev /*, when */) {
-      if (ev.sampleId != null) throw new Error("Imported samples play in WebAudio (local). Select that engine to hear this pattern.");
       if (!this.ready) return;
       // Control message; the SC rack renders. Namespace is bridge-allowed (/brahma/).
+      // Sample events carry their chosen chop as a 5th arg (plan step 3):
+      // the receiver sounds exactly that slice of the bound buffer. Plain
+      // notes omit it and keep the pitch-derived slice (note % numSlices).
+      // The browser's sampleId stays local — SC has one bound buffer, so the
+      // chop a cell plays is the chop of whatever file /octahedron/load
+      // bound last; load the matching file before playing the pattern.
+      var args = [P.TRACKS[track], ev.note, Number(ev.gain.toFixed(3)), Number(ev.dur.toFixed(3))];
+      if (ev.sampleId != null) args.push(ev.slice != null ? ev.slice : 0);
       this.ws.send(JSON.stringify({
         address: "/brahma/instrument/note",
-        args: [P.TRACKS[track], ev.note, Number(ev.gain.toFixed(3)), Number(ev.dur.toFixed(3))],
+        args: args,
       }));
     },
   };
@@ -109,10 +116,9 @@
 
   // ---- transport ------------------------------------------------------------
   function play() {
-    if (state.adapterName === "osc" && scene.grid.some(function (row) { return row.some(function (c) { return c && c.sampleId; }); })) {
-      samples.report("Imported samples play in WebAudio (local). Select that engine to hear this pattern.", true);
-      return;
-    }
+    // Sample cells play through OSC now: the note contract carries the
+    // cell's chosen chop (plan step 3), so the OSC engine sounds them from
+    // the buffer /octahedron/load bound — no engine switch needed.
     ensureAudio();
     if (ac.state === "suspended") ac.resume();
     if (state.adapterName === "osc" && !OscAdapter.ws) OscAdapter.connect();
@@ -252,6 +258,15 @@
       $("tempo").value = state.tempo; $("tempoval").textContent = state.tempo;
       $("phase").value = state.phase; $("s-phase").textContent = state.phase;
       $("s-phase").className = "badge phase-" + (P.PHASES.indexOf(state.phase) >= 0 ? state.phase : "readable");
+      // Plan step 6: the session now carries the Golem sequencer's slice
+      // tracks, so reopening re-drives them — bind, transform, stretch —
+      // when the OSC bridge is already connected. The WebAudio path plays
+      // each cell's chop directly and needs no sequencer state.
+      if (window.SampleProject && OscAdapter.ready) {
+        window.SampleProject.sliceTrackMessages(project).forEach(function (m) {
+          OscAdapter.ws.send(JSON.stringify(m));
+        });
+      }
       localEngine(); renderGrid(); updateVersion();
     },
   });

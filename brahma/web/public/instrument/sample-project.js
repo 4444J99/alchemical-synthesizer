@@ -30,6 +30,7 @@
     return data.length / 4 * 3 - (data.endsWith("==") ? 2 : data.endsWith("=") ? 1 : 0);
   }
   function sourceBytes(source) {
+    if (source.data == null) fail("Source audio is referenced, not embedded: " + (source.name || source.id));
     encodedSize(source.data);
     const binary = atob(source.data), bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -77,6 +78,78 @@
     if (material && !Material.describe(value.module).supported) fail("Unsupported vessel material mapping");
     return { module: value.module, params, material };
   }
+  // A relative asset reference: where the bytes live outside the file, named
+  // by a path that cannot escape the library (no absolute path, no `..`,
+  // no backslash). The ref names the same bytes as the source identity.
+  function assetRef(value) {
+    if (!value || typeof value.path !== "string" || !value.path.length || value.path.length > 1024 ||
+        value.path.startsWith("/") || value.path.includes("\\") ||
+        value.path.split("/").some(part => part === "..") ||
+        /[\u0000-\u001f]/.test(value.path) ||
+        typeof value.sha256 !== "string" || !/^[a-f0-9]{64}$/.test(value.sha256)) fail("Invalid asset reference");
+    return { path: value.path, sha256: value.sha256 };
+  }
+  function cleanSlices(slices, duration) {
+    if (!Array.isArray(slices) || !slices.length || slices.length > 128) fail("Invalid slices");
+    return slices.map(slice => {
+      if (!slice || !Number.isFinite(slice.start) || !Number.isFinite(slice.end) ||
+        slice.start < 0 || slice.end > duration || slice.end <= slice.start) fail("Invalid slice bounds");
+      return { start: slice.start, end: slice.end };
+    });
+  }
+  // One source, structurally cleaned: identity, metadata, chop boundaries,
+  // and recipe. Embedded sources carry base64 audio; a reference-only source
+  // (data null + ref) names bytes the file does not hold. Budgets and the
+  // digest check live with the caller, not here, so reopen() can salvage
+  // one bad source without losing the session.
+  function cleanSource(source, cap) {
+    if (!source || !/^[a-f0-9]{64}$/.test(source.sha256) || source.id !== "sha256:" + source.sha256) fail("Invalid source identity");
+    const referenced = source.data == null;
+    let ref;
+    if (referenced) {
+      ref = assetRef(source.ref);
+      if (ref.sha256 !== source.sha256) fail("Asset reference hash does not match source identity");
+    } else {
+      if (typeof source.data !== "string" || source.data.length > Math.ceil(cap.maxSourceBytes / 3) * 4) fail("Audio exceeds project size limit");
+      encodedSize(source.data);
+      if (source.ref !== undefined) {
+        ref = assetRef(source.ref);
+        if (ref.sha256 !== source.sha256) fail("Asset reference hash does not match source identity");
+      }
+    }
+    const duration = number(source.duration, Number.MIN_VALUE, 86400, "source duration");
+    const sampleRate = number(source.sampleRate, 8000, 384000, "sample rate", true);
+    const channels = number(source.channels, 1, 32, "channels", true);
+    const slices = cleanSlices(source.slices, duration);
+    const clean = { id: source.id, sha256: source.sha256,
+      name: label(source.name, 1024, "source name"), mime: label(source.mime, 128, "source type"),
+      duration, sampleRate, channels, slices };
+    if (referenced) { clean.data = null; clean.ref = ref; }
+    else { clean.data = source.data; if (ref) clean.ref = ref; }
+    if (source.recipe !== undefined) clean.recipe = recipe(source.recipe);
+    return clean;
+  }
+  // One Golem sequencer track's slice routing, mirroring the SC track fields
+  // (15_golem_sequencer.scd, plan steps 4-5): which chop of the track's
+  // source sounds, the clip's native tempo, the playback rate, and the one
+  // live transformation with its stretch controls. The SC wire uses 0 for
+  // "unknown/auto"; the session uses null for the same thing.
+  function sliceTrack(value, source) {
+    if (value === null) return null;
+    if (!value || typeof value !== "object") fail("Invalid slice track");
+    if (!source) fail("Slice track without a track source");
+    const slice = number(value.slice, 0, source.slices.length - 1, "slice track chop", true);
+    const sourceTempo = value.sourceTempo == null || value.sourceTempo === 0 ? null :
+      number(value.sourceTempo, 0.0001, 1000, "source tempo");
+    const rate = value.rate == null ? 1.0 : number(value.rate, -4, 4, "slice playback rate");
+    const transform = value.transform == null ? "none" : value.transform;
+    if (transform !== "none" && transform !== "timestretch") fail("Invalid slice transform");
+    const stretchRate = value.stretchRate == null || value.stretchRate === 0 ? null :
+      number(value.stretchRate, 0.01, 4, "stretch rate");
+    const stretchPitch = value.stretchPitch == null ? 1.0 : number(value.stretchPitch, 0.25, 4, "stretch pitch");
+    const stretchGrain = value.stretchGrain == null ? 0.1 : number(value.stretchGrain, 0.01, 1, "stretch grain");
+    return { slice, sourceTempo, rate, transform, stretchRate, stretchPitch, stretchGrain };
+  }
   async function createSource(input, metadata, overrides) {
     const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
     if (!bytes.length || bytes.length > limits(overrides).maxSourceBytes) fail("Audio exceeds the source size limit");
@@ -87,6 +160,21 @@
       sampleRate: number(metadata.sampleRate, 8000, 384000, "sample rate", true),
       channels: number(metadata.channels, 1, 32, "channels", true),
       slices: equalSlices(metadata.duration, 8) };
+  }
+  // A named asset the session references by relative path but does not embed:
+  // the library file the chop came from, kept as an explicit unresolved item
+  // until its bytes are in the file. No digest is possible here — the hash
+  // comes from the reference itself — so reopen() reports it missing rather
+  // than verifying it.
+  function createReference(metadata, overrides) {
+    const ref = assetRef(metadata.ref);
+    const duration = number(metadata.duration, Number.MIN_VALUE, 86400, "duration");
+    return { id: "sha256:" + ref.sha256, sha256: ref.sha256, name: label(metadata.name, 1024, "source name"),
+      mime: metadata.mime || "application/octet-stream", data: null, ref,
+      duration,
+      sampleRate: number(metadata.sampleRate, 8000, 384000, "sample rate", true),
+      channels: number(metadata.channels, 1, 32, "channels", true),
+      slices: metadata.slices === undefined ? equalSlices(duration, 8) : cleanSlices(metadata.slices, duration) };
   }
   function validateProject(project, overrides) {
     const cap = limits(overrides);
@@ -99,28 +187,16 @@
     const byId = new Map();
     let total = 0, decoded = 0;
     const sources = project.sources.map(source => {
-      if (!source || !/^[a-f0-9]{64}$/.test(source.sha256) || source.id !== "sha256:" + source.sha256) fail("Invalid source identity");
-      if (byId.has(source.id)) fail("Duplicate source identity");
-      // Check encoded length before parsing a potentially large base64 string.
-      if (typeof source.data !== "string" || source.data.length > Math.ceil(cap.maxSourceBytes / 3) * 4) fail("Audio exceeds project size limit");
-      total += encodedSize(source.data);
-      if (total > cap.maxSourceBytes) fail("Audio exceeds project size limit");
-      const duration = number(source.duration, Number.MIN_VALUE, 86400, "source duration");
-      const sampleRate = number(source.sampleRate, 8000, 384000, "sample rate", true);
-      const channels = number(source.channels, 1, 32, "channels", true);
-      decoded += Math.ceil(duration * sampleRate) * channels * 4;
-      if (decoded > cap.maxDecodedBytes) fail("Decoded audio exceeds memory budget");
-      if (!Array.isArray(source.slices) || !source.slices.length || source.slices.length > 128) fail("Invalid slices");
-      const slices = source.slices.map(slice => {
-        if (!slice || !Number.isFinite(slice.start) || !Number.isFinite(slice.end) ||
-          slice.start < 0 || slice.end > duration || slice.end <= slice.start) fail("Invalid slice bounds");
-        return { start: slice.start, end: slice.end };
-      });
-      const clean = { id: source.id, sha256: source.sha256,
-        name: label(source.name, 1024, "source name"), mime: label(source.mime, 128, "source type"),
-        data: source.data, duration, sampleRate, channels, slices };
-      if (source.recipe !== undefined) clean.recipe = recipe(source.recipe);
-      byId.set(source.id, clean);
+      if (source && byId.has(source.id)) fail("Duplicate source identity");
+      const clean = cleanSource(source, cap);
+      if (byId.has(clean.id)) fail("Duplicate source identity");
+      if (clean.data != null) {
+        total += encodedSize(clean.data);
+        if (total > cap.maxSourceBytes) fail("Audio exceeds project size limit");
+        decoded += Math.ceil(clean.duration * clean.sampleRate) * clean.channels * 4;
+        if (decoded > cap.maxDecodedBytes) fail("Decoded audio exceeds memory budget");
+      }
+      byId.set(clean.id, clean);
       return clean;
     });
     for (const source of sources) {
@@ -158,11 +234,18 @@
       if (id !== null && !byId.has(id)) fail("Missing track sample source");
       return id;
     });
+    // Per-track slice routing for the live SC sequencer (plan steps 4-5).
+    // Sessions saved before step 6 carry no sliceTracks and default to five
+    // unbound tracks; a binding always needs its track's source present.
+    const sliceTracksInput = project.sliceTracks === undefined ? [null, null, null, null, null] : project.sliceTracks;
+    if (!Array.isArray(sliceTracksInput) || sliceTracksInput.length !== 5) fail("Invalid slice tracks");
+    const sliceTracks = sliceTracksInput.map((entry, i) =>
+      sliceTrack(entry, entry == null ? null : byId.get(trackSources[i])));
     const settings = project.vessels === undefined ? [null, null, null, null, null] : project.vessels;
     if (!Array.isArray(settings) || settings.length !== 5) fail("Invalid project vessels");
     const vessels = settings.map(vessel);
     return { schema: SCHEMA, name, tempo, phase: project.phase, cycle, vessels,
-      scene: { steps, tracks: 5, grid, tempo, phase: project.phase }, trackSources, sources };
+      scene: { steps, tracks: 5, grid, tempo, phase: project.phase }, trackSources, sliceTracks, sources };
   }
   function serialize(project, overrides) {
     const text = JSON.stringify(validateProject(project, overrides));
@@ -176,6 +259,11 @@
     clean.trackSources[track] = toId;
     clean.scene.grid[track] = clean.scene.grid[track].map(cell => cell && cell.sampleId === fromId ?
       Object.assign({}, cell, { sampleId: toId }) : cell);
+    // A slice-track binding survives the swap only while its chop exists in
+    // the new source; the binding was to the old source's chop, so an
+    // out-of-range chop unbinds the track instead of reopening broken.
+    const next = clean.sources.find(source => source.id === toId);
+    if (clean.sliceTracks[track] != null && clean.sliceTracks[track].slice >= next.slices.length) clean.sliceTracks[track] = null;
     return validateProject(clean, overrides);
   }
   async function deserialize(text, overrides) {
@@ -185,10 +273,120 @@
     try { parsed = JSON.parse(text); } catch (_) { fail("Invalid project JSON"); }
     const project = validateProject(parsed, overrides);
     for (const source of project.sources) {
+      // A referenced source is explicitly unresolved, not corrupt: its bytes
+      // are not in the file, so there is nothing to verify. reopen() reports
+      // it missing; strict reopening keeps it named so the caller can decide.
+      if (source.data == null) continue;
       if (await digest(sourceBytes(source)) !== source.sha256) fail("Source audio integrity check failed: " + source.name);
     }
     return project;
   }
-  return { SCHEMA, DEFAULT_LIMITS, limits, createSource, sourceBytes, equalSlices, digest,
-    validateProject, serialize, deserialize, replaceTrackSource, vessel };
+  // Tolerant reopen (plan step 6): a session with a missing or corrupt asset
+  // still opens. Each bad source is reported — integrity failure, referenced
+  // but not embedded, recipe parent gone, duplicate — and the notes, track
+  // bindings, and slice bindings that pointed at it are dropped, so the
+  // returned project is the actual playable state. A structurally malformed
+  // session (bad grid, bad tempo, no schema) still throws: that is not a
+  // missing asset, it is a broken file. Strict deserialize() is unchanged.
+  async function reopen(text, overrides) {
+    const cap = limits(overrides);
+    if (typeof text !== "string" || text.length > cap.maxProjectBytes ||
+      new TextEncoder().encode(text).byteLength > cap.maxProjectBytes) fail("Project exceeds file size limit");
+    let parsed;
+    try { parsed = JSON.parse(text); } catch (_) { fail("Invalid project JSON"); }
+    if (!parsed || parsed.schema !== SCHEMA) fail("Invalid or unsupported project format");
+    const missing = [];
+    const kept = [];
+    const seen = new Set();
+    for (const source of (Array.isArray(parsed.sources) ? parsed.sources : [])) {
+      if (source && typeof source.id === "string" && seen.has(source.id)) {
+        missing.push({ id: source.id, name: source.name || source.id, reason: "duplicate source identity" });
+        continue;
+      }
+      if (source && typeof source.id === "string") seen.add(source.id);
+      try {
+        const clean = cleanSource(source, cap);
+        if (clean.data == null) {
+          missing.push({ id: clean.id, name: clean.name, reason: "referenced but not embedded", ref: clean.ref.path });
+          continue;
+        }
+        if (await digest(sourceBytes(clean)) !== clean.sha256) {
+          missing.push({ id: clean.id, name: clean.name, reason: "source audio integrity check failed" });
+          continue;
+        }
+        kept.push(clean);
+      } catch (error) {
+        missing.push({ id: (source && source.id) || "unknown", name: (source && source.name) || "unknown",
+          reason: error && error.message ? error.message : "invalid source" });
+      }
+    }
+    // A recipe child whose parent did not survive is missing too; cascade
+    // until every kept source's parent is kept.
+    const keptById = new Map(kept.map(s => [s.id, s]));
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let i = kept.length - 1; i >= 0; i--) {
+        const parentId = kept[i].recipe && kept[i].recipe.parentId;
+        if (parentId && !keptById.has(parentId)) {
+          missing.push({ id: kept[i].id, name: kept[i].name, reason: "recipe parent missing" });
+          keptById.delete(kept[i].id); kept.splice(i, 1); changed = true;
+        }
+      }
+    }
+    const missingIds = new Set(missing.map(m => m.id));
+    const droppedCells = [];
+    if (parsed.scene && Array.isArray(parsed.scene.grid)) {
+      parsed.scene.grid.forEach((row, track) => {
+        if (!Array.isArray(row)) return;
+        row.forEach((cell, step) => {
+          if (cell && cell.sampleId != null && missingIds.has(cell.sampleId)) {
+            droppedCells.push({ track, step, sampleId: cell.sampleId, slice: cell.slice == null ? null : cell.slice });
+            row[step] = null;
+          }
+        });
+      });
+    }
+    const droppedTrackSources = [];
+    const trackSources = Array.isArray(parsed.trackSources) ? parsed.trackSources.slice() : [];
+    const origTrackSources = trackSources.slice();
+    trackSources.forEach((id, track) => {
+      if (id != null && missingIds.has(id)) { droppedTrackSources.push({ track, sampleId: id }); trackSources[track] = null; }
+    });
+    const droppedSliceTracks = [];
+    const sliceTracks = Array.isArray(parsed.sliceTracks) ? parsed.sliceTracks.slice() : [null, null, null, null, null];
+    sliceTracks.forEach((entry, track) => {
+      if (entry != null && trackSources[track] == null) {
+        droppedSliceTracks.push({ track, sampleId: origTrackSources[track] || null });
+        sliceTracks[track] = null;
+      }
+    });
+    const project = validateProject(Object.assign({}, parsed,
+      { sources: kept, trackSources, sliceTracks }), overrides);
+    return { project, report: { missing, droppedCells, droppedTrackSources, droppedSliceTracks } };
+  }
+  // The OSC messages that restore the live SC sequencer's slice tracks from
+  // a saved session (15_golem_sequencer.scd): bind each slice track to its
+  // chop, then its playback rate, transformation, and stretch controls. A
+  // track with no slice binding sends nothing; a plain (\none) track sends
+  // only the bind (and its rate, when it is not 1.0). The browser sends
+  // these on reopen when its OSC bridge is connected.
+  function sliceTrackMessages(project, overrides) {
+    const clean = validateProject(project, overrides);
+    const messages = [];
+    clean.sliceTracks.forEach((entry, track) => {
+      if (!entry) return;
+      messages.push({ address: "/golem/slice/bind",
+        args: [track, entry.slice, entry.sourceTempo == null ? 0 : entry.sourceTempo] });
+      if (entry.rate !== 1.0) messages.push({ address: "/golem/slice/rate", args: [track, entry.rate] });
+      if (entry.transform !== "none") {
+        messages.push({ address: "/golem/slice/transform", args: [track, entry.transform] });
+        messages.push({ address: "/golem/slice/stretch",
+          args: [track, entry.stretchRate == null ? 0 : entry.stretchRate, entry.stretchPitch, entry.stretchGrain] });
+      }
+    });
+    return messages;
+  }
+  return { SCHEMA, DEFAULT_LIMITS, limits, createSource, createReference, sourceBytes, equalSlices, digest,
+    validateProject, serialize, deserialize, reopen, sliceTrackMessages, replaceTrackSource, vessel };
 });
